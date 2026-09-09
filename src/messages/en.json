@@ -1,0 +1,662 @@
+{
+  "meta": {
+    "title": "VAZORA — Evidence Intelligence",
+    "description": "VAZORA turns requirements into verified reality. Contract Intelligence for the execution phase: obligations, evidence, verification, risk and claim readiness."
+  },
+  "common": {
+    "brand": "VAZORA",
+    "tagline": "Evidence Intelligence",
+    "language": "Language",
+    "switchTo": "العربية",
+    "demoData": "Demo data",
+    "demoDataHint": "Illustrative demo environment. Figures are not customer results.",
+    "sar": "SAR",
+    "viewAll": "View all",
+    "back": "Back",
+    "learnMore": "Learn more",
+    "comingSoon": "Coming soon",
+    "skipToContent": "Skip to content"
+  },
+  "status": {
+    "verified": "Verified",
+    "partial": "Partial",
+    "missing": "Missing",
+    "at_risk": "At risk",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "rejected": "Rejected",
+    "open": "Open",
+    "mitigating": "Mitigating",
+    "closed": "Closed",
+    "in_progress": "In progress",
+    "done": "Done",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "paid": "Paid",
+    "active": "Active",
+    "closeout": "Closeout",
+    "draft": "Draft"
+  },
+  "severity": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "cadence": {
+    "one_time": "One-time",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "milestone": "Milestone"
+  },
+  "sector": {
+    "operations_maintenance": "Operations & Maintenance",
+    "construction": "Construction",
+    "facilities_management": "Facilities Management",
+    "technology_services": "Technology Services",
+    "supply": "Supply",
+    "government": "Government"
+  },
+  "nav": {
+    "products": "Products",
+    "contractIntelligence": "Contract Intelligence",
+    "contractIntelligenceHint": "From award to payment: obligations, evidence, verification and claims.",
+    "assessor": "Assessor",
+    "assessorHint": "Specialized virtual assessors for standards and regulatory readiness.",
+    "platform": "Platform",
+    "company": "Company",
+    "login": "Enter VAZORA",
+    "bookDemo": "Book a demo",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "footer": {
+    "blurb": "Evidence Intelligence for organizations that must prove what they deliver.",
+    "products": "Products",
+    "platform": "Platform",
+    "evidenceIntelligence": "Evidence Intelligence",
+    "aiOfficer": "AI Contract Officer",
+    "claimReadiness": "Claim Readiness",
+    "company": "Company",
+    "about": "About VAZORA",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "rights": "© {year} VAZORA. All rights reserved.",
+    "location": "Riyadh · Global"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Evidence Intelligence",
+      "title": "VAZORA turns requirements into verified reality.",
+      "subtitle": "After award, every clause becomes an obligation, every obligation needs evidence, and every claim depends on proof. VAZORA verifies all of it — continuously.",
+      "primary": "Book a demo",
+      "secondary": "Explore Contract Intelligence",
+      "pillars": [
+        "Evidence",
+        "Execution",
+        "Proactive Intelligence",
+        "Claim Readiness"
+      ]
+    },
+    "signature": {
+      "document": "Contract · RTA-OM-2026-014",
+      "clauseLabel": "Clause",
+      "obligation": "Obligation",
+      "evidence": "Evidence",
+      "readiness": "Claim readiness",
+      "officer": "AI Contract Officer",
+      "officerMessage": "Clause 14.2 SLA logs missing for August — claim #5 blocked.",
+      "officerExposure": "Exposure SAR 420,000",
+      "items": [
+        {
+          "clause": "8.4",
+          "obligation": "Monthly PM records — HVAC",
+          "evidence": "PM_Log_Aug.xlsx"
+        },
+        {
+          "clause": "12.1",
+          "obligation": "Monthly performance report",
+          "evidence": "Performance_Sep.pdf"
+        },
+        {
+          "clause": "14.2",
+          "obligation": "SLA availability logs",
+          "evidence": "No file"
+        }
+      ],
+      "stages": {
+        "reading": "Reading clauses",
+        "structuring": "Structuring obligations",
+        "linking": "Linking evidence",
+        "verifying": "Verifying",
+        "ready": "Readiness computed"
+      }
+    },
+    "problem": {
+      "eyebrow": "The execution gap",
+      "title": "Contracts are signed with precision and executed with hope.",
+      "body": "After award, the contract disappears into folders. Obligations live in people's heads. Evidence arrives late, incomplete or unverified. By the time a claim is disputed or a penalty is applied, the proof was never there.",
+      "points": [
+        {
+          "title": "Obligations without owners",
+          "body": "Hundreds of requirements, scattered across clauses, schedules and amendments — with nobody accountable for each one."
+        },
+        {
+          "title": "Evidence that proves nothing",
+          "body": "A file exists. It is not the right file, the right period, the right signature or the right KPI."
+        },
+        {
+          "title": "Claims discovered late",
+          "body": "Missing proof surfaces during review, not before submission — delaying payment and weakening the position."
+        }
+      ]
+    },
+    "shift": {
+      "eyebrow": "Evidence Intelligence",
+      "title": "Not a document store. A system that knows whether you can prove it.",
+      "body": "VAZORA reads the awarded contract, structures every obligation, connects each one to the evidence it requires, and evaluates whether that evidence actually satisfies the clause — before anyone asks.",
+      "chain": [
+        "Original clause",
+        "Requirement",
+        "Evidence",
+        "Verification",
+        "Decision"
+      ]
+    },
+    "lifecycle": {
+      "eyebrow": "Contract Intelligence",
+      "title": "Built for the phase where money is won or lost.",
+      "body": "Most tools stop at signature. VAZORA starts there.",
+      "stages": [
+        {
+          "label": "Award",
+          "hint": "Contract ingested and structured"
+        },
+        {
+          "label": "Execution",
+          "hint": "Obligations owned and scheduled"
+        },
+        {
+          "label": "Evidence",
+          "hint": "Proof collected against each requirement"
+        },
+        {
+          "label": "Verification",
+          "hint": "Quality judged, gaps surfaced"
+        },
+        {
+          "label": "Risk",
+          "hint": "Exposure quantified before impact"
+        },
+        {
+          "label": "Claim",
+          "hint": "Readiness computed, not assumed"
+        },
+        {
+          "label": "Payment",
+          "hint": "Submitted with proof attached"
+        },
+        {
+          "label": "Closeout",
+          "hint": "Traceable record of delivery"
+        }
+      ]
+    },
+    "evidence": {
+      "eyebrow": "Evidence quality",
+      "title": "Uploaded is not verified.",
+      "body": "Every evidence item is checked against the clause it serves — period, scope, signatures, KPIs, acknowledgements. VAZORA tells you what is proven, what is partial, and exactly what is missing.",
+      "fileLabel": "Evidence",
+      "against": "Against clause 12.1 · Monthly performance report",
+      "checks": [
+        {
+          "label": "Covers reporting period (September)",
+          "passed": true
+        },
+        {
+          "label": "Includes 8 contractual KPIs",
+          "passed": false,
+          "note": "7 of 8 found — KPI #6 missing"
+        },
+        {
+          "label": "Signed by contractor representative",
+          "passed": true
+        },
+        {
+          "label": "Client acknowledgement attached",
+          "passed": false
+        }
+      ],
+      "verdict": "Partially verified — 2 gaps block claim #5."
+    },
+    "officer": {
+      "eyebrow": "AI Contract Officer",
+      "title": "Intelligence that speaks first.",
+      "body": "Not a chatbot waiting for a prompt. The Contract Officer monitors deadlines, evidence gaps, risk exposure and claim readiness — and raises what needs attention, with the clause and the money attached.",
+      "feed": [
+        {
+          "kind": "attention",
+          "text": "August SLA logs (Clause 14.2) still missing. Deduction exposure: SAR 420,000."
+        },
+        {
+          "kind": "due_soon",
+          "text": "Deliverable 4 acceptance (Clause 21.3) due in 6 days. Only commissioning report on file."
+        },
+        {
+          "kind": "claim_readiness",
+          "text": "Claim #5 readiness 82% — 3 requirements open. Target submission: 30 Sep."
+        },
+        {
+          "kind": "verified",
+          "text": "HVAC PM records for August verified against Clause 8.4."
+        }
+      ]
+    },
+    "claim": {
+      "eyebrow": "Claim readiness",
+      "title": "Know why a claim is not ready — before you submit it.",
+      "body": "Every claim is decomposed into the evidence it depends on. Readiness is computed from verified requirements, not from a checklist someone ticked.",
+      "claimLabel": "Claim #5 · September 2026",
+      "amount": "SAR 5,120,000",
+      "verified": "{count} verified",
+      "partial": "{count} partial",
+      "missing": "{count} missing",
+      "blocking": "Blocking items",
+      "blockingItems": [
+        {
+          "clause": "14.2",
+          "tone": "missing",
+          "text": "SLA availability logs — August"
+        },
+        {
+          "clause": "12.1",
+          "tone": "partial",
+          "text": "KPI #6 · client acknowledgement"
+        },
+        {
+          "clause": "21.3",
+          "tone": "partial",
+          "text": "Deliverable 4 acceptance certificate"
+        }
+      ]
+    },
+    "assessor": {
+      "eyebrow": "Coming next",
+      "title": "VAZORA Assessor",
+      "body": "The same evidence intelligence, pointed at standards. Specialized virtual assessors that evaluate your readiness against a framework — clause by clause, with evidence.",
+      "tracks": [
+        "CBAHI",
+        "ISO",
+        "NCA",
+        "Safety",
+        "Laboratory",
+        "Education",
+        "Social care"
+      ],
+      "cta": "Preview Assessor"
+    },
+    "trust": {
+      "eyebrow": "Foundation",
+      "title": "Designed for organizations that answer to auditors.",
+      "items": [
+        {
+          "title": "Organization-isolated data",
+          "body": "Every record is scoped to your organization. Isolation is enforced at the data layer, not the interface."
+        },
+        {
+          "title": "Traceable decisions",
+          "body": "Each verification links back to the original clause, the requirement and the evidence that satisfied it."
+        },
+        {
+          "title": "Human in control",
+          "body": "VAZORA surfaces, quantifies and recommends. People decide, approve and submit."
+        },
+        {
+          "title": "Built for Arabic and English",
+          "body": "Native right-to-left experience. Contract terminology handled in both languages."
+        }
+      ]
+    },
+    "cta": {
+      "title": "See your contract as obligations, evidence and readiness.",
+      "body": "A 45-minute working session with one of your active contracts.",
+      "primary": "Book a demo",
+      "secondary": "Enter VAZORA"
+    }
+  },
+  "ci": {
+    "eyebrow": "VAZORA Contract Intelligence",
+    "title": "From award to payment, with proof.",
+    "subtitle": "Contract Intelligence turns an awarded contract into a living system of obligations, evidence, verification, risk and claims — for contractors, operators and service providers who must prove delivery.",
+    "primary": "Book a demo",
+    "secondary": "Enter VAZORA",
+    "who": {
+      "eyebrow": "Who it is for",
+      "title": "Organizations that deliver against contracts.",
+      "items": [
+        "Government contractors",
+        "Operations & maintenance",
+        "Construction",
+        "Facilities management",
+        "IT service providers",
+        "Complex suppliers",
+        "Project-based organizations"
+      ]
+    },
+    "capabilities": {
+      "eyebrow": "Capabilities",
+      "items": [
+        {
+          "title": "Contract structuring",
+          "body": "Clauses, schedules and amendments become discrete obligations with owners, cadence and required evidence."
+        },
+        {
+          "title": "Evidence verification",
+          "body": "Each item is judged against the clause it serves: period, scope, signatures, KPIs, acknowledgements."
+        },
+        {
+          "title": "Risk exposure",
+          "body": "Penalties and deductions quantified per clause, with time to impact — before they are applied."
+        },
+        {
+          "title": "Claim readiness",
+          "body": "Every claim decomposed into requirements. Readiness computed from verified proof."
+        },
+        {
+          "title": "AI Contract Officer",
+          "body": "Proactive monitoring that raises what needs attention, with the clause and amount attached."
+        },
+        {
+          "title": "Traceability",
+          "body": "Original clause → requirement → evidence → verification → decision. Always."
+        }
+      ]
+    },
+    "workspace": {
+      "eyebrow": "The contract workspace",
+      "title": "One place where the contract, the proof and the money meet.",
+      "body": "Health indicators are counted, not scored. Every number opens into the obligations, evidence and clauses behind it.",
+      "cta": "Open the demo workspace"
+    },
+    "faq": {
+      "eyebrow": "Boundaries",
+      "items": [
+        {
+          "q": "Is this a CLM?",
+          "a": "No. CLM manages drafting, negotiation and signature. VAZORA begins after award and focuses on execution, evidence and claims."
+        },
+        {
+          "q": "Is it a document management system?",
+          "a": "No. Files are stored, but the value is in knowing whether a file proves what a clause requires."
+        },
+        {
+          "q": "Is the AI Contract Officer a chatbot?",
+          "a": "It can answer questions, but its primary role is to monitor and raise issues proactively — with clause references and exposure."
+        },
+        {
+          "q": "Does VAZORA make decisions?",
+          "a": "VAZORA surfaces, quantifies and recommends. Approval and submission remain with your team."
+        }
+      ]
+    }
+  },
+  "assessor": {
+    "eyebrow": "VAZORA Assessor",
+    "badge": "Product family in development",
+    "title": "Virtual assessors for standards, built on evidence.",
+    "subtitle": "Assessor applies VAZORA's evidence intelligence to frameworks and regulatory requirements. Each assessor knows a standard, structures its requirements, and evaluates your evidence against them.",
+    "primary": "Register interest",
+    "secondary": "See Contract Intelligence",
+    "how": {
+      "eyebrow": "How it works",
+      "steps": [
+        {
+          "title": "Framework structured",
+          "body": "A standard's requirements are decomposed into assessable items with evidence expectations."
+        },
+        {
+          "title": "Evidence mapped",
+          "body": "Your policies, records and logs are linked to each requirement."
+        },
+        {
+          "title": "Readiness assessed",
+          "body": "Each item is judged verified, partial or missing — with what would close the gap."
+        }
+      ]
+    },
+    "tracks": {
+      "eyebrow": "Planned assessors",
+      "items": [
+        {
+          "name": "CBAHI Assessor",
+          "body": "Healthcare accreditation readiness."
+        },
+        {
+          "name": "ISO Assessor",
+          "body": "Management system standards."
+        },
+        {
+          "name": "NCA Assessor",
+          "body": "Cybersecurity controls readiness."
+        },
+        {
+          "name": "Safety Assessor",
+          "body": "Occupational health and safety."
+        },
+        {
+          "name": "Laboratory Assessor",
+          "body": "Laboratory quality and competence."
+        },
+        {
+          "name": "Education Assessor",
+          "body": "Institutional and program standards."
+        },
+        {
+          "name": "Social Care Assessor",
+          "body": "Care service quality frameworks."
+        }
+      ]
+    },
+    "note": "Assessor does not issue certifications or represent any accreditation body. It prepares organizations for assessment with evidence."
+  },
+  "demo": {
+    "eyebrow": "Book a demo",
+    "title": "Bring one active contract. Leave with it structured.",
+    "body": "A 45-minute working session. We walk through your contract as obligations, evidence and claim readiness — in English or Arabic.",
+    "form": {
+      "name": "Full name",
+      "email": "Work email",
+      "organization": "Organization",
+      "role": "Role",
+      "sector": "Sector",
+      "sectorPlaceholder": "Select a sector",
+      "contracts": "Active contracts under management",
+      "contractsOptions": [
+        "1–5",
+        "6–20",
+        "21–100",
+        "100+"
+      ],
+      "language": "Preferred session language",
+      "message": "What would you like to see?",
+      "submit": "Request demo",
+      "submitting": "Sending…",
+      "privacy": "We use these details only to arrange the session."
+    },
+    "success": {
+      "title": "Request received.",
+      "body": "We will contact you within two business days to schedule the session.",
+      "back": "Back to home"
+    },
+    "errors": {
+      "required": "This field is required.",
+      "email": "Enter a valid work email."
+    }
+  },
+  "login": {
+    "eyebrow": "Enter VAZORA",
+    "title": "Sign in to your organization.",
+    "email": "Work email",
+    "password": "Password",
+    "submit": "Continue",
+    "demoDivider": "or",
+    "demo": "Enter the demo environment",
+    "demoHint": "Explore a demo organization with illustrative contracts. No account required.",
+    "noAccount": "Access is provisioned per organization.",
+    "requestAccess": "Book a demo",
+    "credentialsUnavailable": "Organization sign-in is enabled after onboarding. Use the demo environment to explore."
+  },
+  "app": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "contracts": "Contracts",
+      "evidence": "Evidence",
+      "claims": "Claims",
+      "officer": "AI Contract Officer",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "organization": "Organization",
+      "demoBadge": "Demo environment",
+      "menu": "Menu",
+      "close": "Close"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "greeting": "Good day, {name}",
+      "asOf": "Portfolio as of {date}",
+      "kpis": {
+        "contracts": "Active contracts",
+        "obligationsDue": "Obligations due this month",
+        "overdue": "Overdue",
+        "coverage": "Evidence coverage",
+        "exposure": "Risk exposure",
+        "readiness": "Next claim readiness"
+      },
+      "attention": "Needs attention",
+      "attentionHint": "Raised by the AI Contract Officer",
+      "portfolio": "Contracts",
+      "upcoming": "Due in the next 30 days",
+      "claims": "Claims in preparation"
+    },
+    "contracts": {
+      "title": "Contracts",
+      "count": "{count} contracts",
+      "columns": {
+        "contract": "Contract",
+        "client": "Client",
+        "status": "Status",
+        "value": "Value",
+        "obligations": "Obligations",
+        "coverage": "Coverage",
+        "exposure": "Exposure",
+        "readiness": "Readiness"
+      },
+      "due": "{count} due",
+      "overdue": "{count} overdue"
+    },
+    "contract": {
+      "tabs": {
+        "overview": "Overview",
+        "obligations": "Obligations",
+        "evidence": "Evidence",
+        "risks": "Risks",
+        "claims": "Claims",
+        "activity": "Activity",
+        "officer": "Contract Officer"
+      },
+      "period": "{start} – {end}",
+      "health": "Contract health",
+      "healthHint": "Counted from obligations, evidence and claims — not a composite score.",
+      "obligationsByStatus": "Obligations by status",
+      "nextClaim": "Next claim",
+      "openRisks": "Open risks",
+      "recentActivity": "Recent activity",
+      "officerFeed": "Raised by the Contract Officer",
+      "clauseTrace": "Clause trace",
+      "clauseTraceHint": "Original clause → requirement → evidence → verification",
+      "actions": "Actions",
+      "sections": "Contract sections"
+    },
+    "obligations": {
+      "title": "Obligations",
+      "columns": {
+        "clause": "Clause",
+        "requirement": "Requirement",
+        "owner": "Owner",
+        "cadence": "Cadence",
+        "due": "Due",
+        "evidence": "Evidence",
+        "status": "Status",
+        "exposure": "Exposure"
+      },
+      "evidenceCount": "{count, plural, =0 {none} one {# item} other {# items}}",
+      "required": "Required evidence"
+    },
+    "evidence": {
+      "title": "Evidence",
+      "subtitle": "Every item judged against the clause it serves.",
+      "columns": {
+        "file": "File",
+        "obligation": "Obligation",
+        "uploaded": "Uploaded",
+        "version": "Version",
+        "status": "Status"
+      },
+      "verification": "Verification",
+      "checks": "Checks",
+      "passed": "{passed} of {total} checks passed",
+      "byStatus": "By status",
+      "uploadedBy": "by {name}"
+    },
+    "risks": {
+      "title": "Risks",
+      "exposure": "Exposure",
+      "daysToImpact": "{days, plural, =0 {Impact today} one {# day to impact} other {# days to impact}}",
+      "linkedClause": "Clause {ref}"
+    },
+    "claims": {
+      "title": "Claims",
+      "subtitle": "Readiness is computed from verified requirements.",
+      "claim": "Claim #{number}",
+      "target": "Target {date}",
+      "requirements": "{count} requirements",
+      "readiness": "Readiness",
+      "breakdown": "Requirements",
+      "blocking": "What blocks submission",
+      "nothingBlocking": "No blocking items.",
+      "columns": {
+        "clause": "Clause",
+        "requirement": "Requirement",
+        "status": "Status",
+        "note": "Note"
+      }
+    },
+    "activity": {
+      "title": "Activity"
+    },
+    "notFound": "This contract is not available in your organization.",
+    "officer": {
+      "title": "AI Contract Officer",
+      "subtitle": "Proactive monitoring across your portfolio. Each item carries its clause and exposure.",
+      "briefing": "Today's briefing",
+      "openItems": "{count, plural, one {# item needs attention} other {# items need attention}}",
+      "priority": "Priority {level}",
+      "ask": "Ask about this contract",
+      "askPlaceholder": "e.g. What blocks claim #5?",
+      "askHint": "Conversational analysis is enabled in a later phase. The Officer's proactive monitoring is shown above.",
+      "kinds": {
+        "attention": "Attention",
+        "due_soon": "Due soon",
+        "evidence_gap": "Evidence gap",
+        "claim_readiness": "Claim readiness",
+        "risk": "Risk",
+        "verified": "Verified"
+      }
+    }
+  }
+}
