@@ -64,7 +64,7 @@ export function DemoForm() {
         <input name="role" defaultValue={v.role} className={field} autoComplete="organization-title" />
       </Field>
       <Field label={t("form.sector")}>
-        <select name="sector" className={field} defaultValue={v.sector ?? ""}>
+        <select key={v.sector ?? ""} name="sector" className={field} defaultValue={v.sector ?? ""}>
           <option value="" disabled>{t("form.sectorPlaceholder")}</option>
           {SECTORS.map((s) => (
             <option key={s} value={s}>{sectors(s)}</option>
@@ -72,7 +72,7 @@ export function DemoForm() {
         </select>
       </Field>
       <Field label={t("form.contracts")}>
-        <select name="contracts" className={field} defaultValue={v.contracts || contractsOptions[0]}>
+        <select key={v.contracts ?? ""} name="contracts" className={field} defaultValue={v.contracts || contractsOptions[0]}>
           {contractsOptions.map((o) => (
             <option key={o} value={o}>{o}</option>
           ))}
