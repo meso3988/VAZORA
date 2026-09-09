@@ -222,18 +222,18 @@ export function SignatureAnimation({ className }: { className?: string }) {
 
         {/* officer */}
         <motion.div
-          className="absolute bottom-0 flex h-[20%] w-[48%] items-start gap-2 rounded-md border border-missing/40 bg-elevated p-[2.5%]"
+          className="absolute bottom-0 flex h-[20%] w-[48%] items-center gap-2 overflow-hidden rounded-md border border-missing/40 bg-elevated px-[2.5%]"
           style={{ insetInlineEnd: 0 }}
           initial={false}
           animate={{ opacity: stage >= 6 ? 1 : 0, y: stage >= 6 ? 0 : 8 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-sm bg-missing/15 text-missing">
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-sm bg-missing/15 text-missing">
             <Bell size={11} />
           </span>
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="eyebrow !text-[8px] sm:!text-[9px]">{t("officer")}</span>
-            <span className="line-clamp-2 text-[9px] leading-snug text-fg sm:text-[11px]">
+            <span className="truncate text-[9px] leading-snug text-fg sm:text-[11px]">
               {t("officerMessage")}
             </span>
             <span className="hidden font-mono text-[9px] text-missing sm:block">{t("officerExposure")}</span>
