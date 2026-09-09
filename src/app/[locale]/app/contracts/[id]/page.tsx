@@ -40,7 +40,9 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
   const h = contract.health;
   const byStatus = countBy(obligations, (o) => o.status);
-  const nextClaim = claims.find((c) => c.status === "preparing" || c.status === "ready");
+  const nextClaim = claims
+    .filter((c) => c.status === "preparing" || c.status === "ready")
+    .sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0];
   const openRisks = risks.filter((r) => r.status !== "closed").sort((a, b) => b.exposure - a.exposure);
 
   // Trace the obligation the Officer is most concerned about (missing first, then partial).

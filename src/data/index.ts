@@ -13,7 +13,16 @@ let cached: DataProvider | null = null;
 export function getDataProvider(): DataProvider {
   if (cached) return cached;
   const kind = process.env.VAZORA_DATA_PROVIDER ?? "mock";
-  cached = kind === "supabase" ? createSupabaseDataProvider() : mockDataProvider;
+  switch (kind) {
+    case "mock":
+      cached = mockDataProvider;
+      break;
+    case "supabase":
+      cached = createSupabaseDataProvider();
+      break;
+    default:
+      throw new Error(`Unsupported VAZORA_DATA_PROVIDER "${kind}". Expected "mock" or "supabase".`);
+  }
   return cached;
 }
 

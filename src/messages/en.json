@@ -628,6 +628,7 @@
       "readiness": "Readiness",
       "breakdown": "Requirements",
       "blocking": "What blocks submission",
+      "empty": "No claims have been prepared for this contract yet.",
       "nothingBlocking": "No blocking items.",
       "columns": {
         "clause": "Clause",

@@ -37,13 +37,19 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
   const overdue = active.reduce((a, c) => a + c.health.obligationsOverdue, 0);
   const totalObl = active.reduce((a, c) => a + c.health.obligationsTotal, 0) || 1;
   const coverage = active.reduce((a, c) => a + c.health.evidenceCoverage * c.health.obligationsTotal, 0) / totalObl;
-  const exposure = active.reduce((a, c) => a + c.health.riskExposure, 0);
+  const exposureByCurrency = active.reduce<Record<string, number>>((acc, c) => {
+    acc[c.currency] = (acc[c.currency] ?? 0) + c.health.riskExposure;
+    return acc;
+  }, {});
   const preparing = claims.filter((c) => c.status === "preparing" || c.status === "ready");
   const nextClaim = [...preparing].sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0];
   const titles = Object.fromEntries(contracts.map((c) => [c.id, lt(c.title, locale)]));
 
   const upcoming = obligations
-    .filter((o) => o.status !== "verified" && daysBetween(DEMO_TODAY, o.dueDate) <= 30)
+    .filter((o) => {
+      const days = daysBetween(DEMO_TODAY, o.dueDate);
+      return o.status !== "verified" && days >= 0 && days <= 30;
+    })
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     .slice(0, 6);
 
@@ -61,7 +67,13 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
         <Kpi label={t("dashboard.kpis.obligationsDue")} value={due} />
         <Kpi label={t("dashboard.kpis.overdue")} value={overdue} tone={overdue ? "missing" : undefined} />
         <Kpi label={t("dashboard.kpis.coverage")} value={f.number(coverage, "percent")} tone={coverage >= 0.85 ? "verified" : "partial"} />
-        <Kpi label={t("dashboard.kpis.exposure")} value={<Mono className="text-2xl">{formatMoney(exposure, locale, "SAR", { compact: true })}</Mono>} tone="at_risk" />
+        <Kpi label={t("dashboard.kpis.exposure")} value={
+            <Mono className="text-2xl">
+              {Object.entries(exposureByCurrency)
+                .map(([currency, amount]) => formatMoney(amount, locale, currency, { compact: true }))
+                .join(" · ") || "—"}
+            </Mono>
+          } tone="at_risk" />
         <Kpi
           label={t("dashboard.kpis.readiness")}
           value={nextClaim ? f.number(claimReadiness(nextClaim), "percent") : "—"}
