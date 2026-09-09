@@ -27,15 +27,14 @@ export default async function LoginPage(props: PageProps<"/[locale]/login">) {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_60%)]" />
       <div className="container-x relative flex justify-center pt-16 pb-24 lg:pt-24">
         <div className="flex w-full max-w-md flex-col gap-8">
           <div className="flex flex-col gap-3">
             <Eyebrow>{t("eyebrow")}</Eyebrow>
-            <h1 className="display text-3xl font-medium sm:text-4xl">{t("title")}</h1>
+            <h1 className="display text-[1.75rem] sm:text-[2.125rem]">{t("title")}</h1>
           </div>
 
-          <form action={enterDemo} className="flex flex-col gap-5 rounded-md border border-line bg-elevated p-6 sm:p-8">
+          <form action={enterDemo} className="surface-float flex flex-col gap-5 p-6 sm:p-8">
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="next" value={next} />
             <label className="flex flex-col gap-2">

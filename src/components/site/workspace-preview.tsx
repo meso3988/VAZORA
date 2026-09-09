@@ -27,7 +27,7 @@ export async function WorkspacePreview() {
   ];
 
   return (
-    <div data-theme="light" className="overflow-hidden rounded-lg border border-line-strong bg-bg text-fg shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)]">
+    <div data-theme="light" className="overflow-hidden rounded-lg border border-line-strong bg-bg text-fg shadow-[0_30px_80px_-40px_rgba(17,21,20,0.35)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-elevated px-5 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <span className="font-mono text-xs text-muted" dir="ltr">{contract.reference}</span>

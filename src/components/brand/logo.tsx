@@ -1,6 +1,10 @@
 import { cn } from "@/lib/utils";
 
-/** Converging strokes forming a V, with a signal node where they meet. */
+/**
+ * Two inputs converge into one verified point: a pair of strokes descend,
+ * meet, and resolve to a single mineral node. The lighter inner stroke is
+ * the evidence thread joining the requirement.
+ */
 export function Mark({ className, size = 24 }: { className?: string; size?: number }) {
   return (
     <svg
@@ -12,14 +16,21 @@ export function Mark({ className, size = 24 }: { className?: string; size?: numb
       className={cn("shrink-0", className)}
     >
       <path
-        d="M3 5 L12 19 L21 5"
+        d="M3.5 4.5 L12 18.5 L20.5 4.5"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="1.6"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M7.5 5 L12 12" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" opacity="0.55" />
-      <circle cx="12" cy="19" r="2" className="fill-accent" />
+      <path
+        d="M8 4.5 L12 11.2"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+        opacity="0.45"
+      />
+      <circle cx="12" cy="18.5" r="2.4" className="fill-bg" />
+      <circle cx="12" cy="18.5" r="1.7" className="fill-accent" />
     </svg>
   );
 }
@@ -30,7 +41,7 @@ export function Wordmark({ className, compact }: { className?: string; compact?:
       <Mark size={22} />
       {!compact && (
         <span
-          className="font-sans text-[15px] font-semibold tracking-[0.18em] text-fg"
+          className="text-[15px] font-semibold tracking-[0.2em] text-fg"
           style={{ fontFamily: "var(--font-latin)" }}
         >
           VAZORA

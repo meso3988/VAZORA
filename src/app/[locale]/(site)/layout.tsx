@@ -6,10 +6,10 @@ import { SiteHeader } from "@/components/site/header";
 export default async function SiteLayout({ children }: LayoutProps<"/[locale]">) {
   const t = await getTranslations("common");
   return (
-    <div data-theme="dark" className="flex min-h-dvh flex-col bg-bg text-fg">
+    <div data-theme="light" className="flex min-h-dvh flex-col bg-bg text-fg">
       <a
         href="#content"
-        className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-accent focus:px-3 focus:py-2 focus:text-sm focus:text-[#06110d]"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-accent focus:px-3 focus:py-2 focus:text-sm focus:text-accent-fg"
       >
         {t("skipToContent")}
       </a>

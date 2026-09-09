@@ -1,31 +1,31 @@
 "use client";
 
-import { Bell, FileText } from "lucide-react";
+import { ArrowDownToLine, FileText, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { ThreadPath } from "@/components/brand/threads";
 import { StatusDot, type StatusTone } from "@/components/ui/status";
 import { useReducedMotionSafe } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
 /**
- * Signature animation: a contract enters, clauses are recognised, become
- * obligations, connect to evidence, resolve to verified / partial / missing,
- * claim readiness is computed and the Contract Officer raises the gap.
+ * Signature hero sequence — one continuous causal chain:
+ *  0 contract appears · 1 clauses illuminate · 2 clauses become obligations ·
+ *  3 threads connect evidence · 4 verification states · 5 missing → risk ·
+ *  6 the Contract Officer acts · 7 new evidence arrives, thread reconnects ·
+ *  8 claim readiness progresses 73 → 82 → 91.
  *
  * Positions are percentages inside a fixed-ratio stage; the SVG overlay draws
- * connectors in the same coordinate space and is mirrored for RTL.
+ * Evidence Threads in the same coordinate space and is mirrored for RTL.
  */
 
 type Item = { clause: string; obligation: string; evidence: string };
-const STATUSES: StatusTone[] = ["verified", "partial", "missing"];
-const ROWS = [24, 46, 68]; // y% of each clause/obligation/evidence row
-const READINESS = 82;
-
-// stage: 0 document, 1 clauses, 2 obligations, 3 evidence, 4 statuses, 5 readiness, 6 officer
-const TIMELINE = [0, 900, 1900, 3300, 4700, 5700, 7200];
-const LOOP_AT = 12500;
+const ROWS = [18, 38, 58];
+const TIMELINE = [0, 900, 1900, 3200, 4500, 5500, 6700, 8600, 9800];
+const LOOP_AT = 14000;
+const FINAL = TIMELINE.length - 1;
 
 export function SignatureAnimation({ className }: { className?: string }) {
   const t = useTranslations("home.signature");
@@ -36,7 +36,7 @@ export function SignatureAnimation({ className }: { className?: string }) {
 
   const [timedStage, setStage] = useState(0);
   const [cycle, setCycle] = useState(0);
-  const stage = reduce ? 6 : timedStage;
+  const stage = reduce ? FINAL : timedStage;
 
   useEffect(() => {
     if (reduce) return;
@@ -49,80 +49,72 @@ export function SignatureAnimation({ className }: { className?: string }) {
   }, [cycle, reduce]);
 
   const x = (v: number) => (rtl ? 100 - v : v);
-  const stageLabel = (["reading", "reading", "structuring", "linking", "verifying", "ready", "ready"] as const)[stage];
+  const statuses: StatusTone[] = ["verified", "partial", stage >= 7 ? "verified" : "missing"];
+  const resolved = stage >= 4;
+  const readiness = stage >= 8 ? 91 : stage >= 7 ? 82 : stage >= 4 ? 73 : 0;
+  const stageKey = (
+    ["reading", "reading", "structuring", "linking", "verifying", "risk", "acting", "reconnecting", "ready"] as const
+  )[stage];
 
   return (
-    <div
-      className={cn("relative w-full select-none", className)}
-      aria-label={t("document")}
-      role="img"
-    >
-      <div className="relative aspect-[4/3] w-full sm:aspect-[16/10]">
-        {/* connectors */}
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
-          aria-hidden
-        >
-          {ROWS.map((y, i) => (
-            <g key={i}>
-              <Trace
-                x1={x(27)}
-                x2={x(35)}
-                y={y}
-                on={stage >= 2}
-                delay={i * 0.12}
-                tone={stage >= 4 ? STATUSES[i] : undefined}
-              />
-              <Trace
-                x1={x(63)}
-                x2={x(71)}
-                y={y}
-                on={stage >= 3}
-                delay={i * 0.12}
-                tone={stage >= 4 ? STATUSES[i] : undefined}
-              />
-            </g>
-          ))}
-          {/* missing evidence → officer */}
-          <motion.line
-            x1={x(85)}
-            x2={x(85)}
-            y1={ROWS[2] + 7}
-            y2={83}
-            stroke="var(--status-missing)"
-            strokeWidth={0.35}
-            strokeDasharray="1.2 1.2"
-            vectorEffect="non-scaling-stroke"
-            initial={false}
-            animate={{ opacity: stage >= 6 ? 0.8 : 0 }}
-            transition={{ duration: 0.5 }}
-          />
+    <div className={cn("relative w-full select-none", className)} aria-label={t("document")} role="img">
+      <div className="surface-float relative aspect-[4/3] w-full overflow-hidden bg-canvas sm:aspect-[16/10]">
+        {/* status strip */}
+        <div className="absolute inset-x-0 top-0 flex h-[9%] items-center justify-between border-b border-line px-[3%] text-[9px] text-faint sm:text-[10px]">
+          <span className="flex items-center gap-1.5 font-mono" dir="ltr">
+            <FileText size={11} />
+            RTA-OM-2026-014
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className={cn("size-1.5 rounded-full", stage >= 8 ? "bg-verified" : "bg-accent [animation:pulse-soft_1.6s_ease-in-out_infinite]")} />
+            {t(`stages.${stageKey}`)}
+          </span>
+        </div>
+
+        {/* threads */}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+          {ROWS.map((y, i) => {
+            const tone = resolved ? statuses[i] : "neutral";
+            const missing = resolved && statuses[i] === "missing";
+            return (
+              <g key={i}>
+                <ThreadPath d={`M ${x(24)} ${y} C ${x(28)} ${y}, ${x(30)} ${y}, ${x(34)} ${y}`} on={stage >= 2} delay={i * 0.12} tone={stage >= 2 ? "accent" : "neutral"} />
+                <ThreadPath
+                  d={`M ${x(60)} ${y} C ${x(64)} ${y}, ${x(66)} ${y}, ${x(70)} ${y}`}
+                  on={stage >= 3 && !missing}
+                  delay={i * 0.12}
+                  tone={tone}
+                  flow={resolved && statuses[i] === "verified" && stage < 8}
+                />
+                {missing && <ThreadPath d={`M ${x(60)} ${y} L ${x(70)} ${y}`} on dashed tone="missing" />}
+              </g>
+            );
+          })}
+          {/* missing → risk → officer → readiness causal thread */}
+          <ThreadPath d={`M ${x(84)} ${ROWS[2] + 6} L ${x(84)} 74`} on={stage >= 5} tone={stage >= 7 ? "verified" : "missing"} dashed={stage < 7} />
+          <ThreadPath d={`M ${x(60)} 86 L ${x(38)} 86`} on={stage >= 6} tone="accent" />
         </svg>
 
         {/* document */}
         <motion.div
-          className="absolute top-[8%] bottom-[24%] w-[27%] rounded-md border border-line bg-elevated/90 p-[3%]"
-          style={{ insetInlineStart: 0 }}
+          className="absolute top-[13%] w-[22%] rounded-md border border-line bg-elevated p-[2.5%] shadow-[0_1px_0_rgba(0,0,0,0.03)]"
+          style={{ insetInlineStart: "3%", height: "54%" }}
           initial={false}
-          animate={{ opacity: stage >= 0 ? 1 : 0, y: stage >= 0 ? 0 : 12 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="mb-[8%] flex items-center gap-1.5 text-faint">
-            <FileText size={12} />
-            <span className="truncate font-mono text-[9px] sm:text-[10px]">{t("document")}</span>
+            <span className="truncate text-[8px] sm:text-[9px]">{t("document")}</span>
           </div>
           <div className="flex flex-col gap-[6%]">
-            {Array.from({ length: 11 }).map((_, i) => {
-              const clauseIdx = [2, 5, 8].indexOf(i);
-              const isClause = clauseIdx >= 0;
-              const lit = isClause && stage >= 1;
+            {Array.from({ length: 12 }).map((_, i) => {
+              const clauseIdx = [2, 6, 10].indexOf(i);
+              const lit = clauseIdx >= 0 && stage >= 1;
               return (
                 <div
                   key={i}
                   className={cn(
-                    "h-[3px] rounded-full transition-colors duration-500 sm:h-1",
+                    "h-[2px] rounded-full transition-colors duration-500 sm:h-[3px]",
                     lit ? "bg-accent" : "bg-line",
                     i % 3 === 1 ? "w-[70%]" : i % 4 === 3 ? "w-[85%]" : "w-full",
                   )}
@@ -133,12 +125,12 @@ export function SignatureAnimation({ className }: { className?: string }) {
           </div>
         </motion.div>
 
-        {/* clause markers on the document edge */}
+        {/* clause markers */}
         {ROWS.map((y, i) => (
           <motion.span
             key={`c${i}`}
-            className="absolute flex h-5 -translate-y-1/2 items-center rounded-sm border border-accent/40 bg-bg px-1.5 font-mono text-[9px] text-accent sm:text-[10px]"
-            style={{ top: `${y}%`, insetInlineStart: "18%" }}
+            className="absolute flex h-[7%] -translate-y-1/2 items-center rounded-sm border border-accent/40 bg-elevated px-1.5 font-mono text-[8px] text-accent sm:text-[10px]"
+            style={{ top: `${y}%`, insetInlineStart: "17%" }}
             initial={false}
             animate={{ opacity: stage >= 1 ? 1 : 0, scale: stage >= 1 ? 1 : 0.8 }}
             transition={{ duration: 0.4, delay: i * 0.15 }}
@@ -151,151 +143,130 @@ export function SignatureAnimation({ className }: { className?: string }) {
         {ROWS.map((y, i) => (
           <motion.div
             key={`o${i}`}
-            className="absolute flex h-[15%] w-[28%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border border-line bg-elevated px-[2%]"
-            style={{ top: `${y}%`, insetInlineStart: "35%" }}
+            className="absolute flex h-[15%] w-[26%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border border-line bg-elevated px-[2%]"
+            style={{ top: `${y}%`, insetInlineStart: "34%" }}
             initial={false}
             animate={{ opacity: stage >= 2 ? 1 : 0, x: stage >= 2 ? 0 : rtl ? 8 : -8 }}
             transition={{ duration: 0.5, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="eyebrow !text-[8px] sm:!text-[9px]">{t("obligation")}</span>
-            <span className="line-clamp-2 text-[9px] leading-tight text-fg sm:text-[11px]">
-              {items[i].obligation}
-            </span>
+            <span className="eyebrow !text-[7px] sm:!text-[9px]">{t("obligation")}</span>
+            <span className="line-clamp-2 text-[8px] leading-tight text-fg sm:text-[11px]">{items[i].obligation}</span>
           </motion.div>
         ))}
 
         {/* evidence */}
         {ROWS.map((y, i) => {
-          const tone = STATUSES[i];
-          const resolved = stage >= 4;
+          const tone = statuses[i];
+          const isThird = i === 2;
+          const arrived = !isThird || stage >= 7;
+          const label = isThird && stage < 7 ? t("noFile") : items[i].evidence;
           return (
             <motion.div
               key={`e${i}`}
               className={cn(
-                "absolute flex h-[15%] w-[29%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border bg-elevated px-[2%] transition-colors duration-500",
+                "absolute flex h-[15%] w-[27%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border bg-elevated px-[2%] transition-colors duration-500",
                 resolved
                   ? tone === "verified"
                     ? "border-verified/50"
                     : tone === "partial"
-                      ? "border-partial/50"
-                      : "border-missing/50"
+                      ? "border-partial/60"
+                      : "border-missing/60 border-dashed"
                   : "border-line",
               )}
-              style={{ top: `${y}%`, insetInlineStart: "71%" }}
+              style={{ top: `${y}%`, insetInlineStart: "70%" }}
               initial={false}
               animate={{ opacity: stage >= 3 ? 1 : 0, x: stage >= 3 ? 0 : rtl ? 8 : -8 }}
               transition={{ duration: 0.5, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span className="flex items-center gap-1 eyebrow !text-[8px] sm:!text-[9px]">
+              <span className="flex items-center gap-1 eyebrow !text-[7px] sm:!text-[9px]">
                 {resolved && <StatusDot tone={tone} />}
-                {t("evidence")}
+                {isThird && stage === 7 ? t("arrived") : t("evidence")}
               </span>
               <span
                 className={cn(
-                  "truncate font-mono text-[9px] leading-tight sm:text-[11px]",
-                  resolved && tone === "missing" ? "text-missing" : "text-fg",
+                  "truncate font-mono text-[8px] leading-tight sm:text-[11px]",
+                  arrived ? "text-fg" : "text-faint italic",
                 )}
                 dir="ltr"
               >
-                {items[i].evidence}
+                {label}
               </span>
+              {resolved && (
+                <span
+                  className={cn(
+                    "font-mono text-[7px] uppercase tracking-wider sm:text-[8px]",
+                    tone === "verified" && "text-verified",
+                    tone === "partial" && "text-partial",
+                    tone === "missing" && "text-missing",
+                  )}
+                >
+                  {t(`status.${tone}`)}
+                </span>
+              )}
             </motion.div>
           );
         })}
 
-        {/* readiness */}
+        {/* risk */}
         <motion.div
-          className="absolute bottom-0 flex h-[20%] w-[48%] items-center gap-[3%] rounded-md border border-line bg-elevated px-[3%]"
-          style={{ insetInlineStart: 0 }}
+          className={cn(
+            "absolute top-[74%] flex h-[8%] -translate-y-1/2 items-center gap-1.5 rounded-sm border px-2 font-mono text-[8px] transition-colors duration-500 sm:text-[10px]",
+            stage >= 7 ? "border-verified/40 bg-verified/5 text-verified" : "border-missing/40 bg-missing/5 text-missing",
+          )}
+          style={{ insetInlineEnd: "3%" }}
           initial={false}
-          animate={{ opacity: stage >= 5 ? 1 : 0, y: stage >= 5 ? 0 : 8 }}
+          animate={{ opacity: stage >= 5 ? 1 : 0, y: stage >= 5 ? 0 : 6 }}
           transition={{ duration: 0.5 }}
         >
-          <Ring value={stage >= 5 ? READINESS : 0} animate={!reduce} />
-          <div className="flex min-w-0 flex-col">
-            <span className="eyebrow !text-[8px] sm:!text-[9px]">{t("readiness")}</span>
-            <span className="font-mono text-base font-medium tabular text-fg sm:text-xl">
-              <Counter to={stage >= 5 ? READINESS : 0} animate={!reduce} />%
-            </span>
-          </div>
+          <span className="size-1.5 rounded-full bg-current" />
+          <span dir="ltr">{stage >= 7 ? t("riskCleared") : t("risk")}</span>
         </motion.div>
 
         {/* officer */}
         <motion.div
-          className="absolute bottom-0 flex h-[20%] w-[48%] items-center gap-2 overflow-hidden rounded-md border border-missing/40 bg-elevated px-[2.5%]"
-          style={{ insetInlineEnd: 0 }}
+          className="absolute bottom-[4%] flex h-[16%] w-[38%] items-center gap-2 overflow-hidden rounded-md border border-line bg-elevated px-[2%]"
+          style={{ insetInlineEnd: "3%" }}
           initial={false}
           animate={{ opacity: stage >= 6 ? 1 : 0, y: stage >= 6 ? 0 : 8 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-sm bg-missing/15 text-missing">
-            <Bell size={11} />
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-sm bg-accent-soft text-accent">
+            {stage >= 7 ? <ArrowDownToLine size={11} /> : <Sparkles size={11} />}
           </span>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <span className="eyebrow !text-[8px] sm:!text-[9px]">{t("officer")}</span>
-            <span className="truncate text-[9px] leading-snug text-fg sm:text-[11px]">
-              {t("officerMessage")}
+          <span className="flex min-w-0 flex-col">
+            <span className="eyebrow !text-[7px] sm:!text-[8px]">{t("officer")}</span>
+            <span className="truncate text-[8px] leading-snug text-fg sm:text-[10px]">
+              {stage >= 7 ? t("officerFollowUp") : t("officerAction")}
             </span>
-            <span className="hidden font-mono text-[9px] text-missing sm:block">{t("officerExposure")}</span>
+          </span>
+        </motion.div>
+
+        {/* readiness */}
+        <motion.div
+          className="absolute bottom-[4%] flex h-[16%] w-[30%] items-center gap-[4%] rounded-md border border-line bg-elevated px-[2%]"
+          style={{ insetInlineStart: "3%" }}
+          initial={false}
+          animate={{ opacity: stage >= 4 ? 1 : 0, y: stage >= 4 ? 0 : 8 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Ring value={readiness} />
+          <div className="flex min-w-0 flex-col">
+            <span className="eyebrow !text-[7px] sm:!text-[8px]">{t("readiness")}</span>
+            <span className="font-mono text-[12px] font-medium tabular text-fg sm:text-base" dir="ltr">
+              <Counter to={readiness} />%
+            </span>
           </div>
         </motion.div>
-      </div>
-
-      {/* stage indicator */}
-      <div className="mt-4 flex items-center gap-2 text-xs text-faint">
-        <span className="relative flex size-1.5">
-          <span className="absolute inline-flex size-full animate-[pulse-soft_2s_ease-in-out_infinite] rounded-full bg-accent" />
-        </span>
-        <span className="font-mono">{t(`stages.${stageLabel}`)}</span>
       </div>
     </div>
   );
 }
 
-function Trace({
-  x1,
-  x2,
-  y,
-  on,
-  delay,
-  tone,
-}: {
-  x1: number;
-  x2: number;
-  y: number;
-  on: boolean;
-  delay: number;
-  tone?: StatusTone;
-}) {
-  const color = tone
-    ? tone === "verified"
-      ? "var(--status-verified)"
-      : tone === "partial"
-        ? "var(--status-partial)"
-        : "var(--status-missing)"
-    : "var(--line-strong)";
-  return (
-    <motion.line
-      x1={x1}
-      x2={x2}
-      y1={y}
-      y2={y}
-      stroke={color}
-      strokeWidth={0.35}
-      vectorEffect="non-scaling-stroke"
-      initial={false}
-      animate={{ pathLength: on ? 1 : 0, opacity: on ? 1 : 0 }}
-      transition={{ duration: 0.6, delay, ease: "easeOut" }}
-      style={{ transition: "stroke 500ms" }}
-    />
-  );
-}
-
-function Ring({ value, animate }: { value: number; animate: boolean }) {
+function Ring({ value }: { value: number }) {
   const r = 15.5;
   const c = 2 * Math.PI * r;
   return (
-    <svg viewBox="0 0 36 36" className="size-[70%] max-h-12 shrink-0 -rotate-90 rtl:rotate-90 rtl:scale-x-[-1]" aria-hidden>
+    <svg viewBox="0 0 36 36" className="size-[70%] max-h-10 shrink-0 -rotate-90" aria-hidden>
       <circle cx="18" cy="18" r={r} fill="none" stroke="var(--line)" strokeWidth="2.5" />
       <motion.circle
         cx="18"
@@ -308,28 +279,30 @@ function Ring({ value, animate }: { value: number; animate: boolean }) {
         strokeDasharray={c}
         initial={false}
         animate={{ strokeDashoffset: c - (c * value) / 100 }}
-        transition={{ duration: animate ? 1.2 : 0, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
       />
     </svg>
   );
 }
 
-function Counter({ to, animate }: { to: number; animate: boolean }) {
-  const [v, setV] = useState(0);
+function Counter({ to }: { to: number }) {
+  const [v, setV] = useState(to);
+  const fromRef = useRef(to);
   useEffect(() => {
-    if (!animate) return;
     let raf = 0;
     const start = performance.now();
-    const from = 0;
-    const dur = 1200;
+    const from = fromRef.current;
+    const dur = 900;
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
-      setV(Math.round(from + (to - from) * eased));
+      const next = Math.round(from + (to - from) * eased);
+      fromRef.current = next;
+      setV(next);
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [to, animate]);
-  return <>{animate ? v : to}</>;
+  }, [to]);
+  return <>{v}</>;
 }

@@ -71,7 +71,15 @@
     "login": "Enter VAZORA",
     "bookDemo": "Book a demo",
     "menu": "Menu",
-    "close": "Close"
+    "close": "Close",
+    "platformItems": {
+      "evidence": "Evidence Intelligence",
+      "evidenceHint": "Does the evidence prove the requirement? Not just: does a file exist.",
+      "officer": "AI Contract Officer",
+      "officerHint": "Proactive operational intelligence that notices, requests and follows up.",
+      "claims": "Claim Readiness",
+      "claimsHint": "Know why a claim is not ready — and what evidence is missing — before you submit."
+    }
   },
   "footer": {
     "blurb": "Evidence Intelligence for organizations that must prove what they deliver.",
@@ -87,19 +95,20 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "rights": "© {year} VAZORA. All rights reserved.",
-    "location": "Riyadh · Global"
+    "location": "Riyadh · Global",
+    "closing": "From requirements to verified reality."
   },
   "home": {
     "hero": {
-      "eyebrow": "Evidence Intelligence",
-      "title": "VAZORA turns requirements into verified reality.",
-      "subtitle": "After award, every clause becomes an obligation, every obligation needs evidence, and every claim depends on proof. VAZORA verifies all of it — continuously.",
+      "eyebrow": "VAZORA · Evidence Intelligence",
+      "title": "The contract is awarded. Now make sure it gets executed.",
+      "subtitle": "VAZORA turns every awarded contract into monitored obligations, verified evidence, visible risk and payment-ready claims — continuously, clause by clause.",
       "primary": "Book a demo",
-      "secondary": "Explore Contract Intelligence",
+      "secondary": "See how it works",
       "pillars": [
+        "Obligations",
         "Evidence",
-        "Execution",
-        "Proactive Intelligence",
+        "Verification",
         "Claim Readiness"
       ]
     },
@@ -126,7 +135,7 @@
         {
           "clause": "14.2",
           "obligation": "SLA availability logs",
-          "evidence": "No file"
+          "evidence": "Signed_Acceptance.pdf"
         }
       ],
       "stages": {
@@ -134,7 +143,21 @@
         "structuring": "Structuring obligations",
         "linking": "Linking evidence",
         "verifying": "Verifying",
-        "ready": "Readiness computed"
+        "ready": "Readiness computed",
+        "risk": "Risk identified",
+        "acting": "Officer acting",
+        "reconnecting": "Evidence reconnected"
+      },
+      "noFile": "No file yet",
+      "arrived": "New evidence",
+      "risk": "Potential exposure SAR 420,000",
+      "riskCleared": "Exposure cleared",
+      "officerAction": "Client acknowledgement missing. Requested from project owner.",
+      "officerFollowUp": "Signed_Acceptance.pdf received — Requirement 14.2 verified.",
+      "status": {
+        "verified": "Verified",
+        "partial": "Partial",
+        "missing": "Missing"
       }
     },
     "problem": {
@@ -166,7 +189,30 @@
         "Evidence",
         "Verification",
         "Decision"
-      ]
+      ],
+      "chainDetail": [
+        {
+          "title": "Clause 14.2 — Service availability",
+          "body": "“The Contractor shall maintain 99.5% monthly availability and submit SLA logs acknowledged by the Client within 5 working days of month end.”"
+        },
+        {
+          "title": "Requirement 14.2-A",
+          "body": "Monthly SLA availability log · owner: Service Delivery Manager · due: 5th working day · linked to Claim #05."
+        },
+        {
+          "title": "Evidence on file",
+          "body": "Performance_Sep.pdf · received 09:42 · covers September · signed by contractor representative."
+        },
+        {
+          "title": "Verification",
+          "body": "Period ✓ · KPIs 8/8 ✓ · Contractor signature ✓ · Client acknowledgement ✗ — required by clause, not attached."
+        },
+        {
+          "title": "Decision",
+          "body": "PARTIAL. Requirement is not claimable until the signed acknowledgement is received. Exposure if deducted: SAR 420,000."
+        }
+      ],
+      "hint": "Select a step to see how VAZORA reasons through it."
     },
     "lifecycle": {
       "eyebrow": "Contract Intelligence",
@@ -255,14 +301,57 @@
           "kind": "verified",
           "text": "HVAC PM records for August verified against Clause 8.4."
         }
+      ],
+      "streamTitle": "Requirement 14.2 · today",
+      "stream": [
+        {
+          "time": "08:14",
+          "text": "Monthly SLA evidence missing.",
+          "tone": "missing"
+        },
+        {
+          "time": "08:15",
+          "text": "Requested evidence from Faisal Al-Harbi.",
+          "tone": "pending"
+        },
+        {
+          "time": "09:42",
+          "text": "Performance_Sep.pdf received.",
+          "tone": "pending"
+        },
+        {
+          "time": "09:43",
+          "text": "Evidence verification started.",
+          "tone": "pending"
+        },
+        {
+          "time": "09:44",
+          "text": "Verification incomplete. Missing: client acknowledgement.",
+          "tone": "partial"
+        },
+        {
+          "time": "09:45",
+          "text": "Corrective action created.",
+          "tone": "at_risk"
+        },
+        {
+          "time": "Later",
+          "text": "Signed acknowledgement received.",
+          "tone": "pending"
+        },
+        {
+          "time": "",
+          "text": "Requirement 14.2 — VERIFIED.",
+          "tone": "verified"
+        }
       ]
     },
     "claim": {
       "eyebrow": "Claim readiness",
       "title": "Know why a claim is not ready — before you submit it.",
       "body": "Every claim is decomposed into the evidence it depends on. Readiness is computed from verified requirements, not from a checklist someone ticked.",
-      "claimLabel": "Claim #5 · September 2026",
-      "amount": "SAR 5,120,000",
+      "claimLabel": "Claim #05 · September 2026",
+      "amount": "SAR 1,850,000",
       "verified": "{count} verified",
       "partial": "{count} partial",
       "missing": "{count} missing",
@@ -283,12 +372,28 @@
           "tone": "partial",
           "text": "Deliverable 4 acceptance certificate"
         }
+      ],
+      "valueLabel": "Value",
+      "readinessLabel": "Readiness",
+      "requirements": "{count} requirements",
+      "why": "Why payment is not ready",
+      "reasons": [
+        {
+          "text": "Missing acceptance certificate",
+          "effect": "affects Requirement 14.2",
+          "tone": "missing"
+        },
+        {
+          "text": "Missing current-month SLA proof",
+          "effect": "affects Requirement 8.4",
+          "tone": "partial"
+        }
       ]
     },
     "assessor": {
-      "eyebrow": "Coming next",
-      "title": "VAZORA Assessor",
-      "body": "The same evidence intelligence, pointed at standards. Specialized virtual assessors that evaluate your readiness against a framework — clause by clause, with evidence.",
+      "eyebrow": "Coming next · VAZORA Assessor",
+      "title": "One intelligence engine. Many specialized assessors.",
+      "body": "The same evidence intelligence, pointed at standards. Each assessor carries its own requirements, question types, evidence types and sampling behavior — with human oversight and provider approval.",
       "tracks": [
         "CBAHI",
         "ISO",
@@ -298,7 +403,105 @@
         "Education",
         "Social care"
       ],
-      "cta": "Preview Assessor"
+      "cta": "Preview Assessor",
+      "portfolioTitle": "Assessment provider portfolio",
+      "portfolioHint": "Future vision · illustrative",
+      "portfolio": [
+        {
+          "label": "Client organizations",
+          "value": "38"
+        },
+        {
+          "label": "Active assessments",
+          "value": "12"
+        },
+        {
+          "label": "Frameworks",
+          "value": "4"
+        },
+        {
+          "label": "Open findings",
+          "value": "73"
+        },
+        {
+          "label": "Human reviewers",
+          "value": "8"
+        }
+      ],
+      "model": "Digital assessment + human oversight + provider approval",
+      "labels": {
+        "requirements": "Requirements",
+        "questions": "Question types",
+        "evidence": "Evidence types",
+        "sampling": "Sampling",
+        "context": "Assessment context",
+        "engine": "Evidence Intelligence engine"
+      },
+      "frameworks": [
+        {
+          "key": "cbahi",
+          "label": "CBAHI",
+          "context": "Hospital accreditation readiness",
+          "requirements": "Patient safety standards, medication management, infection control chapters",
+          "questions": "Observation, chart review, staff interview",
+          "evidence": "Policies, incident logs, tracer records, training files",
+          "sampling": "Patient tracers across 3 units · 10 records per standard"
+        },
+        {
+          "key": "iso",
+          "label": "ISO",
+          "context": "Management system certification readiness",
+          "requirements": "Clauses 4–10 mapped to processes and controls",
+          "questions": "Documented information check, process walkthrough",
+          "evidence": "Procedures, records, internal audit reports, CAPA",
+          "sampling": "Process-based · one full cycle per clause"
+        },
+        {
+          "key": "nca",
+          "label": "NCA",
+          "context": "National cybersecurity controls",
+          "requirements": "Governance, defence, resilience and third-party control families",
+          "questions": "Configuration evidence, policy attestation",
+          "evidence": "Configs, screenshots, logs, approved policies",
+          "sampling": "Control-based · risk-weighted asset sample"
+        },
+        {
+          "key": "safety",
+          "label": "Safety",
+          "context": "Occupational health and safety",
+          "requirements": "Hazard control, permits, training, emergency preparedness",
+          "questions": "Site inspection, permit verification",
+          "evidence": "Permits, inspection photos, training matrices, drills",
+          "sampling": "Site walk · high-risk activities first"
+        },
+        {
+          "key": "lab",
+          "label": "Laboratories",
+          "context": "Laboratory competence",
+          "requirements": "Method validation, equipment, traceability, reporting",
+          "questions": "Witnessed testing, record verification",
+          "evidence": "Calibration certificates, QC charts, validation reports",
+          "sampling": "Per method · witnessed test per discipline"
+        },
+        {
+          "key": "education",
+          "label": "Education",
+          "context": "Institutional and program readiness",
+          "requirements": "Learning outcomes, faculty, assessment, quality assurance",
+          "questions": "Document review, stakeholder interviews",
+          "evidence": "Course files, outcome reports, surveys, minutes",
+          "sampling": "Per program · sampled course files"
+        },
+        {
+          "key": "social",
+          "label": "Social care",
+          "context": "Care service quality",
+          "requirements": "Safeguarding, individual care plans, staffing, environment",
+          "questions": "Case review, observation, family interview",
+          "evidence": "Care plans, incident reports, staff records, visits",
+          "sampling": "Per service · sampled care files"
+        }
+      ]
     },
     "trust": {
       "eyebrow": "Foundation",
@@ -496,7 +699,15 @@
     "errors": {
       "required": "This field is required.",
       "email": "Enter a valid work email."
-    }
+    },
+    "flowEyebrow": "What happens in the session",
+    "flow": [
+      "Upload or discuss one contract",
+      "See obligations extracted",
+      "Map required evidence",
+      "Identify execution gaps",
+      "Preview claim readiness"
+    ]
   },
   "login": {
     "eyebrow": "Enter VAZORA",

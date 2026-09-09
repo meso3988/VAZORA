@@ -32,7 +32,7 @@ export function DemoForm() {
 
   if (state.status === "success") {
     return (
-      <div className="flex flex-col items-start gap-5 rounded-md border border-line bg-elevated p-8">
+      <div className="flex flex-col items-start gap-5 surface-float p-8">
         <span className="flex size-10 items-center justify-center rounded-sm bg-verified/15 text-verified">
           <Check size={18} />
         </span>
@@ -50,7 +50,7 @@ export function DemoForm() {
   const v = state.values ?? {};
 
   return (
-    <form action={action} className="grid grid-cols-1 gap-5 rounded-md border border-line bg-elevated p-6 sm:grid-cols-2 sm:p-8" noValidate>
+    <form action={action} className="grid grid-cols-1 gap-5 surface-float p-6 sm:grid-cols-2 sm:p-8" noValidate>
       <Field label={t("form.name")} error={err("name")}>
         <input name="name" defaultValue={v.name} className={cn(field, err("name") && "border-missing")} autoComplete="name" required />
       </Field>
