@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, IBM_Plex_Sans_Arabic, Instrument_Sans } from "next/font/google";
+import { Alexandria, Geist_Mono, Instrument_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -14,10 +14,10 @@ const instrument = Instrument_Sans({
   display: "swap",
 });
 
-const plexArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-plex-arabic",
+const alexandria = Alexandria({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-alexandria",
   display: "swap",
 });
 
@@ -51,7 +51,7 @@ export default async function LocaleLayout(props: LayoutProps<"/[locale]">) {
     <html
       lang={locale}
       dir={meta.dir}
-      className={`${instrument.variable} ${plexArabic.variable} ${geistMono.variable}`}
+      className={`${instrument.variable} ${alexandria.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-dvh antialiased">

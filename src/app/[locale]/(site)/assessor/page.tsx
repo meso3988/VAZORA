@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ThreadField } from "@/components/brand/threads";
 import { Reveal } from "@/components/motion/reveal";
+import { AssessorEcosystem } from "@/components/site/assessor-ecosystem";
 import { ButtonLink } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui/surface";
 import { asLocale } from "@/i18n/params";
@@ -22,16 +24,16 @@ export default async function AssessorPage(props: PageProps<"/[locale]/assessor"
   return (
     <>
       <section className="relative overflow-hidden">
-        <div className="grid-bg pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_65%)]" />
+        <ThreadField className="pointer-events-none absolute -top-10 end-0 hidden h-[130%] w-[50%] opacity-50 lg:block" />
         <div className="container-x relative flex flex-col gap-8 pt-16 pb-20 lg:pt-28 lg:pb-24">
           <div className="flex flex-wrap items-center gap-3">
             <Eyebrow>{t("eyebrow")}</Eyebrow>
             <span className="rounded-sm border border-line px-2 py-0.5 text-[11px] text-muted">{t("badge")}</span>
           </div>
-          <h1 className="display max-w-[18ch] text-balance text-[2.5rem] font-medium sm:text-5xl lg:text-[3.75rem]">
+          <h1 className="display statement max-w-[18ch] text-balance text-[2.375rem] sm:text-[3rem] lg:text-[3.5rem]">
             {t("title")}
           </h1>
-          <p className="max-w-[60ch] text-lg leading-relaxed text-muted">{t("subtitle")}</p>
+          <p className="measure text-[1.0625rem] leading-relaxed text-muted sm:text-lg">{t("subtitle")}</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/demo" size="lg">{t("primary")}</ButtonLink>
             <ButtonLink href="/contract-intelligence" variant="secondary" size="lg">{t("secondary")}</ButtonLink>
@@ -39,13 +41,13 @@ export default async function AssessorPage(props: PageProps<"/[locale]/assessor"
         </div>
       </section>
 
-      <section className="border-t border-line bg-elevated/40">
+      <section className="bg-subtle">
         <div className="container-x flex flex-col gap-10 py-24">
           <Reveal><Eyebrow>{t("how.eyebrow")}</Eyebrow></Reveal>
-          <ol className="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-line bg-line md:grid-cols-3">
+          <ol className="grid grid-cols-1 gap-x-10 md:grid-cols-3">
             {steps.map((s, i) => (
-              <Reveal key={s.title} delay={i * 0.08} className="flex flex-col gap-3 bg-bg p-6">
-                <span className="font-mono text-xs text-faint">{String(i + 1).padStart(2, "0")}</span>
+              <Reveal key={s.title} delay={i * 0.08} className="flex flex-col gap-3 border-t border-line-strong/60 py-6">
+                <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="text-lg font-medium">{s.title}</h3>
                 <p className="text-sm leading-relaxed text-muted">{s.body}</p>
               </Reveal>
@@ -54,16 +56,17 @@ export default async function AssessorPage(props: PageProps<"/[locale]/assessor"
         </div>
       </section>
 
-      <section className="border-t border-line">
-        <div className="container-x flex flex-col gap-10 py-24">
+      <section className="bg-canvas">
+        <div className="container-x flex flex-col gap-12 py-24">
           <Reveal><Eyebrow>{t("tracks.eyebrow")}</Eyebrow></Reveal>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal>
+            <AssessorEcosystem className="mx-auto w-full max-w-4xl" />
+          </Reveal>
+          <ul className="grid grid-cols-1 gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {tracks.map((tr, i) => (
-              <Reveal key={tr.name} delay={i * 0.04}>
-                <li className="flex h-full flex-col gap-2 rounded-md border border-line bg-elevated p-5">
-                  <span className="text-base font-medium">{tr.name}</span>
-                  <span className="text-sm text-muted">{tr.body}</span>
-                </li>
+              <Reveal key={tr.name} delay={i * 0.04} className="flex flex-col gap-1.5 border-t border-line-strong/60 py-5">
+                <span className="text-base font-medium">{tr.name}</span>
+                <span className="text-sm text-muted">{tr.body}</span>
               </Reveal>
             ))}
           </ul>

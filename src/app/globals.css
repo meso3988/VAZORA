@@ -9,61 +9,77 @@
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* Brand */
-  --brand-ink: #0b0d10;
-  --brand-graphite: #14171c;
-  --brand-slate: #1d2229;
-  --brand-line: #2a3039;
-  --brand-paper: #f6f6f3;
-  --brand-mist: #ebece8;
-  --brand-accent: #2fb28a; /* verdigris */
-  --brand-accent-deep: #1f8a6a;
-  --brand-accent-soft: rgba(47, 178, 138, 0.14);
+  /* Brand surfaces */
+  --brand-porcelain: #f7f7f3;
+  --brand-mineral: #eef1ef;
+  --brand-stone: #e8ece9;
+  --brand-canvas: #fcfcfa;
+  --brand-ink: #111514;
+  --brand-graphite: #171b1a;
+  --brand-slate: #1f2422;
 
-  /* Status — semantically distinct from brand accent */
-  --status-verified: #2fb28a;
-  --status-partial: #d9a441;
-  --status-missing: #d5584d;
-  --status-at-risk: #e0784a;
-  --status-pending: #7f8794;
+  /* Mineral / verification green */
+  --brand-accent: #1e8a63;
+  --brand-accent-deep: #166e4f;
+  --brand-accent-soft: rgba(30, 138, 99, 0.12);
+  --brand-accent-fg: #ffffff;
+
+  /* Status — restrained, semantically distinct */
+  --status-verified: #1e8a63;
+  --status-partial: #b8862b;
+  --status-missing: #b8352f;
+  --status-at-risk: #c2603e;
+  --status-pending: #7d8683;
 
   /* Fonts (set by next/font in layout) */
   --font-latin: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: var(--font-plex-arabic), "Segoe UI", Tahoma, sans-serif;
+  --font-arabic: var(--font-alexandria), "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   --font-mono-stack: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Radii / motion */
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-float: 0 1px 2px rgba(17, 21, 20, 0.04), 0 24px 60px -32px rgba(17, 21, 20, 0.28);
 }
 
-/* Public site — dark environment (also the document default) */
+/* Light environment — the document default (public site + application) */
 :root,
+[data-theme="light"] {
+  --bg: var(--brand-porcelain);
+  --bg-elevated: #ffffff;
+  --bg-subtle: var(--brand-mineral);
+  --fg: #141817;
+  --fg-muted: #5a625e;
+  --fg-faint: #8a928d;
+  --line: #dde2de;
+  --line-strong: #c7cec9;
+  --thread: #b9c2bc;
+  color-scheme: light;
+}
+
+/* Immersive ink environment — used for one homepage moment and the footer */
 [data-theme="dark"] {
   --bg: var(--brand-ink);
   --bg-elevated: var(--brand-graphite);
   --bg-subtle: var(--brand-slate);
   --fg: #eef0ec;
-  --fg-muted: #a7aeb8;
-  --fg-faint: #6b727d;
-  --line: var(--brand-line);
-  --line-strong: #3a414c;
+  --fg-muted: #a3aba6;
+  --fg-faint: #6d756f;
+  --line: #262c2a;
+  --line-strong: #363d3a;
+  --thread: #3a4340;
+  --brand-accent: #3fb489;
+  --brand-accent-deep: #2f9a73;
+  --brand-accent-soft: rgba(63, 180, 137, 0.14);
+  --brand-accent-fg: #0b110e;
+  --status-verified: #3fb489;
+  --status-partial: #d4a24a;
+  --status-missing: #de6a60;
+  --status-at-risk: #dd8a63;
+  --status-pending: #8b948f;
   color-scheme: dark;
-}
-
-/* Application shell — light environment */
-[data-theme="light"] {
-  --bg: var(--brand-paper);
-  --bg-elevated: #ffffff;
-  --bg-subtle: var(--brand-mist);
-  --fg: #10131a;
-  --fg-muted: #4f5661;
-  --fg-faint: #8a9099;
-  --line: #dcdedb;
-  --line-strong: #c3c6c2;
-  color-scheme: light;
 }
 
 @theme inline {
@@ -75,10 +91,19 @@
   --color-faint: var(--fg-faint);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-thread: var(--thread);
+
+  --color-porcelain: var(--brand-porcelain);
+  --color-mineral: var(--brand-mineral);
+  --color-stone: var(--brand-stone);
+  --color-canvas: var(--brand-canvas);
+  --color-ink: var(--brand-ink);
+  --color-graphite: var(--brand-graphite);
 
   --color-accent: var(--brand-accent);
   --color-accent-deep: var(--brand-accent-deep);
   --color-accent-soft: var(--brand-accent-soft);
+  --color-accent-fg: var(--brand-accent-fg);
 
   --color-verified: var(--status-verified);
   --color-partial: var(--status-partial);
@@ -94,6 +119,7 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
 
+  --shadow-float: var(--shadow-float);
   --ease-out: var(--ease-out);
 
   --breakpoint-xs: 30rem;
@@ -129,9 +155,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Arabic: its own face, weight and rhythm — not a mirrored copy of the Latin scale. */
 [dir="rtl"] body {
   font-family: var(--font-arabic);
   font-feature-settings: normal;
+  line-height: 1.8;
 }
 
 /* Latin figures/labels keep their mono face in both directions. */
@@ -143,7 +171,7 @@ body {
 
 ::selection {
   background: var(--brand-accent);
-  color: var(--brand-ink);
+  color: var(--brand-accent-fg);
 }
 
 :focus-visible {
@@ -177,7 +205,8 @@ body {
 }
 [dir="rtl"] .eyebrow {
   font-family: var(--font-arabic);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -186,11 +215,11 @@ body {
   border: 1px solid var(--line);
 }
 
-@utility grid-bg {
-  background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--line) 55%, transparent) 1px, transparent 1px);
-  background-size: 48px 48px;
+@utility surface-float {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
 }
 
 @utility text-balance {
@@ -201,17 +230,32 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Display type: Latin tight tracking; Arabic looser leading, no tracking. */
+/* Display type: Latin tight tracking; Arabic heavier weight, looser leading, no tracking. */
 .display {
-  letter-spacing: -0.025em;
-  line-height: 1.02;
+  letter-spacing: -0.022em;
+  line-height: 1.06;
+  font-weight: 500;
 }
 [dir="rtl"] .display {
   letter-spacing: 0;
-  line-height: 1.3;
+  line-height: 1.42;
+  font-weight: 600;
 }
 
-/* Signature animation keyframes (paused under reduced motion) */
+/* Section headings and body copy: Arabic gets its own measure. */
+[dir="rtl"] .measure {
+  max-width: 44ch;
+}
+[dir="ltr"] .measure {
+  max-width: 58ch;
+}
+
+/* Statement type: 700 reserved for major statements only. */
+[dir="rtl"] .statement {
+  font-weight: 700;
+}
+
+/* Keyframes */
 @keyframes trace {
   to {
     stroke-dashoffset: 0;
@@ -224,5 +268,10 @@ body {
   }
   50% {
     opacity: 1;
+  }
+}
+@keyframes thread-flow {
+  to {
+    stroke-dashoffset: -24;
   }
 }

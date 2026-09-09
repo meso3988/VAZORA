@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
-import { Wordmark } from "@/components/brand/logo";
+import { Mark } from "@/components/brand/logo";
+import { ThreadField } from "@/components/brand/threads";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { Link } from "@/i18n/navigation";
 
@@ -35,30 +36,37 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="border-t border-line">
-      <div className="container-x grid grid-cols-1 gap-12 py-16 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
-        <div className="flex flex-col gap-5">
-          <Wordmark />
-          <p className="max-w-[32ch] text-sm leading-relaxed text-muted">{t("blurb")}</p>
-          <p className="eyebrow">{common("tagline")}</p>
+    <footer data-theme="dark" className="relative overflow-hidden bg-bg text-fg">
+      <ThreadField className="absolute inset-y-0 start-0 hidden h-full w-[62%] opacity-70 sm:block" />
+      <div className="container-x relative">
+        <div className="flex flex-col items-start gap-6 pt-24 pb-16 sm:items-center sm:text-center">
+          <Mark size={30} className="text-fg" />
+          <p className="text-[13px] font-semibold tracking-[0.28em]" style={{ fontFamily: "var(--font-latin)" }}>
+            VAZORA
+          </p>
+          <p className="eyebrow !text-muted">{common("tagline")}</p>
+          <p className="display statement max-w-[20ch] text-balance text-[2rem] sm:text-[2.75rem]">{t("closing")}</p>
         </div>
-        {columns.map((col) => (
-          <div key={col.title} className="flex flex-col gap-3">
-            <p className="text-xs font-medium text-fg">{col.title}</p>
-            <ul className="flex flex-col gap-2">
-              {col.items.map((item) => (
-                <li key={item.label}>
-                  <Link href={item.href} className="text-sm text-muted transition-colors hover:text-fg">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="border-t border-line">
-        <div className="container-x flex flex-col gap-4 py-6 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
+
+        <div className="grid grid-cols-2 gap-10 border-t border-line py-12 sm:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
+          <p className="col-span-2 max-w-[36ch] text-sm leading-relaxed text-muted sm:col-span-1">{t("blurb")}</p>
+          {columns.map((col) => (
+            <div key={col.title} className="flex flex-col gap-3">
+              <p className="text-xs font-medium text-fg">{col.title}</p>
+              <ul className="flex flex-col gap-2">
+                {col.items.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="text-sm text-muted transition-colors hover:text-fg">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-4 border-t border-line py-6 text-xs text-faint sm:flex-row sm:items-center sm:justify-between">
           <p>{t("rights", { year: 2026 })}</p>
           <div className="flex items-center gap-5">
             <span>{t("location")}</span>

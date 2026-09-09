@@ -39,10 +39,10 @@ export function SectionHeading({
       )}
     >
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <Tag className="display max-w-[22ch] text-balance text-3xl font-medium sm:text-4xl lg:text-[2.75rem]">
+      <Tag className="display max-w-[24ch] text-balance text-[1.75rem] sm:text-[2.125rem] lg:text-[2.5rem]">
         {title}
       </Tag>
-      {body && <p className="max-w-[58ch] text-base leading-relaxed text-muted sm:text-lg">{body}</p>}
+      {body && <p className="measure text-base leading-relaxed text-muted sm:text-[1.0625rem]">{body}</p>}
     </div>
   );
 }
