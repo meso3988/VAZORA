@@ -1,9 +1,31 @@
 "use server";
 
+export type DemoRequestField =
+  | "name"
+  | "email"
+  | "organization"
+  | "role"
+  | "sector"
+  | "contracts"
+  | "language"
+  | "message";
+
 export type DemoRequestState = {
   status: "idle" | "success" | "error";
   errors?: Partial<Record<"name" | "email" | "organization", "required" | "email">>;
+  values?: Partial<Record<DemoRequestField, string>>;
 };
+
+const FIELDS: DemoRequestField[] = [
+  "name",
+  "email",
+  "organization",
+  "role",
+  "sector",
+  "contracts",
+  "language",
+  "message",
+];
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,9 +37,9 @@ export async function submitDemoRequest(
   _prev: DemoRequestState,
   formData: FormData,
 ): Promise<DemoRequestState> {
-  const name = String(formData.get("name") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const organization = String(formData.get("organization") ?? "").trim();
+  const values: DemoRequestState["values"] = {};
+  for (const f of FIELDS) values[f] = String(formData.get(f) ?? "").trim();
+  const { name = "", email = "", organization = "" } = values;
 
   const errors: DemoRequestState["errors"] = {};
   if (!name) errors.name = "required";
@@ -25,7 +47,7 @@ export async function submitDemoRequest(
   else if (!EMAIL.test(email)) errors.email = "email";
   if (!organization) errors.organization = "required";
 
-  if (Object.keys(errors).length) return { status: "error", errors };
+  if (Object.keys(errors).length) return { status: "error", errors, values };
 
   return { status: "success" };
 }

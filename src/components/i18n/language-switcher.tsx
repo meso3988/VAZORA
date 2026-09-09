@@ -28,7 +28,12 @@ export function LanguageSwitcher({
 
   function switchTo(next: AppLocale) {
     if (next === locale) return;
-    const query = Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    const query: Record<string, string | string[]> = {};
+    for (const [key, value] of new URLSearchParams(window.location.search)) {
+      const prev = query[key];
+      query[key] =
+        prev === undefined ? value : Array.isArray(prev) ? [...prev, value] : [prev, value];
+    }
     startTransition(() => {
       router.replace(
         // @ts-expect-error pathname/params are runtime-derived for the current route
