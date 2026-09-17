@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.76.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.43.0",
     "motion": "^13.2.0",

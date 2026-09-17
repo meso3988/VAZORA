@@ -1184,15 +1184,37 @@
   "login": {
     "eyebrow": "Enter VAZORA",
     "title": "Sign in to your organization.",
+    "titleSignup": "Create your VAZORA account.",
+    "fullName": "Full name",
     "email": "Work email",
     "password": "Password",
-    "submit": "Continue",
+    "submit": "Sign in",
+    "submitSignup": "Create account",
     "demoDivider": "or",
     "demo": "Enter the demo environment",
     "demoHint": "Explore a demo organization with illustrative contracts. No account required.",
     "noAccount": "Access is provisioned per organization.",
+    "noAccountYet": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "switchToSignUp": "Create account",
+    "switchToSignIn": "Sign in",
     "requestAccess": "Book a demo",
-    "credentialsUnavailable": "Organization sign-in is enabled after onboarding. Use the demo environment to explore."
+    "credentialsUnavailable": "Organization sign-in is enabled after onboarding. Use the demo environment to explore.",
+    "errorCredentials": "Incorrect sign-in details. Check your email and password.",
+    "errorSignup": "Could not create the account. The email may already be registered.",
+    "errorWeakPassword": "Password must be at least 8 characters.",
+    "errorConfig": "Live production mode is not configured. Try the demo environment.",
+    "noticeConfirmEmail": "Check your email to confirm the account, then sign in."
+  },
+  "onboarding": {
+    "eyebrow": "Welcome to VAZORA",
+    "title": "Create your organization's workspace",
+    "body": "Your organization is a private space that isolates your contracts, documents, and activity from others.",
+    "orgName": "Organization name",
+    "orgNamePlaceholder": "e.g. Horizon Operations & Maintenance Co.",
+    "submit": "Create workspace",
+    "ownerNote": "You will become the organization owner and can invite your team later.",
+    "errorCreate": "Could not create the organization. Please try again."
   },
   "app": {
     "nav": {

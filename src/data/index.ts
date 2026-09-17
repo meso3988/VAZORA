@@ -17,9 +17,15 @@ export function getDataProvider(): DataProvider {
     case "mock":
       cached = mockDataProvider;
       break;
-    case "supabase":
+    case "supabase": {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)) {
+        throw new Error(
+          "VAZORA_DATA_PROVIDER=supabase but Supabase env vars are missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example).",
+        );
+      }
       cached = createSupabaseDataProvider();
       break;
+    }
     default:
       throw new Error(`Unsupported VAZORA_DATA_PROVIDER "${kind}". Expected "mock" or "supabase".`);
   }

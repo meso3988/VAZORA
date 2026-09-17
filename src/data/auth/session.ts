@@ -1,7 +1,9 @@
 /**
  * Session primitives shared by the proxy (edge) and server code.
- * Phase 1 uses a signed-less demo cookie; the shape mirrors what a
- * Supabase Auth session will provide so the swap stays local to src/data/auth.
+ * Phase 2A supports two sources:
+ *  - demo: the Phase 1 cookie (`vazora_session=demo`), always the demo org
+ *  - live: a Supabase Auth user; `organizationId` is null until onboarding
+ *    creates/joins an organization for the user
  */
 export const SESSION_COOKIE = "vazora_session";
 
@@ -15,6 +17,7 @@ export type SessionUser = {
 
 export type Session = {
   user: SessionUser;
+  /** Empty string only in live mode before onboarding finishes. */
   organizationId: string;
   mode: "demo" | "live";
 };

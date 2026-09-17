@@ -14,7 +14,14 @@ export default async function AppLayout(props: LayoutProps<"/[locale]/app">) {
   const session = await auth.getSession();
   if (!session) return redirect({ href: "/login", locale });
 
-  const org = await getDataProvider().organizations.getById(session.organizationId);
+  // Live users without an organization go through onboarding first.
+  if (session.mode === "live" && !session.organizationId) {
+    return redirect({ href: "/onboarding", locale });
+  }
+
+  const org = session.organizationId
+    ? await getDataProvider().organizations.getById(session.organizationId)
+    : null;
 
   return (
     <AppShell
