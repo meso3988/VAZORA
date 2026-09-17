@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHeader, Panel } from "@/components/app/primitives";
 import { ClaimCard } from "@/components/app/tables";
 import { requireTenant } from "@/data/context";
+import { claimReadiness } from "@/domain/types";
 import { lt } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
@@ -26,7 +27,7 @@ export default async function ClaimsPage(props: PageProps<"/[locale]/app/claims"
     <>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {sorted.map((c) => (
-        <Panel key={c.id}>
+        <Panel key={c.id} tone={claimReadiness(c) >= 0.9 ? "emerald" : claimReadiness(c) >= 0.5 ? "amber" : "rose"}>
           <ClaimCard claim={c} contractTitle={titles[c.contractId]} />
         </Panel>
       ))}

@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 
 import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
@@ -30,22 +31,33 @@ export function Panel({
   title,
   hint,
   action,
+  tone = "graphite",
+  icon: Icon,
   className,
   children,
 }: {
   title?: ReactNode;
   hint?: ReactNode;
   action?: ReactNode;
+  tone?: "graphite" | "amber" | "emerald" | "sky" | "rose";
+  icon?: LucideIcon;
   className?: string;
   children: ReactNode;
 }) {
+  const headerTone = TONE_HEADER[tone];
+  const badgeTone = TONE_BADGE[tone];
   return (
-    <Surface className={cn("flex min-w-0 flex-col", className)}>
+    <Surface className={cn("app-panel flex min-w-0 flex-col", className)}>
       {(title || action) && (
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-3.5">
+        <div className={cn("panel-header-tonal flex items-start justify-between gap-4 rounded-t-md border-b border-line px-5 py-3", headerTone)}>
           <div className="flex min-w-0 flex-col gap-0.5">
-            {title && <h2 className="text-sm font-medium">{title}</h2>}
-            {hint && <p className="text-xs text-muted">{hint}</p>}
+            {title && (
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                {Icon && <Icon size={18} className="shrink-0 opacity-80" strokeWidth={1.5} />}
+                {title}
+              </h2>
+            )}
+            {hint && <p className={cn("text-xs", badgeTone)}>{hint}</p>}
           </div>
           {action}
         </div>
@@ -54,6 +66,21 @@ export function Panel({
     </Surface>
   );
 }
+
+const TONE_HEADER: Record<string, string> = {
+  graphite: "bg-neutral-800 text-neutral-50",
+  amber: "bg-amber-800 text-amber-50",
+  emerald: "bg-emerald-800 text-emerald-50",
+  sky: "bg-sky-800 text-sky-50",
+  rose: "bg-rose-800 text-rose-50",
+};
+const TONE_BADGE: Record<string, string> = {
+  graphite: "text-neutral-200/80",
+  amber: "text-amber-100/80",
+  emerald: "text-emerald-100/80",
+  sky: "text-sky-100/80",
+  rose: "text-rose-100/80",
+};
 
 /** RTL-safe table wrapper: `text-start` on cells follows document direction. */
 export function Table({ className, ...props }: ComponentProps<"table">) {
@@ -92,12 +119,16 @@ export function Kpi({
   hint?: ReactNode;
   tone?: "verified" | "partial" | "missing" | "at_risk";
 }) {
+  const dotClass = tone ? `kpi-dot kpi-dot-${tone}` : "kpi-dot kpi-dot-neutral";
   return (
-    <Surface className="flex flex-col gap-1.5 px-4 py-4">
-      <span className="text-xs text-muted">{label}</span>
+    <Surface className={cn("app-kpi flex flex-col gap-2 px-5 py-4", tone && `kpi-${tone}`)}>
+      <div className="flex items-center gap-2">
+        <span className={dotClass} />
+        <span className="text-[11px] font-medium tracking-wide text-muted">{label}</span>
+      </div>
       <span
         className={cn(
-          "font-mono text-2xl font-medium tabular",
+          "kpi-value font-mono text-[28px] tabular leading-none",
           tone === "verified" && "text-verified",
           tone === "partial" && "text-partial",
           tone === "missing" && "text-missing",
@@ -106,7 +137,7 @@ export function Kpi({
       >
         {value}
       </span>
-      {hint && <span className="text-xs text-faint">{hint}</span>}
+      {hint && <span className="text-[11px] text-faint">{hint}</span>}
     </Surface>
   );
 }

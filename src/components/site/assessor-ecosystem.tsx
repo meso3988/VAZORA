@@ -1,84 +1,115 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { ArrowDown, ArrowUpRight, ScanLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Mark } from "@/components/brand/logo";
-import { useReducedMotionSafe } from "@/lib/hooks";
+import { EvidenceConvergence } from "@/components/brand/threads";
 import { cn } from "@/lib/utils";
 
 type Framework = {
   key: string;
-  label: string;
+  name: string;
   context: string;
-  requirements: string;
-  questions: string;
+  types: string[];
+  method: string;
+  requirement: string;
   evidence: string;
-  sampling: string;
+  gap: string;
+  action: string;
 };
 
 /** One engine, many assessors: selecting a framework changes the assessment context below. */
 export function AssessorEcosystem({ className }: { className?: string }) {
-  const t = useTranslations("home.assessor");
+  const t = useTranslations("mineral.assessor");
+  const common = useTranslations("mineral");
   const frameworks = t.raw("frameworks") as Framework[];
-  const labels = t.raw("labels") as Record<"requirements" | "questions" | "evidence" | "sampling" | "context" | "engine", string>;
   const [active, setActive] = useState(0);
-  const reduce = useReducedMotionSafe();
   const f = frameworks[active];
-
   return (
-    <div className={cn("flex flex-col gap-6", className)}>
-      <div className="flex items-center gap-3">
-        <span className="flex size-9 items-center justify-center rounded-md border border-line bg-elevated text-fg">
-          <Mark size={16} />
+    <div className={cn("assessor-field", className)} data-framework={f.key}>
+      <div className="system-caption">
+        <span className="m-code" dir="ltr">
+          VAZORA / ASSESSOR
         </span>
-        <span className="text-xs text-muted">{labels.engine}</span>
-        <span aria-hidden className="h-px flex-1 bg-thread" />
+        <span>{common("preview")}</span>
       </div>
-
-      <div role="tablist" aria-label={labels.context} className="flex flex-wrap gap-2">
-        {frameworks.map((fw, i) => (
-          <button
-            key={fw.key}
-            role="tab"
-            type="button"
-            aria-selected={i === active}
-            onClick={() => setActive(i)}
-            className={cn(
-              "rounded-md border px-3 py-1.5 text-sm transition-colors",
-              i === active ? "border-fg bg-fg text-bg" : "border-line-strong bg-transparent text-muted hover:border-fg/50 hover:text-fg",
-            )}
-          >
-            {fw.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="surface-float overflow-hidden">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.dl
-            key={f.key}
-            role="tabpanel"
-            initial={reduce ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduce ? undefined : { opacity: 0, y: -6 }}
-            transition={{ duration: 0.28 }}
-            className="grid grid-cols-1 divide-y divide-line"
-          >
-            <div className="flex items-baseline justify-between gap-4 px-5 py-4">
-              <dt className="eyebrow">{labels.context}</dt>
-              <dd className="text-sm font-medium text-end">{f.context}</dd>
-            </div>
-            {(["requirements", "questions", "evidence", "sampling"] as const).map((k) => (
-              <div key={k} className="grid grid-cols-1 gap-1 px-5 py-4 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6">
-                <dt className="text-xs text-faint">{labels[k]}</dt>
-                <dd className="text-sm leading-relaxed text-fg">{f[k]}</dd>
-              </div>
+      <div className="assessment-layout">
+        <div className="framework-rail">
+          <p className="m-eyebrow">{t("framework")}</p>
+          <div role="group" aria-label={t("framework")}>
+            {frameworks.map((framework, i) => (
+              <button
+                type="button"
+                key={framework.key}
+                aria-pressed={i === active}
+                onClick={() => setActive(i)}
+                className={cn(i === active && "is-selected")}
+              >
+                <span className="m-code">0{i + 1}</span>
+                <span>{framework.name}</span>
+                <ArrowUpRight size={14} className="rtl:-scale-x-100" />
+              </button>
             ))}
-          </motion.dl>
-        </AnimatePresence>
+          </div>
+        </div>
+        <div className="assessment-active" aria-live="polite">
+          <div className="assessment-context">
+            <span className="m-eyebrow">{f.name}</span>
+            <h3>{f.context}</h3>
+            <span className="m-code" dir="ltr">
+              LOGIC / 0{active + 1}
+            </span>
+          </div>
+          <div className="assessment-inputs">
+            <span className="m-eyebrow">{t("inputs")}</span>
+            <div className="evidence-fan" key={f.key}>
+              {f.types.map((type, i) => (
+                <div key={type}>
+                  <span className="input-index m-code">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>{type}</span>
+                  <i aria-hidden />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="assessment-engine">
+            <span className="engine-mark">
+              <Mark size={25} />
+            </span>
+            <div>
+              <strong>{t("engine")}</strong>
+              <span>{t("engineHint")}</span>
+            </div>
+            <ScanLine size={22} />
+            <span className="engine-output" aria-hidden />
+          </div>
+          <div className="assessment-method">
+            <span className="m-eyebrow">{t("logic")}</span>
+            <p>{f.method}</p>
+          </div>
+          <div className="assessment-inspection">
+            <div>
+              <span className="m-eyebrow">{t("sample")}</span>
+              <h4>{f.requirement}</h4>
+              <p>{f.evidence}</p>
+              <ArrowDown size={15} />
+              <span className="m-eyebrow">{t("finding")}</span>
+              <p className="assessment-finding">{f.gap}</p>
+            </div>
+            <div>
+              <EvidenceConvergence state="partial" compact />
+              <span className="m-eyebrow">{t("next")}</span>
+              <p>{f.action}</p>
+              <span className="review-boundary">{t("review")}</span>
+            </div>
+          </div>
+        </div>
       </div>
+      <p className="assessment-disclaimer">{t("disclaimer")}</p>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function ContractObligations(props: PageProps<"/[locale]/ap
   const obligations = await db.obligations.list(orgId, { contractId: id });
 
   return (
-    <Panel title={t("title")} hint={`${obligations.length} / ${contract.health.obligationsTotal}`}>
+    <Panel title={t("title")} tone="sky" hint={`${obligations.length} / ${contract.health.obligationsTotal}`}>
       <ObligationsTable obligations={obligations} currency={contract.currency} />
     </Panel>
   );

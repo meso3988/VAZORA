@@ -20,7 +20,7 @@ export default async function ContractOfficer(props: PageProps<"/[locale]/app/co
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-      <Panel title={t("briefing")} hint={t("openItems", { count: open })}>
+      <Panel title={t("briefing")} tone="emerald" hint={t("openItems", { count: open })}>
         <OfficerFeed events={events} showContract={false} />
       </Panel>
       <OfficerAsk />

@@ -15,6 +15,21 @@ export function Eyebrow({ className, ...props }: ComponentProps<"p">) {
   return <p className={cn("eyebrow", className)} {...props} />;
 }
 
+export function ChapterFrame({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className="container-x"><div className={cn("chapter-frame", className)}>{children}</div></div>;
+}
+
+export function ChapterLabel({ label }: { label: string }) {
+  const parts = label.match(/^(\d{2})\s*\/\s*(.*)$/);
+  return (
+    <p className="chapter-label m-eyebrow">
+      {parts && <><span className="chapter-index" dir="ltr">{parts[1]}</span><span className="sr-only"> / </span></>}
+      <span className="chapter-name">{parts ? parts[2] : label}</span>
+      <span className="chapter-rule" aria-hidden />
+    </p>
+  );
+}
+
 export function SectionHeading({
   eyebrow,
   title,

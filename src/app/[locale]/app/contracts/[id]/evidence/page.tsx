@@ -27,12 +27,12 @@ export default async function ContractEvidence(props: PageProps<"/[locale]/app/c
 
   return (
     <>
-      <Panel title={t("byStatus")}>
+      <Panel title={t("byStatus")} tone="sky">
         <div className="p-5">
           <StackedBar segments={ORDER.filter((s) => by[s]).map((s) => ({ key: s, value: by[s] ?? 0, className: toneDot[statusTone[s]], label: st(s) }))} />
         </div>
       </Panel>
-      <Panel title={t("title")} hint={t("subtitle")}>
+      <Panel title={t("title")} tone="graphite" hint={t("subtitle")}>
         <EvidenceTable evidence={evidence} obligations={obligations} />
       </Panel>
     </>

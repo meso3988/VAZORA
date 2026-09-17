@@ -185,6 +185,7 @@ export async function ClaimCard({ claim, contractTitle }: { claim: Claim; contra
   const f = await getFormatter();
   const r = claimReadiness(claim);
   const blocking = claim.requirements.filter((q) => q.status !== "verified");
+  const verified = claim.requirements.filter((q) => q.status === "verified");
 
   return (
     <div className="flex flex-col">
@@ -194,6 +195,11 @@ export async function ClaimCard({ claim, contractTitle }: { claim: Claim; contra
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-base font-medium">{t("claim", { number: claim.number })}</span>
             <StatusPill status={claim.status} subtle />
+            {blocking.length > 0 && (
+              <span className="rounded-sm bg-partial/10 px-2 py-0.5 text-[11px] font-medium text-partial">
+                {t("blockersRemaining", { count: blocking.length })}
+              </span>
+            )}
           </div>
           <span className="text-sm text-muted">{lt(claim.period, locale)}{contractTitle && <> · {contractTitle}</>}</span>
           <span className="text-xs text-muted">
@@ -206,42 +212,37 @@ export async function ClaimCard({ claim, contractTitle }: { claim: Claim; contra
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <div className="flex flex-col gap-3 border-b border-line p-5 md:border-e md:border-b-0">
-          <h3 className="text-sm font-medium">{t("blocking")}</h3>
-          {blocking.length === 0 ? (
-            <p className="text-sm text-verified">{t("nothingBlocking")}</p>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {blocking.map((q) => (
+      <div className="flex flex-col">
+        <div className="border-b border-line p-5">
+          <h3 className="text-sm font-medium">{blocking.length ? t("blockersFirst", { count: blocking.length }) : t("nothingBlocking")}</h3>
+          {blocking.length > 0 && (
+            <ol className="mt-3 flex flex-col gap-3">
+              {blocking.map((q, i) => (
                 <li key={q.id} className="flex gap-2.5">
-                  <StatusDot tone={q.status} className="mt-1.5" />
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-partial/15 font-mono text-[10px] text-partial">{i + 1}</span>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm"><Mono className="me-1.5">{q.clauseRef}</Mono>{lt(q.label, locale)}</span>
                     {q.note && <span className="text-xs leading-relaxed text-muted">{lt(q.note, locale)}</span>}
                   </div>
                 </li>
               ))}
-            </ul>
+            </ol>
           )}
         </div>
-        <div className="flex flex-col">
-          <h3 className="px-5 pt-5 pb-2 text-sm font-medium">{t("breakdown")}</h3>
-          <Table className="min-w-0">
-            <thead>
-              <tr>
-                <Th>{t("columns.clause")}</Th>
-                <Th>{t("columns.requirement")}</Th>
-                <Th>{t("columns.status")}</Th>
-              </tr>
-            </thead>
+        <details className="group">
+          <summary className="flex cursor-pointer items-center gap-2 px-5 py-3 text-xs text-muted hover:text-fg">
+            <StatusDot tone="verified" />
+            {t("verifiedCollapsed", { count: verified.length })}
+            <span className="ms-auto font-mono text-[10px] group-open:rotate-90">›</span>
+          </summary>
+          <Table className="min-w-0 border-t border-line">
             <tbody className="divide-y divide-line">
-              {claim.requirements.map((q) => (
+              {verified.map((q) => (
                 <tr key={q.id}>
                   <Td className="py-2"><Mono>{q.clauseRef}</Mono></Td>
-                  <Td className="py-2 text-sm">{lt(q.label, locale)}</Td>
+                  <Td className="py-2 text-sm text-muted">{lt(q.label, locale)}</Td>
                   <Td className="py-2">
-                    <span className="flex items-center gap-1.5 text-xs">
+                    <span className="flex items-center gap-1.5 text-xs text-muted">
                       <StatusDot tone={statusTone[q.status]} />{st(q.status)}
                     </span>
                   </Td>
@@ -249,7 +250,7 @@ export async function ClaimCard({ claim, contractTitle }: { claim: Claim; contra
               ))}
             </tbody>
           </Table>
-        </div>
+        </details>
       </div>
     </div>
   );

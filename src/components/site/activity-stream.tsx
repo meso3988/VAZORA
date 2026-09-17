@@ -1,70 +1,147 @@
 "use client";
 
-import { motion, useInView } from "motion/react";
+import { Check, CornerDownRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 
-import { StatusDot, type StatusTone } from "@/components/ui/status";
-import { useReducedMotionSafe } from "@/lib/hooks";
+import { EvidenceEnvironment } from "@/components/brand/evidence-environment";
+import {
+  EvidenceConvergence,
+  type VerificationState,
+} from "@/components/brand/threads";
+import { SequenceControls } from "@/components/site/signature-animation";
+import { useNarrativePlayback } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
-type Entry = { time: string; text: string; tone: StatusTone };
+const STATES: VerificationState[] = [
+  "unverified",
+  "requested",
+  "received",
+  "verifying",
+  "partial",
+  "requested",
+  "resubmitted",
+  "reverifying",
+  "verified",
+  "verified",
+];
 
 /** Operational activity stream of the AI Contract Officer — entries arrive in sequence once in view. */
 export function ActivityStream({ className }: { className?: string }) {
-  const t = useTranslations("home.officer");
-  const entries = t.raw("stream") as Entry[];
-  const ref = useRef<HTMLOListElement>(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -20% 0px" });
-  const reduce = useReducedMotionSafe();
-  const show = reduce || inView;
-
+  const t = useTranslations("mineral.officer");
+  const common = useTranslations("mineral");
+  const entries = t.raw("events") as {
+    time: string;
+    text: string;
+    detail: string;
+  }[];
+  const ref = useRef<HTMLDivElement>(null);
+  const playback = useNarrativePlayback(ref, entries.length, 2200);
+  const { step } = playback;
+  const impacted = step === 9;
   return (
-    <div className={cn("relative", className)}>
-      <div className="mb-5 flex items-center justify-between font-mono text-[11px] text-faint">
-        <span>{t("streamTitle")}</span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-accent [animation:pulse-soft_1.6s_ease-in-out_infinite]" />
-          {t("eyebrow")}
-        </span>
+    <div
+      className={cn("officer-workspace", className)}
+      ref={ref}
+      data-officer-step={step}
+    >
+      <EvidenceEnvironment
+        className="officer-environment"
+        tone="graphite"
+        state={STATES[step]}
+        source={{
+          reference: "RTA-OM-2026-014",
+          clause: "14.2",
+          excerpt: entries[0].detail,
+          evidence:
+            step < 2
+              ? null
+              : step >= 6
+                ? "Signed_Acknowledgement.pdf"
+                : "Performance_Sep.pdf",
+        }}
+      />
+      <div className="system-caption">
+        <span>{t("context")}</span>
+        <span>{common("demo")}</span>
       </div>
-      <ol ref={ref} className="relative flex flex-col">
-        <span aria-hidden className="absolute inset-y-2 start-[4.75rem] w-px bg-line-strong sm:start-[5.25rem]" />
-        {entries.map((e, i) => {
-          const last = i === entries.length - 1;
-          return (
-            <motion.li
-              key={i}
-              initial={false}
-              animate={{ opacity: show ? 1 : 0, x: show ? 0 : 6 }}
-              transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : 0.25 + i * 0.35, ease: [0.22, 1, 0.36, 1] }}
+      <div className="officer-layout">
+        <ol className="officer-timeline">
+          {entries.map((entry, i) => (
+            <li
+              key={entry.time}
               className={cn(
-                "relative grid grid-cols-[3.75rem_1.5rem_minmax(0,1fr)] items-start gap-x-3 py-2.5 sm:grid-cols-[4.25rem_1.5rem_minmax(0,1fr)]",
-                last && "mt-3 border-t border-line pt-5",
+                i === step && "is-current",
+                i > step && "is-future",
               )}
             >
-              <span className="pt-0.5 text-end font-mono text-[11px] tabular text-faint" dir="ltr">
-                {e.time}
-              </span>
-              <span className="flex justify-center pt-1.5">
-                <StatusDot tone={e.tone} className="ring-4 ring-bg" />
-              </span>
-              <span
-                className={cn(
-                  "text-sm leading-relaxed",
-                  e.tone === "missing" && "text-fg",
-                  e.tone === "partial" && "text-partial",
-                  e.tone === "at_risk" && "text-fg",
-                  e.tone === "pending" && "text-muted",
-                  e.tone === "verified" && "text-base font-medium text-verified",
-                )}
+              <button
+                type="button"
+                onClick={() => playback.seek(i)}
+                aria-current={i === step ? "step" : undefined}
               >
-                {e.text}
-              </span>
-            </motion.li>
-          );
-        })}
-      </ol>
+                <time className="m-code" dir="ltr">
+                  {entry.time}
+                </time>
+                <span className="timeline-node" aria-hidden>
+                  {i < step ? <Check size={10} /> : null}
+                </span>
+                <span>{entry.text}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+        <div className="officer-inspection">
+          <p className="m-eyebrow">{t("day")}</p>
+          <EvidenceConvergence state={STATES[step]} />
+          <div
+            className="officer-cause"
+            aria-live={playback.playing ? "off" : "polite"}
+          >
+            <CornerDownRight size={17} className="rtl:-scale-x-100" />
+            <p>{entries[step].detail}</p>
+          </div>
+          <dl className="officer-effects" data-impact-updated={impacted}>
+            <div>
+              <dt>{t("risk")}</dt>
+              <dd className={impacted ? "text-verified" : "text-partial"}>
+                {t(impacted ? "mitigated" : "open")}
+              </dd>
+            </div>
+            <div>
+              <dt>{t("obligation")}</dt>
+              <dd>
+                {t(step >= 8 ? "verified" : step >= 4 ? "partial" : "open")}
+              </dd>
+            </div>
+            <div>
+              <dt>{t("action")}</dt>
+              <dd
+                data-action-state={
+                  impacted ? "resolved" : step >= 5 ? "open" : "pending"
+                }
+              >
+                {t(impacted ? "resolved" : step >= 5 ? "open" : "notCreated")}
+              </dd>
+            </div>
+            <div>
+              <dt>{t("readiness")}</dt>
+              <dd
+                className="officer-score"
+                dir="ltr"
+                data-readiness={impacted ? 91 : 82}
+              >
+                {impacted ? 91 : 82}
+                <small>%</small>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+      <div className="officer-workspace-foot">
+        <p>{t("note")}</p>
+        <SequenceControls playback={playback} />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Wordmark } from "@/components/brand/logo";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
@@ -10,36 +10,89 @@ import { ButtonLink } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-type Href = "/contract-intelligence" | "/assessor";
-
 type Group = {
   key: "products" | "platform";
   label: string;
-  items: { href: Href; label: string; hint: string }[];
+  items: { href: string; label: string; hint: string }[];
 };
 
 export function SiteHeader() {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const ref = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
   const [seenPath, setSeenPath] = useState(pathname);
   if (seenPath !== pathname) {
     setSeenPath(pathname);
     setOpen(false);
+    setActive(null);
   }
-
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.style.overflow = open ? "hidden" : "";
+    const outside = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setActive(null);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (open) {
+          setOpen(false);
+          menuButton.current?.focus();
+        }
+        if (active) {
+          ref.current
+            ?.querySelector<HTMLButtonElement>(`[data-nav="${active}"]`)
+            ?.focus();
+          setActive(null);
+        }
+      }
+      if (event.key === "Tab" && open) {
+        const nodes = Array.from(
+          ref.current?.querySelectorAll<HTMLElement>(
+            "a[href], button:not([disabled])",
+          ) ?? [],
+        ).filter((el) => el.getClientRects().length > 0);
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        }
+        if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
     return () => {
-      document.documentElement.style.overflow = "";
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [open, active]);
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.documentElement.style.overflow;
+    const background = Array.from(
+      document.querySelectorAll<HTMLElement>("main, footer"),
+    );
+    const inert = background.map((el) => el.inert);
+    document.documentElement.style.overflow = "hidden";
+    background.forEach((el) => {
+      el.inert = true;
+    });
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const resize = () => {
+      if (desktop.matches) setOpen(false);
+    };
+    desktop.addEventListener("change", resize);
+    return () => {
+      document.documentElement.style.overflow = previous;
+      background.forEach((el, i) => {
+        el.inert = inert[i];
+      });
+      desktop.removeEventListener("change", resize);
     };
   }, [open]);
 
@@ -48,7 +101,11 @@ export function SiteHeader() {
       key: "products",
       label: t("products"),
       items: [
-        { href: "/contract-intelligence", label: t("contractIntelligence"), hint: t("contractIntelligenceHint") },
+        {
+          href: "/contract-intelligence",
+          label: t("contractIntelligence"),
+          hint: t("contractIntelligenceHint"),
+        },
         { href: "/assessor", label: t("assessor"), hint: t("assessorHint") },
       ],
     },
@@ -56,118 +113,164 @@ export function SiteHeader() {
       key: "platform",
       label: t("platform"),
       items: [
-        { href: "/contract-intelligence", label: t("platformItems.evidence"), hint: t("platformItems.evidenceHint") },
-        { href: "/contract-intelligence", label: t("platformItems.officer"), hint: t("platformItems.officerHint") },
-        { href: "/contract-intelligence", label: t("platformItems.claims"), hint: t("platformItems.claimsHint") },
+        {
+          href: "/#evidence-engine",
+          label: t("platformItems.evidence"),
+          hint: t("platformItems.evidenceHint"),
+        },
+        {
+          href: "/contract-intelligence#officer",
+          label: t("platformItems.officer"),
+          hint: t("platformItems.officerHint"),
+        },
+        {
+          href: "/contract-intelligence#claim-readiness",
+          label: t("platformItems.claims"),
+          hint: t("platformItems.claimsHint"),
+        },
       ],
     },
   ];
-
+  const close = () => {
+    setOpen(false);
+    setActive(null);
+  };
   return (
     <header
-      className={cn(
-        "sticky top-0 z-40 border-b transition-colors duration-300",
-        scrolled || open ? "border-line bg-bg/90 backdrop-blur-md" : "border-transparent bg-transparent",
-      )}
+      ref={ref}
+      className="mineral-header sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur-md"
     >
-      <div className="container-x flex h-16 items-center justify-between gap-6">
-        <Link href="/" aria-label="VAZORA" className="rounded-sm">
-          <Wordmark />
+      <div className="container-x flex h-[76px] items-center justify-between gap-6">
+        <Link href="/" aria-label="VAZORA" onClick={close}>
+          <Wordmark sculpted />
         </Link>
-
-        <nav className="hidden items-center gap-1 md:flex" aria-label={t("products")}>
-          {groups.map((g) => (
-            <div key={g.key} className="group relative">
+        <nav
+          className="hidden items-center gap-2 lg:flex"
+          aria-label={t("products")}
+        >
+          {groups.map((group) => (
+            <div className="relative" key={group.key}>
               <button
                 type="button"
-                className="flex items-center gap-1 rounded-md px-3 py-2 text-sm text-muted transition-colors group-hover:text-fg group-focus-within:text-fg"
+                data-nav={group.key}
+                aria-expanded={active === group.key}
+                aria-controls={`nav-${group.key}`}
+                onClick={() =>
+                  setActive(active === group.key ? null : group.key)
+                }
+                className="flex h-11 items-center gap-2 px-3 text-[13px] text-muted hover:text-fg"
               >
-                {g.label}
-                <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
+                {group.label}
+                <ChevronDown
+                  size={12}
+                  className={cn(
+                    "transition-transform",
+                    active === group.key && "rotate-180",
+                  )}
+                />
               </button>
-              <div className="invisible absolute top-full pt-2 opacity-0 transition-[opacity,visibility] duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 start-0">
-                <ul className="surface-float w-[22rem] p-2">
-                  {g.items.map((it) => (
-                    <li key={it.label}>
+              {active === group.key && (
+                <ul
+                  id={`nav-${group.key}`}
+                  className="absolute start-0 top-full w-[340px] border border-line-strong bg-elevated p-2 shadow-float"
+                >
+                  {group.items.map((item) => (
+                    <li key={item.label}>
                       <Link
-                        href={it.href}
-                        className="flex flex-col gap-0.5 rounded-md px-3 py-2.5 transition-colors hover:bg-subtle"
+                        href={item.href}
+                        onClick={close}
+                        className="flex flex-col gap-1 px-4 py-4 hover:bg-subtle"
                       >
-                        <span className="text-sm font-medium text-fg">{it.label}</span>
-                        <span className="text-xs leading-relaxed text-muted">{it.hint}</span>
+                        <span className="text-sm font-medium">
+                          {item.label}
+                        </span>
+                        <span className="text-xs leading-relaxed text-muted">
+                          {item.hint}
+                        </span>
                       </Link>
                     </li>
                   ))}
                 </ul>
-              </div>
+              )}
             </div>
           ))}
           <Link
-            href="/demo"
-            className={cn(
-              "rounded-md px-3 py-2 text-sm text-muted transition-colors hover:text-fg",
-              pathname === "/demo" && "text-fg",
-            )}
+            href="/#enterprise-trust"
+            onClick={close}
+            className="px-3 py-3 text-[13px] text-muted hover:text-fg"
           >
             {t("company")}
           </Link>
         </nav>
-
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-5 lg:flex">
           <LanguageSwitcher variant="text" />
-          <ButtonLink href="/login" variant="ghost" size="sm">
+          <Link href="/login" className="text-xs text-muted hover:text-fg">
             {t("login")}
-          </ButtonLink>
-          <ButtonLink href="/demo" size="sm">
+          </Link>
+          <ButtonLink href="/demo" size="md">
             {t("bookDemo")}
+            <ArrowUpRight size={14} className="rtl:-scale-x-100" />
           </ButtonLink>
         </div>
-
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-5 lg:hidden">
           <LanguageSwitcher variant="text" />
           <button
+            ref={menuButton}
             type="button"
             aria-expanded={open}
-            aria-label={open ? t("close") : t("menu")}
+            aria-controls="mobile-navigation"
+            aria-label={t(open ? "close" : "menu")}
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-9 items-center justify-center rounded-md border border-line text-fg"
+            className="flex size-11 items-center justify-center border border-line-strong"
           >
-            {open ? <X size={18} /> : <Menu size={18} />}
+            {open ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
       </div>
-
       {open && (
-        <div className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto border-t border-line bg-bg md:hidden">
-          <div className="container-x flex flex-col gap-8 py-8">
-            {groups.map((g) => (
-              <div key={g.key} className="flex flex-col gap-1">
-                <p className="eyebrow mb-2">{g.label}</p>
-                {g.items.map((it) => (
+        <nav
+          id="mobile-navigation"
+          aria-label={t("menu")}
+          className="fixed inset-x-0 top-[76px] h-[calc(100dvh-76px)] overflow-y-auto border-t border-line bg-bg lg:hidden"
+        >
+          <div className="container-x flex flex-col gap-7 py-7">
+            {groups.map((group) => (
+              <div key={group.key}>
+                <p className="m-eyebrow mb-3">{group.label}</p>
+                {group.items.map((item) => (
                   <Link
-                    key={it.label}
-                    href={it.href}
-                    className="flex items-start justify-between gap-4 border-b border-line py-3"
+                    key={item.label}
+                    href={item.href}
+                    onClick={close}
+                    className="flex items-center justify-between gap-4 border-b border-line py-4"
                   >
-                    <span className="flex flex-col gap-0.5">
-                      <span className="text-base font-medium text-fg">{it.label}</span>
-                      <span className="text-sm text-muted">{it.hint}</span>
+                    <span>
+                      <span className="block text-base">{item.label}</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-muted">
+                        {item.hint}
+                      </span>
                     </span>
-                    <ArrowUpRight size={18} className="mt-1 shrink-0 text-faint rtl:-scale-x-100" />
+                    <ArrowUpRight
+                      size={17}
+                      className="shrink-0 rtl:-scale-x-100"
+                    />
                   </Link>
                 ))}
               </div>
             ))}
+            <Link href="/#enterprise-trust" onClick={close}>
+              {t("company")}
+            </Link>
             <div className="flex flex-col gap-3">
-              <ButtonLink href="/demo" size="lg">
+              <ButtonLink href="/demo" onClick={close}>
                 {t("bookDemo")}
               </ButtonLink>
-              <ButtonLink href="/login" variant="secondary" size="lg">
+              <ButtonLink href="/login" variant="secondary" onClick={close}>
                 {t("login")}
               </ButtonLink>
             </div>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

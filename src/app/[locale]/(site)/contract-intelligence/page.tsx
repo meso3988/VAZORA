@@ -1,109 +1,105 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { ThreadField } from "@/components/brand/threads";
-import { Reveal } from "@/components/motion/reveal";
+import {
+  ChapterHeading,
+  ClaimReadiness,
+  FinalCta,
+  Lifecycle,
+  Officer,
+  Shift,
+} from "@/components/site/home/sections";
 import { WorkspacePreview } from "@/components/site/workspace-preview";
 import { ButtonLink } from "@/components/ui/button";
-import { Eyebrow, SectionHeading } from "@/components/ui/surface";
+import { ChapterFrame, ChapterLabel } from "@/components/ui/surface";
 import { asLocale } from "@/i18n/params";
 
-export async function generateMetadata(props: PageProps<"/[locale]/contract-intelligence">): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/[locale]/contract-intelligence">,
+): Promise<Metadata> {
   const locale = asLocale((await props.params).locale);
   const t = await getTranslations({ locale, namespace: "ci" });
   return { title: t("eyebrow"), description: t("subtitle") };
 }
 
-export default async function ContractIntelligencePage(props: PageProps<"/[locale]/contract-intelligence">) {
+export default async function ContractIntelligencePage(
+  props: PageProps<"/[locale]/contract-intelligence">,
+) {
   const locale = asLocale((await props.params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("ci");
+  const m = await getTranslations("mineral.ci");
   const who = t.raw("who.items") as string[];
-  const caps = t.raw("capabilities.items") as { title: string; body: string }[];
   const faq = t.raw("faq.items") as { q: string; a: string }[];
-
   return (
     <>
-      <section className="relative overflow-hidden">
-        <ThreadField className="pointer-events-none absolute -top-10 end-0 hidden h-[130%] w-[50%] opacity-50 lg:block" />
-        <div className="container-x relative flex flex-col gap-8 pt-16 pb-20 lg:pt-28 lg:pb-24">
-          <Eyebrow>{t("eyebrow")}</Eyebrow>
-          <h1 className="display statement max-w-[18ch] text-balance text-[2.375rem] sm:text-[3rem] lg:text-[3.5rem]">
-            {t("title")}
+      <section className="product-hero">
+        <ChapterFrame className="product-frame">
+          <ChapterLabel label={t("eyebrow")} />
+          <h1 className="m-display">
+            {m("title")}
+            <span>{m("accent")}</span>
           </h1>
-          <p className="measure text-[1.0625rem] leading-relaxed text-muted sm:text-lg">{t("subtitle")}</p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/demo" size="lg">{t("primary")}</ButtonLink>
-            <ButtonLink href="/login" variant="secondary" size="lg">{t("secondary")}</ButtonLink>
+          <div className="product-intro">
+            <p>{m("body")}</p>
+            <div>
+              <ButtonLink href="/demo">
+                {t("primary")}
+                <ArrowUpRight size={15} className="rtl:-scale-x-100" />
+              </ButtonLink>
+              <ButtonLink href="/login" variant="secondary">
+                {t("secondary")}
+              </ButtonLink>
+            </div>
           </div>
-        </div>
+        </ChapterFrame>
       </section>
-
-      <section className="bg-subtle">
-        <div className="container-x grid grid-cols-1 gap-10 py-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
-          <Reveal>
-            <SectionHeading eyebrow={t("who.eyebrow")} title={t("who.title")} />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <ul className="grid grid-cols-1 gap-x-10 sm:grid-cols-2">
-              {who.map((w) => (
-                <li key={w} className="border-t border-line-strong/60 py-4 text-[15px] last:border-b sm:[&:nth-last-child(2)]:border-b">{w}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
-      <section>
-        <div className="container-x flex flex-col gap-12 py-24">
-          <Reveal>
-            <Eyebrow>{t("capabilities.eyebrow")}</Eyebrow>
-          </Reveal>
-          <div className="grid grid-cols-1 gap-x-10 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
-            {caps.map((c, i) => (
-              <Reveal key={c.title} delay={i * 0.05} className="flex flex-col gap-3 border-t border-line-strong/60 py-6">
-                <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>
-                <h3 className="text-lg font-medium">{c.title}</h3>
-                <p className="text-sm leading-relaxed text-muted">{c.body}</p>
-              </Reveal>
+      <Lifecycle />
+      <div className="container-x">
+        <div className="product-audience">
+          <p className="m-eyebrow">{t("who.eyebrow")}</p>
+          <ul>
+            {who.map((item) => (
+              <li key={item}>{item}</li>
             ))}
-          </div>
+          </ul>
         </div>
+      </div>
+      <Shift />
+      <Officer />
+      <ClaimReadiness />
+      <section className="product-workspace">
+        <ChapterFrame className="workspace-frame">
+          <ChapterHeading
+            eyebrow={t("workspace.eyebrow")}
+            title={m("workspace")}
+            body={m("workspaceBody")}
+          />
+          <ButtonLink href="/login" variant="secondary">
+            {t("workspace.cta")}
+            <ArrowUpRight size={15} className="rtl:-scale-x-100" />
+          </ButtonLink>
+          <details>
+            <summary>{t("workspace.title")}</summary>
+            <div role="region" aria-label={t("workspace.title")} tabIndex={0}>
+              <WorkspacePreview />
+            </div>
+          </details>
+        </ChapterFrame>
       </section>
-
-      <section className="bg-canvas">
-        <div className="container-x flex flex-col gap-12 py-24">
-          <Reveal>
-            <SectionHeading eyebrow={t("workspace.eyebrow")} title={t("workspace.title")} body={t("workspace.body")} />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <WorkspacePreview />
-          </Reveal>
-          <Reveal>
-            <ButtonLink href="/login" variant="secondary">
-              {t("workspace.cta")}
-              <ArrowRight size={16} className="rtl:-scale-x-100" />
-            </ButtonLink>
-          </Reveal>
-        </div>
+      <section className="mineral-faq">
+        <ChapterFrame className="faq-frame">
+          <ChapterLabel label={t("faq.eyebrow")} />
+          {faq.map((item) => (
+            <details key={item.q}>
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </ChapterFrame>
       </section>
-
-      <section className="bg-subtle">
-        <div className="container-x grid grid-cols-1 gap-10 py-24 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-20">
-          <Reveal>
-            <Eyebrow>{t("faq.eyebrow")}</Eyebrow>
-          </Reveal>
-          <dl className="divide-y divide-line">
-            {faq.map((f) => (
-              <Reveal key={f.q} className="grid grid-cols-1 gap-2 py-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] sm:gap-8">
-                <dt className="text-base font-medium">{f.q}</dt>
-                <dd className="text-sm leading-relaxed text-muted">{f.a}</dd>
-              </Reveal>
-            ))}
-          </dl>
-        </div>
-      </section>
+      <FinalCta />
     </>
   );
 }

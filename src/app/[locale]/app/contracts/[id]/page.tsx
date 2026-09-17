@@ -2,10 +2,13 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ClauseTrace } from "@/components/app/clause-trace";
+import { ContractLifecycle } from "@/components/app/contract-lifecycle";
+import { IntakeTimeline } from "@/components/app/intake-timeline";
 import { OfficerFeed } from "@/components/app/officer-feed";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
 import { requireTenant } from "@/data/context";
+import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
@@ -39,6 +42,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   ]);
 
   const h = contract.health;
+  const pipeline = DEMO_PIPELINE.find((run) => run.contractId === id);
   const byStatus = countBy(obligations, (o) => o.status);
   const nextClaim = claims
     .filter((c) => c.status === "preparing" || c.status === "ready")
@@ -52,6 +56,8 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
   return (
     <>
+      <ContractLifecycle contract={contract} nextClaim={nextClaim} />
+
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Kpi label={t("obligations.title")} value={h.obligationsTotal} hint={t("contracts.due", { count: h.obligationsDueThisMonth })} />
         <Kpi label={t("dashboard.kpis.overdue")} value={h.obligationsOverdue} tone={h.obligationsOverdue ? "missing" : undefined} />
@@ -61,7 +67,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
         <Kpi label={t("dashboard.kpis.readiness")} value={f.number(h.claimReadiness, "percent")} tone={h.claimReadiness >= 0.9 ? "verified" : "partial"} hint={nextClaim ? t("claims.claim", { number: nextClaim.number }) : undefined} />
       </div>
 
-      <Panel title={t("contract.clauseTrace")} hint={t("contract.clauseTraceHint")}>
+      <Panel title={t("contract.clauseTrace")} tone="sky" hint={t("contract.clauseTraceHint")}>
         <div className="p-4">
           {traced && tracedClause ? (
             <ClauseTrace clause={tracedClause} obligation={traced} evidence={evidence.filter((e) => e.obligationId === traced.id)} />
@@ -69,8 +75,10 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
         </div>
       </Panel>
 
+      {pipeline && <IntakeTimeline pipeline={pipeline} />}
+
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel title={t("contract.obligationsByStatus")} hint={t("contract.healthHint")}>
+        <Panel title={t("contract.obligationsByStatus")} tone="emerald" hint={t("contract.healthHint")}>
           <div className="p-5">
             <StackedBar
               segments={STATUS_ORDER.filter((s) => byStatus[s]).map((s) => ({
@@ -111,7 +119,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
           )}
         </Panel>
 
-        <Panel title={t("contract.openRisks")} action={<Link href={`/app/contracts/${id}/risks`} className="text-xs text-muted hover:text-fg">{c("viewAll")}</Link>}>
+        <Panel title={t("contract.openRisks")} tone="rose" action={<Link href={`/app/contracts/${id}/risks`} className="text-xs text-rose-100/90 hover:text-white">{c("viewAll")}</Link>}>
           <ul className="divide-y divide-line">
             {openRisks.slice(0, 3).map((r) => (
               <li key={r.id} className="flex items-start gap-3 px-5 py-3">
@@ -130,11 +138,11 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Panel title={t("contract.officerFeed")} action={<Link href={`/app/contracts/${id}/officer`} className="text-xs text-muted hover:text-fg">{c("viewAll")}</Link>}>
+        <Panel title={t("contract.officerFeed")} tone="emerald" action={<Link href={`/app/contracts/${id}/officer`} className="text-xs text-emerald-100/90 hover:text-white">{c("viewAll")}</Link>}>
           <OfficerFeed events={events} showContract={false} />
         </Panel>
         <div className="flex flex-col gap-4">
-          <Panel title={t("contract.actions")}>
+          <Panel title={t("contract.actions")} tone="amber">
             <ul className="divide-y divide-line">
               {actions.map((a) => (
                 <li key={a.id} className="flex items-center gap-3 px-5 py-3">
@@ -148,7 +156,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
               ))}
             </ul>
           </Panel>
-          <Panel title={t("contract.recentActivity")} action={<Link href={`/app/contracts/${id}/activity`} className="text-xs text-muted hover:text-fg">{c("viewAll")}</Link>}>
+          <Panel title={t("contract.recentActivity")} tone="graphite" action={<Link href={`/app/contracts/${id}/activity`} className="text-xs text-neutral-200/90 hover:text-white">{c("viewAll")}</Link>}>
             <ul className="divide-y divide-line">
               {activity.map((a) => (
                 <li key={a.id} className="flex flex-col gap-0.5 px-5 py-3">
