@@ -1304,6 +1304,11 @@
       "count": "{count} contracts",
       "listTitle": "All contracts",
       "newContract": "New contract",
+      "empty": {
+        "title": "No contracts yet",
+        "body": "Create your first contract to build your organization's VAZORA workspace."
+      },
+      "forbidden": "You do not have access.",
       "columns": {
         "contract": "Contract",
         "client": "Client",
@@ -1316,6 +1321,33 @@
       },
       "due": "{count} due",
       "overdue": "{count} overdue"
+    },
+    "contractNew": {
+      "title": "New contract",
+      "subtitle": "Register a real contract for your organization — basics only at this phase.",
+      "panelTitle": "Contract details",
+      "submit": "Save contract",
+      "demoNotice": "The demo environment is read-only — create a real account to add contracts.",
+      "errorDuplicate": "This contract number already exists in your organization.",
+      "errorInvalid": "Check the contract title and number.",
+      "errorCreate": "Could not save the contract. Please try again.",
+      "fields": {
+        "title": "Contract title",
+        "number": "Contract number",
+        "client": "Client / government entity",
+        "project": "Project",
+        "noProject": "No project",
+        "value": "Contract value",
+        "currency": "Currency",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "status": "Status"
+      },
+      "statuses": {
+        "active": "Active",
+        "mobilizing": "Mobilizing",
+        "closeout": "Closeout"
+      }
     },
     "contract": {
       "tabs": {
@@ -1339,6 +1371,21 @@
       "clauseTraceHint": "Original clause → requirement → evidence → verification",
       "actions": "Actions",
       "sections": "Contract sections"
+    },
+    "documents": {
+      "title": "Contract documents",
+      "hint": "PDF or DOCX · up to 25 MB · private per-organization storage",
+      "upload": "Upload",
+      "empty": "No documents yet — upload the original contract file.",
+      "open": "Open",
+      "uploaded": "Document uploaded successfully.",
+      "demoReadonly": "The demo environment is read-only — sign in with your real organization to upload.",
+      "errors": {
+        "noFile": "Choose a file first.",
+        "tooLarge": "File exceeds 25 MB.",
+        "type": "Unsupported type — PDF or DOCX only.",
+        "upload": "Upload failed. Please try again."
+      }
     },
     "pipeline": {
       "title": "Contract intake — {file}",

@@ -5,8 +5,10 @@ import { ClauseTrace } from "@/components/app/clause-trace";
 import { ContractLifecycle } from "@/components/app/contract-lifecycle";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
 import { OfficerFeed } from "@/components/app/officer-feed";
+import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
+import { auth } from "@/data/auth/provider";
 import { requireTenant } from "@/data/context";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
@@ -25,12 +27,17 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const c = await getTranslations("common");
   const sev = await getTranslations("severity");
   const f = await getFormatter();
+  const sp = await props.searchParams;
+  const uploadState = typeof sp.uploaded === "string" ? "uploaded" : typeof sp.error === "string" ? sp.error : undefined;
   const { orgId, db } = await requireTenant();
 
   const contract = await db.contracts.getById(orgId, id);
   if (!contract) notFound();
 
-  const [obligations, clauses, evidence, risks, claims, actions, events, activity] = await Promise.all([
+  const session = await auth.getSession();
+  const isLive = session?.mode === "live";
+
+  const [obligations, clauses, evidence, risks, claims, actions, events, activity, documents] = await Promise.all([
     db.obligations.list(orgId, { contractId: id }),
     db.contracts.listClauses(orgId, id),
     db.evidence.list(orgId, { contractId: id }),
@@ -39,6 +46,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     db.actions.list(orgId, { contractId: id }),
     db.agent.listEvents(orgId, { contractId: id, limit: 5 }),
     db.activity.list(orgId, { contractId: id, limit: 6 }),
+    db.documents.list(orgId, id),
   ]);
 
   const h = contract.health;
@@ -74,6 +82,29 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
           ) : null}
         </div>
       </Panel>
+
+      <DocumentPanel
+        contractId={id}
+        locale={locale}
+        documents={documents}
+        canUpload={isLive}
+        error={uploadState}
+        labels={{
+          title: t("documents.title"),
+          hint: t("documents.hint"),
+          upload: t("documents.upload"),
+          empty: t("documents.empty"),
+          open: t("documents.open"),
+          uploaded: t("documents.uploaded"),
+          demoReadonly: t("documents.demoReadonly"),
+          errors: {
+            noFile: t("documents.errors.noFile"),
+            tooLarge: t("documents.errors.tooLarge"),
+            type: t("documents.errors.type"),
+            upload: t("documents.errors.upload"),
+          },
+        }}
+      />
 
       {pipeline && <IntakeTimeline pipeline={pipeline} />}
 

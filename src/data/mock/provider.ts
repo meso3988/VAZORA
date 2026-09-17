@@ -96,4 +96,9 @@ export const mockDataProvider: DataProvider = {
       return filter?.limit ? items.slice(0, filter.limit) : items;
     },
   },
+  documents: {
+    async list() {
+      return [];
+    },
+  },
 };

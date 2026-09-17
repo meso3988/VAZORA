@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   Contract,
+  ContractDocument,
   Organization,
   OrganizationMember,
   Project,
@@ -13,6 +14,7 @@ import type {
   ClaimRepository,
   ContractRepository,
   DataProvider,
+  DocumentRepository,
   EvidenceRepository,
   ObligationRepository,
   OrganizationRepository,
@@ -39,6 +41,18 @@ type ContractRow = {
   start_date: string | null;
   end_date: string | null;
   status: "active" | "mobilizing" | "closeout" | "archived";
+};
+type DocRow = {
+  id: string;
+  organization_id: string;
+  contract_id: string;
+  file_name: string;
+  storage_path: string;
+  mime_type: string;
+  file_size: number;
+  document_type: ContractDocument["documentType"];
+  uploaded_by: string | null;
+  created_at: string;
 };
 
 function toText(value: string | null | undefined) {
@@ -93,6 +107,34 @@ function mapContract(row: ContractRow): Contract {
 }
 
 const ZERO_HEALTH_CONTRACT = (row: ContractRow): Contract => mapContract(row);
+
+function mapDocument(row: DocRow): ContractDocument {
+  return {
+    id: row.id,
+    organizationId: row.organization_id,
+    contractId: row.contract_id,
+    fileName: row.file_name,
+    storagePath: row.storage_path,
+    mimeType: row.mime_type,
+    fileSize: row.file_size,
+    documentType: row.document_type,
+    uploadedBy: row.uploaded_by ?? "",
+    createdAt: row.created_at,
+  };
+}
+
+const documents: DocumentRepository = {
+  async list(organizationId, contractId) {
+    const supabase = await createSupabaseServer();
+    const { data } = await supabase
+      .from("contract_documents")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .eq("contract_id", contractId)
+      .order("created_at", { ascending: false });
+    return ((data ?? []) as DocRow[]).map(mapDocument);
+  },
+};
 
 const organizations: OrganizationRepository = {
   async getById(id) {
@@ -217,5 +259,6 @@ export function createSupabaseDataProvider(): DataProvider {
     claims,
     agent,
     activity,
+    documents,
   };
 }

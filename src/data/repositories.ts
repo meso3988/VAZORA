@@ -5,6 +5,7 @@ import type {
   Claim,
   Clause,
   Contract,
+  ContractDocument,
   Evidence,
   Obligation,
   Organization,
@@ -60,6 +61,10 @@ export interface ActivityRepository {
   list(organizationId: string, filter?: { contractId?: string; limit?: number }): Promise<ActivityEntry[]>;
 }
 
+export interface DocumentRepository {
+  list(organizationId: string, contractId: string): Promise<ContractDocument[]>;
+}
+
 export interface DataProvider {
   readonly kind: "mock" | "supabase";
   organizations: OrganizationRepository;
@@ -71,4 +76,5 @@ export interface DataProvider {
   claims: ClaimRepository;
   agent: AgentRepository;
   activity: ActivityRepository;
+  documents: DocumentRepository;
 }
