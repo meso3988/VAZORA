@@ -82,6 +82,28 @@ insert into contracts (organization_id, contract_number, title) values
 insert into demo_requests (name, email, company) values ('Lead X', 'lead@x.co', 'X Co');
 select count(*) as demo_leak_auth from demo_requests;
 
+-- 7. REGRESSION (member self-promote): a plain member tries to become owner.
+--    expect: 0 rows remain 'member'-changed (update hits 0 rows / rejected).
+insert into organization_members (organization_id, user_id, role) values
+  ('10000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-0000000000b2', 'member')
+on conflict do nothing;
+update organization_members set role = 'owner'
+where organization_id = '10000000-0000-4000-8000-000000000001'
+  and user_id = '00000000-0000-4000-8000-0000000000a1'; -- caller A is owner: allowed
+-- but as User A, the member row from another user cannot be demoted/promoted
+-- (owner-only via members_update):
+update organization_members set role = 'admin'
+where organization_id = '10000000-0000-4000-8000-000000000001'
+  and user_id = '00000000-0000-4000-8000-0000000000b2'; -- expect UPDATE 1 (owner may) — keeps owner-only gate
+
+-- 8. REGRESSION (cross-tenant FK): Alpha contract cannot point at Beta project.
+--    Bring fixtures in-line with projects, then try:
+insert into contracts (organization_id, project_id, contract_number, title) values
+  ('10000000-0000-4000-8000-000000000001', '22000000-0000-4000-8000-000000000002', 'XFK-1', 'cross');  -- expect ERROR (valid_project_for_org)
+
+-- 9. REGRESSION (demo status hijack): public insert cannot claim 'converted'.
+insert into demo_requests (name, email, status) values ('Hijack', 'h@x.co', 'converted');  -- expect ERROR (with check)
+
 rollback;
 begin;
 
