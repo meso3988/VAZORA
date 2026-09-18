@@ -2,6 +2,7 @@
 
 import {
   Bot,
+  ClipboardList,
   FileCheck2,
   FolderKanban,
   LayoutDashboard,
@@ -20,14 +21,15 @@ import { DemoBadge } from "@/components/ui/surface";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-type NavHref = "/app/dashboard" | "/app/contracts" | "/app/evidence" | "/app/claims" | "/app/agent";
+type NavHref = "/app/dashboard" | "/app/contracts" | "/app/evidence" | "/app/claims" | "/app/agent" | "/app/tasks";
 
-const NAV: { href: NavHref; key: "dashboard" | "contracts" | "evidence" | "claims" | "officer"; icon: typeof LayoutDashboard }[] = [
+const NAV: { href: NavHref; key: "dashboard" | "contracts" | "evidence" | "claims" | "officer" | "tasks"; icon: typeof LayoutDashboard }[] = [
   { href: "/app/dashboard", key: "dashboard", icon: LayoutDashboard },
   { href: "/app/contracts", key: "contracts", icon: FolderKanban },
   { href: "/app/evidence", key: "evidence", icon: FileCheck2 },
   { href: "/app/claims", key: "claims", icon: Receipt },
   { href: "/app/agent", key: "officer", icon: Bot },
+  { href: "/app/tasks", key: "tasks", icon: ClipboardList },
 ];
 
 export function AppShell({
@@ -97,7 +99,7 @@ export function AppShell({
   );
 
   return (
-    <div data-theme="light" className="min-h-dvh bg-bg text-fg lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+    <div data-theme="light" className="vazora-app min-h-dvh bg-bg text-fg lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
       <aside className="sticky top-0 hidden h-dvh flex-col gap-6 border-e border-line bg-elevated p-4 lg:flex">
         <div className="flex items-center justify-between px-2 pt-1">
           <Link href="/app/dashboard" aria-label="VAZORA"><Wordmark /></Link>

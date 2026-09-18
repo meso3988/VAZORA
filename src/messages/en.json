@@ -1,4 +1,486 @@
 {
+  "mineral": {
+    "demo": "Illustrative product sequence · demo data",
+    "preview": "Product preview · not a live assessment",
+    "chapter": "Chapter",
+    "environment": {
+      "source": "Contract extract",
+      "evidence": "Evidence register",
+      "sourceTruth": "Retained as source truth",
+      "extracted": "Requirement traced to source",
+      "linked": "Verification follows the source requirement",
+      "illustrative": "Illustrative proof trace"
+    },
+    "controls": {
+      "play": "Play sequence",
+      "pause": "Pause sequence",
+      "next": "Next step",
+      "previous": "Previous step",
+      "replay": "Replay sequence",
+      "reduced": "Reduced motion · explore step by step"
+    },
+    "thread": {
+      "requirement": "Requirement",
+      "evidence": "Evidence",
+      "unverified": "Awaiting proof",
+      "received": "Received. Not yet verified.",
+      "verifying": "Verification in progress",
+      "partial": "Evidence gap remains",
+      "requested": "Corrective action opened",
+      "resubmitted": "New evidence. Gap still open.",
+      "reverifying": "Re-verification in progress",
+      "verified": "Verified convergence",
+      "closed": "The relationship is verified. The gap can close.",
+      "open": "Only verified evidence can close this gap."
+    },
+    "hero": {
+      "eyebrow": "01 / CONTRACT ENTERS VAZORA",
+      "title": "The contract defines what must happen.",
+      "accent": "VAZORA verifies the proof.",
+      "body": "From obligation to evidence. From gap to action.",
+      "watch": "Follow the evidence",
+      "source": "Source contract",
+      "sourceName": "Operations & maintenance",
+      "clause": "Clause 8.4",
+      "clauseText": "Monthly maintenance records must include the client's signed acknowledgement.",
+      "requirement": "Obligation 8.4",
+      "requirementText": "Monthly records + client acknowledgement",
+      "owner": "Owner · Project delivery",
+      "expected": "Required evidence",
+      "file": "Evidence received",
+      "newFile": "Additional evidence",
+      "fileNote": "Maintenance records · September",
+      "ack": "Client acknowledgement",
+      "period": "Reporting period",
+      "missing": "Not attached",
+      "pending": "Awaiting verification",
+      "verified": "Verified against clause 8.4",
+      "officer": "AI Contract Officer",
+      "awaitAction": "Actions follow the verification result.",
+      "request": "Requested signed acknowledgement from the project owner.",
+      "actionDone": "Evidence request resolved after verification.",
+      "risk": "Evidence-related risk",
+      "unassessed": "Not assessed",
+      "openRisk": "Open",
+      "mitigated": "Mitigated",
+      "readiness": "Claim readiness",
+      "impactNote": "Illustrative score; not payment approval.",
+      "steps": [
+        {
+          "title": "A contract enters VAZORA.",
+          "body": "The original document remains the source of truth."
+        },
+        {
+          "title": "Clause 8.4 is identified.",
+          "body": "The evidence expectation is anchored to the exact clause."
+        },
+        {
+          "title": "A requirement takes shape.",
+          "body": "Monthly records and client acknowledgement. Both are required."
+        },
+        {
+          "title": "Evidence arrives. Nothing is assumed.",
+          "body": "Receiving a document does not verify the obligation."
+        },
+        {
+          "title": "VAZORA checks the relationship.",
+          "body": "The reporting period and required acknowledgement are inspected."
+        },
+        {
+          "title": "The proof is insufficient.",
+          "body": "Client acknowledgement is missing. The gap stays visible."
+        },
+        {
+          "title": "VAZORA acts on the gap.",
+          "body": "A request for the missing proof is assigned to the project owner."
+        },
+        {
+          "title": "New evidence arrives. The gap remains.",
+          "body": "Risk and claim readiness do not change on upload."
+        },
+        {
+          "title": "Re-verification runs on the new evidence.",
+          "body": "The acknowledgement is checked against the obligation and period."
+        },
+        {
+          "title": "Only now do the paths converge.",
+          "body": "Verification succeeded. The evidence gap can close."
+        },
+        {
+          "title": "Proof changes the operational state.",
+          "body": "The action resolves, evidence-related risk falls and readiness updates."
+        }
+      ]
+    },
+    "proof": {
+      "eyebrow": "02 / THE PROOF CHAIN",
+      "title": "A decision you can trace. All the way back.",
+      "body": "Not just what VAZORA found. What it checked, what is missing, and why it matters.",
+      "source": "Source contract",
+      "reference": "Clause 12.1",
+      "quote": "The monthly performance report shall include eight contractual KPIs, the contractor's signature and client acknowledgement.",
+      "requirement": "Extracted requirement",
+      "requirementBody": "8 KPIs + reporting period + two-party acknowledgement",
+      "evidence": "Evidence under inspection",
+      "fileMeta": "September 2026 · version 02 · received 09:42",
+      "inspect": "Inspect a check",
+      "checks": [
+        {
+          "label": "Reporting period",
+          "value": "Verified",
+          "detail": "The report covers 1–30 September 2026, matching the contractual reporting period."
+        },
+        {
+          "label": "Contractor signature",
+          "value": "Verified",
+          "detail": "The contractor representative's signature is present on page 12."
+        },
+        {
+          "label": "Contractual KPIs",
+          "value": "7 / 8",
+          "detail": "KPI 6, response-time compliance, is absent. Seven other indicators are present."
+        },
+        {
+          "label": "Client acknowledgement",
+          "value": "Missing",
+          "detail": "No client acknowledgement is attached. A contractor signature cannot substitute for it."
+        }
+      ],
+      "decision": "Partially verified",
+      "impact": "Claim #05 remains incomplete.",
+      "why": "Two evidence gaps. One explainable decision.",
+      "request": "Required next: KPI 6 and signed client acknowledgement.",
+      "sourceLink": "Source → clause 12.1 · evidence → page 12"
+    },
+    "officer": {
+      "eyebrow": "03 / THE OFFICER WORKS",
+      "title": "Not waiting for a prompt. Working toward proof.",
+      "body": "An operational sequence, not a conversation. Every action has a cause. Every change has evidence.",
+      "context": "Requirement 14.2 · monthly SLA evidence",
+      "day": "16 September 2026",
+      "risk": "Evidence-related risk",
+      "obligation": "Obligation state",
+      "action": "Corrective action",
+      "notCreated": "Not yet created",
+      "open": "Open",
+      "partial": "Partial",
+      "mitigated": "Mitigated",
+      "resolved": "Resolved",
+      "verified": "Verified",
+      "readiness": "Claim readiness",
+      "note": "Simulated workflow within configured permissions. People retain approval and submission authority.",
+      "events": [
+        {
+          "time": "08:14",
+          "text": "Monthly SLA evidence is missing.",
+          "detail": "Requirement 14.2 needs the current reporting period and client acknowledgement."
+        },
+        {
+          "time": "08:15",
+          "text": "Evidence requested from Faisal.",
+          "detail": "The request is assigned to the project owner with the clause reference attached."
+        },
+        {
+          "time": "09:42",
+          "text": "Performance_Sep.pdf received.",
+          "detail": "Receipt recorded. The obligation is not verified."
+        },
+        {
+          "time": "09:43",
+          "text": "Evidence verification started.",
+          "detail": "Period, coverage and acknowledgement are checked."
+        },
+        {
+          "time": "09:44",
+          "text": "Partial verification. Acknowledgement missing.",
+          "detail": "The report covers the period, but does not establish client acknowledgement."
+        },
+        {
+          "time": "09:45",
+          "text": "Corrective action created.",
+          "detail": "Request the signed acknowledgement. Risk and readiness remain unchanged."
+        },
+        {
+          "time": "10:13",
+          "text": "Signed acknowledgement received.",
+          "detail": "New evidence is on file. The evidence gap is still open."
+        },
+        {
+          "time": "10:13:30",
+          "text": "Re-verification in progress.",
+          "detail": "The new acknowledgement is checked against the requirement and reporting period."
+        },
+        {
+          "time": "10:14",
+          "text": "Requirement 14.2 verified.",
+          "detail": "Proof is sufficient. The gap closes."
+        },
+        {
+          "time": "10:14:01",
+          "text": "Downstream state updated.",
+          "detail": "The action resolves, evidence-related risk is mitigated and illustrative readiness rises from 82% to 91%."
+        }
+      ]
+    },
+    "claim": {
+      "eyebrow": "04 / EXECUTION VALUE",
+      "title": "The value is in the contract. The readiness is in the proof.",
+      "label": "CLAIM #05 / SEPTEMBER 2026",
+      "value": "Claim value",
+      "readiness": "Readiness score",
+      "scoreNote": "Illustrative weighted score. Not the percentage of money released or withheld.",
+      "verified": "9 verified",
+      "partial": "2 partial",
+      "missing": "1 missing",
+      "requirements": "12 linked requirements",
+      "blockers": "What stands between this claim and readiness?",
+      "select": "Inspect an open requirement",
+      "items": [
+        {
+          "ref": "12.1",
+          "title": "Monthly performance report",
+          "status": "Partial",
+          "missing": "KPI 6 + client acknowledgement",
+          "action": "Complete KPI 6 and submit the acknowledgement for verification."
+        },
+        {
+          "ref": "21.3",
+          "title": "Deliverable 4 acceptance",
+          "status": "Partial",
+          "missing": "Client acceptance certificate",
+          "action": "Attach the acceptance certificate to the commissioning record for verification."
+        },
+        {
+          "ref": "14.2",
+          "title": "Monthly SLA availability",
+          "status": "Missing",
+          "missing": "Current-month SLA evidence",
+          "action": "Request the current-period SLA log, then verify coverage and acknowledgement."
+        }
+      ],
+      "gap": "Evidence still required",
+      "action": "Next action",
+      "impactLabel": "Potential financial impact",
+      "impact": "Not quantified in this example. A monetary impact requires an explicit contract condition.",
+      "boundary": "Verification supports readiness. Payment remains subject to contractual conditions and authorized approval."
+    },
+    "assessor": {
+      "eyebrow": "05 / VAZORA ASSESSOR",
+      "title": "One engine. Different ways to prove it.",
+      "body": "Change the framework. Watch the evidence expectations, inspection method and assessment logic change with it.",
+      "engine": "EVIDENCE INTELLIGENCE",
+      "engineHint": "Shared verification engine",
+      "framework": "Assessment framework",
+      "inputs": "Evidence expected",
+      "logic": "Assessment logic",
+      "sample": "Illustrative inspection",
+      "finding": "Evidence gap",
+      "review": "Human review required",
+      "next": "Required next",
+      "disclaimer": "Illustrative framework mappings, not an authoritative statement of a standard. Assessor is in development; VAZORA does not issue official certification.",
+      "cta": "Explore VAZORA Assessor",
+      "frameworks": [
+        {
+          "key": "cbahi",
+          "name": "CBAHI",
+          "context": "Patient safety & care continuity",
+          "types": [
+            "Patient record",
+            "Policy",
+            "Interview",
+            "Training",
+            "KPI",
+            "Observation"
+          ],
+          "method": "Trace the patient's journey. Compare documented policy with records, staff practice and observation.",
+          "requirement": "Care is documented and staff competency is evidenced.",
+          "evidence": "Policy + patient record + interview",
+          "gap": "Current training record not supplied",
+          "action": "Request a current competency record and review it against the care activity."
+        },
+        {
+          "key": "nca",
+          "name": "NCA",
+          "context": "Access governance & control operation",
+          "types": [
+            "Control",
+            "Configuration",
+            "Access log",
+            "Policy",
+            "Technical evidence",
+            "Interview"
+          ],
+          "method": "Map the control to configuration and operating evidence. Check whether policy is enforced in practice.",
+          "requirement": "Privileged access is restricted and periodically reviewed.",
+          "evidence": "Access policy + configuration + logs",
+          "gap": "Latest privileged-access review absent",
+          "action": "Request the approved review and reconcile it with the privileged-account inventory."
+        },
+        {
+          "key": "iso",
+          "name": "ISO",
+          "context": "Process consistency & objective evidence",
+          "types": [
+            "Clause",
+            "Procedure",
+            "Record",
+            "Objective evidence",
+            "Interview",
+            "Observation"
+          ],
+          "method": "Follow a process from requirement to execution. Triangulate records, interviews and observed practice.",
+          "requirement": "Corrective actions address causes and are checked for effectiveness.",
+          "evidence": "Procedure + action record + interview",
+          "gap": "Effectiveness review is undocumented",
+          "action": "Obtain the effectiveness review and check whether the identified cause was addressed."
+        },
+        {
+          "key": "safety",
+          "name": "Safety",
+          "context": "Hazard control & safe execution",
+          "types": [
+            "Hazard register",
+            "Permit",
+            "Inspection",
+            "Training",
+            "Drill record",
+            "Observation"
+          ],
+          "method": "Trace a high-risk activity from hazard assessment through permits, supervision and site practice.",
+          "requirement": "High-risk work is authorized and its controls are implemented.",
+          "evidence": "Risk assessment + permit + inspection",
+          "gap": "Supervisor authorization missing",
+          "action": "Request authorization and verify it against the work permit and activity."
+        },
+        {
+          "key": "lab",
+          "name": "Laboratories",
+          "context": "Method validity & measurement traceability",
+          "types": [
+            "Method",
+            "Calibration",
+            "QC record",
+            "Validation",
+            "Competency",
+            "Witnessed test"
+          ],
+          "method": "Follow a result back through the test method, equipment calibration and operator competency.",
+          "requirement": "Reported results use valid methods and calibrated equipment.",
+          "evidence": "Method validation + QC chart",
+          "gap": "Current calibration record absent",
+          "action": "Obtain the calibration record and verify validity for the testing period."
+        },
+        {
+          "key": "education",
+          "name": "Education",
+          "context": "Learning outcomes & assessment quality",
+          "types": [
+            "Course file",
+            "Outcome",
+            "Assessment",
+            "Survey",
+            "Interview",
+            "Review record"
+          ],
+          "method": "Map intended learning outcomes to assessment evidence and the institution's improvement cycle.",
+          "requirement": "Learning outcomes are measured and improvement actions are reviewed.",
+          "evidence": "Course file + outcome report",
+          "gap": "Improvement review not documented",
+          "action": "Request the review record and map its actions to the outcome findings."
+        },
+        {
+          "key": "social",
+          "name": "Social care",
+          "context": "Individual care & safeguarding",
+          "types": [
+            "Care plan",
+            "Case record",
+            "Safeguarding",
+            "Staff record",
+            "Family interview",
+            "Observation"
+          ],
+          "method": "Trace an individual's care plan into service records, safeguarding practice and family feedback.",
+          "requirement": "Individual care plans are current and periodically reviewed.",
+          "evidence": "Care plan + case record + interview",
+          "gap": "Scheduled care-plan review absent",
+          "action": "Obtain the review and confirm that changes were reflected in the care plan."
+        }
+      ],
+      "providerTitle": "A wider view for assessment providers.",
+      "providerHint": "Provider vision · illustrative portfolio",
+      "portfolio": [
+        { "value": "42", "label": "Client organizations" },
+        { "value": "17", "label": "Active assessments" },
+        { "value": "5", "label": "Frameworks" },
+        { "value": "73", "label": "Open findings" },
+        { "value": "8", "label": "Human reviewers" }
+      ],
+      "providerFlow": [
+        "Digital assessment",
+        "Human review",
+        "Authorized provider decision"
+      ]
+    },
+    "engine": {
+      "eyebrow": "06 / ONE ENGINE",
+      "title": "Different requirements. The same standard of proof.",
+      "contract": "Contract Intelligence",
+      "contractBody": "Clauses · obligations · execution",
+      "assessor": "VAZORA Assessor",
+      "assessorBody": "Standards · controls · assessment",
+      "result": "Requirement + evidence → verification",
+      "body": "A shared evidence model. Traceable sources. Visible gaps. Human accountability."
+    },
+    "trust": {
+      "eyebrow": "07 / ENTERPRISE FOUNDATIONS",
+      "title": "Intelligence with a chain of accountability.",
+      "body": "The product must explain its result—and respect who is authorized to act on it.",
+      "items": [
+        {
+          "title": "Organization boundaries",
+          "body": "Organization-scoped records form the data-layer boundary. The public experience uses isolated demo fixtures."
+        },
+        {
+          "title": "Source-level traceability",
+          "body": "Follow a finding to the requirement, source clause and evidence behind it."
+        },
+        {
+          "title": "Human oversight",
+          "body": "Review, approval and submission remain with authorized people. Intelligence does not replace authority."
+        },
+        {
+          "title": "Security, stated precisely",
+          "body": "Review deployment, access and audit requirements with our team. No certification or production-security claim is implied by this demo."
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "08 / VERIFIED CONVERGENCE",
+      "title": "A gap does not close on a promise.",
+      "accent": "It closes on proof.",
+      "body": "See the relationship between a requirement and its evidence.",
+      "cta": "Book a working demo",
+      "secondary": "Enter VAZORA",
+      "requirement": "What is required",
+      "evidence": "What proves it",
+      "verified": "Verified reality"
+    },
+    "ci": {
+      "title": "A contract is not finished at signature.",
+      "accent": "That is where VAZORA begins.",
+      "body": "ChatGPT can read your contract. VAZORA runs it with you: obligations, evidence, verification and the actions that move execution forward.",
+      "workspace": "Continue into the working demo.",
+      "workspaceBody": "Explore the existing contract workspace with illustrative records. The public sequence and the application remain distinct demo contexts."
+    },
+    "demoPage": {
+      "title": "Bring a requirement. Follow the proof.",
+      "body": "Explore how a clause becomes an obligation, how evidence is verified, and how a missing proof changes the next action.",
+      "note": "Demo mode: this form validates your details and shows an acknowledgement. It does not send a booking or store your request.",
+      "formTitle": "Your working session",
+      "formHint": "Tell us which execution or assessment problem you want to explore."
+    }
+  },
   "meta": {
     "title": "VAZORA — Evidence Intelligence",
     "description": "VAZORA turns requirements into verified reality. Contract Intelligence for the execution phase: obligations, evidence, verification, risk and claim readiness."
@@ -105,12 +587,7 @@
       "subtitle": "VAZORA turns every awarded contract into monitored obligations, verified evidence, visible risk and payment-ready claims — continuously, clause by clause.",
       "primary": "Book a demo",
       "secondary": "See how it works",
-      "pillars": [
-        "Obligations",
-        "Evidence",
-        "Verification",
-        "Claim Readiness"
-      ]
+      "pillars": ["Obligations", "Evidence", "Verification", "Claim Readiness"]
     },
     "signature": {
       "document": "Contract · RTA-OM-2026-014",
@@ -679,21 +1156,16 @@
       "sector": "Sector",
       "sectorPlaceholder": "Select a sector",
       "contracts": "Active contracts under management",
-      "contractsOptions": [
-        "1–5",
-        "6–20",
-        "21–100",
-        "100+"
-      ],
+      "contractsOptions": ["1–5", "6–20", "21–100", "100+"],
       "language": "Preferred session language",
       "message": "What would you like to see?",
       "submit": "Request demo",
-      "submitting": "Sending…",
-      "privacy": "We use these details only to arrange the session."
+      "submitting": "Validating…",
+      "privacy": "Demo only. No booking is sent and no request is stored."
     },
     "success": {
-      "title": "Request received.",
-      "body": "We will contact you within two business days to schedule the session.",
+      "title": "Demo form validated.",
+      "body": "Your details passed validation. This demo has not sent a booking or stored your request.",
       "back": "Back to home"
     },
     "errors": {
@@ -712,15 +1184,37 @@
   "login": {
     "eyebrow": "Enter VAZORA",
     "title": "Sign in to your organization.",
+    "titleSignup": "Create your VAZORA account.",
+    "fullName": "Full name",
     "email": "Work email",
     "password": "Password",
-    "submit": "Continue",
+    "submit": "Sign in",
+    "submitSignup": "Create account",
     "demoDivider": "or",
     "demo": "Enter the demo environment",
     "demoHint": "Explore a demo organization with illustrative contracts. No account required.",
     "noAccount": "Access is provisioned per organization.",
+    "noAccountYet": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "switchToSignUp": "Create account",
+    "switchToSignIn": "Sign in",
     "requestAccess": "Book a demo",
-    "credentialsUnavailable": "Organization sign-in is enabled after onboarding. Use the demo environment to explore."
+    "credentialsUnavailable": "Organization sign-in is enabled after onboarding. Use the demo environment to explore.",
+    "errorCredentials": "Incorrect sign-in details. Check your email and password.",
+    "errorSignup": "Could not create the account. The email may already be registered.",
+    "errorWeakPassword": "Password must be at least 8 characters.",
+    "errorConfig": "Live production mode is not configured. Try the demo environment.",
+    "noticeConfirmEmail": "Check your email to confirm the account, then sign in."
+  },
+  "onboarding": {
+    "eyebrow": "Welcome to VAZORA",
+    "title": "Create your organization's workspace",
+    "body": "Your organization is a private space that isolates your contracts, documents, and activity from others.",
+    "orgName": "Organization name",
+    "orgNamePlaceholder": "e.g. Horizon Operations & Maintenance Co.",
+    "submit": "Create workspace",
+    "ownerNote": "You will become the organization owner and can invite your team later.",
+    "errorCreate": "Could not create the organization. Please try again."
   },
   "app": {
     "nav": {
@@ -729,6 +1223,7 @@
       "evidence": "Evidence",
       "claims": "Claims",
       "officer": "AI Contract Officer",
+      "tasks": "Tasks",
       "settings": "Settings",
       "signOut": "Sign out",
       "organization": "Organization",
@@ -737,8 +1232,7 @@
       "close": "Close"
     },
     "dashboard": {
-      "title": "Dashboard",
-      "greeting": "Good day, {name}",
+      "title": "Dashboard",      "greeting": "Good day, {name}",
       "asOf": "Portfolio as of {date}",
       "kpis": {
         "contracts": "Active contracts",
@@ -752,11 +1246,69 @@
       "attentionHint": "Raised by the AI Contract Officer",
       "portfolio": "Contracts",
       "upcoming": "Due in the next 30 days",
-      "claims": "Claims in preparation"
+      "claims": "Claims in preparation",
+      "latestIntake": "Latest contract intake",
+      "latestIntakeDetail": "{stages} documented stages · active in {total}",
+      "viewIntake": "View intake path",
+      "opsSummary": "{count} items require your attention today — {approvals} await approval, {actions} need action.",
+      "approvalQueue": "Waiting for your approval",
+      "approvalHint": "VAZORA recommends. You decide.",
+      "actionQueue": "Action required",
+      "actionHint": "Above the fold because they affect money.",
+      "empty": "Nothing pending your decision.",
+      "approve": "Approve",
+      "change": "Change",
+      "reject": "Reject",
+      "reviewApprove": "Review & approve",
+      "suggestedBy": "VAZORA suggestion",
+      "signals": "Business signals",
+      "signalsHint": "Consequence first — exposure, overdue, claims.",
+      "exposureNow": "Financial risk",
+      "overdueNow": "Overdue",
+      "claimsNeeding": "Claims blocked",
+      "claimsBlockerTitle": "Why it is not ready",
+      "secondary": "Supporting signals",
+      "activation": "New contract activation",
+      "activationHint": "Each run is documented to the second.",
+      "stepComplete": "{done} of {total} steps complete",
+      "steps": {
+        "parsed": "Contract parsed",
+        "obligations": "Obligations extracted",
+        "reviewed": "Obligations reviewed",
+        "owners": "Owners assigned",
+        "rules": "Evidence rules reviewed",
+        "activate": "Activation pending"
+      },
+      "continueActivation": "Continue activation",
+      "atRisk": "Contracts at risk",
+      "officerActivity": "Contract Officer activity",
+      "inDays": "in {days} days",
+      "assignments": "Assignments to review",
+      "todayProgress": "Today's activation progress"
+    },
+    "lifecycle": {
+      "title": "Contract lifecycle",
+      "hint": "Award → execution → evidence → verification → risk → claim → closeout",
+      "stages": {
+        "award": "Award",
+        "execution": "Execution",
+        "evidence": "Evidence",
+        "verification": "Verification",
+        "risk": "Risk",
+        "claim": "Claim",
+        "closeout": "Closeout"
+      }
     },
     "contracts": {
       "title": "Contracts",
       "count": "{count} contracts",
+      "listTitle": "All contracts",
+      "newContract": "New contract",
+      "empty": {
+        "title": "No contracts yet",
+        "body": "Create your first contract to build your organization's VAZORA workspace."
+      },
+      "forbidden": "You do not have access.",
       "columns": {
         "contract": "Contract",
         "client": "Client",
@@ -769,6 +1321,33 @@
       },
       "due": "{count} due",
       "overdue": "{count} overdue"
+    },
+    "contractNew": {
+      "title": "New contract",
+      "subtitle": "Register a real contract for your organization — basics only at this phase.",
+      "panelTitle": "Contract details",
+      "submit": "Save contract",
+      "demoNotice": "The demo environment is read-only — create a real account to add contracts.",
+      "errorDuplicate": "This contract number already exists in your organization.",
+      "errorInvalid": "Check the contract title and number.",
+      "errorCreate": "Could not save the contract. Please try again.",
+      "fields": {
+        "title": "Contract title",
+        "number": "Contract number",
+        "client": "Client / government entity",
+        "project": "Project",
+        "noProject": "No project",
+        "value": "Contract value",
+        "currency": "Currency",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "status": "Status"
+      },
+      "statuses": {
+        "active": "Active",
+        "mobilizing": "Mobilizing",
+        "closeout": "Closeout"
+      }
     },
     "contract": {
       "tabs": {
@@ -792,6 +1371,34 @@
       "clauseTraceHint": "Original clause → requirement → evidence → verification",
       "actions": "Actions",
       "sections": "Contract sections"
+    },
+    "documents": {
+      "title": "Contract documents",
+      "hint": "PDF or DOCX · up to 25 MB · private per-organization storage",
+      "upload": "Upload",
+      "empty": "No documents yet — upload the original contract file.",
+      "open": "Open",
+      "uploaded": "Document uploaded successfully.",
+      "demoReadonly": "The demo environment is read-only — sign in with your real organization to upload.",
+      "errors": {
+        "noFile": "Choose a file first.",
+        "tooLarge": "File exceeds 25 MB.",
+        "type": "Unsupported type — PDF or DOCX only.",
+        "upload": "Upload failed. Please try again."
+      }
+    },
+    "pipeline": {
+      "title": "Contract intake — {file}",
+      "hint": "Uploaded by {by} · {date} · fully active in {total}",
+      "stages": {
+        "uploaded": { "label": "Contract uploaded", "detail": "Source document received" },
+        "parsing": { "label": "Structure parsed", "detail": "Text, schedules and annexes detected" },
+        "clauses": { "label": "Clauses detected", "detail": "{count} clauses with evidence requirements" },
+        "obligations": { "label": "Obligations generated", "detail": "{count} obligations written to the register" },
+        "owners": { "label": "Owners assigned", "detail": "Every obligation has a named owner" },
+        "requests": { "label": "Evidence requests sent", "detail": "Instant notifications to each owner" },
+        "ready": { "label": "Contract active", "detail": "Updates continuously as evidence arrives" }
+      }
     },
     "obligations": {
       "title": "Obligations",
@@ -822,7 +1429,19 @@
       "checks": "Checks",
       "passed": "{passed} of {total} checks passed",
       "byStatus": "By status",
-      "uploadedBy": "by {name}"
+      "uploadedBy": "by {name}",
+      "inspector": {
+        "title": "Evidence inspector",
+        "requirement": "What was required?",
+        "submitted": "What was submitted?",
+        "inspected": "What did VAZORA inspect?",
+        "result": "Result",
+        "why": "Why — what passed and what failed",
+        "proofChain": "Proof chain",
+        "next": "What closes the gap?",
+        "openObligation": "Open requirement",
+        "closeHint": "Select an evidence item to inspect it."
+      }
     },
     "risks": {
       "title": "Risks",
@@ -839,6 +1458,9 @@
       "readiness": "Readiness",
       "breakdown": "Requirements",
       "blocking": "What blocks submission",
+      "blockersRemaining": "{count} blockers remaining",
+      "blockersFirst": "{count} blockers remaining — resolve these first",
+      "verifiedCollapsed": "{count} verified — expand to review",
       "empty": "No claims have been prepared for this contract yet.",
       "nothingBlocking": "No blocking items.",
       "columns": {
@@ -851,6 +1473,17 @@
     "activity": {
       "title": "Activity"
     },
+    "tasks": {
+      "title": "Tasks",
+      "subtitle": "Actions generated across your contracts — grouped so exceptions surface first.",
+      "empty": "Nothing here right now.",
+      "groups": {
+        "mine": "My tasks",
+        "overdue": "Due soon or overdue",
+        "waitingOnClient": "Waiting on client",
+        "done": "Completed"
+      }
+    },
     "notFound": "This contract is not available in your organization.",
     "officer": {
       "title": "AI Contract Officer",
@@ -860,10 +1493,22 @@
       "priority": "Priority {level}",
       "ask": "Ask about this contract",
       "askPlaceholder": "e.g. What blocks claim #5?",
-      "askHint": "Conversational analysis is enabled in a later phase. The Officer's proactive monitoring is shown above.",
+      "askHint": "Conversational analysis — preview. The Officer's proactive monitoring is shown above.",
+      "command": "Command center",
+      "tiers": {
+        "critical": "Critical",
+        "today": "Today",
+        "thisWeek": "This week",
+        "monitoring": "Monitoring"
+      },
+      "happened": "What happened",
+      "matters": "Why it matters",
+      "recommends": "VAZORA recommends",
+      "exposure": "Potential exposure",
+      "dueIn": "Due",
+      "source": "View source clause",
       "kinds": {
-        "attention": "Attention",
-        "due_soon": "Due soon",
+        "attention": "Attention",        "due_soon": "Due soon",
         "evidence_gap": "Evidence gap",
         "claim_readiness": "Claim readiness",
         "risk": "Risk",

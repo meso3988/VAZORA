@@ -19,7 +19,7 @@ export default async function ContractClaims(props: PageProps<"/[locale]/app/con
   return (
     <>
       {claims.length === 0 && (
-        <Panel title={t("title")} hint={t("subtitle")}>
+        <Panel title={t("title")} tone="rose" hint={t("subtitle")}>
           <Empty>{t("empty")}</Empty>
         </Panel>
       )}

@@ -18,7 +18,7 @@ export default async function ContractActivity(props: PageProps<"/[locale]/app/c
   const activity = await db.activity.list(orgId, { contractId: id });
 
   return (
-    <Panel title={t("title")}>
+    <Panel title={t("title")} tone="graphite">
       {activity.length === 0 ? (
         <Empty>—</Empty>
       ) : (

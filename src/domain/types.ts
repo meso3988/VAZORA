@@ -222,6 +222,20 @@ export type ActivityEntry = {
   at: ISODate;
 };
 
+/** A file attached to a contract, stored privately in object storage. */
+export type ContractDocument = {
+  id: string;
+  organizationId: string;
+  contractId: string;
+  fileName: string;
+  storagePath: string;
+  mimeType: string;
+  fileSize: number;
+  documentType: "contract" | "annex" | "correspondence" | "other";
+  uploadedBy: string;
+  createdAt: ISODate;
+};
+
 export function claimReadiness(claim: Pick<Claim, "requirements">): number {
   const total = claim.requirements.length;
   if (total === 0) return 0;

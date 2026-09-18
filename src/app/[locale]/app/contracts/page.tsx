@@ -1,8 +1,10 @@
+import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Mono, PageHeader, Panel, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
+import { ButtonLink } from "@/components/ui/button";
 import { requireTenant } from "@/data/context";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
@@ -25,8 +27,26 @@ export default async function ContractsPage(props: PageProps<"/[locale]/app/cont
 
   return (
     <>
-      <PageHeader title={t("title")} subtitle={t("count", { count: contracts.length })} />
-      <Panel>
+      <PageHeader
+        title={t("title")}
+        subtitle={t("count", { count: contracts.length })}
+        actions={
+          <ButtonLink href="/app/contracts/new" size="sm">
+            <Plus size={14} /> {t("newContract")}
+          </ButtonLink>
+        }
+      />
+      {contracts.length === 0 ? (
+        <Panel tone="sky" title={t("empty.title")}>
+          <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
+            <p className="text-sm text-muted">{t("empty.body")}</p>
+            <ButtonLink href="/app/contracts/new" size="sm">
+              <Plus size={14} /> {t("newContract")}
+            </ButtonLink>
+          </div>
+        </Panel>
+      ) : (
+        <Panel tone="graphite" title={t("listTitle")} hint={t("count", { count: contracts.length })}>
         <Table className="min-w-[880px]">
           <thead className="bg-fg/2">
             <tr>
@@ -68,7 +88,8 @@ export default async function ContractsPage(props: PageProps<"/[locale]/app/cont
             ))}
           </tbody>
         </Table>
-      </Panel>
+        </Panel>
+      )}
     </>
   );
 }

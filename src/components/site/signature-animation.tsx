@@ -1,308 +1,376 @@
 "use client";
 
-import { ArrowDownToLine, FileText, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  FileText,
+  Pause,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 
-import { ThreadPath } from "@/components/brand/threads";
-import { StatusDot, type StatusTone } from "@/components/ui/status";
-import { useReducedMotionSafe } from "@/lib/hooks";
+import { VazoraMonument } from "@/components/brand/vazora-monument";
+import { EvidenceEnvironment } from "@/components/brand/evidence-environment";
+import {
+  EvidenceConvergence,
+  type VerificationState,
+} from "@/components/brand/threads";
+import { useNarrativePlayback } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 
 /**
  * Signature hero sequence — one continuous causal chain:
- *  0 contract appears · 1 clauses illuminate · 2 clauses become obligations ·
- *  3 threads connect evidence · 4 verification states · 5 missing → risk ·
- *  6 the Contract Officer acts · 7 new evidence arrives, thread reconnects ·
- *  8 claim readiness progresses 73 → 82 → 91.
- *
- * Positions are percentages inside a fixed-ratio stage; the SVG overlay draws
- * Evidence Threads in the same coordinate space and is mirrored for RTL.
+ * source → clause → requirement → receipt → verification → partial result →
+ * corrective request → new receipt → re-verification → verified result → impact.
+ * Receipt never closes the gap. Only the verified result permits convergence;
+ * downstream changes follow as a separate event. The sequence runs once in view.
+ * Spatial layers distinguish source, inspection and operational impact.
+ * Arabic and mobile layouts are independently composed with logical positioning.
  */
+const STATES: VerificationState[] = [
+  "unverified",
+  "unverified",
+  "unverified",
+  "received",
+  "verifying",
+  "partial",
+  "requested",
+  "resubmitted",
+  "reverifying",
+  "verified",
+  "verified",
+];
+const STAGES = [
+  "source",
+  "clause",
+  "requirement",
+  "received",
+  "verifying",
+  "partial",
+  "requested",
+  "resubmitted",
+  "reverifying",
+  "verified",
+  "impact",
+];
 
-type Item = { clause: string; obligation: string; evidence: string };
-const ROWS = [18, 38, 58];
-const TIMELINE = [0, 900, 1900, 3200, 4500, 5500, 6700, 8600, 9800];
-const LOOP_AT = 14000;
-const FINAL = TIMELINE.length - 1;
-
-export function SignatureAnimation({ className }: { className?: string }) {
-  const t = useTranslations("home.signature");
-  const locale = useLocale();
-  const rtl = locale === "ar";
-  const reduce = useReducedMotionSafe();
-  const items = t.raw("items") as Item[];
-
-  const [timedStage, setStage] = useState(0);
-  const [cycle, setCycle] = useState(0);
-  const stage = reduce ? FINAL : timedStage;
-
-  useEffect(() => {
-    if (reduce) return;
-    const timers = TIMELINE.map((ms, i) => setTimeout(() => setStage(i), ms));
-    const loop = setTimeout(() => setCycle((c) => c + 1), LOOP_AT);
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(loop);
-    };
-  }, [cycle, reduce]);
-
-  const x = (v: number) => (rtl ? 100 - v : v);
-  const statuses: StatusTone[] = ["verified", "partial", stage >= 7 ? "verified" : "missing"];
-  const resolved = stage >= 4;
-  const readiness = stage >= 8 ? 91 : stage >= 7 ? 82 : stage >= 4 ? 73 : 0;
-  const stageKey = (
-    ["reading", "reading", "structuring", "linking", "verifying", "risk", "acting", "reconnecting", "ready"] as const
-  )[stage];
-
+export function SequenceControls({
+  playback,
+}: {
+  playback: ReturnType<typeof useNarrativePlayback>;
+}) {
+  const t = useTranslations("mineral.controls");
   return (
-    <div className={cn("relative w-full select-none", className)} aria-label={t("document")} role="img">
-      <div className="surface-float relative aspect-[4/3] w-full overflow-hidden bg-canvas sm:aspect-[16/10]">
-        {/* status strip */}
-        <div className="absolute inset-x-0 top-0 flex h-[9%] items-center justify-between border-b border-line px-[3%] text-[9px] text-faint sm:text-[10px]">
-          <span className="flex items-center gap-1.5 font-mono" dir="ltr">
-            <FileText size={11} />
-            RTA-OM-2026-014
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className={cn("size-1.5 rounded-full", stage >= 8 ? "bg-verified" : "bg-accent [animation:pulse-soft_1.6s_ease-in-out_infinite]")} />
-            {t(`stages.${stageKey}`)}
-          </span>
-        </div>
-
-        {/* threads */}
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-          {ROWS.map((y, i) => {
-            const tone = resolved ? statuses[i] : "neutral";
-            const missing = resolved && statuses[i] === "missing";
-            return (
-              <g key={i}>
-                <ThreadPath d={`M ${x(24)} ${y} C ${x(28)} ${y}, ${x(30)} ${y}, ${x(34)} ${y}`} on={stage >= 2} delay={i * 0.12} tone={stage >= 2 ? "accent" : "neutral"} />
-                <ThreadPath
-                  d={`M ${x(60)} ${y} C ${x(64)} ${y}, ${x(66)} ${y}, ${x(70)} ${y}`}
-                  on={stage >= 3 && !missing}
-                  delay={i * 0.12}
-                  tone={tone}
-                  flow={resolved && statuses[i] === "verified" && stage < 8}
-                />
-                {missing && <ThreadPath d={`M ${x(60)} ${y} L ${x(70)} ${y}`} on dashed tone="missing" />}
-              </g>
-            );
-          })}
-          {/* missing → risk → officer → readiness causal thread */}
-          <ThreadPath d={`M ${x(84)} ${ROWS[2] + 6} L ${x(84)} 74`} on={stage >= 5} tone={stage >= 7 ? "verified" : "missing"} dashed={stage < 7} />
-          <ThreadPath d={`M ${x(60)} 86 L ${x(38)} 86`} on={stage >= 6} tone="accent" />
-        </svg>
-
-        {/* document */}
-        <motion.div
-          className="absolute top-[13%] w-[22%] rounded-md border border-line bg-elevated p-[2.5%] shadow-[0_1px_0_rgba(0,0,0,0.03)]"
-          style={{ insetInlineStart: "3%", height: "54%" }}
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+    <div className="sequence-controls">
+      <button
+        type="button"
+        onClick={() => playback.seek(playback.step - 1)}
+        disabled={playback.step === 0}
+        aria-label={t("previous")}
+      >
+        <ArrowLeft size={15} className="rtl:-scale-x-100" />
+      </button>
+      {!playback.reduce && (
+        <button
+          type="button"
+          onClick={playback.toggle}
+          disabled={playback.atEnd}
+          aria-label={t(playback.playing ? "pause" : "play")}
         >
-          <div className="mb-[8%] flex items-center gap-1.5 text-faint">
-            <span className="truncate text-[8px] sm:text-[9px]">{t("document")}</span>
-          </div>
-          <div className="flex flex-col gap-[6%]">
-            {Array.from({ length: 12 }).map((_, i) => {
-              const clauseIdx = [2, 6, 10].indexOf(i);
-              const lit = clauseIdx >= 0 && stage >= 1;
-              return (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-[2px] rounded-full transition-colors duration-500 sm:h-[3px]",
-                    lit ? "bg-accent" : "bg-line",
-                    i % 3 === 1 ? "w-[70%]" : i % 4 === 3 ? "w-[85%]" : "w-full",
-                  )}
-                  style={lit ? { transitionDelay: `${clauseIdx * 150}ms` } : undefined}
-                />
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* clause markers */}
-        {ROWS.map((y, i) => (
-          <motion.span
-            key={`c${i}`}
-            className="absolute flex h-[7%] -translate-y-1/2 items-center rounded-sm border border-accent/40 bg-elevated px-1.5 font-mono text-[8px] text-accent sm:text-[10px]"
-            style={{ top: `${y}%`, insetInlineStart: "17%" }}
-            initial={false}
-            animate={{ opacity: stage >= 1 ? 1 : 0, scale: stage >= 1 ? 1 : 0.8 }}
-            transition={{ duration: 0.4, delay: i * 0.15 }}
-          >
-            {items[i].clause}
-          </motion.span>
-        ))}
-
-        {/* obligations */}
-        {ROWS.map((y, i) => (
-          <motion.div
-            key={`o${i}`}
-            className="absolute flex h-[15%] w-[26%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border border-line bg-elevated px-[2%]"
-            style={{ top: `${y}%`, insetInlineStart: "34%" }}
-            initial={false}
-            animate={{ opacity: stage >= 2 ? 1 : 0, x: stage >= 2 ? 0 : rtl ? 8 : -8 }}
-            transition={{ duration: 0.5, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className="eyebrow !text-[7px] sm:!text-[9px]">{t("obligation")}</span>
-            <span className="line-clamp-2 text-[8px] leading-tight text-fg sm:text-[11px]">{items[i].obligation}</span>
-          </motion.div>
-        ))}
-
-        {/* evidence */}
-        {ROWS.map((y, i) => {
-          const tone = statuses[i];
-          const isThird = i === 2;
-          const arrived = !isThird || stage >= 7;
-          const label = isThird && stage < 7 ? t("noFile") : items[i].evidence;
-          return (
-            <motion.div
-              key={`e${i}`}
-              className={cn(
-                "absolute flex h-[15%] w-[27%] -translate-y-1/2 flex-col justify-center gap-0.5 rounded-md border bg-elevated px-[2%] transition-colors duration-500",
-                resolved
-                  ? tone === "verified"
-                    ? "border-verified/50"
-                    : tone === "partial"
-                      ? "border-partial/60"
-                      : "border-missing/60 border-dashed"
-                  : "border-line",
-              )}
-              style={{ top: `${y}%`, insetInlineStart: "70%" }}
-              initial={false}
-              animate={{ opacity: stage >= 3 ? 1 : 0, x: stage >= 3 ? 0 : rtl ? 8 : -8 }}
-              transition={{ duration: 0.5, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span className="flex items-center gap-1 eyebrow !text-[7px] sm:!text-[9px]">
-                {resolved && <StatusDot tone={tone} />}
-                {isThird && stage === 7 ? t("arrived") : t("evidence")}
-              </span>
-              <span
-                className={cn(
-                  "truncate font-mono text-[8px] leading-tight sm:text-[11px]",
-                  arrived ? "text-fg" : "text-faint italic",
-                )}
-                dir="ltr"
-              >
-                {label}
-              </span>
-              {resolved && (
-                <span
-                  className={cn(
-                    "font-mono text-[7px] uppercase tracking-wider sm:text-[8px]",
-                    tone === "verified" && "text-verified",
-                    tone === "partial" && "text-partial",
-                    tone === "missing" && "text-missing",
-                  )}
-                >
-                  {t(`status.${tone}`)}
-                </span>
-              )}
-            </motion.div>
-          );
-        })}
-
-        {/* risk */}
-        <motion.div
-          className={cn(
-            "absolute top-[74%] flex h-[8%] -translate-y-1/2 items-center gap-1.5 rounded-sm border px-2 font-mono text-[8px] transition-colors duration-500 sm:text-[10px]",
-            stage >= 7 ? "border-verified/40 bg-verified/5 text-verified" : "border-missing/40 bg-missing/5 text-missing",
-          )}
-          style={{ insetInlineEnd: "3%" }}
-          initial={false}
-          animate={{ opacity: stage >= 5 ? 1 : 0, y: stage >= 5 ? 0 : 6 }}
-          transition={{ duration: 0.5 }}
-        >
-          <span className="size-1.5 rounded-full bg-current" />
-          <span dir="ltr">{stage >= 7 ? t("riskCleared") : t("risk")}</span>
-        </motion.div>
-
-        {/* officer */}
-        <motion.div
-          className="absolute bottom-[4%] flex h-[16%] w-[38%] items-center gap-2 overflow-hidden rounded-md border border-line bg-elevated px-[2%]"
-          style={{ insetInlineEnd: "3%" }}
-          initial={false}
-          animate={{ opacity: stage >= 6 ? 1 : 0, y: stage >= 6 ? 0 : 8 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="flex size-5 shrink-0 items-center justify-center rounded-sm bg-accent-soft text-accent">
-            {stage >= 7 ? <ArrowDownToLine size={11} /> : <Sparkles size={11} />}
-          </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="eyebrow !text-[7px] sm:!text-[8px]">{t("officer")}</span>
-            <span className="truncate text-[8px] leading-snug text-fg sm:text-[10px]">
-              {stage >= 7 ? t("officerFollowUp") : t("officerAction")}
-            </span>
-          </span>
-        </motion.div>
-
-        {/* readiness */}
-        <motion.div
-          className="absolute bottom-[4%] flex h-[16%] w-[30%] items-center gap-[4%] rounded-md border border-line bg-elevated px-[2%]"
-          style={{ insetInlineStart: "3%" }}
-          initial={false}
-          animate={{ opacity: stage >= 4 ? 1 : 0, y: stage >= 4 ? 0 : 8 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <Ring value={readiness} />
-          <div className="flex min-w-0 flex-col">
-            <span className="eyebrow !text-[7px] sm:!text-[8px]">{t("readiness")}</span>
-            <span className="font-mono text-[12px] font-medium tabular text-fg sm:text-base" dir="ltr">
-              <Counter to={readiness} />%
-            </span>
-          </div>
-        </motion.div>
-      </div>
+          {playback.playing ? <Pause size={14} /> : <Play size={14} />}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => playback.seek(playback.step + 1)}
+        disabled={playback.atEnd}
+        aria-label={t("next")}
+      >
+        <ArrowRight size={15} className="rtl:-scale-x-100" />
+      </button>
+      <button type="button" onClick={playback.replay} aria-label={t("replay")}>
+        <RotateCcw size={14} />
+      </button>
+      {playback.reduce && <small>{t("reduced")}</small>}
     </div>
   );
 }
 
-function Ring({ value }: { value: number }) {
-  const r = 15.5;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg viewBox="0 0 36 36" className="size-[70%] max-h-10 shrink-0 -rotate-90" aria-hidden>
-      <circle cx="18" cy="18" r={r} fill="none" stroke="var(--line)" strokeWidth="2.5" />
-      <motion.circle
-        cx="18"
-        cy="18"
-        r={r}
-        fill="none"
-        stroke="var(--status-verified)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeDasharray={c}
-        initial={false}
-        animate={{ strokeDashoffset: c - (c * value) / 100 }}
-        transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-      />
-    </svg>
-  );
-}
+const HERO_DURATIONS = [600, 700, 900, 1000, 1200, 900, 800, 1000, 1200, 1500, 0] as const;
 
-function Counter({ to }: { to: number }) {
-  const [v, setV] = useState(to);
-  const fromRef = useRef(to);
-  useEffect(() => {
-    let raf = 0;
-    const start = performance.now();
-    const from = fromRef.current;
-    const dur = 900;
-    const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      const next = Math.round(from + (to - from) * eased);
-      fromRef.current = next;
-      setV(next);
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [to]);
-  return <>{v}</>;
+export function SignatureAnimation({ className, introduction }: { className?: string; introduction?: ReactNode }) {
+  const t = useTranslations("mineral.hero");
+  const common = useTranslations("mineral");
+  const locale = useLocale();
+  const steps = t.raw("steps") as { title: string; body: string }[];
+  const ref = useRef<HTMLDivElement>(null);
+  const [sceneReady, setSceneReady] = useState(false);
+  const handleReady = useCallback(() => setSceneReady(true), []);
+  const playback = useNarrativePlayback(ref, STATES.length, HERO_DURATIONS, sceneReady);
+  const { step } = playback;
+  const verified = step >= 9;
+  const impacted = step === 10;
+  const evidenceFile =
+    step < 3
+      ? "—"
+      : step >= 7
+        ? "Signed_Acceptance.pdf"
+        : "Maintenance_Sep.pdf";
+
+  return (
+    <div
+      ref={ref}
+      className={cn("signature-system", className)}
+      data-stage={STAGES[step]}
+      aria-label={t("watch")}
+    >
+      <div className="hero-opening">
+        {introduction}
+        <div className="hero-artwork" aria-hidden="true" data-proof-state={STATES[step]} data-playing={playback.playing}>
+          {/* Integrated Precision HUD Telemetry (No Clumsy Boxes) */}
+          <div className="monument-hud">
+            <div className="hud-channel hud-requirement" data-active={step >= 1}>
+              <div className="hud-meta">
+                <span className="hud-beacon hud-beacon-req" />
+                <span className="hud-label">{common("thread.requirement")}</span>
+                <span className="hud-code" dir="ltr">§ 8.4</span>
+              </div>
+              <div className="hud-data">
+                <span className="hud-title">{t("clause")}</span>
+                <span className="hud-detail">{t("ack")}</span>
+              </div>
+            </div>
+
+            <div className="hud-channel hud-evidence" key={step >= 7 ? "additional" : "initial"} data-active={step >= 3}>
+              <div className="hud-meta">
+                <span className="hud-beacon hud-beacon-evi" />
+                <span className="hud-label">{common("thread.evidence")}</span>
+                <span className="hud-code" dir="ltr">DOC—02</span>
+              </div>
+              <div className="hud-data">
+                <span className="hud-title">{t(step < 3 ? "expected" : step >= 7 ? "newFile" : "file")}</span>
+                <span className="hud-detail" dir={step >= 3 ? "ltr" : undefined} title={evidenceFile}>
+                  {step < 3 ? common("thread.unverified") : evidenceFile}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="monument-shadow" />
+          <VazoraMonument
+            state={STATES[step]}
+            playing={playback.playing}
+            step={step}
+            duration={HERO_DURATIONS[step]}
+            mirrored={locale === "ar"}
+            onReady={handleReady}
+          />
+
+          {/* Elegant side narrative — the current step, beside the letter */}
+          <div className="monument-narrative" key={step} data-active>
+            <span className="narrative-index" dir="ltr">{String(step + 1).padStart(2, "0")}</span>
+            <div>
+              <h3>{steps[step].title}</h3>
+              <p>{steps[step].body}</p>
+            </div>
+          </div>
+
+          {/* Unified Verification Dock (High-Tech Instrument Capsule) */}
+          <div className="monument-verdict">
+            <div className="monument-dock">
+              <div className="dock-factor" data-status={step >= 5 ? "verified" : step === 4 ? "checking" : "pending"}>
+                <span className="dock-indicator">
+                  {step >= 5 ? <Check size={13} strokeWidth={2.5} /> : <span className="dock-dot" />}
+                </span>
+                <span className="dock-text">{t("period")}</span>
+              </div>
+              <span className="dock-separator" aria-hidden="true" />
+              <div className="dock-factor" data-status={verified ? "verified" : step >= 7 ? "checking" : step >= 5 ? "missing" : "pending"}>
+                <span className="dock-indicator">
+                  {verified ? <Check size={13} strokeWidth={2.5} /> : <span className="dock-dot" />}
+                </span>
+                <span className="dock-text">{t("ack")}</span>
+              </div>
+            </div>
+
+            <div className="monument-status-line">
+              <span className="status-pill-indicator">
+                {verified ? <Check size={14} strokeWidth={2.5} /> : <span className="status-gap-pulse" />}
+              </span>
+              <strong className="status-title">{common(`thread.${STATES[step]}`)}</strong>
+            </div>
+            <p className="status-subtext">
+              {verified ? t("verified") : step === 5 || step === 6 ? `${t("ack")} · ${t("missing")}` : common("thread.open")}
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* threads */}
+      <EvidenceEnvironment
+        className="hero-environment"
+        state={STATES[step]}
+        detected={step >= 1}
+        source={{
+          reference: "RTA-OM-2026-014",
+          clause: "8.4",
+          excerpt: t("clauseText"),
+          evidence: step < 3 ? null : evidenceFile,
+        }}
+      />
+      {/* status strip */}
+      <details className="hero-dossier">
+      <summary className="system-caption">
+        <span className="m-code" dir="ltr">
+          VAZORA / CI—014
+        </span>
+        <span>{common("demo")}</span>
+        <span className="m-code" dir="ltr">
+          {String(step + 1).padStart(2, "0")} / 11
+        </span>
+        <ChevronDown size={14} aria-hidden="true" />
+      </summary>
+      <div className="hero-scene">
+        {/* document */}
+        <div className="hero-source source-plane">
+          <div className="source-heading">
+            <FileText size={15} />
+            <span>{t("source")}</span>
+            <span className="m-code">01</span>
+          </div>
+          <h3>{t("sourceName")}</h3>
+          <span className="m-code source-reference" dir="ltr">
+            RTA-OM-2026-014
+          </span>
+          <div className="document-lines" aria-hidden>
+            <i />
+            <i />
+            <i />
+          </div>
+          {/* clause markers */}
+          <div className={cn("source-clause", step >= 1 && "is-detected")}>
+            <span className="m-code">§ 8.4</span>
+            <p>{t("clauseText")}</p>
+          </div>
+          <div className="document-lines" aria-hidden>
+            <i />
+            <i />
+          </div>
+          <span className="source-page m-code" dir="ltr">
+            08 / 36
+          </span>
+        </div>
+        {/* obligations */}
+        <div className="hero-core">
+          <div className="requirement-heading">
+            <span className="m-eyebrow">{t("requirement")}</span>
+            <h3>{t("requirementText")}</h3>
+            <span>{t("owner")}</span>
+          </div>
+          <EvidenceConvergence state={STATES[step]} />
+          {/* officer */}
+          <div
+            className={cn("hero-action", step < 6 && "is-waiting")}
+            data-action-resolved={impacted}
+          >
+            <span className="action-branch" aria-hidden />
+            <div>
+              <span className="m-eyebrow">{t("officer")}</span>
+              <p>
+                {t(
+                  step < 6
+                    ? "awaitAction"
+                    : impacted
+                      ? "actionDone"
+                      : "request",
+                )}
+              </p>
+            </div>
+            <ArrowDown size={15} />
+          </div>
+        </div>
+        {/* evidence */}
+        <div
+          className={cn("hero-evidence source-plane", step < 3 && "is-pending")}
+        >
+          <div className="source-heading">
+            <FileText size={15} />
+            <span>
+              {t(step < 3 ? "expected" : step >= 7 ? "newFile" : "file")}
+            </span>
+            <span className="m-code">02</span>
+          </div>
+          <p className="evidence-file" dir="ltr">
+            {evidenceFile}
+          </p>
+          <p className="evidence-file-note">{t("fileNote")}</p>
+          <div className="evidence-preview" aria-hidden>
+            <span className="m-code">SEP / 2026</span>
+            <div className="document-lines">
+              <i />
+              <i />
+              <i />
+              <i />
+            </div>
+            <div className="signature-line">
+              {step >= 7 ? <span>F. Al-Harbi</span> : <span>—</span>}
+            </div>
+          </div>
+          <div className="evidence-check">
+            <span>{t("ack")}</span>
+            <span className={verified ? "text-verified" : "text-partial"}>
+              {verified ? (
+                <Check size={16} />
+              ) : (
+                t(step >= 7 ? "pending" : "missing")
+              )}
+            </span>
+          </div>
+          <div className="evidence-note">
+            {verified ? t("verified") : common(`thread.${STATES[step]}`)}
+          </div>
+        </div>
+      </div>
+      {/* missing → risk → officer → readiness causal thread */}
+      <div className="hero-outcome" data-theme="dark">
+        {/* risk */}
+        <div>
+          <span className="m-eyebrow">{t("risk")}</span>
+          <strong
+            data-risk={
+              impacted ? "mitigated" : step >= 5 ? "open" : "unassessed"
+            }
+          >
+            {t(impacted ? "mitigated" : step >= 5 ? "openRisk" : "unassessed")}
+          </strong>
+        </div>
+        <span className="outcome-connection" aria-hidden />
+        {/* readiness */}
+        <div>
+          <span className="m-eyebrow">{t("readiness")}</span>
+          <strong
+            className="outcome-number"
+            dir="ltr"
+            data-readiness={impacted ? 82 : 73}
+          >
+            {impacted ? "82" : "73"}
+            <small>%</small>
+          </strong>
+        </div>
+        <p>{t("impactNote")}</p>
+      </div>
+      </details>
+      <div className="sequence-explanation">
+        <div aria-live={playback.playing ? "off" : "polite"} className="sr-only">
+          <h3>{steps[step].title}</h3>
+          <p>{steps[step].body}</p>
+        </div>
+        <SequenceControls playback={playback} />
+      </div>
+    </div>
+  );
 }
