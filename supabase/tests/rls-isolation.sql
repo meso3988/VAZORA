@@ -152,3 +152,81 @@ select count(*) as anon_contracts_deny from contracts;                     -- ex
 select count(*) as anon_org_deny from organizations;                       -- expect: 0
 
 rollback;
+
+-- ============================================================================
+-- Phase 2B — ingestion entities isolation assertions
+-- Runs AFTER supabase/migrations/0004_phase2b_ingestion.sql.
+-- ============================================================================
+begin;
+
+-- Fixtures (postgres; bypasses RLS)
+insert into auth.users (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
+values
+  ('00000000-0000-4000-8000-0000000000a1', 'user-a@test.local', crypt('testpass', gen_salt('bf')), now(), '{}'),
+  ('00000000-0000-4000-8000-0000000000b1', 'user-b@test.local', crypt('testpass', gen_salt('bf')), now(), '{}')
+on conflict (id) do nothing;
+insert into organizations (id, name, slug, created_by) values
+  ('10000000-0000-4000-8000-000000000001', 'Alpha Contracting', 'alpha', '00000000-0000-4000-8000-0000000000a1'),
+  ('20000000-0000-4000-8000-000000000002', 'Beta Facilities', 'beta', '00000000-0000-4000-8000-0000000000b1')
+on conflict (id) do nothing;
+insert into organization_members (organization_id, user_id, role) values
+  ('10000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-0000000000a1', 'owner'),
+  ('20000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-0000000000b1', 'owner')
+on conflict do nothing;
+insert into contracts (id, organization_id, contract_number, title) values
+  ('11100000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'A-001', 'Alpha Contract'),
+  ('22200000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', 'B-001', 'Beta Contract')
+on conflict (id) do nothing;
+insert into contract_documents (id, organization_id, contract_id, file_name, storage_path, mime_type, file_size) values
+  ('30000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', 'main.pdf', '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/d1_main.pdf', 'application/pdf', 100),
+  ('31100000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', '22200000-0000-4000-8000-000000000002', 'beta-main.pdf', '20000000-0000-4000-8000-000000000002/22200000-0000-4000-8000-000000000002/d2_beta.pdf', 'application/pdf', 100)
+on conflict (id) do nothing;
+insert into contract_ingestion_runs (id, organization_id, contract_id, parser_version, extractor_version) values
+  ('40000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '0.1', '0.1')
+on conflict (id) do nothing;
+insert into contract_clauses (id, organization_id, contract_id, ingestion_run_id, document_id, clause_number, text) values
+  ('50000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', '30000000-0000-4000-8000-000000000001', '12.1', 'على المقاول تقديم تقرير أداء شهري')
+on conflict (id) do nothing;
+insert into contract_obligations (id, organization_id, contract_id, ingestion_run_id, title, requirement_text) values
+  ('60000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '40000000-0000-4000-8000-000000000001', 'تقرير أداء شهري', 'تقديم تقرير أداء شهري')
+on conflict (id) do nothing;
+
+-- Perspective A (Alpha member)
+set local role authenticated;
+select set_config('request.jwt.claims',
+  '{"sub":"00000000-0000-4000-8000-0000000000a1","aud":"authenticated","role":"authenticated"}', true);
+
+-- Alpha reads own runs/clauses/obligations — expect 1/1/1.
+select
+  (select count(*) from contract_ingestion_runs) as runs,
+  (select count(*) from contract_clauses)        as clauses,
+  (select count(*) from contract_obligations)    as obligations;
+
+-- A can register source refs + evidence requirements; activation gate blocks
+-- activating unapproved/un-sourced obligations.
+insert into obligation_source_refs (organization_id, obligation_id, document_id, source_snippet)
+values ('10000000-0000-4000-8000-000000000001', '60000000-0000-4000-8000-000000000001', '30000000-0000-4000-8000-000000000001', 'على المقاول تقديم تقرير أداء شهري');   -- expect INSERT 1
+
+insert into obligation_evidence_requirements (organization_id, obligation_id, name, evidence_type)
+values ('10000000-0000-4000-8000-000000000001', '60000000-0000-4000-8000-000000000001', 'تقرير أداء شهري', 'report');   -- expect INSERT 1
+
+-- Activation gate: draft + unapproved → ERROR expected.
+update contract_obligations set activation_status = 'active'
+where id = '60000000-0000-4000-8000-000000000001';                       -- expect ERROR
+
+-- Cross-tenant FK guards:
+insert into contract_clauses (organization_id, contract_id, ingestion_run_id, document_id, clause_number, text)
+values ('10000000-0000-4000-8000-000000000001',
+        '22200000-0000-4000-8000-000000000002',   -- Beta contract
+        '40000000-0000-4000-8000-000000000001',
+        '31100000-0000-4000-8000-000000000002',   -- Beta document
+        '1.2', 'ض');
+-- expect ERROR (valid_contract_for_org)
+
+insert into obligation_source_refs (organization_id, obligation_id, document_id, source_snippet)
+values ('10000000-0000-4000-8000-000000000001',
+        '60000000-0000-4000-8000-000000000001',   -- Alpha obligation
+        '31100000-0000-4000-8000-000000000002',   -- Beta document
+        'x');                                     -- expect ERROR (valid_document_for_org)
+
+rollback;
