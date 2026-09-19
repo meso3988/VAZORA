@@ -36,16 +36,27 @@ export function hardenExtraction(opts: {
   const { extraction } = opts;
   const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 
-  // A — source validation
+  // A — source validation: verbatim span must provably exist in its clause.
+  // LLMs often merge/brace the end. Require the leading 24 chars AND at
+  // least 60% of the snippet's 24-char windows to exist in the clause —
+  // stops invented text while allowing partial quote trimming.
   const snippet = extraction.source_snippet?.trim() ?? "";
-  if (!snippet || snippet.length < 4) return null;
+  if (!snippet || snippet.length < 8) return null;
   const snippetNorm = norm(snippet);
   const clausePool = opts.clauseTexts.filter((c) => c.documentId === opts.documentId);
   const preferred = opts.clauseTexts.find(
     (c) => c.documentId === opts.documentId && c.clauseNumber === extraction.source_clause_number,
   );
   const haystacks = [preferred, ...clausePool.filter((c) => c !== preferred)].filter(Boolean) as { text: string; clauseNumber: string | null; documentId: string }[];
-  const found = haystacks.some((c) => norm(c.text).includes(snippetNorm.slice(0, 60)) || norm(c.text).includes(snippetNorm));
+  const windows: string[] = [];
+  const W = 24;
+  for (let i = 0; i < snippetNorm.length; i += W) windows.push(snippetNorm.slice(i, i + W));
+  const found = haystacks.some((c) => {
+    const hay = norm(c.text);
+    if (!hay.includes(snippetNorm.slice(0, Math.min(W, snippetNorm.length)))) return false;
+    const hits = windows.filter((w) => hay.includes(w)).length;
+    return hits >= Math.max(1, Math.ceil(windows.length * 0.6));
+  });
   if (!found) return null;
 
   // B — summary-style headings are not obligations
