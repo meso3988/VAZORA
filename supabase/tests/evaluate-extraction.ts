@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { extractChunkValidated, getExtractionProvider, registerExtractionProvider } from "../../src/lib/ingestion/extractor";
+import { extractChunkValidated, getExtractionProvider } from "../../src/lib/ingestion/extractor";
 import { hardenExtraction, dedupeAcross } from "../../src/lib/ingestion/harden";
 import { testFixtureProvider } from "../../src/lib/ingestion/test-fixture-provider";
 
@@ -65,8 +65,9 @@ async function main() {
   if (!IS_LIVE) {
     choice = { id: "test-fixture", model: "fixture/ground-truth", live: false, provider: testFixtureProvider };
   } else {
-    const { openAiCompatProvider } = await import("../../src/lib/ingestion/openai-compat");
-    registerExtractionProvider("openai-compat", () => openAiCompatProvider);
+    await import("../../src/lib/ingestion/openai-compat");
+    await import("../../src/lib/ingestion/anthropic");
+    await import("../../src/lib/ingestion/gemini");
     const p = getExtractionProvider();
     if (!p) {
       console.error("LIVE MODE requires VAZORA_EXTRACTION_PROVIDER + VAZORA_AI_API_KEY. Configure and retry.");

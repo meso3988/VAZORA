@@ -94,7 +94,12 @@ const providerImpl: ContractExtractionProvider = {
       }
       if (!grounded.length) return { ok: true, obligations: [] };
 
-      const obligations: ObligationExtraction[] = grounded.map((o) => ({
+      const obligations: ObligationExtraction[] = grounded.map((o) => {
+        const seg = chunk.segments.find(
+          (s) => s.clauseNumber && s.clauseNumber.trim().toLowerCase() === o.clause.trim().toLowerCase(),
+        ) ?? chunk.segments[0];
+        const snippet = (seg?.text ?? "").slice(0, 200);
+        return {
         title: o.requirement,
         requirement_text: o.requirement,
         obligation_type: o.frequency ? "reporting" : o.financial ? "payment" : "other",
@@ -129,9 +134,10 @@ const providerImpl: ContractExtractionProvider = {
         ),
         evidence_requirements: o.evidence.map((name) => ({ name, evidence_type: "document" as const, required: true })),
         source_clause_number: o.clause,
-        source_snippet: o.requirement,
+        source_snippet: snippet.trim() || o.requirement,
         review_reason: null,
-      }));
+      }
+      });
       return { ok: true, obligations };
     } catch (e) {
       return { ok: false, error: `fixture bench not found for ${id}: ${e instanceof Error ? e.message : ""}` };
