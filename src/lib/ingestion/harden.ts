@@ -107,14 +107,21 @@ export function hardenExtraction(opts: {
   return out;
 }
 
-/** Deterministic dedup: same normalized title within the same clause/document is a duplicate. */
+/**
+ * Deterministic dedup. A candidate is a duplicate when either:
+ *  - same normalized title within the same clause/document, or
+ *  - same source-span anchor (first 40 normalized chars) within the same
+ *    document — paraphrased titles over one verbatim span are one obligation.
+ */
 export function dedupeAcross(chunks: { extraction: ObligationExtraction; documentId: string }[]): { extraction: ObligationExtraction; documentId: string }[] {
   const seen = new Set<string>();
   const out: typeof chunks = [];
   for (const item of chunks) {
-    const key = `${item.documentId}|${(item.extraction.source_clause_number ?? "").toLowerCase()}|${item.extraction.title.trim().toLowerCase().replace(/\s+/g, " ")}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const titleKey = `${item.documentId}|${(item.extraction.source_clause_number ?? "").toLowerCase()}|${item.extraction.title.trim().toLowerCase().replace(/\s+/g, " ")}`;
+    const spanKey = `${item.documentId}|${(item.extraction.source_snippet ?? "").replace(/\s+/g, " ").trim().toLowerCase().slice(0, 40)}`;
+    if (seen.has(titleKey) || (item.extraction.source_snippet && seen.has(spanKey))) continue;
+    seen.add(titleKey);
+    if (item.extraction.source_snippet) seen.add(spanKey);
     out.push(item);
   }
   return out;

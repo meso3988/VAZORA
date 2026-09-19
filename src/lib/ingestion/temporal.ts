@@ -77,8 +77,8 @@ export function extractTemporal(text: string): TemporalRule {
       const m = t.match(/(\d{1,2})\s*(?:من|بعد)\s*(?:نهاية\s*)?(?:الشهر|كل شهر)/);
       return m ? Number(m[1]) : null;
     })();
-    if (d) return { frequency: "monthly", due: `monthly_day_${d}`, relativeDays: null, calendar: "gregorian", kind: "calendar_day", raw: t.match(/(من|في)\s*(الشهر|كل شهر|شهر)|شهريً?ا|شهريًا/)?.[0] ?? t.match(MONT_H)![0] };
-    return { frequency: "monthly", due: null, relativeDays: null, calendar: null, kind: "frequency_only", raw: t.match(MONT_H)![0] };
+    if (d) return { frequency: "monthly", due: `monthly_day_${d}`, relativeDays: null, calendar: "gregorian", kind: "calendar_day", raw: t.match(/(من|في)\s*(الشهر|كل شهر|شهر)|شهريً?ا|شهريًا/)?.[0] ?? t.match(MONT_H)?.[0] ?? null };
+    return { frequency: "monthly", due: null, relativeDays: null, calendar: null, kind: "frequency_only", raw: t.match(MONT_H)?.[0] ?? t.match(/(من|في)\s*(الشهر|كل شهر|شهر)/)?.[0] ?? null };
   }
   if (BEFORE_MONTH_END.test(t)) {
     return { frequency: "monthly", due: "monthly_end", relativeDays: null, calendar: "gregorian", kind: "calendar_day", raw: t.match(BEFORE_MONTH_END)![0] };

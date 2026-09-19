@@ -34,7 +34,13 @@ const cases: Case[] = [
   { input: "Report monthly by اليوم السابع", expect: { frequency: "monthly", due: "monthly_day_7" } },
   // Negative
   { input: "deliver quarterly management consulting", expect: { due: null } },
-  { input: "انس".length ? "اسم الشركة فقط." : "", expect: { frequency: null, due: null } },
+  { input: "اسم الشركة فقط.", expect: { frequency: null, due: null } },
+  // Duration phrases are NOT due rules (2B.8)
+  { input: "لمدة الالتزام", expect: { frequency: null, due: null } },
+  { input: "for the contract duration", expect: { frequency: null, due: null } },
+  { input: "throughout the term of this agreement", expect: { frequency: null, due: null } },
+  // Regression: alternate month-mention path must not crash when MONT_H misses
+  { input: "في الشهر المقبل", expect: { frequency: "monthly", due: null } },
 ];
 
 let passed = 0, failed = 0;
