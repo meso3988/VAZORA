@@ -250,12 +250,6 @@ create table obligation_assignment_suggestions (
   -- Composite FK: the suggested person must be a member of THIS organization.
   foreign key (organization_id, suggested_person_id)
     references organization_members (organization_id, user_id)
-  confidence assignment_confidence not null default 'medium',
-  reason text,
-  approved boolean,                   -- null = pending, true/false = human decision
-  decided_by uuid references auth.users (id),
-  decided_at timestamptz,
-  created_at timestamptz not null default now()
 );
 
 -- ---------------------------------------------------------------------------
