@@ -1378,6 +1378,96 @@
         "upload": "تعذّر رفع الملف. حاول مرة أخرى."
       }
     },
+    "review": {
+      "title": "مراجعة وتفعيل",
+      "obligations": "التزاماً",
+      "back": "← العودة للعقد",
+      "bulkApproved": "تم اعتماد {count} التزامات عالية الثقة",
+      "errUnresolved": "لا يمكن التفعيل — {count} التزامات لم تُحسم بعد",
+      "errGate": "بوابة التفعيل منعت العملية — تأكد من المراجعة والمصدر لكل التزام",
+      "cats": {
+        "all": "الكل",
+        "needsReview": "تتطلب مراجعة",
+        "high": "ثقة عالية",
+        "recurring": "دورية",
+        "payment": "مرتبطة بالمستخلص",
+        "financial": "شروط مالية",
+        "external": "اعتمادات خارجية",
+        "submission": "تتطلب تقديمًا",
+        "missingSource": "مصدر ناقص",
+        "conflict": "تعارض بنود",
+        "approved": "معتمدة"
+      },
+      "states": {
+        "explicit": "نصّية",
+        "inferred": "مُستنتجة",
+        "unknown": "غير معروف",
+        "conflict": "تعارض"
+      },
+      "fields": {
+        "requirement": "المتطلب",
+        "frequency": "التكرار",
+        "due": "قاعدة الاستحقاق",
+        "evidence": "الأدلة المطلوبة",
+        "owner": "المسؤول",
+        "contributor": "المساهم",
+        "approver": "المعتمد",
+        "external": "الاعتماد الخارجي",
+        "payment": "علاقة بالدفع",
+        "financial": "شرط مالي",
+        "penalty": "شرط جزائي",
+        "submission": "التقديم",
+        "destination": "الوجهة",
+        "deadline": "القاعدة الزمنية",
+        "acknowledge": "إقرار خارجي",
+        "source": "المصدر التعاقدي",
+        "confidence": "الثقة",
+        "aiSuggested": "اقترحها AI",
+        "humanApproved": "اعتمدها المراجع",
+        "risk": "ملاحظة مخاطرة"
+      },
+      "actions": {
+        "approve": "اعتمد",
+        "edit": "عدّل",
+        "reject": "ارفض",
+        "bulkApprove": "اعتماد جماعي آمِن",
+        "activate": "فعّل العقد",
+        "save": "احفظ",
+        "cancel": "إلغاء"
+      },
+      "summary": {
+        "approved": "معتمدة",
+        "rejected": "مرفوضة",
+        "unresolved": "غير محسومة",
+        "sourceMissing": "بلا مصدر",
+        "conflicts": "تعارضات",
+        "exceptionsAssignments": "تعيينات تحتاج قرار"
+      },
+      "activation": {
+        "title": "تفعيل العقد",
+        "body": "التفعيل فعل بشري مقصود. بعده تصبح الالتزامات المعتمدة هي الأساس التشغيلي، ولا تُعدَّل بصمت عند إِعادـة التحليل.",
+        "unresolvedWarn": "{count} التزامات غير محسومة — احسمها قبل التفعيل."
+      },
+      "assignments": {
+        "title": "تعيينات تتطلب مراجعتك",
+        "pending": "خصائص اقتراحات الأدوار تحتاج موافقتك.",
+        "owner": "مالك",
+        "contributor": "مساهم",
+        "approver": "معتمد",
+        "external": "اعتماد خارجي",
+        "approveAll": "اعتمد عالية الثقة",
+        "bulk": "اعتمد الكل",
+        "approved": "معتمدة",
+        "reason": "السبب"
+      },
+      "inspector": {
+        "title": "فاحص الالتزام",
+        "aiVersion": "الاستخراج الأصلي",
+        "editNote": "التحرير يحافظ على نسخة AI الأصلية — لا تُمسح.",
+        "rejectNote": "اذكر سبب الرفض",
+        "noSource": "لم يُعثر على مصدر موثوق — راجع يدويًا قبل الاعتماد."
+      }
+    },
     "ingestion": {
       "title": "تحليل العقد",
       "unavailable": "استخراج AI غير مهيأ — اضبط مزود الاستخراج.",

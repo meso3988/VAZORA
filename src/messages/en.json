@@ -1387,6 +1387,96 @@
         "upload": "Upload failed. Please try again."
       }
     },
+    "review": {
+      "title": "Review & Activate",
+      "obligations": "obligations",
+      "back": "← Back to contract",
+      "bulkApproved": "Approved {count} high-confidence obligations",
+      "errUnresolved": "Cannot activate — {count} obligations still unresolved",
+      "errGate": "The activation gate blocked this — review and source each obligation first",
+      "cats": {
+        "all": "All",
+        "needsReview": "Needs review",
+        "high": "High confidence",
+        "recurring": "Recurring",
+        "payment": "Payment-linked",
+        "financial": "Financial condition",
+        "external": "External dependency",
+        "submission": "Submission required",
+        "missingSource": "Missing source",
+        "conflict": "Clause conflict",
+        "approved": "Approved"
+      },
+      "states": {
+        "explicit": "Explicit",
+        "inferred": "Inferred",
+        "unknown": "Unknown",
+        "conflict": "Conflict"
+      },
+      "fields": {
+        "requirement": "Requirement",
+        "frequency": "Frequency",
+        "due": "Due rule",
+        "evidence": "Required evidence",
+        "owner": "Owner",
+        "contributor": "Contributor",
+        "approver": "Approver",
+        "external": "External dependency",
+        "payment": "Payment link",
+        "financial": "Financial condition",
+        "penalty": "Penalty condition",
+        "submission": "Submission",
+        "destination": "Destination",
+        "deadline": "Deadline rule",
+        "acknowledge": "External acknowledgement",
+        "source": "Contractual source",
+        "confidence": "Confidence",
+        "aiSuggested": "AI suggested",
+        "humanApproved": "Reviewer approved",
+        "risk": "Risk note"
+      },
+      "actions": {
+        "approve": "Approve",
+        "edit": "Edit",
+        "reject": "Reject",
+        "bulkApprove": "Approve safe high-confidence",
+        "activate": "Activate contract",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "summary": {
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "unresolved": "Unresolved",
+        "sourceMissing": "Missing source",
+        "conflicts": "Conflicts",
+        "exceptionsAssignments": "Assignments pending"
+      },
+      "activation": {
+        "title": "Activate contract",
+        "body": "Activation is a deliberate human step. Approved obligations become the operational baseline; a re-analysis never overwrites them silently.",
+        "unresolvedWarn": "{count} obligations unresolved — resolve them before activating."
+      },
+      "assignments": {
+        "title": "Assignments requiring your review",
+        "pending": "Role suggestions need your approval.",
+        "owner": "Owner",
+        "contributor": "Contributor",
+        "approver": "Approver",
+        "external": "External dependency",
+        "approveAll": "Approve high-confidence",
+        "bulk": "Approve all",
+        "approved": "Approved",
+        "reason": "Reason"
+      },
+      "inspector": {
+        "title": "Obligation inspector",
+        "aiVersion": "Original extraction",
+        "editNote": "Editing preserves the original AI extraction — never erased.",
+        "rejectNote": "Note why rejected",
+        "noSource": "No reliable source found — review manually before approving."
+      }
+    },
     "ingestion": {
       "title": "Contract analysis",
       "unavailable": "AI extraction is not configured — set the extraction provider.",
