@@ -84,5 +84,12 @@ export async function extractChunkValidated(
   if (!checked.ok) {
     return { ok: false, error: `schema: ${checked.issues.slice(0, 3).join("; ")}` };
   }
-  return { ok: true, obligations: checked.obligations };
+  return {
+    ok: true,
+    obligations: checked.obligations,
+    model: result.model,
+    durationMs: result.durationMs,
+    retries: result.retries,
+    usage: result.usage,
+  };
 }

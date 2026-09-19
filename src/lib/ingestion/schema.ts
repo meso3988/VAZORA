@@ -35,7 +35,9 @@ export const evidenceRequirementSchema = z.object({
 
 export const obligationExtractionSchema = z.object({
   title: z.string().min(2).max(240),
-  requirement_text: z.string().min(2),
+  requirement_text: z.string().min(2).optional(),
+  /** model often emits `requirement` instead — normalize */
+  requirement: z.string().min(2).optional(),
   obligation_type: obligationTypeSchema,
 
   frequency: z.string().max(120).nullish(),
@@ -90,7 +92,34 @@ export type ChunkExtraction = z.infer<typeof chunkExtractionSchema>;
 export function validateChunkExtraction(raw: unknown):
   | { ok: true; obligations: ObligationExtraction[] }
   | { ok: false; issues: string[] } {
-  const checked = chunkExtractionSchema.safeParse(raw);
-  if (checked.success) return { ok: true, obligations: checked.data.obligations };
+  // Normalize before zod: providers sometimes emit `requirement` instead of
+  // `requirement_text`. Canonicalize at the boundary so schemas stay stable.
+  const normalized = (() => {
+    if (typeof raw !== "object" || raw === null) return raw;
+    const obj = raw as { obligations?: unknown[] };
+    if (!Array.isArray(obj.obligations)) return raw;
+    return {
+      ...obj,
+      obligations: obj.obligations.map((o) => {
+        if (typeof o !== "object" || o === null) return o;
+        const rec = o as Record<string, unknown>;
+        if (rec.requirement_text == null && typeof rec.requirement === "string") {
+          return { ...rec, requirement_text: rec.requirement };
+        }
+        return rec;
+      }),
+    };
+  })();
+
+  const checked = chunkExtractionSchema.safeParse(normalized);
+  if (checked.success) {
+    return {
+      ok: true,
+      obligations: checked.data.obligations.map((o) => ({
+        ...o,
+        requirement_text: (o.requirement_text ?? o.requirement) as string,
+      })) as ObligationExtraction[],
+    };
+  }
   return { ok: false, issues: checked.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) };
 }
