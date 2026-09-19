@@ -2,6 +2,7 @@ import "server-only";
 
 import { chunkSegments, documentFingerprint, segmentDocument } from "@/lib/ingestion/segment";
 import { extractChunkValidated, getExtractionProvider } from "@/lib/ingestion/extractor";
+import { dedupeAcross, hardenExtraction } from "@/lib/ingestion/harden";
 import { parseDocumentBytes } from "@/lib/ingestion/parser";
 import type { ObligationExtraction } from "@/lib/ingestion/schema";
 
@@ -182,6 +183,8 @@ export async function runContractIngestion(opts: {
     const obligations: { extraction: ObligationExtraction; segmentContext: (typeof segmentContexts)[number] }[] = [];
     const tokensIn = 0;
     const tokensOut = 0;
+    const rejectedCandidates: string[] = [];
+
     for (const ctx of segmentContexts) {
       const result = await extractChunkValidated(provider, {
         organizationId,
@@ -190,8 +193,24 @@ export async function runContractIngestion(opts: {
         chunk: { chunkIndex: ctx.chunkIndex, documentIds: [ctx.documentId], documentNames: [ctx.fileName], segments: ctx.segments },
       });
       if (!result.ok) return fail("extraction_failed", `${ctx.chunkIndex}: ${result.error}`);
-      for (const ext of result.obligations) obligations.push({ extraction: ext, segmentContext: ctx });
+
+      for (const ext of result.obligations) {
+        const grounded = hardenExtraction({
+          extraction: ext,
+          documentId: ctx.documentId,
+          clauseTexts: segmentContexts.flatMap((c) => c.segments.map((s) => ({ documentId: c.documentId, clauseNumber: s.clauseNumber, text: s.text }))),
+        });
+        if (grounded) obligations.push({ extraction: grounded, segmentContext: ctx });
+        else rejectedCandidates.push(ext.title);
+      }
     }
+
+    // Dedupe identical candidates across chunks before scoring
+    const deduped = dedupeAcross(obligations.map((o) => ({ extraction: o.extraction, documentId: o.segmentContext.documentId })));
+    obligations.length = 0;
+    obligations.push(
+      ...deduped.map((d) => ({ extraction: d.extraction, segmentContext: segmentContexts.find((c) => c.documentId === d.documentId)! })),
+    );
 
     // 5. Consolidate — never blend sources; duplicates merge by (title, source ref)
     await supabase.from("contract_ingestion_runs").update({ status: "consolidating" }).eq("id", runId);
@@ -348,7 +367,7 @@ export async function runContractIngestion(opts: {
       event_type: "contract.analysis_completed",
       entity_type: "contract",
       entity_id: contractId,
-      metadata: { run_id: runId, obligations: obligationRows.length, documents: docs.length },
+      metadata: { run_id: runId, obligations: obligationRows.length, documents: docs.length, rejected_candidates: rejectedCandidates.length },
     });
 
     return { runId, status: "ready_for_review", obligations: obligationRows.length };

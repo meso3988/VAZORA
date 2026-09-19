@@ -18,6 +18,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { extractChunkValidated, getExtractionProvider, registerExtractionProvider } from "../../src/lib/ingestion/extractor";
+import { hardenExtraction, dedupeAcross } from "../../src/lib/ingestion/harden";
 import { testFixtureProvider } from "../../src/lib/ingestion/test-fixture-provider";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -96,7 +97,7 @@ async function evalBench(id: string, provider: NonNullable<ReturnType<typeof get
 
   for (let rep = 0; rep < REPEATS; rep++) {
     const t0 = Date.now();
-    const variantResults: Awaited<ReturnType<typeof extractChunkValidated>>[] = [];
+    const variantResults: (Awaited<ReturnType<typeof extractChunkValidated>> & { _docId?: string })[] = [];
 
     for (const file of gt.files) {
       const bytes = readFileSync(join(fixtures, file));
@@ -115,12 +116,12 @@ async function evalBench(id: string, provider: NonNullable<ReturnType<typeof get
             segments: chunk.map((x) => ({ clauseNumber: x.clauseNumber, heading: x.heading, text: x.text, pageNumber: x.pageNumber })),
           },
         });
-        variantResults.push(res);
+        variantResults.push(Object.assign(res, { _docId: file }));
       }
     }
     durationMs += Date.now() - t0;
 
-    // flatten
+    // flatten + harden (same as the real pipeline)
     const oks = variantResults.filter((v): v is Extract<typeof v, { ok: true }> => v.ok);
     failures += variantResults.length - oks.length;
     for (const v of variantResults) {
@@ -132,7 +133,28 @@ async function evalBench(id: string, provider: NonNullable<ReturnType<typeof get
       }
     }
 
-    const observations = oks.flatMap((v) => v.obligations);
+    // Build clause pool for source validation, and apply the hardened gate + dedupe.
+    const clauseTextsAll: { text: string; clauseNumber: string | null; documentId: string }[] = [];
+    for (const file of gt.files) {
+      const bytes = readFileSync(join(fixtures, file));
+      const parsed = await (await import("../../src/lib/ingestion/parser")).parseDocumentBytes(file, bytes);
+      const segs = (await import("../../src/lib/ingestion/segment")).segmentDocument(parsed);
+      for (const s of segs) clauseTextsAll.push({ documentId: file, clauseNumber: s.clauseNumber, text: s.text });
+    }
+
+    const hardened: { extraction: import("../../src/lib/ingestion/schema").ObligationExtraction; documentId: string }[] = [];
+    let rejectedByGate = 0;
+    for (const v of oks) {
+      for (const ob of v.obligations) {
+        const h = hardenExtraction({ extraction: ob, documentId: v._docId ?? gt.files[0], clauseTexts: clauseTextsAll });
+        if (h) hardened.push({ extraction: h, documentId: v._docId ?? gt.files[0] });
+        else rejectedByGate += 1;
+      }
+    }
+    const deduped = dedupeAcross(hardened);
+    const observations = deduped.map((d) => d.extraction);
+
+    console.error(`  [${id}] gate: rejected=${rejectedByGate} kept=${deduped.length}`);
     // dedupe across chunks by requirement text.
     const seenReq = new Set<string>();
     const unique = observations.filter((o) => {
