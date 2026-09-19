@@ -32,9 +32,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "0.180.0",
+    "docx": "^9.5.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

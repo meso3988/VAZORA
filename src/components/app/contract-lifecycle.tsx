@@ -24,6 +24,10 @@ export async function ContractLifecycle({
   const st = await getTranslations("status");
   const f = await getFormatter();
   const h = contract.health;
+  const safeDate = (iso: string, style: "short" | "medium" = "short") => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? "—" : f.dateTime(d, style);
+  };
   const stageLabels = {
     award: t("stages.award"),
     execution: t("stages.execution"),
@@ -41,7 +45,7 @@ export async function ContractLifecycle({
     active?: boolean;
     tone?: "at_risk";
   }[] = [
-    { key: "award", value: f.dateTime(new Date(contract.startDate), "short"), done: true },
+    { key: "award", value: safeDate(contract.startDate), done: true },
     { key: "execution", value: st(contract.status), done: true },
     { key: "evidence", value: f.number(h.evidenceCoverage, "percent"), done: h.evidenceCoverage >= 0.85 },
     { key: "verification", value: f.number(h.claimReadiness, "percent"), done: h.claimReadiness >= 0.95 },
@@ -49,12 +53,12 @@ export async function ContractLifecycle({
     {
       key: "claim",
       value: nextClaim
-        ? `${formatMoney(nextClaim.amount, "en", nextClaim.currency, { compact: true })} · ${f.dateTime(new Date(nextClaim.targetDate), "short")}`
+        ? `${formatMoney(nextClaim.amount, "en", nextClaim.currency, { compact: true })} · ${safeDate(nextClaim.targetDate)}`
         : "—",
       done: Boolean(nextClaim && nextClaim.status === "approved"),
       active: Boolean(nextClaim && (nextClaim.status === "preparing" || nextClaim.status === "ready")),
     },
-    { key: "closeout", value: f.dateTime(new Date(contract.endDate), "short"), done: false },
+    { key: "closeout", value: safeDate(contract.endDate), done: false },
   ];
 
   const start = new Date(contract.startDate).getTime();
@@ -75,7 +79,7 @@ export async function ContractLifecycle({
         aria-hidden
         className="absolute top-[33px] size-[9px] rounded-full bg-fg"
         style={{ insetInlineStart: `calc(32px + (100% - 64px) * ${progress})`, transform: "translateX(-50%)" }}
-        title={f.dateTime(new Date(today), "medium")}
+        title={safeDate(today, "medium")}
       />
       <ol className="grid grid-cols-4 gap-y-6 sm:grid-cols-7">
         {stages.map((stage) => (

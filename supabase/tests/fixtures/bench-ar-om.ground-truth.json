@@ -1,0 +1,114 @@
+{
+  "benchmark": "bench-ar-om",
+  "language": "ar",
+  "files": [
+    "bench-ar-om-main.docx",
+    "bench-ar-om-addendum.docx"
+  ],
+  "obligations": [
+    {
+      "clause": "12",
+      "requirement": "تقرير أداء شهري بثمانية مؤشرات",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "تقرير أداء شهري",
+        "ثمانية مؤشرات أداء",
+        "توقيع مدير المشروع"
+      ],
+      "payment_linked": false,
+      "financial": null,
+      "external_dependency": "إقرار الجهة المشترية",
+      "submission": {
+        "destination": "PMO",
+        "channel": "portal",
+        "deadline_rule": "يوم 5 شهريًا"
+      },
+      "owner_role": "مدير المشروع"
+    },
+    {
+      "clause": "14",
+      "requirement": "سجلات الصيانة الوقائية الموقعة",
+      "frequency": "monthly",
+      "due_rule": "with_monthly_claim",
+      "evidence": [
+        "سجلات الصيانة الوقائية الموقعة"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": "مسؤول الصيانة"
+    },
+    {
+      "clause": "18",
+      "requirement": "المادة 18.3 — الربط بصرف المستخلص",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "تقرير الأداء الموقّع"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": "توقيع الجهة المشترية",
+      "submission": {
+        "destination": "الجهة المشترية",
+        "channel": "portal",
+        "deadline_rule": "يوم 5 شهريًا"
+      },
+      "owner_role": "مدير المشروع"
+    },
+    {
+      "clause": "21",
+      "requirement": "غرامة تأخير 0.5% أسبوعيًا",
+      "frequency": null,
+      "due_rule": null,
+      "evidence": [],
+      "payment_linked": null,
+      "financial": "penalty",
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": null
+    },
+    {
+      "clause": "22",
+      "requirement": "شهادة جاهزية الموقع قبل المرحلة الثانية",
+      "frequency": null,
+      "due_rule": null,
+      "evidence": [
+        "شهادة جاهزية الموقع"
+      ],
+      "payment_linked": null,
+      "financial": null,
+      "external_dependency": "توقيع ممثل الجهة المشترية",
+      "submission": null,
+      "owner_role": null
+    },
+    {
+      "clause": "23",
+      "requirement": "تقديم التقارير عبر بوابة PMO في اليوم الخامس",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "تقرير أداء شهري"
+      ],
+      "payment_linked": false,
+      "financial": null,
+      "external_dependency": null,
+      "submission": {
+        "destination": "PMO",
+        "channel": "portal",
+        "deadline_rule": "يوم 5 شهريًا"
+      },
+      "owner_role": "منسق التقارير"
+    }
+  ],
+  "addendumConflict": [
+    {
+      "mainClause": "23",
+      "requirement": "تقديم التقارير عبر بوابة PMO في اليوم السابع",
+      "addendumDueRule": "monthly_day_7",
+      "addendumRaw": "يعدّل الملحق: التقديم في اليوم السابع من كل شهر بدل الخامس."
+    }
+  ]
+}

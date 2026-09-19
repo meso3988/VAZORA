@@ -12,6 +12,8 @@ import { validateChunkExtraction, type ObligationExtraction } from "@/lib/ingest
 export type ExtractionChunk = {
   chunkIndex: number;
   documentIds: string[];
+  /** file names of the contributing documents — lets the extractor know when a chunk came from an addendum */
+  documentNames: string[];
   segments: { clauseNumber: string | null; heading: string | null; text: string; pageNumber: number | null }[];
 };
 
@@ -30,7 +32,19 @@ export interface ContractExtractionProvider {
   }): Promise<ContractExtractionResult>;
 }
 
+import { registerTestFixtureProvider } from "./test-fixture-provider";
+
 const registry: Record<string, () => ContractExtractionProvider> = {};
+
+// Test-fixture provider registration is opt-in twice (provider id + explicit
+// VAZORA_TEST_FIXTURE=1). It is QA-only tooling; real tenants never activate
+// it accidentally.
+if (
+  process.env.VAZORA_EXTRACTION_PROVIDER === "test-fixture" &&
+  process.env.VAZORA_TEST_FIXTURE === "1"
+) {
+  registerTestFixtureProvider((id, factory) => { registry[id] = factory; });
+}
 
 export function registerExtractionProvider(id: string, factory: () => ContractExtractionProvider) {
   registry[id] = factory;

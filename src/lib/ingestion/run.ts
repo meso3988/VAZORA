@@ -118,7 +118,7 @@ export async function runContractIngestion(opts: {
     await supabase.from("contract_ingestion_runs").update({ status: "parsing" }).eq("id", runId);
 
     const clauseInserts: Record<string, unknown>[] = [];
-    const segmentContexts: { documentId: string; chunkIndex: number; segments: { clauseNumber: string | null; heading: string | null; text: string; pageNumber: number | null }[] }[] = [];
+    const segmentContexts: { documentId: string; chunkIndex: number; fileName: string; segments: { clauseNumber: string | null; heading: string | null; text: string; pageNumber: number | null }[] }[] = [];
     let pageCount = 0;
     let chunkIndex = 0;
 
@@ -160,6 +160,7 @@ export async function runContractIngestion(opts: {
         segmentContexts.push({
           documentId: doc.id,
           chunkIndex: chunkIndex++,
+          fileName: doc.file_name,
           segments: chunk.map((s) => ({ clauseNumber: s.clauseNumber, heading: s.heading, text: s.text, pageNumber: s.pageNumber })),
         });
       }
@@ -186,7 +187,7 @@ export async function runContractIngestion(opts: {
         organizationId,
         contractId,
         contractTitle,
-        chunk: { chunkIndex: ctx.chunkIndex, documentIds: [ctx.documentId], segments: ctx.segments },
+        chunk: { chunkIndex: ctx.chunkIndex, documentIds: [ctx.documentId], documentNames: [ctx.fileName], segments: ctx.segments },
       });
       if (!result.ok) return fail("extraction_failed", `${ctx.chunkIndex}: ${result.error}`);
       for (const ext of result.obligations) obligations.push({ extraction: ext, segmentContext: ctx });
@@ -204,13 +205,39 @@ export async function runContractIngestion(opts: {
       if (row.clause_number) clauseIndex.set(`${row.document_id}|${row.clause_number}`, row.id as string);
     }
 
+    // 5b. Conflict detection: same clause in DIFFERENT documents with a
+    // different due-rule (e.g. main "day 5" vs addendum "day 7") is a
+    // POTENTIAL CONTRACTUAL CONFLICT — never resolved automatically.
+    const normTitle = (s?: string | null) => (s ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+    const byClause = new Map<string, typeof obligations>();
+    obligations.forEach((ob) => {
+      const k = (ob.extraction.source_clause_number ?? "").toLowerCase();
+      if (!k) return;
+      const list = byClause.get(k) ?? [];
+      list.push(ob);
+      byClause.set(k, list);
+    });
+    const conflictIdByIndex = new Map<number, string>();
+    for (const group of byClause.values()) {
+      const docs = new Set(group.map((o) => o.segmentContext.documentId));
+      const dueRaw = new Set(group.map((o) => normTitle(o.extraction.due_rule_raw)).filter(Boolean));
+      const dueNorm = new Set(group.map((o) => normTitle(o.extraction.due_rule_normalized)).filter(Boolean));
+      if (docs.size > 1 && (dueRaw.size > 1 || dueNorm.size > 1)) {
+        const groupId = crypto.randomUUID();
+        group.forEach((o) => conflictIdByIndex.set(obligations.indexOf(o), groupId));
+      }
+    }
+
     const obligationInserts: Record<string, unknown>[] = [];
     const obligationSnippets: { snippet: string; documentId: string; page: number | null; clauseNumber: string | null }[][] = [];
-    for (const { extraction, segmentContext } of obligations) {
+    obligations.forEach(({ extraction, segmentContext }, idx) => {
+      const inConflict = conflictIdByIndex.has(idx);
       const reviewStatus =
         !extraction.source_snippet || extraction.ai_confidence == null || extraction.ai_confidence < 0.6
           ? "needs_review"
-          : "extracted";
+          : inConflict
+            ? "conflict_requires_review"
+            : "extracted";
       const needsSourceReview = !extraction.source_snippet || !extraction.source_clause_number;
 
       obligationInserts.push({
@@ -242,6 +269,7 @@ export async function runContractIngestion(opts: {
         review_status: reviewStatus,
         review_notes: extraction.review_reason ?? null,
         needs_source_review: needsSourceReview,
+        conflict_group_id: conflictIdByIndex.get(idx) ?? null,
       });
       obligationSnippets.push(
         (extraction.source_snippet
@@ -253,7 +281,7 @@ export async function runContractIngestion(opts: {
             }]
           : []),
       );
-    }
+    });
 
     const { data: obligationRows, error: oblErr } = await supabase
       .from("contract_obligations")

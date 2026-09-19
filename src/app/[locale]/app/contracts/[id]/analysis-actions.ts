@@ -71,6 +71,10 @@ export async function analyzeContract(formData: FormData) {
     }
     redirect({ href: back(`?analysis=ok&n=${result.obligations}`), locale });
   } catch (e) {
+    // redirect() throws NEXT_REDIRECT — let it through.
+    if (e && typeof e === "object" && "digest" in (e as object) && String((e as { digest: string }).digest).startsWith("NEXT_REDIRECT")) {
+      throw e;
+    }
     const msg = e instanceof Error ? e.message : "unknown";
     if (msg === "no_documents") redirect({ href: back("?analysis=nodocs"), locale });
     redirect({ href: back("?analysis=fail&code=unexpected"), locale });

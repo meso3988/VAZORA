@@ -1,0 +1,23 @@
+# VAZORA synthetic benchmark ground truth
+#
+# Machine-readable ground truth for the three synthetic test contracts. The
+# evaluation harness (supabase/tests/evaluate-extraction.mjs) compares live
+# extraction against these expected values, field by field — never invented.
+
+كيان | Benchmark ID | Language | Files
+النقل البلدية — عقد رئيسي | bench-ar-om | ar | bench-ar-om-main.docx, bench-ar-om-addendum.docx (CONFLICT day5/day7)
+Regional maintenance services | bench-en-svc | en | bench-en-svc.docx
+Data center operations (مختلط) | bench-mixed-dc | mixed | bench-mixed-dc.docx
+
+For each obligation in ground truth:
+- clause: expected clause number
+- requirement: short expected requirement text
+- frequency: expected frequency token (monthly / quarterly / null)
+- due_rule: expected due rule token (monthly_day_5 / day_10_after_period_end / null)
+- evidence: list of required evidence names
+- payment_linked: boolean | null
+- financial: "penalty" | "deduction" | "retention" | null
+- external_dependency: string | null
+- submission: { destination, channel, deadline_rule } | null
+- owner_role: string | null
+- prov: expected provenance kind for the requirement field (explicit)
