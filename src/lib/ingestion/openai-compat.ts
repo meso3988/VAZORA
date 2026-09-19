@@ -86,7 +86,11 @@ export const openAiCompatProvider: ContractExtractionProvider = {
       return { ok: false, error: `provider HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
     }
 
-    const payload = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const payload = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
+      model?: string;
+    };
     const content = payload.choices?.[0]?.message?.content;
     if (!content) return { ok: false, error: "empty provider response" };
 
@@ -97,7 +101,15 @@ export const openAiCompatProvider: ContractExtractionProvider = {
       return { ok: false, error: "provider returned non-JSON content" };
     }
     const obligations = (parsed as { obligations?: unknown[] }).obligations ?? [];
-    return { ok: true, obligations: obligations as never[] };
+    return {
+      ok: true,
+      obligations: obligations as never[],
+      model: payload.model ?? MODEL,
+      usage: {
+        inputTokens: payload.usage?.prompt_tokens,
+        outputTokens: payload.usage?.completion_tokens,
+      },
+    };
   },
 };
 

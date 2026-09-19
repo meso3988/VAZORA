@@ -59,7 +59,41 @@ The service role bypasses RLS by design. Use it **only** in trusted server
 code (e.g. an internal lead-inspection route protected by a separate admin
 check) and never expose it to the browser.
 
-## 7. Future phases
+## 8. Phase 2B — AI extraction configuration (no keys committed)
+
+The extraction pipeline is provider-independent. Configure ONLY via env:
+
+| Variable | Purpose | Example |
+| --- | --- | --- |
+| `VAZORA_EXTRACTION_PROVIDER` | adapter id | `openai-compat` |
+| `VAZORA_AI_BASE_URL` | OpenAI-compatible endpoint (optional) | `https://api.openai.com/v1` |
+| `VAZORA_AI_API_KEY` | server-only API key | (your key, never in chat/repo) |
+| `VAZORA_EXTRACTION_MODEL` | model id | `gpt-4o-mini` |
+
+Adapters currently shipped: `openai-compat` (works with any OpenAI-compatible API — OpenAI, Azure OpenAI, xAI, Moonshot/Kimi). Additional dedicated adapters (Anthropic, Gemini, etc.) can implement `ContractExtractionProvider` and register with `registerExtractionProvider("<id>", factory)`.
+
+### Evaluation harness
+
+```bash
+# Fixture mode (default): `test-fixture + VAZORA_TEST_FIXTURE=1` —
+# deterministic against ground truth. Output labeled TEST FIXTURE.
+node --require ./supabase/tests/harness-cjs-preload.cjs --import tsx supabase/tests/evaluate-extraction.ts
+
+# Live evaluation — real provider, real latency, real usage and cost metadata.
+# Output labeled LIVE MODEL. No fallback to fixture.
+VAZORA_EVAL_LIVE=1 \
+VAZORA_EXTRACTION_PROVIDER=openai-compat \
+VAZORA_EXTRACTION_MODEL=gpt-4o-mini \
+VAZORA_AI_API_KEY=sk-... \
+node --require ./supabase/tests/harness-cjs-preload.cjs --import tsx supabase/tests/evaluate-extraction.ts
+```
+
+Repeat for stability tests: `VAZORA_EVAL_REPEATS=3`.
+
+### App runtime
+
+The Analyze Contract button in the live workspace uses the same config. Without it,
+the user sees "AI extraction is not configured" — never fake results.
 
 `supabase/drafts/phase1-full-schema-draft.sql` contains the Phase 2B+ schema
 (clauses, obligations, evidence, risks, claims, agent events, embeddings). It

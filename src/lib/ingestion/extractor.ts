@@ -17,8 +17,16 @@ export type ExtractionChunk = {
   segments: { clauseNumber: string | null; heading: string | null; text: string; pageNumber: number | null }[];
 };
 
+/** Provider-agnostic extractor interface. Adapters return parsed schemas only. */
 export type ContractExtractionResult =
-  | { ok: true; obligations: ObligationExtraction[] }
+  | {
+      ok: true;
+      obligations: ObligationExtraction[];
+      model?: string;
+      durationMs?: number;
+      retries?: number;
+      usage?: { inputTokens?: number; outputTokens?: number };
+    }
   | { ok: false; error: string };
 
 export interface ContractExtractionProvider {

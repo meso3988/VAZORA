@@ -1,0 +1,14 @@
+{
+  "benchmark_version": "contract-extraction-benchmark-v1",
+  "frozen_at": "2026-09-19T13:04:47.572Z",
+  "files": {
+    "bench-ar-om-main.docx": "4cd60c615d835b425e8a9de41ddbfa210f102daf4bbad3565024808cebd1c4bf",
+    "bench-ar-om-addendum.docx": "9bceaf31dcae9a3dbd0cf26837a88dbbcf1ec23a4c1768f4a840cad63ea52a6d",
+    "bench-ar-om.ground-truth.json": "2dd4017373b181d6a50c6ac888fa0315811f1766f6a2f5588dcc4aebbae7197a",
+    "bench-en-svc.docx": "1e40847b72d353a5588b94714f6922649145437e31a48114d17fdf6baf19b3d7",
+    "bench-en-svc.ground-truth.json": "ff2d48dd77f940cebf1f01657eb7ec9322f03827e79d685c1009b98322f97f27",
+    "bench-mixed-dc.docx": "4b8f8d4e41d70020ffc2fc9feddbbe04c42a743245cd171ce32a25e2d46dd8ac",
+    "bench-mixed-dc.ground-truth.json": "4d3dac0fea4485acb42fe3132f91b12f88680f3eae4c56f184071651399613ea"
+  },
+  "note": "Ground truth is frozen. Do not alter without a documented benchmark defect and a new version label."
+}
