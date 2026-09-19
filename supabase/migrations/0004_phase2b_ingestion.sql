@@ -239,8 +239,17 @@ create table obligation_assignment_suggestions (
   obligation_id uuid not null references contract_obligations (id) on delete cascade,
   suggestion_kind text not null check (suggestion_kind in ('owner','contributor','approver','external_dependency')),
   suggested_role text not null,
-  suggested_person_id uuid references organization_members (user_id), -- scoped via RLS
+  suggested_person_id uuid,
   suggested_person_name text,         -- raw name if person unknown / external
+  confidence assignment_confidence not null default 'medium',
+  reason text,
+  approved boolean,                   -- null = pending, true/false = human decision
+  decided_by uuid references auth.users (id),
+  decided_at timestamptz,
+  created_at timestamptz not null default now(),
+  -- Composite FK: the suggested person must be a member of THIS organization.
+  foreign key (organization_id, suggested_person_id)
+    references organization_members (organization_id, user_id)
   confidence assignment_confidence not null default 'medium',
   reason text,
   approved boolean,                   -- null = pending, true/false = human decision
