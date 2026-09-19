@@ -3,6 +3,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 
 import { ClauseTrace } from "@/components/app/clause-trace";
 import { ContractLifecycle } from "@/components/app/contract-lifecycle";
+import { IngestionControls } from "@/components/app/ingestion-controls";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
 import { OfficerFeed } from "@/components/app/officer-feed";
 import { DocumentPanel } from "@/components/app/document-panel";
@@ -18,6 +19,45 @@ import { asLocale } from "@/i18n/params";
 
 const STATUS_ORDER: ObligationStatus[] = ["verified", "partial", "missing", "overdue", "at_risk", "pending"];
 
+async function getLatestIngestionRun(orgId: string, contractId: string) {
+  const { createSupabaseServer } = await import("@/lib/supabase/server");
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("contract_ingestion_runs")
+    .select("id, status, error_code")
+    .eq("organization_id", orgId)
+    .eq("contract_id", contractId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return null;
+  const { count } = await supabase
+    .from("contract_obligations")
+    .select("id", { count: "exact", head: true })
+    .eq("ingestion_run_id", data.id);
+  return { id: data.id as string, status: data.status as string, error_code: data.error_code as string | null, obligations: count ?? 0 };
+}
+
+async function getIngestionSummary(orgId: string, contractId: string) {
+  const { createSupabaseServer } = await import("@/lib/supabase/server");
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase
+    .from("contract_obligations")
+    .select("review_status, payment_linked, financial_condition, external_dependency, frequency")
+    .eq("organization_id", orgId)
+    .eq("contract_id", contractId);
+  const rows = data ?? [];
+  return {
+    obligations: rows.length,
+    needsReview: rows.filter((o) => o.review_status === "needs_review" || o.review_status === "conflict_requires_review").length,
+    conflictCount: rows.filter((o) => o.review_status === "conflict_requires_review").length,
+    paymentLinked: rows.filter((o) => o.payment_linked === true).length,
+    financial: rows.filter((o) => o.financial_condition !== null).length,
+    externalDeps: rows.filter((o) => o.external_dependency !== null).length,
+    recurring: rows.filter((o) => o.frequency !== null).length,
+  };
+}
+
 export default async function ContractOverview(props: PageProps<"/[locale]/app/contracts/[id]">) {
   const { locale: rawLocale, id } = await props.params;
   const locale = asLocale(rawLocale);
@@ -29,6 +69,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const f = await getFormatter();
   const sp = await props.searchParams;
   const uploadState = typeof sp.uploaded === "string" ? "uploaded" : typeof sp.error === "string" ? sp.error : undefined;
+  const analysisState = typeof sp.analysis === "string" ? sp.analysis : undefined;
   const { orgId, db } = await requireTenant();
 
   const contract = await db.contracts.getById(orgId, id);
@@ -37,7 +78,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
 
-  const [obligations, clauses, evidence, risks, claims, actions, events, activity, documents] = await Promise.all([
+  const [obligations, clauses, evidence, risks, claims, actions, events, activity, documents, latestRun, obligationStats] = await Promise.all([
     db.obligations.list(orgId, { contractId: id }),
     db.contracts.listClauses(orgId, id),
     db.evidence.list(orgId, { contractId: id }),
@@ -47,6 +88,8 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     db.agent.listEvents(orgId, { contractId: id, limit: 5 }),
     db.activity.list(orgId, { contractId: id, limit: 6 }),
     db.documents.list(orgId, id),
+    isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve(null),
+    isLive ? getIngestionSummary(orgId, id) : Promise.resolve(null),
   ]);
 
   const h = contract.health;
@@ -105,6 +148,48 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
           },
         }}
       />
+
+      {isLive && analysisState && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-2.5 text-xs text-muted">
+          {analysisState === "unconfigured"
+            ? t("ingestion.unconfigured")
+            : analysisState === "nodocs"
+              ? t("ingestion.needDocuments")
+              : analysisState === "fail"
+                ? t("ingestion.failed")
+                : analysisState === "ok"
+                  ? t("ingestion.readyHint")
+                  : t("ingestion.unavailable")}
+        </p>
+      )}
+
+      {isLive && (
+        <IngestionControls
+          contractId={id}
+          locale={locale}
+          hasDocuments={documents.length > 0}
+          canRun={isLive}
+          currentRun={latestRun}
+          analysis={obligationStats}
+          labels={{
+            title: t("ingestion.title"),
+            unavailable: t("ingestion.unavailable"),
+            needDocuments: t("ingestion.needDocuments"),
+            analyze: t("ingestion.analyze"),
+            lastCounts: "",
+            running: t("ingestion.running"),
+            stages: t("ingestion.stages"),
+            failed: t("ingestion.failed"),
+            total: t("ingestion.total"),
+            recurring: t("ingestion.recurring"),
+            payment: t("ingestion.payment"),
+            financial: t("ingestion.financial"),
+            external: t("ingestion.external"),
+            needsReview: t("ingestion.needsReview"),
+            readyHint: t("ingestion.readyHint"),
+          }}
+        />
+      )}
 
       {pipeline && <IntakeTimeline pipeline={pipeline} />}
 

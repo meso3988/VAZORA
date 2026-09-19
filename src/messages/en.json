@@ -1387,6 +1387,23 @@
         "upload": "Upload failed. Please try again."
       }
     },
+    "ingestion": {
+      "title": "Contract analysis",
+      "unavailable": "AI extraction is not configured — set the extraction provider.",
+      "unconfigured": "AI analysis is not configured for this environment — set the extraction provider first (VAZORA_EXTRACTION_PROVIDER).",
+      "needDocuments": "Upload the contract file first (Contract documents).",
+      "analyze": "Analyze contract",
+      "running": "Analyzing the contract now ({status})…",
+      "stages": "Read documents → structure clauses → identify obligations → evidence requirements → financial conditions → prepare review",
+      "failed": "Analysis failed — review the details or retry.",
+      "total": "Total obligations",
+      "recurring": "Recurring",
+      "payment": "Payment-linked",
+      "financial": "Financial conditions",
+      "external": "External dependencies",
+      "needsReview": "Need your review",
+      "readyHint": "Analysis ready — review obligations before activation."
+    },
     "pipeline": {
       "title": "Contract intake — {file}",
       "hint": "Uploaded by {by} · {date} · fully active in {total}",
