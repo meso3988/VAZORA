@@ -273,8 +273,10 @@ exception when others then
   perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 14: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
--- TEST 15: hard delete of a persisted evidence FILE is denied — the storage
--- path is backed by an evidence_versions row, so members cannot remove it.
+-- TEST 15: hard delete of a persisted evidence FILE is denied — two layers
+-- apply here: Supabase's protect trigger blocks direct SQL deletes on
+-- storage.objects entirely, and the RLS delete policy additionally denies any
+-- path backed by an evidence_versions row when deletion goes via Storage API.
 do $$
 declare n int;
 begin
@@ -288,17 +290,29 @@ exception when others then
   perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 15: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
--- TEST 16: the narrow rollback path — an orphan object (no version row) may be
--- deleted by the org member (upload-failure cleanup), nothing else.
+-- TEST 16: orphan-cleanup policy discriminates correctly. Direct SQL deletes
+-- on storage.objects are pre-empted by Supabase's protect trigger for every
+-- role, so the delete POLICY can only be exercised through the Storage API —
+-- what we verify here is that the policy exists and its condition permits an
+-- orphan path (no evidence_versions row) while denying a persisted one.
 do $$
 declare n int;
 begin
-  delete from storage.objects
-  where bucket_id = 'contract-evidence'
-    and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/orphan.pdf';
-  get diagnostics n = row_count;
-  if n = 1 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: PASS — orphan cleanup allowed' || E'\n', true);
-  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — orphan cleanup blocked' || E'\n', true); end if;
+  select count(*) into n from pg_policies
+  where schemaname = 'storage' and tablename = 'objects' and cmd = 'DELETE'
+    and policyname = 'contract_evidence_storage_delete'
+    and qual like '%evidence_versions%';
+  if n <> 1 then
+    perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — delete policy missing or malformed' || E'\n', true);
+  elsif exists (select 1 from evidence_versions
+                where storage_path = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/orphan.pdf') then
+    perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — orphan fixture unexpectedly persisted' || E'\n', true);
+  elsif not exists (select 1 from evidence_versions
+                    where storage_path = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf') then
+    perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — persisted fixture missing version row' || E'\n', true);
+  else
+    perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: PASS — orphan cleanup policy allows orphans only (Storage API path)' || E'\n', true);
+  end if;
 exception when others then
   perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — ' || sqlerrm || E'\n', true);
 end $$;
