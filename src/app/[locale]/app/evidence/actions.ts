@@ -5,11 +5,13 @@ import { hasLocale } from "next-intl";
 import { auth } from "@/data/auth/provider";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { OVERRIDE_RESULTS, applyHumanOverride } from "@/lib/evidence/override";
+import { EVIDENCE_BUCKET, storeEvidenceVersion } from "@/lib/evidence/upload";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
 type AppLocale = (typeof routing.locales)[number];
 
-const BUCKET = "contract-evidence";
+const BUCKET = EVIDENCE_BUCKET;
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
 const EVIDENCE_TYPES = new Set([
@@ -34,11 +36,6 @@ const MIME_SIGNATURES: Record<string, { offset?: number; bytes: number[] }[]> = 
   "image/jpeg": [{ bytes: [0xff, 0xd8, 0xff] }],
   "image/webp": [{ bytes: [0x52, 0x49, 0x46, 0x46] }], // RIFF
 };
-
-function safeFileName(name: string): string {
-  const base = name.split(/[\\/]/).pop() ?? "evidence";
-  return base.replace(/[^\w.؀-ۿ-]+/g, "_").slice(0, 120) || "file";
-}
 
 function signatureMatches(buffer: Buffer, mime: string): boolean {
   const sigs = MIME_SIGNATURES[mime];
@@ -119,114 +116,6 @@ export async function createEvidenceItem(formData: FormData) {
   });
 
   redirect({ href: back(`created=${item.id}`), locale });
-}
-
-type UploadOutcome =
-  | { ok: true; versionId: string; versionNumber: number }
-  | { ok: false; error: string };
-
-/**
- * Shared version-upload path: validate bytes, store privately, insert the
- * immutable version row, then nudge the gap lifecycle. NEVER closes gaps —
- * only a verification run may resolve them (Checkpoint 2).
- */
-async function storeEvidenceVersion(opts: {
-  supabase: Awaited<ReturnType<typeof createSupabaseServer>>;
-  orgId: string;
-  userId: string;
-  evidenceItemId: string;
-  contractId: string;
-  file: File;
-}): Promise<UploadOutcome> {
-  const { supabase, orgId, userId, evidenceItemId, contractId, file } = opts;
-
-  const { data: last } = await supabase
-    .from("evidence_versions")
-    .select("version_number")
-    .eq("evidence_item_id", evidenceItemId)
-    .order("version_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const versionNumber = ((last?.version_number as number | undefined) ?? 0) + 1;
-
-  const versionId = crypto.randomUUID();
-  const fileName = safeFileName(file.name);
-  const storagePath = `${orgId}/${contractId}/${evidenceItemId}/${versionId}_${fileName}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(storagePath, buffer, { contentType: file.type, upsert: false });
-  if (uploadError) return { ok: false, error: "upload" };
-
-  const hashBuffer = await crypto.subtle.digest("SHA-256", new Uint8Array(buffer));
-  const fileHash = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
-
-  const { error: rowError } = await supabase.from("evidence_versions").insert({
-    id: versionId,
-    organization_id: orgId,
-    evidence_item_id: evidenceItemId,
-    version_number: versionNumber,
-    file_name: fileName,
-    storage_path: storagePath,
-    mime_type: file.type,
-    file_size: file.size,
-    file_hash: fileHash,
-    uploaded_by: userId,
-  });
-  if (rowError) {
-    await supabase.storage.from(BUCKET).remove([storagePath]);
-    return { ok: false, error: "upload" };
-  }
-
-  // New version ⇒ previous verification no longer applies to the candidate.
-  await supabase
-    .from("evidence_items")
-    .update({ status: "received" })
-    .eq("id", evidenceItemId)
-    .eq("organization_id", orgId);
-
-  // Open gaps on this item's linked requirements move to evidence_received —
-  // they stay open; only a verification run may resolve them.
-  const { data: links } = await supabase
-    .from("evidence_requirement_links")
-    .select("evidence_requirement_id")
-    .eq("evidence_item_id", evidenceItemId)
-    .eq("organization_id", orgId);
-  const reqIds = (links ?? []).map((l) => l.evidence_requirement_id as string);
-  if (reqIds.length) {
-    await supabase
-      .from("evidence_gaps")
-      .update({ status: "evidence_received" })
-      .eq("organization_id", orgId)
-      .in("evidence_requirement_id", reqIds)
-      .eq("status", "open");
-  }
-
-  await supabase.from("activity_log").insert({
-    organization_id: orgId,
-    actor_user_id: userId,
-    event_type: "evidence.version_uploaded",
-    entity_type: "evidence_item",
-    entity_id: evidenceItemId,
-    metadata: { version_id: versionId, version_number: versionNumber, file_name: fileName },
-  });
-
-  // New evidence received → re-verification. Runs only when a provider is
-  // configured and criteria are linked; a failed attempt never marks the
-  // item verified and never closes a gap.
-  const { verificationProviderConfigured, runEvidenceVerification } = await import("@/lib/evidence/run");
-  if (verificationProviderConfigured()) {
-    try {
-      await runEvidenceVerification({
-        supabase, organizationId: orgId, evidenceItemId, userId,
-      });
-    } catch {
-      // verification failure is isolated — the upload itself still succeeds
-    }
-  }
-
-  return { ok: true, versionId, versionNumber };
 }
 
 function validateUploadFile(file: FormDataEntryValue | null): { ok: true; file: File } | { ok: false; error: string } {
@@ -405,11 +294,6 @@ export async function linkEvidenceToRequirement(formData: FormData) {
   redirect({ href: back(`linked=${evidenceItemId}`), locale });
 }
 
-const OVERRIDE_RESULTS = new Set([
-  "verified", "partial", "missing", "not_found",
-  "not_applicable", "needs_human_review", "unable_to_verify",
-]);
-
 /**
  * Run a verification attempt on the item's latest version. Every call creates
  * a NEW verification run — prior history is never overwritten.
@@ -438,10 +322,8 @@ export async function requestEvidenceVerification(formData: FormData) {
 }
 
 /**
- * Authorized human override on a single check. The AI/deterministic result is
- * NEVER mutated — the human decision is stored alongside it (human_result +
- * reason + actor + timestamp). When the effective result becomes verified,
- * the matching open gap resolves via the check's verification run.
+ * Authorized human override on a single check — thin wrapper over
+ * applyHumanOverride (src/lib/evidence/override.ts).
  */
 export async function overrideEvidenceCheck(formData: FormData) {
   const locale = localeOf(formData);
@@ -460,62 +342,12 @@ export async function overrideEvidenceCheck(formData: FormData) {
   }
 
   const supabase = await createSupabaseServer();
-  const { data: check } = await supabase
-    .from("evidence_verification_checks")
-    .select("id, verification_run_id, evidence_requirement_id")
-    .eq("id", checkId)
-    .eq("organization_id", orgId)
-    .maybeSingle();
-  if (!check) {
-    redirect({ href: back("error=forbidden"), locale });
-    throw new Error("unreachable");
-  }
-
-  const { error } = await supabase
-    .from("evidence_verification_checks")
-    .update({
-      human_result: humanResult,
-      human_reason: reason,
-      overridden_by: session.user.id,
-      overridden_at: new Date().toISOString(),
-    })
-    .eq("id", checkId)
-    .eq("organization_id", orgId);
-  if (error) {
-    redirect({ href: back("error=override"), locale });
-    throw new Error("unreachable");
-  }
-
-  await supabase.from("activity_log").insert({
-    organization_id: orgId,
-    actor_user_id: session.user.id,
-    event_type: "evidence.human_override",
-    entity_type: "evidence_verification_check",
-    entity_id: checkId,
-    metadata: { run_id: check.verification_run_id, human_result: humanResult },
+  const outcome = await applyHumanOverride({
+    supabase, orgId, userId: session.user.id, checkId, humanResult, reason,
   });
-
-  // Override to verified resolves the criterion's active gap — attribution is
-  // the check's own run, and the override record keeps the AI result intact.
-  if (humanResult === "verified" && check.evidence_requirement_id) {
-    const { data: gap } = await supabase
-      .from("evidence_gaps")
-      .update({ status: "resolved", closed_by_verification_run_id: check.verification_run_id })
-      .eq("organization_id", orgId)
-      .eq("evidence_requirement_id", check.evidence_requirement_id)
-      .in("status", ["open", "evidence_received", "reverification_pending"])
-      .select("id")
-      .maybeSingle();
-    if (gap) {
-      await supabase.from("activity_log").insert({
-        organization_id: orgId,
-        actor_user_id: session.user.id,
-        event_type: "evidence.gap_closed",
-        entity_type: "evidence_gap",
-        entity_id: gap.id,
-        metadata: { run_id: check.verification_run_id, via: "human_override" },
-      });
-    }
+  if (!outcome.ok) {
+    redirect({ href: back(`error=${outcome.error}`), locale });
+    throw new Error("unreachable");
   }
 
   redirect({ href: back(`overridden=${checkId}`), locale });

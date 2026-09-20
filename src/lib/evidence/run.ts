@@ -8,7 +8,7 @@ import { getVerificationProvider, verifyValidated } from "@/lib/evidence/verifie
 import "@/lib/evidence/providers/anthropic";
 import "@/lib/evidence/providers/openai-compat";
 
-type SupabaseLike = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServer>>;
+export type SupabaseLike = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServer>>;
 
 const BUCKET = "contract-evidence";
 
