@@ -1,16 +1,19 @@
 -- ============================================================================
--- VAZORA — Phase 3 evidence tenant-isolation test (editor-safe)
+-- VAZORA — Phase 3 evidence tenant-isolation test (one-paste runnable)
 --
--- Same mechanics as rls-isolation.sql: run inside the Supabase SQL editor,
--- assertions execute as `authenticated` via request.jwt.claims. Everything
--- rolls back at the end — safe to run repeatedly.
+-- Paste the whole file into the Supabase SQL editor and run once. Each
+-- assertion executes inside a DO block with an EXCEPTION handler, so an
+-- expected denial does NOT abort the transaction — the run completes and
+-- prints one line per test to the Messages panel:
+--   TEST n: PASS — ...        (denial enforced / write allowed as designed)
+--   TEST n: FAIL — ...        (something leaked or a legit op broke)
+-- Everything rolls back at the end — safe to run repeatedly.
 --
 -- Coverage:
---   * Alpha cannot read Beta evidence items/versions/links/runs/checks/gaps
---   * Alpha cannot write evidence rows that reference Beta objects
---   * Gap lifecycle gate: resolve requires a verification run; resolved is
---     terminal
---   * Storage objects in `contract-evidence` isolated by org path segment
+--   * Alpha cannot read Beta items/versions/links/runs/checks/gaps
+--   * Alpha cannot write rows referencing Beta objects
+--   * Alpha cannot touch Beta files in the contract-evidence bucket
+--   * Gap gate: resolve requires a verification run; resolved is terminal
 -- ============================================================================
 
 begin;
@@ -47,7 +50,6 @@ insert into contract_ingestion_runs (id, organization_id, contract_id, status, p
   ('33300000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', '22200000-0000-4000-8000-000000000002', 'approved', '0.2.0', 'test')
 on conflict (id) do nothing;
 
--- obligations: approved + sourced so they could activate
 insert into contract_obligations (id, organization_id, contract_id, ingestion_run_id, title, requirement_text, review_status) values
   ('44400000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '33300000-0000-4000-8000-000000000001', 'Alpha monthly report', 'submit monthly report', 'approved'),
   ('44400000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000002', '22200000-0000-4000-8000-000000000002', '33300000-0000-4000-8000-000000000002', 'Beta monthly report', 'submit monthly report', 'approved')
@@ -90,76 +92,160 @@ insert into storage.objects (bucket_id, name, owner_id) values
   ('contract-evidence', '20000000-0000-4000-8000-000000000002/22200000-0000-4000-8000-000000000002/77700000-0000-4000-8000-000000000002/v1_beta.pdf', '00000000-0000-4000-8000-0000000000b1');
 
 -- ===========================================================================
--- Perspective: User A (Alpha)
+-- Perspective: User A (Alpha owner)
 -- ===========================================================================
 set local role authenticated;
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-4000-8000-0000000000a1","aud":"authenticated","role":"authenticated"}', true);
 
--- 1. READ DENIAL — every Phase 3 entity hides Beta rows. expect: all 0
-select
-  (select count(*) from evidence_items)            as items_seen,
-  (select count(*) from evidence_versions)         as versions_seen,
-  (select count(*) from evidence_requirement_links) as links_seen,
-  (select count(*) from evidence_verification_runs) as runs_seen,
-  (select count(*) from evidence_verification_checks) as checks_seen,
-  (select count(*) from evidence_gaps)             as gaps_seen;
+-- TEST 1: read denial — Alpha sees zero Beta evidence rows.
+do $$
+declare
+  n int;
+begin
+  select (select count(*) from evidence_items)
+       + (select count(*) from evidence_versions)
+       + (select count(*) from evidence_requirement_links)
+       + (select count(*) from evidence_verification_runs)
+       + (select count(*) from evidence_verification_checks)
+       + (select count(*) from evidence_gaps) into n;
+  if n = 0 then raise notice 'TEST 1: PASS — zero Beta rows visible'; end if;
+  if n > 0 then raise notice 'TEST 1: FAIL — % Beta rows visible', n; end if;
+end $$;
 
--- 2. Cannot read Beta storage objects. expect: 0
-select count(*) as beta_evidence_storage_deny
-from storage.objects
-where bucket_id = 'contract-evidence'
-  and name like '20000000-0000-4000-8000-000000000002/%';
+-- TEST 2: cannot read Beta evidence files. expect count 0.
+do $$
+declare n int;
+begin
+  select count(*) into n from storage.objects
+  where bucket_id = 'contract-evidence'
+    and name like '20000000-0000-4000-8000-000000000002/%';
+  if n = 0 then raise notice 'TEST 2: PASS — Beta evidence storage hidden';
+  else raise notice 'TEST 2: FAIL — % objects visible', n; end if;
+end $$;
 
--- 3. WRITE DENIAL — Alpha item cannot point at Beta contract. expect: ERROR
-insert into evidence_items (organization_id, contract_id, title) values
-  ('10000000-0000-4000-8000-000000000001', '22200000-0000-4000-8000-000000000002', 'cross-tenant item');
+-- TEST 3: Alpha item pointing at Beta contract must be rejected.
+do $$
+begin
+  insert into evidence_items (organization_id, contract_id, title) values
+    ('10000000-0000-4000-8000-000000000001', '22200000-0000-4000-8000-000000000002', 'cross-tenant item');
+  raise notice 'TEST 3: FAIL — cross-tenant contract insert succeeded';
+exception when others then
+  raise notice 'TEST 3: PASS — %', sqlerrm;
+end $$;
 
--- 4. WRITE DENIAL — Alpha item cannot point at Beta obligation. expect: ERROR
-insert into evidence_items (organization_id, contract_id, obligation_id, title) values
-  ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000002', 'cross-tenant obligation');
+-- TEST 4: Alpha item pointing at Beta obligation must be rejected.
+do $$
+begin
+  insert into evidence_items (organization_id, contract_id, obligation_id, title) values
+    ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000002', 'cross-tenant obligation');
+  raise notice 'TEST 4: FAIL — cross-tenant obligation insert succeeded';
+exception when others then
+  raise notice 'TEST 4: PASS — %', sqlerrm;
+end $$;
 
--- 5. Legit insert — Alpha evidence item for Alpha contract. expect: INSERT 1
-insert into evidence_items (id, organization_id, contract_id, obligation_id, title, evidence_type) values
-  ('77700000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', 'Alpha September report', 'report');
+-- TEST 5: legit insert — Alpha item/version/link/run for Alpha objects.
+do $$
+begin
+  insert into evidence_items (id, organization_id, contract_id, obligation_id, title, evidence_type) values
+    ('77700000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', 'Alpha September report', 'report');
+  insert into evidence_versions (id, organization_id, evidence_item_id, version_number, file_name, storage_path, mime_type, file_size, file_hash) values
+    ('88800000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', 1, 'a.pdf', 'a/ev/v1_a.pdf', 'application/pdf', 10, 'bb');
+  insert into evidence_requirement_links (organization_id, evidence_item_id, evidence_version_id, evidence_requirement_id) values
+    ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000001');
+  insert into evidence_verification_runs (id, organization_id, contract_id, obligation_id, evidence_item_id, evidence_version_id, status) values
+    ('99900000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', 'completed');
+  raise notice 'TEST 5: PASS — same-tenant writes allowed';
+exception when others then
+  raise notice 'TEST 5: FAIL — %', sqlerrm;
+end $$;
 
-insert into evidence_versions (id, organization_id, evidence_item_id, version_number, file_name, storage_path, mime_type, file_size, file_hash) values
-  ('88800000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', 1, 'a.pdf', 'a/ev/v1_a.pdf', 'application/pdf', 10, 'bb');
+-- TEST 6: Alpha link cannot reference Beta requirement.
+do $$
+begin
+  insert into evidence_requirement_links (organization_id, evidence_item_id, evidence_requirement_id) values
+    ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000002');
+  raise notice 'TEST 6: FAIL — cross-tenant requirement link succeeded';
+exception when others then
+  raise notice 'TEST 6: PASS — %', sqlerrm;
+end $$;
 
--- 6. WRITE DENIAL — Alpha link cannot reference Beta requirement. expect: ERROR
-insert into evidence_requirement_links (organization_id, evidence_item_id, evidence_requirement_id) values
-  ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000002');
+-- TEST 7: Alpha run cannot reference Beta item/version.
+do $$
+begin
+  insert into evidence_verification_runs (organization_id, contract_id, evidence_item_id, evidence_version_id, status) values
+    ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000002', '88800000-0000-4000-8000-000000000002', 'queued');
+  raise notice 'TEST 7: FAIL — cross-tenant run insert succeeded';
+exception when others then
+  raise notice 'TEST 7: PASS — %', sqlerrm;
+end $$;
 
--- 7. WRITE DENIAL — Alpha verification run cannot reference Beta item. expect: ERROR
-insert into evidence_verification_runs (organization_id, contract_id, evidence_item_id, evidence_version_id, status) values
-  ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000002', '88800000-0000-4000-8000-000000000002', 'queued');
+-- TEST 8: Alpha check cannot reference Beta run.
+do $$
+begin
+  insert into evidence_verification_checks (organization_id, verification_run_id, check_label, result) values
+    ('10000000-0000-4000-8000-000000000001', '99900000-0000-4000-8000-000000000002', 'x', 'missing');
+  raise notice 'TEST 8: FAIL — cross-tenant check insert succeeded';
+exception when others then
+  raise notice 'TEST 8: PASS — %', sqlerrm;
+end $$;
 
--- 8. WRITE DENIAL — Alpha check cannot reference Beta run. expect: ERROR
-insert into evidence_verification_checks (organization_id, verification_run_id, check_label, result) values
-  ('10000000-0000-4000-8000-000000000001', '99900000-0000-4000-8000-000000000002', 'x', 'missing');
+-- TEST 9: Alpha cannot close Beta gap (update must hit 0 rows).
+do $$
+declare n int;
+begin
+  update evidence_gaps set status = 'resolved',
+    closed_by_verification_run_id = '99900000-0000-4000-8000-000000000002'
+  where id = 'aaa00000-0000-4000-8000-000000000002';
+  get diagnostics n = row_count;
+  if n = 0 then raise notice 'TEST 9: PASS — Beta gap unreachable';
+  else raise notice 'TEST 9: FAIL — modified % Beta gaps', n; end if;
+end $$;
 
--- 9. WRITE DENIAL — Alpha cannot close/modify Beta gap (update hits 0 rows).
-update evidence_gaps set status = 'resolved', closed_by_verification_run_id = '99900000-0000-4000-8000-000000000002'
-where id = 'aaa00000-0000-4000-8000-000000000002';  -- expect: UPDATE 0
+-- TEST 10: resolving a gap without a verification run is impossible.
+do $$
+begin
+  insert into evidence_gaps (organization_id, contract_id, description, status) values
+    ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', 'forced close', 'resolved');
+  raise notice 'TEST 10: FAIL — gap resolved without verification run';
+exception when others then
+  raise notice 'TEST 10: PASS — %', sqlerrm;
+end $$;
 
--- 10. GAP GATE — resolving without a run id is impossible. expect: ERROR
-insert into evidence_gaps (organization_id, contract_id, description, status) values
-  ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', 'forced close', 'resolved');
+-- TEST 11: legal lifecycle — open → evidence_received → reverification → resolved.
+do $$
+declare n int;
+begin
+  insert into evidence_gaps (id, organization_id, contract_id, obligation_id, evidence_requirement_id, description)
+  values ('aaa00000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000001', 'missing KPI 6');
+  update evidence_gaps set status = 'evidence_received' where id = 'aaa00000-0000-4000-8000-000000000001';
+  update evidence_gaps set status = 'reverification_pending' where id = 'aaa00000-0000-4000-8000-000000000001';
+  update evidence_gaps set status = 'resolved', closed_by_verification_run_id = '99900000-0000-4000-8000-000000000001'
+  where id = 'aaa00000-0000-4000-8000-000000000001';
+  select count(*) into n from evidence_gaps where id = 'aaa00000-0000-4000-8000-000000000001' and status = 'resolved' and closed_at is not null;
+  if n = 1 then raise notice 'TEST 11: PASS — full gap lifecycle works';
+  else raise notice 'TEST 11: FAIL — lifecycle incomplete'; end if;
+exception when others then
+  raise notice 'TEST 11: FAIL — %', sqlerrm;
+end $$;
 
--- 11. Legit gap + legal lifecycle. expect: INSERT 1, UPDATE 1, UPDATE 1
-insert into evidence_gaps (id, organization_id, contract_id, obligation_id, evidence_requirement_id, description)
-values ('aaa00000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000001', 'missing KPI 6');
+-- TEST 12: resolved is terminal — reopening must be rejected.
+do $$
+begin
+  update evidence_gaps set status = 'open' where id = 'aaa00000-0000-4000-8000-000000000001';
+  raise notice 'TEST 12: FAIL — resolved gap reopened';
+exception when others then
+  raise notice 'TEST 12: PASS — %', sqlerrm;
+end $$;
 
-update evidence_gaps set status = 'evidence_received' where id = 'aaa00000-0000-4000-8000-000000000001';  -- upload arrives
-update evidence_gaps set status = 'reverification_pending' where id = 'aaa00000-0000-4000-8000-000000000001';
-
-insert into evidence_verification_runs (id, organization_id, contract_id, obligation_id, evidence_item_id, evidence_version_id, status) values
-  ('99900000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', 'completed');
-
-update evidence_gaps set status = 'resolved', closed_by_verification_run_id = '99900000-0000-4000-8000-000000000001'
-where id = 'aaa00000-0000-4000-8000-000000000001';  -- expect: UPDATE 1, closed_at set
-
--- 12. Resolved is terminal — reopening is rejected. expect: ERROR
-update evidence_gaps set status = 'open' where id = 'aaa00000-0000-4000-8000-000000000001';
+-- TEST 13: 'verified' check without source support is rejected (non-deterministic).
+do $$
+begin
+  insert into evidence_verification_checks (organization_id, verification_run_id, check_label, check_kind, result) values
+    ('10000000-0000-4000-8000-000000000001', '99900000-0000-4000-8000-000000000001', 'unsupported', 'ai_semantic', 'verified');
+  raise notice 'TEST 13: FAIL — verified without source support accepted';
+exception when others then
+  raise notice 'TEST 13: PASS — %', sqlerrm;
+end $$;
 
 rollback;
