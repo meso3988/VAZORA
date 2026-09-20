@@ -29,8 +29,9 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
   const { locale: rawLocale, id } = await props.params;
   const locale = asLocale(rawLocale);
   setRequestLocale(locale);
-  const { v: versionParam } = await props.searchParams;
+  const { v: versionParam, uploaded, error } = await props.searchParams;
   const t = await getTranslations("app.evidence.inspector");
+  const ut = await getTranslations("app.evidence.upload");
   const vt = await getTranslations("app.evidence.versions");
   const gt = await getTranslations("app.evidence.gaps");
   const session = await auth.getSession();
@@ -122,6 +123,17 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
           ) : undefined
         }
       />
+
+      {typeof uploaded === "string" && uploaded && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
+          {ut("receivedNotice")}
+        </p>
+      )}
+      {typeof error === "string" && error && (
+        <p className="rounded-md border border-missing/40 bg-missing/5 px-4 py-3 text-xs text-missing" role="alert">
+          {ut("errorNotice")}
+        </p>
+      )}
 
       {/* ===== three-zone inspector — mobile order: gaps(2) → A→B→C(3) → history(4) ===== */}
       <div className="grid grid-cols-1 gap-4 max-lg:order-3 lg:grid-cols-3">
