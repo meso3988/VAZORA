@@ -212,6 +212,20 @@ async function storeEvidenceVersion(opts: {
     metadata: { version_id: versionId, version_number: versionNumber, file_name: fileName },
   });
 
+  // New evidence received → re-verification. Runs only when a provider is
+  // configured and criteria are linked; a failed attempt never marks the
+  // item verified and never closes a gap.
+  const { verificationProviderConfigured, runEvidenceVerification } = await import("@/lib/evidence/run");
+  if (verificationProviderConfigured()) {
+    try {
+      await runEvidenceVerification({
+        supabase, organizationId: orgId, evidenceItemId, userId,
+      });
+    } catch {
+      // verification failure is isolated — the upload itself still succeeds
+    }
+  }
+
   return { ok: true, versionId, versionNumber };
 }
 
@@ -389,6 +403,122 @@ export async function linkEvidenceToRequirement(formData: FormData) {
   });
 
   redirect({ href: back(`linked=${evidenceItemId}`), locale });
+}
+
+const OVERRIDE_RESULTS = new Set([
+  "verified", "partial", "missing", "not_found",
+  "not_applicable", "needs_human_review", "unable_to_verify",
+]);
+
+/**
+ * Run a verification attempt on the item's latest version. Every call creates
+ * a NEW verification run — prior history is never overwritten.
+ */
+export async function requestEvidenceVerification(formData: FormData) {
+  const locale = localeOf(formData);
+  const session = await liveSession(locale);
+  const evidenceItemId = String(formData.get("evidenceItemId") ?? "").slice(0, 64);
+  const contractId = String(formData.get("contractId") ?? "").slice(0, 64);
+  const back = (params: string) =>
+    contractId ? `/app/contracts/${contractId}/evidence?${params}` : `/app/evidence?${params}`;
+
+  const supabase = await createSupabaseServer();
+  const { runEvidenceVerification } = await import("@/lib/evidence/run");
+  const outcome = await runEvidenceVerification({
+    supabase,
+    organizationId: session.organizationId,
+    evidenceItemId,
+    userId: session.user.id,
+  });
+  if (!outcome.ok) {
+    redirect({ href: back(`error=${outcome.error.split(":")[0]}`), locale });
+    throw new Error("unreachable");
+  }
+  redirect({ href: back(`verified=${outcome.overall}`), locale });
+}
+
+/**
+ * Authorized human override on a single check. The AI/deterministic result is
+ * NEVER mutated — the human decision is stored alongside it (human_result +
+ * reason + actor + timestamp). When the effective result becomes verified,
+ * the matching open gap resolves via the check's verification run.
+ */
+export async function overrideEvidenceCheck(formData: FormData) {
+  const locale = localeOf(formData);
+  const session = await liveSession(locale);
+  const orgId = session.organizationId;
+  const checkId = String(formData.get("checkId") ?? "").slice(0, 64);
+  const humanResult = String(formData.get("humanResult") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 1000);
+  const contractId = String(formData.get("contractId") ?? "").slice(0, 64);
+  const back = (params: string) =>
+    contractId ? `/app/contracts/${contractId}/evidence?${params}` : `/app/evidence?${params}`;
+
+  if (!OVERRIDE_RESULTS.has(humanResult) || !reason) {
+    redirect({ href: back("error=invalid"), locale });
+    throw new Error("unreachable");
+  }
+
+  const supabase = await createSupabaseServer();
+  const { data: check } = await supabase
+    .from("evidence_verification_checks")
+    .select("id, verification_run_id, evidence_requirement_id")
+    .eq("id", checkId)
+    .eq("organization_id", orgId)
+    .maybeSingle();
+  if (!check) {
+    redirect({ href: back("error=forbidden"), locale });
+    throw new Error("unreachable");
+  }
+
+  const { error } = await supabase
+    .from("evidence_verification_checks")
+    .update({
+      human_result: humanResult,
+      human_reason: reason,
+      overridden_by: session.user.id,
+      overridden_at: new Date().toISOString(),
+    })
+    .eq("id", checkId)
+    .eq("organization_id", orgId);
+  if (error) {
+    redirect({ href: back("error=override"), locale });
+    throw new Error("unreachable");
+  }
+
+  await supabase.from("activity_log").insert({
+    organization_id: orgId,
+    actor_user_id: session.user.id,
+    event_type: "evidence.human_override",
+    entity_type: "evidence_verification_check",
+    entity_id: checkId,
+    metadata: { run_id: check.verification_run_id, human_result: humanResult },
+  });
+
+  // Override to verified resolves the criterion's active gap — attribution is
+  // the check's own run, and the override record keeps the AI result intact.
+  if (humanResult === "verified" && check.evidence_requirement_id) {
+    const { data: gap } = await supabase
+      .from("evidence_gaps")
+      .update({ status: "resolved", closed_by_verification_run_id: check.verification_run_id })
+      .eq("organization_id", orgId)
+      .eq("evidence_requirement_id", check.evidence_requirement_id)
+      .in("status", ["open", "evidence_received", "reverification_pending"])
+      .select("id")
+      .maybeSingle();
+    if (gap) {
+      await supabase.from("activity_log").insert({
+        organization_id: orgId,
+        actor_user_id: session.user.id,
+        event_type: "evidence.gap_closed",
+        entity_type: "evidence_gap",
+        entity_id: gap.id,
+        metadata: { run_id: check.verification_run_id, via: "human_override" },
+      });
+    }
+  }
+
+  redirect({ href: back(`overridden=${checkId}`), locale });
 }
 
 /** Short-lived signed URL (60s) — minted only after the RLS-checked select. */

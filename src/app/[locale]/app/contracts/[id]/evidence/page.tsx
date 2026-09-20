@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { EVIDENCE_TYPES, EvidenceUpload } from "@/components/app/evidence-upload";
+import { requestEvidenceVerification } from "@/app/[locale]/app/evidence/actions";
 import { Panel, StackedBar } from "@/components/app/primitives";
 import { EvidenceTable } from "@/components/app/tables";
 import { statusTone, toneDot } from "@/components/ui/status";
@@ -55,7 +56,7 @@ export default async function ContractEvidence(props: PageProps<"/[locale]/app/c
         }}
       />
       <Panel title={t("title")} tone="graphite" hint={t("subtitle")}>
-        <EvidenceTable evidence={evidence} obligations={obligations} />
+        <EvidenceTable evidence={evidence} obligations={obligations} verifyAction={isLive ? requestEvidenceVerification : undefined} />
       </Panel>
     </>
   );

@@ -410,11 +410,26 @@
       "providerTitle": "A wider view for assessment providers.",
       "providerHint": "Provider vision · illustrative portfolio",
       "portfolio": [
-        { "value": "42", "label": "Client organizations" },
-        { "value": "17", "label": "Active assessments" },
-        { "value": "5", "label": "Frameworks" },
-        { "value": "73", "label": "Open findings" },
-        { "value": "8", "label": "Human reviewers" }
+        {
+          "value": "42",
+          "label": "Client organizations"
+        },
+        {
+          "value": "17",
+          "label": "Active assessments"
+        },
+        {
+          "value": "5",
+          "label": "Frameworks"
+        },
+        {
+          "value": "73",
+          "label": "Open findings"
+        },
+        {
+          "value": "8",
+          "label": "Human reviewers"
+        }
       ],
       "providerFlow": [
         "Digital assessment",
@@ -587,7 +602,12 @@
       "subtitle": "VAZORA turns every awarded contract into monitored obligations, verified evidence, visible risk and payment-ready claims — continuously, clause by clause.",
       "primary": "Book a demo",
       "secondary": "See how it works",
-      "pillars": ["Obligations", "Evidence", "Verification", "Claim Readiness"]
+      "pillars": [
+        "Obligations",
+        "Evidence",
+        "Verification",
+        "Claim Readiness"
+      ]
     },
     "signature": {
       "document": "Contract · RTA-OM-2026-014",
@@ -1156,7 +1176,12 @@
       "sector": "Sector",
       "sectorPlaceholder": "Select a sector",
       "contracts": "Active contracts under management",
-      "contractsOptions": ["1–5", "6–20", "21–100", "100+"],
+      "contractsOptions": [
+        "1–5",
+        "6–20",
+        "21–100",
+        "100+"
+      ],
       "language": "Preferred session language",
       "message": "What would you like to see?",
       "submit": "Request demo",
@@ -1232,7 +1257,8 @@
       "close": "Close"
     },
     "dashboard": {
-      "title": "Dashboard",      "greeting": "Good day, {name}",
+      "title": "Dashboard",
+      "greeting": "Good day, {name}",
       "asOf": "Portfolio as of {date}",
       "kpis": {
         "contracts": "Active contracts",
@@ -1498,13 +1524,34 @@
       "title": "Contract intake — {file}",
       "hint": "Uploaded by {by} · {date} · fully active in {total}",
       "stages": {
-        "uploaded": { "label": "Contract uploaded", "detail": "Source document received" },
-        "parsing": { "label": "Structure parsed", "detail": "Text, schedules and annexes detected" },
-        "clauses": { "label": "Clauses detected", "detail": "{count} clauses with evidence requirements" },
-        "obligations": { "label": "Obligations generated", "detail": "{count} obligations written to the register" },
-        "owners": { "label": "Owners assigned", "detail": "Every obligation has a named owner" },
-        "requests": { "label": "Evidence requests sent", "detail": "Instant notifications to each owner" },
-        "ready": { "label": "Contract active", "detail": "Updates continuously as evidence arrives" }
+        "uploaded": {
+          "label": "Contract uploaded",
+          "detail": "Source document received"
+        },
+        "parsing": {
+          "label": "Structure parsed",
+          "detail": "Text, schedules and annexes detected"
+        },
+        "clauses": {
+          "label": "Clauses detected",
+          "detail": "{count} clauses with evidence requirements"
+        },
+        "obligations": {
+          "label": "Obligations generated",
+          "detail": "{count} obligations written to the register"
+        },
+        "owners": {
+          "label": "Owners assigned",
+          "detail": "Every obligation has a named owner"
+        },
+        "requests": {
+          "label": "Evidence requests sent",
+          "detail": "Instant notifications to each owner"
+        },
+        "ready": {
+          "label": "Contract active",
+          "detail": "Updates continuously as evidence arrives"
+        }
       }
     },
     "obligations": {
@@ -1533,6 +1580,7 @@
         "status": "Status"
       },
       "verification": "Verification",
+      "verify": "Run verification",
       "checks": "Checks",
       "passed": "{passed} of {total} checks passed",
       "byStatus": "By status",
@@ -1641,7 +1689,8 @@
       "dueIn": "Due",
       "source": "View source clause",
       "kinds": {
-        "attention": "Attention",        "due_soon": "Due soon",
+        "attention": "Attention",
+        "due_soon": "Due soon",
         "evidence_gap": "Evidence gap",
         "claim_readiness": "Claim readiness",
         "risk": "Risk",

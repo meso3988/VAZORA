@@ -282,6 +282,13 @@ const EVIDENCE_STATUS_MAP: Record<string, Evidence["status"]> = {
   rejected: "rejected",
 };
 
+type CheckRow = {
+  verification_run_id: string;
+  check_label: string;
+  result: string;
+  human_result: string | null;
+};
+
 const evidence: EvidenceRepository = {
   async list(organizationId, filter) {
     const supabase = await createSupabaseServer();
@@ -293,11 +300,50 @@ const evidence: EvidenceRepository = {
     if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
     if (filter?.obligationId) q = q.eq("obligation_id", filter.obligationId);
     const { data } = await q;
-    return ((data ?? []) as EvidenceItemRow[]).map((row) => {
+    const rows = (data ?? []) as EvidenceItemRow[];
+
+    // Latest verification run per item → its per-criterion checks. The
+    // effective result is coalesce(human_result, result): a human override
+    // wins for display while the AI result stays on the row.
+    const itemIds = rows.map((r) => r.id);
+    const { data: runs } = itemIds.length
+      ? await supabase
+          .from("evidence_verification_runs")
+          .select("id, evidence_item_id, overall_result, created_at")
+          .eq("organization_id", organizationId)
+          .in("evidence_item_id", itemIds)
+          .eq("status", "completed")
+          .order("created_at", { ascending: false })
+      : { data: [] as { id: string; evidence_item_id: string; overall_result: string | null; created_at: string }[] };
+    const latestRunByItem = new Map<string, { id: string; overall_result: string | null }>();
+    for (const r of runs ?? []) {
+      if (!latestRunByItem.has(r.evidence_item_id)) {
+        latestRunByItem.set(r.evidence_item_id, { id: r.id, overall_result: r.overall_result });
+      }
+    }
+    const runIds = [...latestRunByItem.values()].map((r) => r.id);
+    const { data: checkRows } = runIds.length
+      ? await supabase
+          .from("evidence_verification_checks")
+          .select("verification_run_id, check_label, result, human_result")
+          .eq("organization_id", organizationId)
+          .in("verification_run_id", runIds)
+          .not("evidence_requirement_id", "is", null)
+      : { data: [] as CheckRow[] };
+    const checksByRun = new Map<string, CheckRow[]>();
+    for (const c of checkRows ?? []) {
+      const list = checksByRun.get(c.verification_run_id) ?? [];
+      list.push(c);
+      checksByRun.set(c.verification_run_id, list);
+    }
+
+    return rows.map((row) => {
       const versions = row.evidence_versions ?? [];
       const latest = versions.length
         ? versions.reduce((a, v) => (v.version_number > a.version_number ? v : a))
         : null;
+      const latestRun = latestRunByItem.get(row.id);
+      const runChecks = latestRun ? (checksByRun.get(latestRun.id) ?? []) : [];
       return {
         id: row.id,
         organizationId: row.organization_id,
@@ -309,7 +355,13 @@ const evidence: EvidenceRepository = {
         uploadedAt: latest?.uploaded_at ?? row.created_at,
         version: latest?.version_number ?? 0,
         status: EVIDENCE_STATUS_MAP[row.status] ?? "pending",
-        verification: { summary: { en: "", ar: "" }, checks: [] },
+        verification: {
+          summary: { en: latestRun?.overall_result ?? "", ar: latestRun?.overall_result ?? "" },
+          checks: runChecks.map((c) => ({
+            label: { en: c.check_label, ar: c.check_label },
+            passed: (c.human_result ?? c.result) === "verified",
+          })),
+        },
       };
     });
   },

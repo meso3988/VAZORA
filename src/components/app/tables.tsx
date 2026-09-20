@@ -67,10 +67,13 @@ export async function EvidenceTable({
   evidence,
   obligations,
   contractTitles,
+  verifyAction,
 }: {
   evidence: Evidence[];
   obligations: Obligation[];
   contractTitles?: Record<string, string>;
+  /** Optional server action enabling the per-row "Run verification" button */
+  verifyAction?: (formData: FormData) => void | Promise<void>;
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app.evidence");
@@ -88,6 +91,7 @@ export async function EvidenceTable({
           <Th>{t("columns.version")}</Th>
           <Th>{t("verification")}</Th>
           <Th>{t("columns.status")}</Th>
+          {verifyAction ? <Th><span className="sr-only">{t("verify")}</span></Th> : null}
         </tr>
       </thead>
       <tbody className="divide-y divide-line">
@@ -132,6 +136,21 @@ export async function EvidenceTable({
                 </div>
               </Td>
               <Td><StatusPill status={e.status} subtle /></Td>
+              {verifyAction ? (
+                <Td>
+                  <form action={verifyAction}>
+                    <input type="hidden" name="evidenceItemId" value={e.id} />
+                    <input type="hidden" name="contractId" value={e.contractId} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      className="inline-flex h-7 items-center rounded-sm border border-line bg-elevated px-2.5 text-xs font-medium text-fg transition-colors hover:bg-fg/5"
+                    >
+                      {t("verify")}
+                    </button>
+                  </form>
+                </Td>
+              ) : null}
             </tr>
           );
         })}
