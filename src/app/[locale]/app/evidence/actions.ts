@@ -141,7 +141,7 @@ export async function uploadEvidenceVersion(formData: FormData) {
   const session = await liveSession(locale);
   const orgId = session.organizationId;
   const evidenceItemId = String(formData.get("evidenceItemId") ?? "").slice(0, 64);
-  const back = (params: string) => `/app/evidence?${params}`;
+  const back = (params: string) => `/app/evidence/${evidenceItemId}?${params}`;
 
   const check = validateUploadFile(formData.get("file"));
   if (!check.ok) {
@@ -187,11 +187,12 @@ export async function uploadNewEvidence(formData: FormData) {
   const orgId = session.organizationId;
   const contractId = String(formData.get("contractId") ?? "").slice(0, 64);
   const obligationId = String(formData.get("obligationId") ?? "").slice(0, 64) || null;
-  const title = String(formData.get("title") ?? "").trim().slice(0, 200);
+  const requirementId = String(formData.get("requirementId") ?? "").slice(0, 64) || null;
   const evidenceType = String(formData.get("evidenceType") ?? "document");
   const back = (params: string) => `/app/contracts/${contractId}/evidence?${params}`;
+  let title = String(formData.get("title") ?? "").trim().slice(0, 200);
 
-  if (!title || !EVIDENCE_TYPES.has(evidenceType)) {
+  if (!EVIDENCE_TYPES.has(evidenceType)) {
     redirect({ href: back("error=invalid"), locale });
     throw new Error("unreachable");
   }
@@ -217,12 +218,34 @@ export async function uploadNewEvidence(formData: FormData) {
     throw new Error("unreachable");
   }
 
+  // Pre-linked upload ("upload evidence for requirement X"): resolve the
+  // requirement for title fallback + obligation derivation.
+  let reqObligationId = obligationId;
+  if (requirementId) {
+    const { data: req } = await supabase
+      .from("obligation_evidence_requirements")
+      .select("id, obligation_id, name")
+      .eq("organization_id", orgId)
+      .eq("id", requirementId)
+      .maybeSingle();
+    if (!req) {
+      redirect({ href: back("error=forbidden"), locale });
+      throw new Error("unreachable");
+    }
+    reqObligationId = req.obligation_id as string;
+    if (!title) title = req.name as string;
+  }
+  if (!title) {
+    redirect({ href: back("error=invalid"), locale });
+    throw new Error("unreachable");
+  }
+
   const { data: item, error: itemError } = await supabase
     .from("evidence_items")
     .insert({
       organization_id: orgId,
       contract_id: contractId,
-      obligation_id: obligationId,
+      obligation_id: reqObligationId,
       title,
       evidence_type: evidenceType,
       created_by: session.user.id,
@@ -243,6 +266,19 @@ export async function uploadNewEvidence(formData: FormData) {
     metadata: { contract_id: contractId, obligation_id: obligationId },
   });
 
+  // Pre-link BEFORE storing so upload-time auto-verification sees the link —
+  // an item-level link (version-scoping is optional per the schema).
+  if (requirementId) {
+    await supabase.from("evidence_requirement_links").insert({
+      organization_id: orgId,
+      evidence_item_id: item.id,
+      evidence_version_id: null,
+      evidence_requirement_id: requirementId,
+      link_source: "manual",
+      created_by: session.user.id,
+    });
+  }
+
   const stored = await storeEvidenceVersion({
     supabase, orgId, userId: session.user.id,
     evidenceItemId: item.id as string, contractId, file: check.file,
@@ -252,6 +288,12 @@ export async function uploadNewEvidence(formData: FormData) {
     throw new Error("unreachable");
   }
 
+  // Requirement-scoped uploads land on the inspector so the honest
+  // "received → verification" state is visible immediately.
+  if (requirementId) {
+    redirect({ href: `/app/evidence/${item.id}`, locale });
+    throw new Error("unreachable");
+  }
   redirect({ href: back(`uploaded=${item.id}`), locale });
 }
 
@@ -266,7 +308,7 @@ export async function linkEvidenceToRequirement(formData: FormData) {
   const evidenceItemId = String(formData.get("evidenceItemId") ?? "").slice(0, 64);
   const requirementId = String(formData.get("requirementId") ?? "").slice(0, 64);
   const versionId = String(formData.get("versionId") ?? "").slice(0, 64) || null;
-  const back = (params: string) => `/app/evidence?${params}`;
+  const back = (params: string) => `/app/evidence/${evidenceItemId}?${params}`;
 
   const supabase = await createSupabaseServer();
   const { error } = await supabase.from("evidence_requirement_links").insert({
@@ -303,8 +345,13 @@ export async function requestEvidenceVerification(formData: FormData) {
   const session = await liveSession(locale);
   const evidenceItemId = String(formData.get("evidenceItemId") ?? "").slice(0, 64);
   const contractId = String(formData.get("contractId") ?? "").slice(0, 64);
+  const returnTo = String(formData.get("returnTo") ?? "");
   const back = (params: string) =>
-    contractId ? `/app/contracts/${contractId}/evidence?${params}` : `/app/evidence?${params}`;
+    returnTo === "item"
+      ? `/app/evidence/${evidenceItemId}?${params}`
+      : contractId
+        ? `/app/contracts/${contractId}/evidence?${params}`
+        : `/app/evidence?${params}`;
 
   const supabase = await createSupabaseServer();
   const { runEvidenceVerification } = await import("@/lib/evidence/run");

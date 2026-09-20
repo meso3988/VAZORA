@@ -68,12 +68,15 @@ export async function EvidenceTable({
   obligations,
   contractTitles,
   verifyAction,
+  detailBasePath,
 }: {
   evidence: Evidence[];
   obligations: Obligation[];
   contractTitles?: Record<string, string>;
   /** Optional server action enabling the per-row "Run verification" button */
   verifyAction?: (formData: FormData) => void | Promise<void>;
+  /** When set (live mode), the file cell links to the Evidence Inspector */
+  detailBasePath?: string;
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app.evidence");
@@ -102,7 +105,13 @@ export async function EvidenceTable({
             <tr key={e.id} className="align-top hover:bg-fg/3">
               <Td>
                 <div className="flex flex-col gap-0.5">
-                  <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                  {detailBasePath ? (
+                    <Link href={`${detailBasePath}/${e.id}`} className="hover:underline">
+                      <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                    </Link>
+                  ) : (
+                    <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                  )}
                   <span className="text-xs uppercase text-faint">{e.fileType}</span>
                 </div>
               </Td>
