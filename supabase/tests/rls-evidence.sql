@@ -22,11 +22,6 @@
 
 begin;
 
--- Results sink — created as postgres, granted to `authenticated` so the
--- DO blocks below can write outcomes regardless of TEMP privileges.
-create temp table evidence_rls_results (test int, outcome text);
-grant insert, select on evidence_rls_results to authenticated;
-
 -- --- Fixtures (postgres role — bypasses RLS intentionally) ------------------
 insert into auth.users (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
 values
@@ -110,6 +105,11 @@ insert into storage.objects (bucket_id, name, owner_id) values
 set local role authenticated;
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-4000-8000-0000000000a1","aud":"authenticated","role":"authenticated"}', true);
+
+-- Results sink — created AFTER the role switch. Since PG 15, objects in
+-- pg_temp created by another role are unreachable under SET ROLE, so the
+-- temp table must be owned by `authenticated` itself.
+create temp table evidence_rls_results (test int, outcome text);
 
 
 
