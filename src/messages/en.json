@@ -1548,6 +1548,32 @@
         "next": "What closes the gap?",
         "openObligation": "Open requirement",
         "closeHint": "Select an evidence item to inspect it."
+      },
+      "upload": {
+        "title": "Submit evidence",
+        "hint": "PDF, DOCX, XLSX, CSV or image — max 25 MB. Uploading never marks anything verified.",
+        "nameField": "Evidence title",
+        "typeField": "Evidence type",
+        "obligationField": "Linked obligation",
+        "noObligation": "No obligation link",
+        "submit": "Upload",
+        "types": {
+          "document": "Document",
+          "report": "Report",
+          "record": "Record",
+          "spreadsheet": "Spreadsheet",
+          "signature": "Signature",
+          "acknowledgement": "Acknowledgement",
+          "approval": "Approval",
+          "photo": "Photo",
+          "certificate": "Certificate",
+          "invoice": "Invoice",
+          "kpi": "KPI",
+          "log": "Log",
+          "meeting_minutes": "Meeting minutes",
+          "system_record": "System record",
+          "other": "Other"
+        }
       }
     },
     "risks": {

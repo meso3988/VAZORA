@@ -3,6 +3,8 @@ import "server-only";
 import type {
   Contract,
   ContractDocument,
+  Evidence,
+  Obligation,
   Organization,
   OrganizationMember,
   Project,
@@ -193,18 +195,123 @@ const contracts: ContractRepository = {
   },
 };
 
+type ObligationRow = {
+  id: string;
+  organization_id: string;
+  contract_id: string;
+  title: string;
+  requirement_text: string;
+  frequency: string | null;
+  activation_status: string;
+  review_status: string;
+  ai_payload: { source_clause_number?: string | null } | null;
+  created_at: string;
+  obligation_evidence_requirements?: { name: string }[];
+};
+
+const CADENCE_MAP: Record<string, Obligation["cadence"]> = {
+  weekly: "weekly",
+  monthly: "monthly",
+  quarterly: "quarterly",
+};
+
+function mapObligation(row: ObligationRow): Obligation {
+  return {
+    id: row.id,
+    organizationId: row.organization_id,
+    contractId: row.contract_id,
+    clauseId: "",
+    clauseRef: row.ai_payload?.source_clause_number ?? "",
+    requirement: { en: row.requirement_text, ar: row.requirement_text },
+    ownerId: "",
+    ownerName: "",
+    status: row.activation_status === "active" ? "verified" : row.review_status === "rejected" ? "missing" : "pending",
+    cadence: CADENCE_MAP[row.frequency ?? ""] ?? "one_time",
+    dueDate: "",
+    requiredEvidence: (row.obligation_evidence_requirements ?? []).map((r) => ({ en: r.name, ar: r.name })),
+    evidenceIds: [],
+  };
+}
+
 const obligations: ObligationRepository = {
-  async list() {
-    return [];
+  async list(organizationId, filter) {
+    const supabase = await createSupabaseServer();
+    let q = supabase
+      .from("contract_obligations")
+      .select("*, obligation_evidence_requirements(name)")
+      .eq("organization_id", organizationId)
+      .neq("review_status", "rejected")
+      .order("created_at", { ascending: true });
+    if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
+    const { data } = await q;
+    return ((data ?? []) as ObligationRow[]).map(mapObligation);
   },
-  async getById() {
-    return null;
+  async getById(organizationId, id) {
+    const supabase = await createSupabaseServer();
+    const { data } = await supabase
+      .from("contract_obligations")
+      .select("*, obligation_evidence_requirements(name)")
+      .eq("organization_id", organizationId)
+      .eq("id", id)
+      .maybeSingle();
+    return data ? mapObligation(data as ObligationRow) : null;
   },
 };
 
+type EvidenceItemRow = {
+  id: string;
+  organization_id: string;
+  contract_id: string;
+  obligation_id: string | null;
+  title: string;
+  status: string;
+  created_at: string;
+  evidence_versions?: {
+    id: string;
+    version_number: number;
+    file_name: string;
+    mime_type: string;
+    uploaded_by: string | null;
+    uploaded_at: string;
+  }[];
+};
+
+const EVIDENCE_STATUS_MAP: Record<string, Evidence["status"]> = {
+  verified: "verified",
+  partially_verified: "partial",
+  rejected: "rejected",
+};
+
 const evidence: EvidenceRepository = {
-  async list() {
-    return [];
+  async list(organizationId, filter) {
+    const supabase = await createSupabaseServer();
+    let q = supabase
+      .from("evidence_items")
+      .select("*, evidence_versions(*)")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false });
+    if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
+    if (filter?.obligationId) q = q.eq("obligation_id", filter.obligationId);
+    const { data } = await q;
+    return ((data ?? []) as EvidenceItemRow[]).map((row) => {
+      const versions = row.evidence_versions ?? [];
+      const latest = versions.length
+        ? versions.reduce((a, v) => (v.version_number > a.version_number ? v : a))
+        : null;
+      return {
+        id: row.id,
+        organizationId: row.organization_id,
+        contractId: row.contract_id,
+        obligationId: row.obligation_id ?? "",
+        fileName: latest?.file_name ?? row.title,
+        fileType: (latest?.mime_type ?? "").split("/").pop()?.split(".").pop() ?? "file",
+        uploadedBy: latest?.uploaded_by ?? "",
+        uploadedAt: latest?.uploaded_at ?? row.created_at,
+        version: latest?.version_number ?? 0,
+        status: EVIDENCE_STATUS_MAP[row.status] ?? "pending",
+        verification: { summary: { en: "", ar: "" }, checks: [] },
+      };
+    });
   },
 };
 

@@ -129,7 +129,7 @@ export type Evidence = {
   contractId: string;
   obligationId: string;
   fileName: string;
-  fileType: "pdf" | "xlsx" | "docx" | "jpg" | "eml";
+  fileType: string;
   uploadedBy: string;
   uploadedAt: ISODate;
   version: number;

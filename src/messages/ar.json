@@ -1539,6 +1539,32 @@
         "next": "ما الذي يغلق الفجوة؟",
         "openObligation": "فتح المتطلب",
         "closeHint": "اختر دليلاً من الجدول لفحصه بالتفصيل."
+      },
+      "upload": {
+        "title": "تقديم دليل",
+        "hint": "PDF أو DOCX أو XLSX أو CSV أو صورة — حتى 25MB. الرفع لا يعني التحقق أبدًا.",
+        "nameField": "عنوان الدليل",
+        "typeField": "نوع الدليل",
+        "obligationField": "الالتزام المرتبط",
+        "noObligation": "بدون ربط بالتزام",
+        "submit": "رفع",
+        "types": {
+          "document": "مستند",
+          "report": "تقرير",
+          "record": "سجل",
+          "spreadsheet": "جدول بيانات",
+          "signature": "توقيع",
+          "acknowledgement": "اعتماد استلام",
+          "approval": "اعتماد",
+          "photo": "صورة",
+          "certificate": "شهادة",
+          "invoice": "فاتورة",
+          "kpi": "مؤشر أداء",
+          "log": "سجل تشغيل",
+          "meeting_minutes": "محضر اجتماع",
+          "system_record": "سجل نظام",
+          "other": "أخرى"
+        }
       }
     },
     "risks": {
