@@ -20,11 +20,16 @@ const EVIDENCE_TYPES = new Set([
 
 // Declared MIME → magic bytes. We never trust the browser's file.type or
 // extension alone: the stored signature must match before we accept bytes.
+// Empty signature list = content must prove it is plain UTF-8 text (CSV).
 const MIME_SIGNATURES: Record<string, { offset?: number; bytes: number[] }[]> = {
   "application/pdf": [{ bytes: [0x25, 0x50, 0x44, 0x46] }], // %PDF
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [{ bytes: [0x50, 0x4b, 0x03, 0x04] }], // PK zip
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [{ bytes: [0x50, 0x4b, 0x03, 0x04] }],
   "text/csv": [],
+  "application/csv": [],
+  // Some browsers label .csv as ms-excel — accepted only when the bytes are
+  // really text, never for binary spreadsheet payloads.
+  "application/vnd.ms-excel": [],
   "image/png": [{ bytes: [0x89, 0x50, 0x4e, 0x47] }],
   "image/jpeg": [{ bytes: [0xff, 0xd8, 0xff] }],
   "image/webp": [{ bytes: [0x52, 0x49, 0x46, 0x46] }], // RIFF

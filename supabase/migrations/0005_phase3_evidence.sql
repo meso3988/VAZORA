@@ -257,11 +257,22 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------------
--- Policies — member read/write inside org; cross-tenant FK guards on write
+-- Policies — member read/insert/update inside org; cross-tenant FK guards on
+-- write. NO delete policies exist: evidence is an audit trail and hard
+-- deletion is a service-role/DB-admin operation only (never the browser).
+-- Lifecycle uses supersede/archive semantics instead.
 -- ---------------------------------------------------------------------------
 
-create policy evidence_items_tenant on evidence_items
-  for all
+create policy evidence_items_select on evidence_items
+  for select using (is_org_member (organization_id));
+create policy evidence_items_insert on evidence_items
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_contract_for_org (contract_id, organization_id)
+    and (obligation_id is null or valid_obligation_for_org (obligation_id, organization_id))
+  );
+create policy evidence_items_update on evidence_items
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
@@ -269,16 +280,32 @@ create policy evidence_items_tenant on evidence_items
     and (obligation_id is null or valid_obligation_for_org (obligation_id, organization_id))
   );
 
-create policy evidence_versions_tenant on evidence_versions
-  for all
+create policy evidence_versions_select on evidence_versions
+  for select using (is_org_member (organization_id));
+create policy evidence_versions_insert on evidence_versions
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_evidence_item_for_org (evidence_item_id, organization_id)
+  );
+create policy evidence_versions_update on evidence_versions
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
     and valid_evidence_item_for_org (evidence_item_id, organization_id)
   );
 
-create policy evidence_req_links_tenant on evidence_requirement_links
-  for all
+create policy evidence_req_links_select on evidence_requirement_links
+  for select using (is_org_member (organization_id));
+create policy evidence_req_links_insert on evidence_requirement_links
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_evidence_item_for_org (evidence_item_id, organization_id)
+    and (evidence_version_id is null or valid_evidence_version_for_org (evidence_version_id, organization_id))
+    and valid_evidence_requirement_for_org (evidence_requirement_id, organization_id)
+  );
+create policy evidence_req_links_update on evidence_requirement_links
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
@@ -287,8 +314,18 @@ create policy evidence_req_links_tenant on evidence_requirement_links
     and valid_evidence_requirement_for_org (evidence_requirement_id, organization_id)
   );
 
-create policy verification_runs_tenant on evidence_verification_runs
-  for all
+create policy verification_runs_select on evidence_verification_runs
+  for select using (is_org_member (organization_id));
+create policy verification_runs_insert on evidence_verification_runs
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_contract_for_org (contract_id, organization_id)
+    and (obligation_id is null or valid_obligation_for_org (obligation_id, organization_id))
+    and valid_evidence_item_for_org (evidence_item_id, organization_id)
+    and valid_evidence_version_for_org (evidence_version_id, organization_id)
+  );
+create policy verification_runs_update on evidence_verification_runs
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
@@ -298,8 +335,16 @@ create policy verification_runs_tenant on evidence_verification_runs
     and valid_evidence_version_for_org (evidence_version_id, organization_id)
   );
 
-create policy verification_checks_tenant on evidence_verification_checks
-  for all
+create policy verification_checks_select on evidence_verification_checks
+  for select using (is_org_member (organization_id));
+create policy verification_checks_insert on evidence_verification_checks
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_verification_run_for_org (verification_run_id, organization_id)
+    and (evidence_requirement_id is null or valid_evidence_requirement_for_org (evidence_requirement_id, organization_id))
+  );
+create policy verification_checks_update on evidence_verification_checks
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
@@ -307,8 +352,19 @@ create policy verification_checks_tenant on evidence_verification_checks
     and (evidence_requirement_id is null or valid_evidence_requirement_for_org (evidence_requirement_id, organization_id))
   );
 
-create policy evidence_gaps_tenant on evidence_gaps
-  for all
+create policy evidence_gaps_select on evidence_gaps
+  for select using (is_org_member (organization_id));
+create policy evidence_gaps_insert on evidence_gaps
+  for insert with check (
+    is_org_member (organization_id)
+    and valid_contract_for_org (contract_id, organization_id)
+    and (obligation_id is null or valid_obligation_for_org (obligation_id, organization_id))
+    and (evidence_requirement_id is null or valid_evidence_requirement_for_org (evidence_requirement_id, organization_id))
+    and (verification_run_id is null or valid_verification_run_for_org (verification_run_id, organization_id))
+    and (closed_by_verification_run_id is null or valid_verification_run_for_org (closed_by_verification_run_id, organization_id))
+  );
+create policy evidence_gaps_update on evidence_gaps
+  for update
   using (is_org_member (organization_id))
   with check (
     is_org_member (organization_id)
@@ -389,22 +445,42 @@ create policy contract_evidence_storage_insert on storage.objects
     and storage_org_member (name)
   );
 
+-- Update is restricted the same way: overwriting an object that backs a
+-- persisted version would mutate audit evidence in place. Only orphan
+-- objects may be updated/overwritten.
 create policy contract_evidence_storage_update on storage.objects
   for update to authenticated
   using (
     bucket_id = 'contract-evidence'
     and storage_org_member (name)
+    and not exists (
+      select 1 from evidence_versions v where v.storage_path = name
+    )
   )
   with check (
     bucket_id = 'contract-evidence'
     and storage_org_member (name)
+    and not exists (
+      select 1 from evidence_versions v where v.storage_path = name
+    )
   );
 
+-- Evidence is part of the contractual audit trail: persisted version files
+-- are immutable. Members may delete ONLY orphan objects — files that were
+-- uploaded to storage but never persisted as an evidence_versions row (the
+-- narrow rollback path for a failed upload). No user-facing hard delete
+-- exists for referenced evidence; corrections are new versions, and the app
+-- will use supersede/archive semantics for lifecycle management.
+-- Hard-deleting a persisted version file requires the service role / DB admin
+-- (server-side only, never the browser).
 create policy contract_evidence_storage_delete on storage.objects
   for delete to authenticated
   using (
     bucket_id = 'contract-evidence'
     and storage_org_member (name)
+    and not exists (
+      select 1 from evidence_versions v where v.storage_path = name
+    )
   );
 
 -- ---------------------------------------------------------------------------

@@ -89,7 +89,11 @@ insert into evidence_gaps (id, organization_id, contract_id, obligation_id, evid
 on conflict (id) do nothing;
 
 insert into storage.objects (bucket_id, name, owner_id) values
-  ('contract-evidence', '20000000-0000-4000-8000-000000000002/22200000-0000-4000-8000-000000000002/77700000-0000-4000-8000-000000000002/v1_beta.pdf', '00000000-0000-4000-8000-0000000000b1');
+  ('contract-evidence', '20000000-0000-4000-8000-000000000002/22200000-0000-4000-8000-000000000002/77700000-0000-4000-8000-000000000002/v1_beta.pdf', '00000000-0000-4000-8000-0000000000b1'),
+  -- Alpha persisted object (backs the version row created in TEST 5) and an
+  -- Alpha orphan object (uploaded but never persisted) for delete-policy tests
+  ('contract-evidence', '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf', '00000000-0000-4000-8000-0000000000a1'),
+  ('contract-evidence', '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/orphan.pdf', '00000000-0000-4000-8000-0000000000a1');
 
 -- ===========================================================================
 -- Perspective: User A (Alpha owner)
@@ -150,7 +154,7 @@ begin
   insert into evidence_items (id, organization_id, contract_id, obligation_id, title, evidence_type) values
     ('77700000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', 'Alpha September report', 'report');
   insert into evidence_versions (id, organization_id, evidence_item_id, version_number, file_name, storage_path, mime_type, file_size, file_hash) values
-    ('88800000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', 1, 'a.pdf', 'a/ev/v1_a.pdf', 'application/pdf', 10, 'bb');
+    ('88800000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', 1, 'a.pdf', '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf', 'application/pdf', 10, 'bb');
   insert into evidence_requirement_links (organization_id, evidence_item_id, evidence_version_id, evidence_requirement_id) values
     ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000001');
   insert into evidence_verification_runs (id, organization_id, contract_id, obligation_id, evidence_item_id, evidence_version_id, status) values
@@ -246,6 +250,62 @@ begin
   raise notice 'TEST 13: FAIL — verified without source support accepted';
 exception when others then
   raise notice 'TEST 13: PASS — %', sqlerrm;
+end $$;
+
+-- TEST 14: hard delete of a persisted version RECORD is denied (no delete policy).
+do $$
+declare n int;
+begin
+  delete from evidence_versions where id = '88800000-0000-4000-8000-000000000001';
+  get diagnostics n = row_count;
+  if n = 0 then raise notice 'TEST 14: PASS — version record undeletable';
+  else raise notice 'TEST 14: FAIL — deleted % version rows', n; end if;
+exception when others then
+  raise notice 'TEST 14: PASS — %', sqlerrm;
+end $$;
+
+-- TEST 15: hard delete of a persisted evidence FILE is denied — the storage
+-- path is backed by an evidence_versions row, so members cannot remove it.
+do $$
+declare n int;
+begin
+  delete from storage.objects
+  where bucket_id = 'contract-evidence'
+    and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf';
+  get diagnostics n = row_count;
+  if n = 0 then raise notice 'TEST 15: PASS — persisted evidence file undeletable';
+  else raise notice 'TEST 15: FAIL — deleted referenced file'; end if;
+exception when others then
+  raise notice 'TEST 15: PASS — %', sqlerrm;
+end $$;
+
+-- TEST 16: the narrow rollback path — an orphan object (no version row) may be
+-- deleted by the org member (upload-failure cleanup), nothing else.
+do $$
+declare n int;
+begin
+  delete from storage.objects
+  where bucket_id = 'contract-evidence'
+    and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/orphan.pdf';
+  get diagnostics n = row_count;
+  if n = 1 then raise notice 'TEST 16: PASS — orphan cleanup allowed';
+  else raise notice 'TEST 16: FAIL — orphan cleanup blocked'; end if;
+exception when others then
+  raise notice 'TEST 16: FAIL — %', sqlerrm;
+end $$;
+
+-- TEST 17: updating a persisted evidence FILE in place is denied.
+do $$
+declare n int;
+begin
+  update storage.objects set name = 'x_mutated.pdf'
+  where bucket_id = 'contract-evidence'
+    and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf';
+  get diagnostics n = row_count;
+  if n = 0 then raise notice 'TEST 17: PASS — persisted file immutable';
+  else raise notice 'TEST 17: FAIL — mutated referenced file'; end if;
+exception when others then
+  raise notice 'TEST 17: PASS — %', sqlerrm;
 end $$;
 
 rollback;

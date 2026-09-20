@@ -84,7 +84,7 @@ export function EvidenceUpload({
               type="file"
               name="file"
               required
-              accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx,text/csv,.csv,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp"
+              accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xlsx,text/csv,application/csv,application/vnd.ms-excel,.csv,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp"
               className="block w-full text-xs text-muted file:me-3 file:rounded-md file:border file:border-line file:bg-bg file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-fg"
             />
             <Button type="submit" size="sm" className="shrink-0">
