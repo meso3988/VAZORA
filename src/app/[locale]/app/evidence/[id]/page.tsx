@@ -64,6 +64,17 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
     detail.obligationRequirements.find((r) => r.id === rid)?.name ??
     "—";
 
+  // A gap closed by a check carrying a human override must be attributed as
+  // a human decision — never implied as VAZORA verification.
+  const overrideClosed = new Set<string>();
+  for (const g of detail.gaps) {
+    if (!g.closedByRunId || !g.requirementId) continue;
+    const run = detail.runs.find((r) => r.id === g.closedByRunId);
+    if (run?.checks.some((c) => c.requirementId === g.requirementId && c.humanResult != null)) {
+      overrideClosed.add(g.id);
+    }
+  }
+
   return (
     <>
       <PageHeader
@@ -286,7 +297,7 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
 
       {/* ===== gaps ===== */}
       <Panel title={gt("title")} tone={openGaps.length ? "rose" : "emerald"} className="max-lg:order-2">
-        <GapList gaps={detail.gaps} requirementName={reqName} />
+        <GapList gaps={detail.gaps} requirementName={reqName} overrideClosed={overrideClosed} />
       </Panel>
 
       {/* ===== proof chain + version history ===== */}

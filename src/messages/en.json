@@ -1751,7 +1751,8 @@
         },
         "resolvedBy": "Resolved by verification run {run}",
         "dismissedHuman": "Dismissed by an authorized human",
-        "nextAction": "Next: submit evidence that satisfies this criterion"
+        "nextAction": "Next: submit evidence that satisfies this criterion",
+        "viaOverride": "via human override"
       },
       "matrix": {
         "title": "Evidence matrix",

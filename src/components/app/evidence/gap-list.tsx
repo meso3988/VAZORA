@@ -1,7 +1,7 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, CircleDot, RefreshCw } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { GapStatusBadge } from "@/components/app/evidence/badges";
+import { GapStatusBadge, OverrideBadge } from "@/components/app/evidence/badges";
 import type { EvidenceGapView } from "@/domain/evidence";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +17,12 @@ const STEP_ICON = { open: AlertTriangle, evidence_received: CircleDot, reverific
 export async function GapList({
   gaps,
   requirementName,
+  overrideClosed,
 }: {
   gaps: EvidenceGapView[];
   requirementName: (id: string | null) => string;
+  /** gap ids whose closing check carries a human override — never implied as AI verification */
+  overrideClosed?: Set<string>;
 }) {
   const t = await getTranslations("app.evidence.gaps");
   if (!gaps.length) return <p className="px-5 py-6 text-center text-sm text-verified">{t("none")}</p>;
@@ -63,9 +66,11 @@ export async function GapList({
                 );
               })}
             </ol>
-            <p className="text-[11px] text-faint">
+            <p className="flex items-center gap-1.5 text-[11px] text-faint">
               {g.status === "resolved" && g.closedByRunId
-                ? t("resolvedBy", { run: g.closedByRunId.slice(0, 8) })
+                ? overrideClosed?.has(g.id)
+                  ? (<>{t("resolvedBy", { run: g.closedByRunId.slice(0, 8) })} · <OverrideBadge />{t("viaOverride")}</>)
+                  : t("resolvedBy", { run: g.closedByRunId.slice(0, 8) })
                 : g.status === "dismissed_by_authorized_human"
                   ? t("dismissedHuman")
                   : t("nextAction")}
