@@ -240,7 +240,7 @@ const obligations: ObligationRepository = {
       .from("contract_obligations")
       .select("*, obligation_evidence_requirements(name)")
       .eq("organization_id", organizationId)
-      .neq("review_status", "rejected")
+      .eq("review_status", "approved")
       .order("created_at", { ascending: true });
     if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
     const { data } = await q;
