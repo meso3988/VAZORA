@@ -4,10 +4,12 @@
 -- Paste the whole file into the Supabase SQL editor and run once. Each
 -- assertion executes inside a DO block with an EXCEPTION handler, so an
 -- expected denial does NOT abort the transaction — the run completes and
--- prints a RESULTS TABLE as the final query output (visible directly in
--- the SQL editor results panel — Supabase does not show RAISE NOTICE):
---   test | PASS — ...        (denial enforced / legit op allowed)
---   test | FAIL — ...        (something leaked or a legit op broke)
+-- prints a RESULTS TABLE as the final query output, visible directly in
+-- the SQL editor results panel (Supabase does not show RAISE NOTICE, and
+-- SET ROLE makes pg_temp unreachable, so results accumulate in a custom
+-- session GUC instead — no tables involved at all):
+--   TEST n: PASS — ...        (denial enforced / legit op allowed)
+--   TEST n: FAIL — ...        (something leaked or a legit op broke)
 -- Any FAIL row means a real isolation breach — investigate before deploy.
 -- Everything rolls back at the end — safe to run repeatedly.
 --
@@ -21,14 +23,6 @@
 -- ============================================================================
 
 begin;
-
--- Results sink. This must be a REAL table, not a temp one: since PG 15,
--- pg_temp objects are unreachable under SET ROLE (security hardening), so
--- `authenticated` could never see it. A regular table created inside this
--- transaction works with normal grants, and the final rollback drops it —
--- zero residue.
-create table evidence_rls_results (test int, outcome text);
-grant insert, select on evidence_rls_results to authenticated;
 
 -- --- Fixtures (postgres role — bypasses RLS intentionally) ------------------
 insert into auth.users (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
@@ -114,9 +108,8 @@ set local role authenticated;
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-4000-8000-0000000000a1","aud":"authenticated","role":"authenticated"}', true);
 
-
-
-
+-- Results accumulator — a custom GUC works under any role with no grants.
+select set_config('app.rls_results', '', true);
 
 -- TEST 1: read denial — Alpha sees zero Beta evidence rows.
 do $$
@@ -129,8 +122,8 @@ begin
        + (select count(*) from evidence_verification_runs)
        + (select count(*) from evidence_verification_checks)
        + (select count(*) from evidence_gaps) into n;
-  if n = 0 then insert into evidence_rls_results values (1, 'PASS — zero Beta rows visible'); end if;
-  if n > 0 then insert into evidence_rls_results values (1, 'FAIL — ' || n || ' Beta rows visible'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 1: PASS — zero Beta rows visible' || E'\n', true); end if;
+  if n > 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 1: FAIL — ' || n || ' Beta rows visible' || E'\n', true); end if;
 end $$;
 
 -- TEST 2: cannot read Beta evidence files. expect count 0.
@@ -140,8 +133,8 @@ begin
   select count(*) into n from storage.objects
   where bucket_id = 'contract-evidence'
     and name like '20000000-0000-4000-8000-000000000002/%';
-  if n = 0 then insert into evidence_rls_results values (2, 'PASS — Beta evidence storage hidden');
-  else insert into evidence_rls_results values (2, 'FAIL — ' || n || ' objects visible'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 2: PASS — Beta evidence storage hidden' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 2: FAIL — ' || n || ' objects visible' || E'\n', true); end if;
 end $$;
 
 -- TEST 3: Alpha item pointing at Beta contract must be rejected.
@@ -149,9 +142,9 @@ do $$
 begin
   insert into evidence_items (organization_id, contract_id, title) values
     ('10000000-0000-4000-8000-000000000001', '22200000-0000-4000-8000-000000000002', 'cross-tenant item');
-  insert into evidence_rls_results values (3, 'FAIL — cross-tenant contract insert succeeded');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 3: FAIL — cross-tenant contract insert succeeded' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (3, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 3: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 4: Alpha item pointing at Beta obligation must be rejected.
@@ -159,9 +152,9 @@ do $$
 begin
   insert into evidence_items (organization_id, contract_id, obligation_id, title) values
     ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000002', 'cross-tenant obligation');
-  insert into evidence_rls_results values (4, 'FAIL — cross-tenant obligation insert succeeded');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 4: FAIL — cross-tenant obligation insert succeeded' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (4, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 4: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 5: legit insert — Alpha item/version/link/run for Alpha objects.
@@ -175,9 +168,9 @@ begin
     ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000001');
   insert into evidence_verification_runs (id, organization_id, contract_id, obligation_id, evidence_item_id, evidence_version_id, status) values
     ('99900000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '44400000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '88800000-0000-4000-8000-000000000001', 'completed');
-  insert into evidence_rls_results values (5, 'PASS — same-tenant writes allowed');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 5: PASS — same-tenant writes allowed' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (5, 'FAIL — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 5: FAIL — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 6: Alpha link cannot reference Beta requirement.
@@ -185,9 +178,9 @@ do $$
 begin
   insert into evidence_requirement_links (organization_id, evidence_item_id, evidence_requirement_id) values
     ('10000000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000001', '66600000-0000-4000-8000-000000000002');
-  insert into evidence_rls_results values (6, 'FAIL — cross-tenant requirement link succeeded');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 6: FAIL — cross-tenant requirement link succeeded' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (6, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 6: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 7: Alpha run cannot reference Beta item/version.
@@ -195,9 +188,9 @@ do $$
 begin
   insert into evidence_verification_runs (organization_id, contract_id, evidence_item_id, evidence_version_id, status) values
     ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', '77700000-0000-4000-8000-000000000002', '88800000-0000-4000-8000-000000000002', 'queued');
-  insert into evidence_rls_results values (7, 'FAIL — cross-tenant run insert succeeded');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 7: FAIL — cross-tenant run insert succeeded' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (7, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 7: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 8: Alpha check cannot reference Beta run.
@@ -205,9 +198,9 @@ do $$
 begin
   insert into evidence_verification_checks (organization_id, verification_run_id, check_label, result) values
     ('10000000-0000-4000-8000-000000000001', '99900000-0000-4000-8000-000000000002', 'x', 'missing');
-  insert into evidence_rls_results values (8, 'FAIL — cross-tenant check insert succeeded');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 8: FAIL — cross-tenant check insert succeeded' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (8, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 8: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 9: Alpha cannot close Beta gap (update must hit 0 rows).
@@ -218,8 +211,8 @@ begin
     closed_by_verification_run_id = '99900000-0000-4000-8000-000000000002'
   where id = 'aaa00000-0000-4000-8000-000000000002';
   get diagnostics n = row_count;
-  if n = 0 then insert into evidence_rls_results values (9, 'PASS — Beta gap unreachable');
-  else insert into evidence_rls_results values (9, 'FAIL — modified ' || n || ' Beta gaps'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 9: PASS — Beta gap unreachable' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 9: FAIL — modified ' || n || ' Beta gaps' || E'\n', true); end if;
 end $$;
 
 -- TEST 10: resolving a gap without a verification run is impossible.
@@ -227,9 +220,9 @@ do $$
 begin
   insert into evidence_gaps (organization_id, contract_id, description, status) values
     ('10000000-0000-4000-8000-000000000001', '11100000-0000-4000-8000-000000000001', 'forced close', 'resolved');
-  insert into evidence_rls_results values (10, 'FAIL — gap resolved without verification run');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 10: FAIL — gap resolved without verification run' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (10, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 10: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 11: legal lifecycle — open → evidence_received → reverification → resolved.
@@ -243,19 +236,19 @@ begin
   update evidence_gaps set status = 'resolved', closed_by_verification_run_id = '99900000-0000-4000-8000-000000000001'
   where id = 'aaa00000-0000-4000-8000-000000000001';
   select count(*) into n from evidence_gaps where id = 'aaa00000-0000-4000-8000-000000000001' and status = 'resolved' and closed_at is not null;
-  if n = 1 then insert into evidence_rls_results values (11, 'PASS — full gap lifecycle works');
-  else insert into evidence_rls_results values (11, 'FAIL — lifecycle incomplete'); end if;
+  if n = 1 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 11: PASS — full gap lifecycle works' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 11: FAIL — lifecycle incomplete' || E'\n', true); end if;
 exception when others then
-  insert into evidence_rls_results values (11, 'FAIL — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 11: FAIL — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 12: resolved is terminal — reopening must be rejected.
 do $$
 begin
   update evidence_gaps set status = 'open' where id = 'aaa00000-0000-4000-8000-000000000001';
-  insert into evidence_rls_results values (12, 'FAIL — resolved gap reopened');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 12: FAIL — resolved gap reopened' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (12, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 12: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 13: 'verified' check without source support is rejected (non-deterministic).
@@ -263,9 +256,9 @@ do $$
 begin
   insert into evidence_verification_checks (organization_id, verification_run_id, check_label, check_kind, result) values
     ('10000000-0000-4000-8000-000000000001', '99900000-0000-4000-8000-000000000001', 'unsupported', 'ai_semantic', 'verified');
-  insert into evidence_rls_results values (13, 'FAIL — verified without source support accepted');
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 13: FAIL — verified without source support accepted' || E'\n', true);
 exception when others then
-  insert into evidence_rls_results values (13, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 13: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 14: hard delete of a persisted version RECORD is denied (no delete policy).
@@ -274,10 +267,10 @@ declare n int;
 begin
   delete from evidence_versions where id = '88800000-0000-4000-8000-000000000001';
   get diagnostics n = row_count;
-  if n = 0 then insert into evidence_rls_results values (14, 'PASS — version record undeletable');
-  else insert into evidence_rls_results values (14, 'FAIL — deleted ' || n || ' version rows'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 14: PASS — version record undeletable' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 14: FAIL — deleted ' || n || ' version rows' || E'\n', true); end if;
 exception when others then
-  insert into evidence_rls_results values (14, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 14: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 15: hard delete of a persisted evidence FILE is denied — the storage
@@ -289,10 +282,10 @@ begin
   where bucket_id = 'contract-evidence'
     and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf';
   get diagnostics n = row_count;
-  if n = 0 then insert into evidence_rls_results values (15, 'PASS — persisted evidence file undeletable');
-  else insert into evidence_rls_results values (15, 'FAIL — deleted referenced file'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 15: PASS — persisted evidence file undeletable' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 15: FAIL — deleted referenced file' || E'\n', true); end if;
 exception when others then
-  insert into evidence_rls_results values (15, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 15: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 16: the narrow rollback path — an orphan object (no version row) may be
@@ -304,10 +297,10 @@ begin
   where bucket_id = 'contract-evidence'
     and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/orphan.pdf';
   get diagnostics n = row_count;
-  if n = 1 then insert into evidence_rls_results values (16, 'PASS — orphan cleanup allowed');
-  else insert into evidence_rls_results values (16, 'FAIL — orphan cleanup blocked'); end if;
+  if n = 1 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: PASS — orphan cleanup allowed' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — orphan cleanup blocked' || E'\n', true); end if;
 exception when others then
-  insert into evidence_rls_results values (16, 'FAIL — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 16: FAIL — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- TEST 17: updating a persisted evidence FILE in place is denied.
@@ -318,15 +311,18 @@ begin
   where bucket_id = 'contract-evidence'
     and name = '10000000-0000-4000-8000-000000000001/11100000-0000-4000-8000-000000000001/77700000-0000-4000-8000-000000000001/v1_a.pdf';
   get diagnostics n = row_count;
-  if n = 0 then insert into evidence_rls_results values (17, 'PASS — persisted file immutable');
-  else insert into evidence_rls_results values (17, 'FAIL — mutated referenced file'); end if;
+  if n = 0 then perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 17: PASS — persisted file immutable' || E'\n', true);
+  else perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 17: FAIL — mutated referenced file' || E'\n', true); end if;
 exception when others then
-  insert into evidence_rls_results values (17, 'PASS — ' || sqlerrm);
+  perform set_config('app.rls_results', current_setting('app.rls_results') || 'TEST 17: PASS — ' || sqlerrm || E'\n', true);
 end $$;
 
 -- ===========================================================================
 -- Results — this is the final query output: every row should say PASS.
 -- ===========================================================================
-select test, outcome from evidence_rls_results order by test;
+select outcome
+from string_to_table(current_setting('app.rls_results'), E'\n') with ordinality as r(outcome, n)
+where outcome <> ''
+order by n;
 
 rollback;
