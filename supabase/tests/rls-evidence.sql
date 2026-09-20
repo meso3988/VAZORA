@@ -22,6 +22,14 @@
 
 begin;
 
+-- Results sink. This must be a REAL table, not a temp one: since PG 15,
+-- pg_temp objects are unreachable under SET ROLE (security hardening), so
+-- `authenticated` could never see it. A regular table created inside this
+-- transaction works with normal grants, and the final rollback drops it —
+-- zero residue.
+create table evidence_rls_results (test int, outcome text);
+grant insert, select on evidence_rls_results to authenticated;
+
 -- --- Fixtures (postgres role — bypasses RLS intentionally) ------------------
 insert into auth.users (id, email, encrypted_password, email_confirmed_at, raw_user_meta_data)
 values
@@ -106,10 +114,7 @@ set local role authenticated;
 select set_config('request.jwt.claims',
   '{"sub":"00000000-0000-4000-8000-0000000000a1","aud":"authenticated","role":"authenticated"}', true);
 
--- Results sink — created AFTER the role switch. Since PG 15, objects in
--- pg_temp created by another role are unreachable under SET ROLE, so the
--- temp table must be owned by `authenticated` itself.
-create temp table evidence_rls_results (test int, outcome text);
+
 
 
 
