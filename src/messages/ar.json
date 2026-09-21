@@ -1910,6 +1910,56 @@
         "claim_readiness": "جاهزية المستخلص",
         "risk": "خطر",
         "verified": "مُتحقق منه"
+      },
+      "officerName": "ضابط العقود",
+      "you": "أنت",
+      "conversations": "المحادثات",
+      "conversation": "المحادثة",
+      "newConversation": "محادثة جديدة",
+      "noConversations": "لا توجد محادثات بعد.",
+      "untitled": "بلا عنوان",
+      "scopeContract": "ضمن عقد",
+      "scopeOrganization": "على مستوى المنظمة",
+      "startPrompt": "ابدأ محادثة لتسأل عن العقود والمواعيد والأدلة والفجوات.",
+      "threadEmpty": "اطرح أول سؤال — يجيب الضابط من سجلات VAZORA الحالية.",
+      "sources": "المصادر",
+      "toolsUsed": "{count} {count, plural, one {استعلام} other {استعلامات}} في VAZORA",
+      "send": "إرسال",
+      "providerMissing": "نموذج ضابط العقود غير مهيّأ",
+      "providerMissingNotice": "لا يوجد نموذج مهيّأ لضابط العقود، لذلك لا يمكنه الإجابة. اضبط VAZORA_OFFICER_PROVIDER و VAZORA_OFFICER_MODEL.",
+      "errorNotice": "تعذّر على الضابط إكمال الطلب ({code}).",
+      "monitoringUpcoming": "المراقبة الاستباقية (حرج / اليوم / هذا الأسبوع) تأتي في نقطة التفتيش التالية. لا شيء يُراقَب تلقائيًا بعد.",
+      "demoFixtures": "بيانات توضيحية",
+      "timezone": {
+        "prompt": "حدّد المنطقة الزمنية لمنظمتك",
+        "why": "تُحسب المواعيد و“اليوم” والتأخير بالتوقيت المحلي لمنظمتك. القيمة الحالية {current} ولم يؤكّدها أحد.",
+        "label": "المنطقة الزمنية للمنظمة",
+        "save": "حفظ المنطقة الزمنية"
+      },
+      "action": {
+        "recommends": "توصية VAZORA",
+        "reason": "السبب",
+        "sources": "المصادر",
+        "approvalRequired": "تتطلب موافقة",
+        "approve": "موافقة",
+        "reject": "رفض",
+        "rejectReason": "سبب الرفض…",
+        "approvedBy": "وافق عليه",
+        "rejectedBy": "رفضه",
+        "approvedNotExecuted": "تمت الموافقة والتسجيل. لا تنفّذ VAZORA بعد التغييرات التعاقدية ولا المراسلات الخارجية — التنفيذ يأتي مع منفّذ الإجراءات.",
+        "noApprovalRight": "دورك لا يخوّلك الموافقة على هذا الإجراء.",
+        "approvedNotice": "تمت الموافقة على الإجراء وتسجيله.",
+        "rejectedNotice": "رُفض الإجراء.",
+        "status": {
+          "suggested": "مقترح",
+          "waiting_for_approval": "بانتظار الموافقة",
+          "approved": "معتمد",
+          "executing": "قيد التنفيذ",
+          "completed": "مكتمل",
+          "rejected": "مرفوض",
+          "failed": "فشل",
+          "cancelled": "ملغى"
+        }
       }
     }
   }

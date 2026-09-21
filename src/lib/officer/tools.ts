@@ -199,8 +199,22 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
       .eq("activation_status", OPERATIONAL_OBLIGATION.activation_status);
   }
   const { data } = await q;
-  return (data ?? []).map((o: any) => ({
+  const rows = data ?? [];
+
+  // Carry the human-facing contract identity so the Officer can name the
+  // contract ("FM-008") without a second lookup — a UUID is not an answer.
+  const contractIds = [...new Set(rows.map((o: any) => o.contract_id).filter(Boolean))];
+  const { data: contracts } = contractIds.length
+    ? await ctx.supabase
+        .from("contracts").select("id, contract_number, title")
+        .eq("organization_id", ctx.organizationId).in("id", contractIds)
+    : { data: [] as any[] };
+  const byId = new Map((contracts ?? []).map((c: any) => [c.id, c]));
+
+  return rows.map((o: any) => ({
     ...o,
+    contract_number: byId.get(o.contract_id)?.contract_number ?? null,
+    contract_title: byId.get(o.contract_id)?.title ?? null,
     ...classifyDeadline({ today: ctx.clock.today, dueDate: o.due_date_normalized ?? null }),
   }));
 }
@@ -302,7 +316,11 @@ const getOverdueObligations: OfficerTool = {
       .sort((a: any, b: any) => (b.daysOverdue ?? 0) - (a.daysOverdue ?? 0));
     return ok(
       { asOf: ctx.clock.today, timeZone: ctx.clock.timeZone, obligations: rows },
-      rows.map((o: any) => cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`)),
+      [
+        ...rows.map((o: any) => cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`)),
+        ...[...new Set(rows.map((o: any) => o.contract_id))].map((cid: any) =>
+          cite("contract", cid, rows.find((o: any) => o.contract_id === cid)?.contract_number ?? "contract", cid, `/app/contracts/${cid}`)),
+      ],
       `${rows.length} overdue`,
     );
   },
@@ -504,7 +522,8 @@ const getRecentActivity: OfficerTool = {
 const getOrganizationMembers: OfficerTool = {
   name: "getOrganizationMembers",
   toolClass: "READ_ONLY",
-  description: "Members of this organization and their roles — who can be assigned or must approve.",
+  description:
+    "Members of this organization with role and display identity — who can be assigned work and who may approve.",
   input: empty,
   handler: async (ctx) => {
     const { data } = await ctx.supabase
@@ -512,7 +531,24 @@ const getOrganizationMembers: OfficerTool = {
       .select("user_id, role, created_at")
       .eq("organization_id", ctx.organizationId);
     const rows = data ?? [];
-    return ok(rows, [], `${rows.length} members`);
+    // Display identity comes from a narrow security-definer function scoped
+    // to fellow members; auth.users is not readable directly. If it is
+    // unavailable we degrade honestly to the user id rather than inventing
+    // a name.
+    const { data: identities } = await ctx.supabase.rpc("org_member_identities", { org: ctx.organizationId });
+    const byId = new Map((identities ?? []).map((i: any) => [i.user_id, i]));
+    const merged = rows.map((m: any) => {
+      const id = byId.get(m.user_id) as any;
+      return {
+        userId: m.user_id,
+        role: m.role,
+        displayName: id?.display_name ?? null,
+        email: id?.email ?? null,
+        identityResolved: !!id,
+        memberSince: m.created_at,
+      };
+    });
+    return ok(merged, [], `${merged.length} members`);
   },
 };
 
@@ -586,6 +622,22 @@ async function proposeAction(
   }
   if (input.contractId && !(await resolveContract(ctx, input.contractId))) {
     return { ok: false, error: "contract_not_found_in_organization" };
+  }
+
+  // IDEMPOTENCY: a repeated click or a model re-proposing the same thing
+  // must not create a second approval request for an identical open action.
+  const { data: dupes } = await ctx.supabase
+    .from("officer_actions")
+    .select("id, status, requires_approval, action_type, arguments, contract_id")
+    .eq("organization_id", ctx.organizationId)
+    .eq("action_type", input.actionType)
+    .in("status", ["suggested", "waiting_for_approval"]);
+  const argKey = JSON.stringify(input.args ?? {});
+  const existing = (dupes ?? []).find(
+    (d: any) => JSON.stringify(d.arguments ?? {}) === argKey && (d.contract_id ?? null) === (input.contractId ?? null),
+  );
+  if (existing) {
+    return ok(existing, input.citations ?? [], `existing open proposal reused (${existing.status})`);
   }
 
   const { data, error } = await ctx.supabase

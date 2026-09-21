@@ -39,6 +39,61 @@ export function canTransition(from: OfficerActionStatus, to: OfficerActionStatus
   return (TRANSITIONS[from] ?? []).includes(to);
 }
 
+/**
+ * Re-validate a proposal against CURRENT state at approval time.
+ *
+ * A proposal is a snapshot of an argument the Officer made earlier. If the
+ * world moved underneath it — the obligation vanished, the proposed assignee
+ * left the organization, the contract changed hands — approving it blindly
+ * would apply a stale decision. We stop and require a fresh review instead.
+ */
+type RevalidationInput = {
+  action_type: string;
+  contract_id: string | null;
+  obligation_id: string | null;
+  arguments: Record<string, unknown>;
+};
+
+/** Narrow an untyped action row to exactly what revalidation reads. */
+function toRevalidationInput(row: Record<string, unknown>): RevalidationInput {
+  return {
+    action_type: String(row.action_type ?? ""),
+    contract_id: (row.contract_id as string | null) ?? null,
+    obligation_id: (row.obligation_id as string | null) ?? null,
+    arguments: (row.arguments as Record<string, unknown> | null) ?? {},
+  };
+}
+
+async function revalidateAction(
+  ctx: OfficerContext,
+  action: RevalidationInput,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (action.contract_id) {
+    const { data } = await ctx.supabase
+      .from("contracts").select("id")
+      .eq("organization_id", ctx.organizationId).eq("id", action.contract_id).maybeSingle();
+    if (!data) return { ok: false, error: "state_changed: contract_no_longer_available" };
+  }
+  if (action.obligation_id) {
+    const { data } = await ctx.supabase
+      .from("contract_obligations").select("id, review_status, activation_status")
+      .eq("organization_id", ctx.organizationId).eq("id", action.obligation_id).maybeSingle();
+    if (!data) return { ok: false, error: "state_changed: obligation_no_longer_available" };
+    if (action.action_type.startsWith("obligation.") &&
+        (data.review_status !== "approved" || data.activation_status !== "active")) {
+      return { ok: false, error: "state_changed: obligation_no_longer_operational" };
+    }
+  }
+  const assignee = action.arguments?.assigneeUserId;
+  if (typeof assignee === "string") {
+    const { data } = await ctx.supabase
+      .from("organization_members").select("user_id")
+      .eq("organization_id", ctx.organizationId).eq("user_id", assignee).maybeSingle();
+    if (!data) return { ok: false, error: "state_changed: assignee_no_longer_a_member" };
+  }
+  return { ok: true };
+}
+
 async function loadAction(ctx: OfficerContext, actionId: string) {
   const { data } = await ctx.supabase
     .from("officer_actions")
@@ -79,6 +134,10 @@ export async function approveOfficerAction(
 
   const auth = authorizeAction(ctx.role, action.action_type as string);
   if (!auth.allowed) return { ok: false, error: `unauthorized: ${auth.reason}` };
+
+  // Never trust a previously generated approval payload: re-check the world.
+  const fresh = await revalidateAction(ctx, toRevalidationInput(action));
+  if (!fresh.ok) return { ok: false, error: fresh.error };
 
   const approvedAt = new Date().toISOString();
   const { error: approveErr, data: approved } = await ctx.supabase
@@ -155,6 +214,9 @@ export async function executeApprovedAction(
   // Third check: authority again, immediately before any effect.
   const auth = authorizeAction(ctx.role, action.action_type as string);
   if (!auth.allowed) return { ok: false, error: `unauthorized: ${auth.reason}` };
+
+  const stillValid = await revalidateAction(ctx, toRevalidationInput(action));
+  if (!stillValid.ok) return { ok: false, error: stillValid.error };
 
   const internal = classifyAction(action.action_type as string) === "SAFE_INTERNAL_WRITE";
   if (!internal) {
