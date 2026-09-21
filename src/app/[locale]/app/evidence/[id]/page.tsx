@@ -7,9 +7,11 @@ import {
   linkEvidenceToRequirement,
   overrideEvidenceCheck,
   requestEvidenceVerification,
+  resolveEvidenceDiscrepancy,
   uploadEvidenceVersion,
 } from "@/app/[locale]/app/evidence/actions";
 import { CheckCard } from "@/components/app/evidence/check-card";
+import { DiscrepancyList } from "@/components/app/evidence/discrepancy-list";
 import { GapList } from "@/components/app/evidence/gap-list";
 import { ItemStatusBadge } from "@/components/app/evidence/badges";
 import { ProofChain } from "@/components/app/evidence/proof-chain";
@@ -29,11 +31,12 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
   const { locale: rawLocale, id } = await props.params;
   const locale = asLocale(rawLocale);
   setRequestLocale(locale);
-  const { v: versionParam, uploaded, error } = await props.searchParams;
+  const { v: versionParam, uploaded, error, discrepancy } = await props.searchParams;
   const t = await getTranslations("app.evidence.inspector");
   const ut = await getTranslations("app.evidence.upload");
   const vt = await getTranslations("app.evidence.versions");
   const gt = await getTranslations("app.evidence.gaps");
+  const dt = await getTranslations("app.evidence.discrepancy");
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
   const orgId = session?.organizationId;
@@ -132,6 +135,11 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
       {typeof error === "string" && error && (
         <p className="rounded-md border border-missing/40 bg-missing/5 px-4 py-3 text-xs text-missing" role="alert">
           {ut("errorNotice")}
+        </p>
+      )}
+      {typeof discrepancy === "string" && discrepancy && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
+          {discrepancy === "kept" ? dt("keptNotice") : dt("regressionNotice")}
         </p>
       )}
 
@@ -306,6 +314,24 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
           )}
         </Panel>
       </div>
+
+      {/* ===== verification discrepancies — same-version weakening, human review ===== */}
+      {detail.discrepancies.length > 0 && (
+        <Panel
+          title={dt("title")}
+          tone={detail.discrepancies.some((d) => d.status === "pending") ? "amber" : "graphite"}
+          className="max-lg:order-2"
+        >
+          <DiscrepancyList
+            discrepancies={detail.discrepancies}
+            runs={detail.runs}
+            requirementName={reqName}
+            evidenceItemId={detail.id}
+            resolveAction={isLive ? resolveEvidenceDiscrepancy : undefined}
+            locale={locale}
+          />
+        </Panel>
+      )}
 
       {/* ===== gaps ===== */}
       <Panel title={gt("title")} tone={openGaps.length ? "rose" : "emerald"} className="max-lg:order-2">

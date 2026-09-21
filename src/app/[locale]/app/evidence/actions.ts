@@ -400,6 +400,38 @@ export async function overrideEvidenceCheck(formData: FormData) {
   redirect({ href: back(`overridden=${checkId}`), locale });
 }
 
+/**
+ * Authorized human decision on a VERIFICATION_DISCREPANCY — keep the prior
+ * verified state, or confirm the regression (opens a new gap with
+ * opened_via = human_confirmed_verification_regression).
+ */
+export async function resolveEvidenceDiscrepancy(formData: FormData) {
+  const locale = localeOf(formData);
+  const session = await liveSession(locale);
+  const discrepancyId = String(formData.get("discrepancyId") ?? "").slice(0, 64);
+  const evidenceItemId = String(formData.get("evidenceItemId") ?? "").slice(0, 64);
+  const decision = String(formData.get("decision") ?? "");
+  const reason = String(formData.get("reason") ?? "").trim().slice(0, 1000);
+  const back = (params: string) => `/app/evidence/${evidenceItemId}?${params}`;
+
+  if (decision !== "keep_prior" && decision !== "confirm_regression" || !reason) {
+    redirect({ href: back("error=invalid"), locale });
+    throw new Error("unreachable");
+  }
+
+  const supabase = await createSupabaseServer();
+  const { resolveDiscrepancy } = await import("@/lib/evidence/discrepancy");
+  const outcome = await resolveDiscrepancy({
+    supabase, orgId: session.organizationId, userId: session.user.id,
+    discrepancyId, decision, reason,
+  });
+  if (!outcome.ok) {
+    redirect({ href: back(`error=${outcome.error}`), locale });
+    throw new Error("unreachable");
+  }
+  redirect({ href: back(`discrepancy=${decision === "keep_prior" ? "kept" : "regression"}`), locale });
+}
+
 /** Short-lived signed URL (60s) — minted only after the RLS-checked select. */
 export async function getEvidenceSignedUrl(formData: FormData) {
   const locale = localeOf(formData);

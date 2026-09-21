@@ -9,6 +9,7 @@ import type {
   EvidenceMatrixRow,
   EvidenceRequirementView,
   EvidenceVersionView,
+  VerificationDiscrepancyView,
   ObligationContext,
   VerificationCheckView,
   VerificationRunView,
@@ -67,6 +68,28 @@ function mapGap(row: any): EvidenceGapView {
     description: row.description,
     verificationRunId: row.verification_run_id,
     closedByRunId: row.closed_by_verification_run_id,
+    openedVia: (row.opened_via as string) ?? "verification_run",
+    createdAt: row.created_at,
+  };
+}
+
+function mapDiscrepancy(row: any): VerificationDiscrepancyView {
+  return {
+    id: row.id,
+    requirementId: row.evidence_requirement_id,
+    evidenceVersionId: row.evidence_version_id,
+    priorResult: row.prior_result,
+    currentResult: row.current_result,
+    priorCheckId: row.prior_check_id,
+    currentCheckId: row.current_check_id,
+    priorRunId: row.prior_run_id,
+    currentRunId: row.current_run_id,
+    provider: row.provider,
+    model: row.model,
+    status: row.status,
+    resolvedBy: row.resolved_by,
+    resolvedAt: row.resolved_at,
+    resolutionNote: row.resolution_note,
     createdAt: row.created_at,
   };
 }
@@ -220,6 +243,13 @@ export async function getEvidenceItemDetail(
         .order("created_at", { ascending: false })
     : { data: [] as any[] };
 
+  const { data: discrepancyRows } = await supabase
+    .from("evidence_verification_discrepancies")
+    .select("*")
+    .eq("organization_id", orgId)
+    .eq("evidence_item_id", itemId)
+    .order("created_at", { ascending: false });
+
   const linkVersionByRequirement: Record<string, string | null> = {};
   for (const l of linkRows ?? []) {
     linkVersionByRequirement[l.evidence_requirement_id as string] =
@@ -274,6 +304,7 @@ export async function getEvidenceItemDetail(
     linkVersionByRequirement,
     runs,
     gaps: (gapRows ?? []).map(mapGap),
+    discrepancies: (discrepancyRows ?? []).map(mapDiscrepancy),
   };
 }
 

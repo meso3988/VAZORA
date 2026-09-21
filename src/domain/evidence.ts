@@ -88,6 +88,28 @@ export type EvidenceGapView = {
   description: string | null;
   verificationRunId: string | null;
   closedByRunId: string | null;
+  /** 'verification_run' or 'human_confirmed_verification_regression' */
+  openedVia: string;
+  createdAt: string;
+};
+
+/** Same-version weakening — a pending or decided VERIFICATION_DISCREPANCY. */
+export type VerificationDiscrepancyView = {
+  id: string;
+  requirementId: string;
+  evidenceVersionId: string;
+  priorResult: CheckResult;
+  currentResult: CheckResult;
+  priorCheckId: string;
+  currentCheckId: string;
+  priorRunId: string;
+  currentRunId: string;
+  provider: string | null;
+  model: string | null;
+  status: "pending" | "kept_prior" | "regression_confirmed";
+  resolvedBy: string | null;
+  resolvedAt: string | null;
+  resolutionNote: string | null;
   createdAt: string;
 };
 
@@ -132,6 +154,7 @@ export type EvidenceItemDetail = {
   linkVersionByRequirement: Record<string, string | null>;
   runs: VerificationRunView[];
   gaps: EvidenceGapView[];
+  discrepancies: VerificationDiscrepancyView[];
 };
 
 /** One row of the contract Evidence Matrix. */

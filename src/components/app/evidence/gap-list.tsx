@@ -73,7 +73,9 @@ export async function GapList({
                   : t("resolvedBy", { run: g.closedByRunId.slice(0, 8) })
                 : g.status === "dismissed_by_authorized_human"
                   ? t("dismissedHuman")
-                  : t("nextAction")}
+                  : g.openedVia === "human_confirmed_verification_regression"
+                    ? (<>{t("openedHumanRegression")} · <OverrideBadge /></>)
+                    : t("nextAction")}
             </p>
           </li>
         );

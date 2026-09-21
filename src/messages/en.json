@@ -1752,7 +1752,8 @@
         "resolvedBy": "Resolved by verification run {run}",
         "dismissedHuman": "Dismissed by an authorized human",
         "nextAction": "Next: submit evidence that satisfies this criterion",
-        "viaOverride": "via human override"
+        "viaOverride": "via human override",
+        "openedHumanRegression": "Opened by human-confirmed regression"
       },
       "matrix": {
         "title": "Evidence matrix",
@@ -1805,6 +1806,22 @@
         "allContracts": "All contracts",
         "apply": "Apply",
         "uploadedBy": "by"
+      },
+      "discrepancy": {
+        "title": "Verification discrepancies",
+        "pending": "Human review required",
+        "kept": "Prior state retained",
+        "confirmed": "Regression confirmed",
+        "sameVersion": "Same evidence version — unchanged file",
+        "runMeta": "Provider {provider} · model {model}",
+        "reviewHint": "The same file was verified before. This weaker re-run does not reopen the gap automatically — a reviewer decides.",
+        "keptLabel": "Prior verified state retained",
+        "confirmedLabel": "Regression confirmed — new gap opened",
+        "keepPrior": "Keep previous verified state",
+        "confirmRegression": "Confirm regression",
+        "reasonPlaceholder": "Decision reason (required)…",
+        "keptNotice": "Discrepancy reviewed — previous verified state retained.",
+        "regressionNotice": "Regression confirmed — a new gap was opened with human attribution."
       }
     },
     "risks": {

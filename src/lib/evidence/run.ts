@@ -1,6 +1,7 @@
 import "server-only";
 
 import { extractEvidenceText } from "@/lib/evidence/deterministic";
+import { recordSameVersionDiscrepancy } from "@/lib/evidence/discrepancy";
 import { applyVerificationOutput, planUnreadable, type Criterion, type VerificationPlan } from "@/lib/evidence/engine";
 import { getVerificationProvider, verifyValidated } from "@/lib/evidence/verifier";
 
@@ -32,6 +33,9 @@ export type VerificationRunOutcome =
  * prior runs are never touched. Gap reconciliation is idempotent: unproven
  * criteria reuse the existing active gap for that requirement (updated, not
  * duplicated); proven criteria resolve their gaps via closed_by_verification_run_id.
+ * Same-version weakening (verified → weaker on the unchanged file) records a
+ * VERIFICATION_DISCREPANCY instead of reopening the resolved gap — see
+ * discrepancy.ts. New versions reconcile normally.
  *
  * UPLOADED ≠ VERIFIED is enforced by the DB gate — this function is the ONLY
  * application path that can set a gap to resolved.
@@ -250,8 +254,17 @@ export async function runEvidenceVerification(opts: {
       provider: provider?.id ?? null,
       model: provider?.model ?? null,
     }));
-    const { error: checkErr } = await supabase.from("evidence_verification_checks").insert(checkInserts);
+    const { data: insertedChecks, error: checkErr } = await supabase
+      .from("evidence_verification_checks")
+      .insert(checkInserts)
+      .select("id, evidence_requirement_id, result");
     if (checkErr) return fail("check_insert", checkErr.message);
+    const checkIdByReq = new Map<string, { id: string; result: string }>();
+    for (const c of insertedChecks ?? []) {
+      if (c.evidence_requirement_id) {
+        checkIdByReq.set(c.evidence_requirement_id as string, { id: c.id as string, result: c.result as string });
+      }
+    }
 
     // 6. Gap reconciliation — idempotent per requirement.
     const { data: activeGaps } = await supabase
@@ -296,6 +309,26 @@ export async function runEvidenceVerification(opts: {
           metadata: { run_id: runId, requirement_id: draft.evidenceRequirementId },
         });
       } else if (!existing) {
+        // Same-version weakening is a VERIFICATION_DISCREPANCY, not an
+        // automatic reopen — the prior resolved state stays in force pending
+        // authorized human review. New versions bypass this entirely.
+        const current = checkIdByReq.get(draft.evidenceRequirementId);
+        const discrepancyId = current
+          ? await recordSameVersionDiscrepancy({
+              supabase,
+              organizationId,
+              evidenceItemId,
+              evidenceVersionId: version.id as string,
+              evidenceRequirementId: draft.evidenceRequirementId,
+              currentRunId: runId,
+              currentCheckId: current.id,
+              currentResult: current.result,
+              provider: provider?.id ?? null,
+              model: provider?.model ?? null,
+              userId,
+            })
+          : null;
+        if (discrepancyId) continue;
         const { data: gapRow } = await supabase
           .from("evidence_gaps")
           .insert({
