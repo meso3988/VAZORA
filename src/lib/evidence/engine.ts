@@ -168,7 +168,10 @@ export function applyVerificationOutput(opts: {
       reasons.push("strict_type_needs_location");
     }
 
-    const page = grounded.page ?? pageOfExcerpt(evidenceText, pageOffsets, pc.source_excerpt ?? "");
+    // Page attribution prefers the deterministic excerpt→page lookup over the
+    // model's claim: when offsets exist and the excerpt is grounded, the true
+    // page is computable — a hallucinated page number must not outrank it.
+    const page = pageOfExcerpt(evidenceText, pageOffsets, pc.source_excerpt ?? "") ?? grounded.page;
 
     checks.push({
       evidenceRequirementId: criterion.requirementId,
@@ -231,7 +234,7 @@ export function applyVerificationOutput(opts: {
  */
 export function planUnreadable(opts: {
   criteria: Criterion[];
-  reason: "ocr_required" | "unsupported_type" | "parse_failed";
+  reason: "ocr_required" | "unsupported_type" | "parse_failed" | "unsafe_content";
   fileName: string;
 }): VerificationPlan {
   const { criteria, reason, fileName } = opts;

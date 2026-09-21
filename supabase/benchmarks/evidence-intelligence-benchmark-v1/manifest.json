@@ -1,0 +1,46 @@
+{
+  "benchmark": "evidence-intelligence-benchmark-v1",
+  "version": "1.0.0",
+  "frozen_at": "2026-09-20T21:28:34.069Z",
+  "ground_truth": {
+    "path": "ground-truth.json",
+    "sha256": "d2faf5bbb13df85e594023cd01bfc119355d8ca9e44199bbb7139f706f39ed87"
+  },
+  "files": [
+    {
+      "path": "files/adv-report.txt",
+      "sha256": "be2801b56c79f8476aed629969dbc6ebc60a9c89c86755befc7af3f38d278cc6",
+      "bytes": 642
+    },
+    {
+      "path": "files/ar-report-v1.txt",
+      "sha256": "caea0872aa01ea046f2897c7a0dc580d3bbbada6002388bac26ccf2c7168b9eb",
+      "bytes": 1100
+    },
+    {
+      "path": "files/ar-report-v2.txt",
+      "sha256": "1a27dd1022db52b5b152218586c386bd9ac36d4778e5d3f8c5a1526f8cacc9e8",
+      "bytes": 1245
+    },
+    {
+      "path": "files/en-kpis.xlsx",
+      "sha256": "d85ef2d7d7b094d890876808ba948db8a21ba2b82c158d3d25a148b59f6cc59f",
+      "bytes": 2511
+    },
+    {
+      "path": "files/en-monthly-report.pdf",
+      "sha256": "e4c16b77fc3ce07c6cf71468e84bb31912b99e34da3d538d2877ae54d4a48143",
+      "bytes": 1507
+    },
+    {
+      "path": "files/mixed-kpi-log.xlsx",
+      "sha256": "5d8f6c7d144fddf66bff2b9d7c2e7703c02770dd5b3734f5ae5afe888778d5e7",
+      "bytes": 2222
+    },
+    {
+      "path": "files/mixed-supervisor-note.csv",
+      "sha256": "00a1ee11e6d60819e867060466dfccc031ce4633d2e43d490ea87a126d79de75",
+      "bytes": 504
+    }
+  ]
+}

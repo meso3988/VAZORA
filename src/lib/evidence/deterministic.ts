@@ -16,7 +16,7 @@ import { parseDocumentBytes } from "@/lib/ingestion/parser";
 
 export type EvidenceText =
   | { ok: true; text: string; pageOffsets: { page: number; start: number; end: number }[] }
-  | { ok: false; reason: "ocr_required" | "unsupported_type" | "parse_failed" };
+  | { ok: false; reason: "ocr_required" | "unsupported_type" | "parse_failed" | "unsafe_content" };
 
 const TEXT_MIMES = new Set([
   "text/csv",
@@ -52,8 +52,18 @@ export async function extractEvidenceText(
   }
 
   if (mimeType.startsWith("image/")) return { ok: false, reason: "ocr_required" };
-  // XLSX has no parser in this codebase yet — honest unable_to_verify path,
-  // never a fabricated verdict.
+
+  if (lower.endsWith(".xlsx")) {
+    const { parseXlsx, workbookToText } = await import("@/lib/evidence/xlsx");
+    const wb = await parseXlsx(bytes);
+    if (!wb.ok) return { ok: false, reason: wb.reason === "unsafe_content" ? "unsafe_content" : "parse_failed" };
+    const text = workbookToText(wb);
+    if (wb.flags.length) {
+      return { ok: true, text: `${text}\n[workbook flags: ${wb.flags.join(", ")}]`, pageOffsets: [] };
+    }
+    return { ok: true, text, pageOffsets: [] };
+  }
+
   return { ok: false, reason: "unsupported_type" };
 }
 
