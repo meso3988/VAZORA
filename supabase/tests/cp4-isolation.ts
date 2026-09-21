@@ -117,15 +117,25 @@ async function main() {
   }
 
   // ---------- WRITE attacks ----------
-  let alphaItem = "";
   const alphaContractId = crypto.randomUUID();
   const { error: cErr } = await A.from("contracts").insert({ id: alphaContractId, organization_id: alpha.orgId, contract_number: "A-ISO-1", title: "Alpha contract" });
   if (cErr) throw new Error(`alpha contract seed: ${cErr.message}`);
+  const alphaItem = crypto.randomUUID();
+  const { error: itemErr } = await A.from("evidence_items").insert({ id: alphaItem, organization_id: alpha.orgId, contract_id: alphaContractId, title: "Alpha item", status: "received" });
+  if (itemErr) throw new Error(`alpha item seed: ${itemErr.message}`);
   {
     const { error } = await A.from("evidence_verification_runs").insert({
       organization_id: beta.orgId, contract_id: contractId, obligation_id: obligationId, evidence_item_id: itemId, evidence_version_id: versionId, status: "completed", verifier_provider: "x", verifier_model: "x",
     });
     check("verify-beta-evidence", !!error, error ? `denied: ${error.message.slice(0, 60)}` : "INSERT ACCEPTED");
+  }
+  {
+    // Nastier variant: ALPHA's own org on the row, BETA's version referenced —
+    // tests the cross-object coherence check inside the policy.
+    const { error } = await A.from("evidence_verification_runs").insert({
+      organization_id: alpha.orgId, contract_id: alphaContractId, evidence_item_id: alphaItem, evidence_version_id: versionId, status: "completed", verifier_provider: "x", verifier_model: "x",
+    });
+    check("verify-beta-version-under-alpha-org", !!error, error ? `denied: ${error.message.slice(0, 60)}` : "CROSS-TENANT RUN ACCEPTED");
   }
   {
     const { error } = await A.from("evidence_verification_checks")
@@ -141,12 +151,8 @@ async function main() {
   }
   {
     // Cross-link: bind Alpha's OWN item to BETA's requirement — the dangerous one.
-    const alphaItemId = crypto.randomUUID();
-    const { error: itemErr } = await A.from("evidence_items").insert({ id: alphaItemId, organization_id: alpha.orgId, contract_id: alphaContractId, title: "Alpha item", status: "received" });
-    if (itemErr) throw new Error(`alpha item seed: ${itemErr.message}`);
-    const { error } = await A.from("evidence_requirement_links").insert({ evidence_item_id: alphaItemId, evidence_requirement_id: requirementId, organization_id: alpha.orgId });
+    const { error } = await A.from("evidence_requirement_links").insert({ evidence_item_id: alphaItem, evidence_requirement_id: requirementId, organization_id: alpha.orgId });
     check("crosslink-beta-requirement", !!error, error ? `denied: ${error.message.slice(0, 60)}` : "CROSS-LINK ACCEPTED");
-    alphaItem = alphaItemId;
   }
   {
     const { error } = await A.from("evidence_items").delete().eq("id", itemId);

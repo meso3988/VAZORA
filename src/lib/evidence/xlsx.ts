@@ -156,6 +156,10 @@ export async function parseXlsx(bytes: Buffer): Promise<XlsxWorkbook> {
   const read = async (path: string): Promise<string | null> => {
     const f = zip.file(path);
     if (!f) return null;
+    // Refuse oversized entries BEFORE decompression — the header's declared
+    // size is trustworthy enough to reject; the post-check covers lies.
+    const declared = (f as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize;
+    if (typeof declared === "number" && declared > MAX_ENTRY_BYTES) return null;
     const text = await f.async("string");
     if (text.length > MAX_ENTRY_BYTES) return null;
     return text;
@@ -208,7 +212,9 @@ export async function parseXlsx(bytes: Buffer): Promise<XlsxWorkbook> {
     if (!target) continue;
     const path = target.startsWith("/") ? target.slice(1) : `xl/${target.replace(/^\.\//, "")}`;
     const sheetXml = await read(path);
-    if (!sheetXml) continue;
+    // A declared-but-unreadable sheet means the workbook we hand the verifier
+    // would be silently incomplete — fail closed rather than verify a subset.
+    if (!sheetXml) return { ok: false, reason: "malformed" };
     const sd = doc(sheetXml);
     if (!sd) return { ok: false, reason: "malformed" };
 
