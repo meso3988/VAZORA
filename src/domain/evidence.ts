@@ -157,6 +157,34 @@ export type EvidenceItemDetail = {
   discrepancies: VerificationDiscrepancyView[];
 };
 
+/**
+ * EFFECTIVE OPERATIONAL STATE vs LATEST VERIFICATION RESULT.
+ *
+ * These are two different questions and must never collapse into one badge:
+ *
+ *   operational — what the organization should act on right now. A pending
+ *                 (or human-retained) same-version discrepancy keeps the
+ *                 previously accepted result in force.
+ *   latest      — what the newest verification run actually said. Always
+ *                 shown honestly, never hidden to protect the operational
+ *                 state.
+ *
+ * Phase 4 (AI Contract Officer) must read `operational` for decisions while
+ * staying aware of `discrepancyStatus === "pending"`.
+ */
+export type EffectiveEvidenceStatus = {
+  /** the state to operationally act on — NOT simply the newest model output */
+  operational: CheckResult | null;
+  /** the newest verification result, shown alongside, never instead */
+  latest: CheckResult | null;
+  /** true while operational is held above latest by a discrepancy */
+  priorStateInForce: boolean;
+  /** pending = awaiting authorized human review */
+  discrepancyStatus: "pending" | "kept_prior" | "regression_confirmed" | null;
+  /** how the operational state was established */
+  source: "verification_run" | "human_override" | "prior_verified_retained" | "human_confirmed_regression" | "none";
+};
+
 /** One row of the contract Evidence Matrix. */
 export type EvidenceMatrixRow = {
   requirement: EvidenceRequirementView;
@@ -168,6 +196,8 @@ export type EvidenceMatrixRow = {
   latestItemStatus: EvidenceItemStatus | null;
   effectiveHuman: boolean;
   gap: EvidenceGapView | null;
+  /** operational vs latest — the row renders `effective.operational` as primary */
+  effective: EffectiveEvidenceStatus;
 };
 
 /** Categorized inbox row — exceptions first, never a generic file list. */
@@ -185,12 +215,24 @@ export type EvidenceInboxRow = {
   openGapCount: number;
   unlinkedCount: number;
   needsOverrideReview: boolean;
+  /** same-version discrepancies awaiting authorized human review */
+  pendingDiscrepancyCount: number;
+  /** pending + human-retained — those still holding a prior verified state */
+  heldDiscrepancyCount: number;
+  /**
+   * Operational item status. While a discrepancy holds the prior verified
+   * state in force this stays "verified" even though `status` (the latest
+   * run's verdict) reads "needs_review".
+   */
+  effectiveStatus: EvidenceItemStatus;
 };
 
 export type InboxCategory =
   | "needs_linking"
   | "needs_verification"
   | "needs_human_review"
+  /** verifier disagreed with an accepted result on the SAME immutable evidence */
+  | "verification_discrepancy"
   | "partial"
   | "missing"
   | "reverification_pending"

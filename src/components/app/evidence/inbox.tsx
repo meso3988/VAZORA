@@ -1,15 +1,23 @@
-import { ArrowUpLeft } from "lucide-react";
+import { AlertTriangle, ArrowUpLeft } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
 import { ItemStatusBadge } from "@/components/app/evidence/badges";
 import { Empty, Mono } from "@/components/app/primitives";
-import type { EvidenceInboxRow, InboxCategory } from "@/domain/evidence";
+import type { EvidenceInboxRow, EvidenceItemStatus, InboxCategory } from "@/domain/evidence";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-/** Inbox category derived from live state — exceptions first. */
+/**
+ * Inbox category derived from live state — exceptions first.
+ *
+ * A VERIFICATION DISCREPANCY ("the verifier disagreed with a previously
+ * accepted result on the SAME immutable evidence") is a different problem
+ * from an evidence GAP ("required evidence is operationally incomplete"),
+ * so it gets its own queue instead of being mixed into the gap categories.
+ */
 function categoryOf(row: EvidenceInboxRow): InboxCategory {
   if (row.unlinkedCount > 0 || !row.obligationTitle) return "needs_linking";
+  if (row.pendingDiscrepancyCount > 0 && row.openGapCount === 0) return "verification_discrepancy";
   switch (row.status) {
     case "verification_pending":
       return "reverification_pending";
@@ -30,6 +38,7 @@ function categoryOf(row: EvidenceInboxRow): InboxCategory {
 const CATEGORY_ORDER: InboxCategory[] = [
   "needs_linking",
   "needs_human_review",
+  "verification_discrepancy",
   "reverification_pending",
   "partial",
   "missing",
@@ -38,19 +47,27 @@ const CATEGORY_ORDER: InboxCategory[] = [
   "verified",
 ];
 
+/** Item status → translation key in app.evidence.itemStatus. */
+const ITEM_KEY = {
+  received: "received", verification_pending: "verificationPending",
+  partially_verified: "partiallyVerified", verified: "verified",
+  needs_review: "needsReview", ocr_required: "ocrRequired", rejected: "rejected",
+} as const satisfies Record<EvidenceItemStatus, string>;
+
 const RECENT_MS = 7 * 24 * 60 * 60 * 1000;
 const isRecent = (r: EvidenceInboxRow) => Date.now() - Date.parse(r.uploadedAt) < RECENT_MS;
 
 const CATEGORY_RANK: Record<InboxCategory, number> = {
   needs_human_review: 0,
   needs_linking: 1,
-  reverification_pending: 2,
-  partial: 3,
-  missing: 4,
-  needs_verification: 5,
-  recent: 6,
-  verified: 7,
-  all: 8,
+  verification_discrepancy: 2,
+  reverification_pending: 3,
+  partial: 4,
+  missing: 5,
+  needs_verification: 6,
+  recent: 7,
+  verified: 8,
+  all: 9,
 };
 
 /**
@@ -70,6 +87,7 @@ export async function EvidenceInbox({
   activeContract: string | null;
 }) {
   const t = await getTranslations("app.evidence.inbox");
+  const st = await getTranslations("app.evidence.itemStatus");
   const f = await getFormatter();
   const locale = await getLocale();
 
@@ -101,6 +119,7 @@ export async function EvidenceInbox({
       case "partial":
       case "missing": return r.openGapCount ? t("next.resolveGap", { count: r.openGapCount }) : t("next.inspect");
       case "needs_human_review": return t("next.review");
+      case "verification_discrepancy": return t("next.reviewDiscrepancy");
       default: return t("next.inspect");
     }
   };
@@ -153,14 +172,26 @@ export async function EvidenceInbox({
                 >
                   <div className="flex min-w-0 flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <ItemStatusBadge status={r.status} />
+                      {/* operational status — not the raw latest-run verdict */}
+                      <ItemStatusBadge status={r.effectiveStatus} />
                       <span className="truncate text-sm font-medium">{r.title}</span>
                       {r.openGapCount > 0 && (
                         <span className="rounded-sm bg-missing/10 px-1.5 py-0.5 text-[10px] font-medium text-missing">
                           {t("gaps", { count: r.openGapCount })}
                         </span>
                       )}
+                      {r.pendingDiscrepancyCount > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-sm bg-partial/10 px-1.5 py-0.5 text-[10px] font-medium text-partial">
+                          <AlertTriangle size={10} strokeWidth={2} aria-hidden />
+                          {t("discrepancies", { count: r.pendingDiscrepancyCount })}
+                        </span>
+                      )}
                     </div>
+                    {r.heldDiscrepancyCount > 0 && r.effectiveStatus !== r.status && (
+                      <p className="text-[11px] text-muted">
+                        {t("priorStateInForce", { latest: st(ITEM_KEY[r.status]) })}
+                      </p>
+                    )}
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted">
                       <span dir="ltr" className="font-mono">{r.fileName}</span>
                       <span>· {r.contractTitle}</span>

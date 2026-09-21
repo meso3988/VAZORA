@@ -1,11 +1,17 @@
-import { ArrowUpLeft, FileUp } from "lucide-react";
+import { AlertTriangle, ArrowUpLeft, FileUp } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { uploadNewEvidence } from "@/app/[locale]/app/evidence/actions";
 import { GapStatusBadge, ItemStatusBadge, OverrideBadge, ResultBadge } from "@/components/app/evidence/badges";
 import { Empty, Mono, Table, Td, Th } from "@/components/app/primitives";
-import type { EvidenceMatrixRow } from "@/domain/evidence";
+import type { CheckResult, EvidenceMatrixRow } from "@/domain/evidence";
 import { Link } from "@/i18n/navigation";
+
+/** Result → translation key in app.evidence.result. */
+const RESULT_KEY = {
+  verified: "verified", partial: "partial", missing: "missing", not_found: "notFound",
+  not_applicable: "notApplicable", needs_human_review: "needsHumanReview", unable_to_verify: "unableToVerify",
+} as const satisfies Record<CheckResult, string>;
 
 /**
  * Contract Evidence Matrix — one row per required criterion, grouped by
@@ -47,7 +53,7 @@ export async function EvidenceMatrix({
       <tbody className="divide-y divide-line">
         {[...byObligation.entries()].map(([obId, list]) => {
           const ob = list[0].obligation;
-          const verifiedCount = list.filter((r) => r.latestResult === "verified").length;
+          const verifiedCount = list.filter((r) => r.effective.operational === "verified").length;
           return (
             <ObligationRows
               key={obId}
@@ -90,6 +96,7 @@ async function ObligationRows({
   canUpload: boolean;
 }) {
   const t = await getTranslations("app.evidence.matrix");
+  const rt = await getTranslations("app.evidence.result");
   return (
     <>
       <tr className="bg-fg/3">
@@ -103,10 +110,15 @@ async function ObligationRows({
         </Td>
       </tr>
       {rows.map((r) => {
+        // Exceptions are judged on the OPERATIONAL state — a discrepancy is
+        // flagged distinctly rather than painted as an operational failure.
         const exception =
           r.gap != null ||
-          r.latestResult !== "verified" ||
-          (r.latestItemStatus != null && r.latestItemStatus !== "verified");
+          (r.effective.operational !== "verified" &&
+            !(r.effective.operational == null && r.linkedItemCount === 0)) ||
+          (!r.effective.priorStateInForce &&
+            r.latestItemStatus != null &&
+            r.latestItemStatus !== "verified");
         return (
           <tr key={r.requirement.id} className={`align-top ${exception ? "bg-missing/3" : ""} hover:bg-fg/3`}>
             <Td>
@@ -122,7 +134,9 @@ async function ObligationRows({
                     {t("items", { count: r.linkedItemCount })}
                     <ArrowUpLeft size={11} strokeWidth={1.75} aria-hidden className="rtl:-scale-x-100" />
                   </Link>
-                  {r.latestItemStatus && r.latestItemStatus !== "verified" && (
+                  {/* While the prior verified state is in force the item's
+                      raw run status would read "needs review" — misleading. */}
+                  {r.latestItemStatus && r.latestItemStatus !== "verified" && !r.effective.priorStateInForce && (
                     <ItemStatusBadge status={r.latestItemStatus} />
                   )}
                 </span>
@@ -130,11 +144,38 @@ async function ObligationRows({
                 <span className="text-xs text-missing">{t("noneSubmitted")}</span>
               )}
             </Td>
+            {/* OPERATIONAL STATE is primary; the latest model result is shown
+                beside it, never instead of it. A pending discrepancy must not
+                make unchanged evidence look operationally regressed. */}
             <Td>
-              {r.latestResult ? (
-                <span className="flex flex-wrap items-center gap-1.5">
-                  <ResultBadge result={r.latestResult} />
-                  {r.effectiveHuman && <OverrideBadge />}
+              {r.effective.operational ? (
+                <span className="flex flex-col gap-1">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <ResultBadge result={r.effective.operational} />
+                    {r.effectiveHuman && <OverrideBadge />}
+                  </span>
+                  {r.effective.priorStateInForce && (
+                    <span className="flex flex-col gap-0.5 rounded-sm border border-partial/40 bg-partial/5 px-2 py-1">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-partial">
+                        <AlertTriangle size={11} strokeWidth={1.75} aria-hidden />
+                        {t("discrepancy")}
+                      </span>
+                      <span className="text-[10px] text-muted">
+                        {t("latestModelResult", { result: rt(RESULT_KEY[r.effective.latest ?? "unable_to_verify"]) })}
+                      </span>
+                      {r.latestItemId && (
+                        <Link
+                          href={`/app/evidence/${r.latestItemId}`}
+                          className="text-[10px] font-medium text-fg underline-offset-2 hover:underline"
+                        >
+                          {t("reviewDiscrepancy")}
+                        </Link>
+                      )}
+                    </span>
+                  )}
+                  {r.effective.discrepancyStatus === "regression_confirmed" && !r.effective.priorStateInForce && (
+                    <span className="text-[10px] text-muted">{t("regressionConfirmed")}</span>
+                  )}
                 </span>
               ) : (
                 <span className="text-xs text-faint">{t("notVerified")}</span>
@@ -151,9 +192,9 @@ async function ObligationRows({
               )}
             </Td>
             <Td>
-              {r.latestItemId && (r.latestResult !== "verified" || (r.latestItemStatus != null && r.latestItemStatus !== "verified")) ? (
+              {r.latestItemId && (exception || r.effective.priorStateInForce) ? (
                 <Link href={`/app/evidence/${r.latestItemId}`} className="inline-flex items-center gap-1 text-xs font-medium text-fg hover:underline">
-                  {r.gap ? t("resolveGap") : t("inspect")}
+                  {r.effective.priorStateInForce ? t("reviewDiscrepancy") : r.gap ? t("resolveGap") : t("inspect")}
                 </Link>
               ) : r.linkedItemCount === 0 && canUpload ? (
                 <form action={uploadNewEvidence} className="flex items-center gap-2">

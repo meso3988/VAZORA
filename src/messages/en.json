@@ -1762,7 +1762,7 @@
         "columns": {
           "requirement": "Evidence required",
           "submitted": "Submitted",
-          "verification": "Verification",
+          "verification": "Operational status",
           "gap": "Open gap",
           "next": "Next action"
         },
@@ -1774,7 +1774,12 @@
         "resolveGap": "Resolve gap",
         "inspect": "Inspect",
         "upload": "Upload",
-        "uploadFor": "Upload evidence for {name}"
+        "uploadFor": "Upload evidence for {name}",
+        "verification": "Operational status",
+        "discrepancy": "Verification discrepancy",
+        "latestModelResult": "Latest model result: {result}",
+        "reviewDiscrepancy": "Review discrepancy",
+        "regressionConfirmed": "Regression confirmed by an authorized human"
       },
       "inbox": {
         "title": "Evidence inbox",
@@ -1791,7 +1796,8 @@
           "partial": "Partial ({count})",
           "missing": "Missing ({count})",
           "verified": "Verified ({count})",
-          "recent": "Recently uploaded ({count})"
+          "recent": "Recently uploaded ({count})",
+          "verification_discrepancy": "Verification discrepancies ({count})"
         },
         "gaps": "{count} open {count, plural, one {gap} other {gaps}}",
         "next": {
@@ -1800,12 +1806,15 @@
           "waitRun": "Re-verification in progress",
           "resolveGap": "Resolve {count} open {count, plural, one {gap} other {gaps}}",
           "inspect": "Inspect",
-          "review": "Human review needed"
+          "review": "Human review needed",
+          "reviewDiscrepancy": "Review verification discrepancy"
         },
         "contractFilter": "Contract",
         "allContracts": "All contracts",
         "apply": "Apply",
-        "uploadedBy": "by"
+        "uploadedBy": "by",
+        "discrepancies": "{count} {count, plural, one {discrepancy} other {discrepancies}}",
+        "priorStateInForce": "Previous verified state in effect · latest re-verification: {latest}"
       },
       "discrepancy": {
         "title": "Verification discrepancies",
@@ -1821,7 +1830,13 @@
         "confirmRegression": "Confirm regression",
         "reasonPlaceholder": "Decision reason (required)…",
         "keptNotice": "Discrepancy reviewed — previous verified state retained.",
-        "regressionNotice": "Regression confirmed — a new gap was opened with human attribution."
+        "regressionNotice": "Regression confirmed — a new gap was opened with human attribution.",
+        "effectiveHeading": "Operational state vs latest verification",
+        "operationalLabel": "Operational status",
+        "latestLabel": "Latest re-verification",
+        "discrepancyLabel": "Discrepancy",
+        "priorInEffect": "The previous verified state remains in effect until this discrepancy is reviewed.",
+        "keptByHuman": "Previous verified state retained by an authorized human."
       }
     },
     "risks": {

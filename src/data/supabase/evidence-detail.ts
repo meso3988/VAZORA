@@ -14,6 +14,7 @@ import type {
   VerificationCheckView,
   VerificationRunView,
 } from "@/domain/evidence";
+import { effectiveItemStatus, effectiveStatusForRequirement } from "@/domain/effective-status";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
 type Supa = Awaited<ReturnType<typeof createSupabaseServer>>;
@@ -342,7 +343,7 @@ export async function getContractEvidenceMatrix(
   if (!requirements.length) return [];
 
   const reqIds = requirements.map((r) => r.id as string);
-  const [{ data: linkRows }, { data: gapRows }, { data: checkRows }, { data: itemRows }] = await Promise.all([
+  const [{ data: linkRows }, { data: gapRows }, { data: checkRows }, { data: itemRows }, { data: discRows }] = await Promise.all([
     supabase
       .from("evidence_requirement_links")
       .select("evidence_requirement_id, evidence_item_id")
@@ -367,7 +368,30 @@ export async function getContractEvidenceMatrix(
       .select("id, status")
       .eq("organization_id", orgId)
       .eq("contract_id", contractId),
+    supabase
+      .from("evidence_verification_discrepancies")
+      .select("*")
+      .eq("organization_id", orgId)
+      .in("evidence_requirement_id", reqIds)
+      .order("created_at", { ascending: false }),
   ]);
+
+  // Version the newest run examined per requirement — effective status is
+  // only held for the SAME version the discrepancy was raised on.
+  const latestRunIds = [
+    ...new Set((checkRows ?? []).map((c) => c.verification_run_id as string).filter(Boolean)),
+  ];
+  const { data: runVersionRows } = latestRunIds.length
+    ? await supabase
+        .from("evidence_verification_runs")
+        .select("id, evidence_version_id")
+        .eq("organization_id", orgId)
+        .in("id", latestRunIds)
+    : { data: [] as any[] };
+  const versionByRun = new Map<string, string>(
+    (runVersionRows ?? []).map((r: any) => [r.id as string, r.evidence_version_id as string]),
+  );
+  const discrepancies = (discRows ?? []).map(mapDiscrepancy);
 
   const itemStatusById = new Map<string, EvidenceItemStatus>();
   for (const it of itemRows ?? []) itemStatusById.set(it.id as string, it.status as EvidenceItemStatus);
@@ -381,11 +405,19 @@ export async function getContractEvidenceMatrix(
   for (const g of gapRows ?? []) {
     if (!gapByReq.has(g.evidence_requirement_id)) gapByReq.set(g.evidence_requirement_id, mapGap(g));
   }
-  const latestCheckByReq = new Map<string, { result: CheckResult; human: CheckResult | null; itemId: string | null }>();
+  const latestCheckByReq = new Map<
+    string,
+    { result: CheckResult; human: CheckResult | null; itemId: string | null; versionId: string | null }
+  >();
   for (const c of checkRows ?? []) {
     const key = c.evidence_requirement_id as string;
     if (!latestCheckByReq.has(key)) {
-      latestCheckByReq.set(key, { result: c.result, human: c.human_result, itemId: null });
+      latestCheckByReq.set(key, {
+        result: c.result,
+        human: c.human_result,
+        itemId: null,
+        versionId: versionByRun.get(c.verification_run_id as string) ?? null,
+      });
     }
   }
   // One evidence item per requirement for navigation — newest linked item.
@@ -416,6 +448,7 @@ export async function getContractEvidenceMatrix(
 
   return requirements.map((r) => {
     const latest = latestCheckByReq.get(r.id);
+    const latestResult = (latest?.human ?? latest?.result) ?? null;
     return {
       requirement: {
         id: r.id,
@@ -427,11 +460,18 @@ export async function getContractEvidenceMatrix(
       },
       obligation: obContext.get(r.obligation_id)!,
       linkedItemCount: linkedItems.get(r.id)?.size ?? 0,
-      latestResult: (latest?.human ?? latest?.result) ?? null,
+      latestResult,
       latestItemId: itemByReq.get(r.id) ?? null,
       latestItemStatus: itemStatusById.get(itemByReq.get(r.id) ?? "") ?? null,
       effectiveHuman: latest?.human != null,
       gap: gapByReq.get(r.id) ?? null,
+      effective: effectiveStatusForRequirement({
+        requirementId: r.id as string,
+        latestResult,
+        latestVersionId: latest?.versionId ?? null,
+        humanOverridden: latest?.human != null,
+        discrepancies,
+      }),
     };
   });
 }
@@ -456,7 +496,7 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
   const contractIds = [...new Set(rows.map((r) => r.contract_id as string))];
   const obligationIds = [...new Set(rows.map((r) => r.obligation_id).filter(Boolean))] as string[];
 
-  const [{ data: versionRows }, { data: linkRows }, { data: contractRows }, { data: obRows }, { data: gapRows }] =
+  const [{ data: versionRows }, { data: linkRows }, { data: contractRows }, { data: obRows }, { data: gapRows }, { data: pendingDiscRows }] =
     await Promise.all([
       supabase
         .from("evidence_versions")
@@ -478,7 +518,23 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
         .select("evidence_requirement_id, status")
         .eq("organization_id", orgId)
         .in("status", OPEN_GAP_STATES),
+      // pending = awaiting review; kept_prior = retained by a human. Both
+      // still hold the previously accepted operational state in force.
+      supabase
+        .from("evidence_verification_discrepancies")
+        .select("evidence_item_id, status")
+        .eq("organization_id", orgId)
+        .in("status", ["pending", "kept_prior"])
+        .in("evidence_item_id", itemIds),
     ]);
+
+  const pendingDiscByItem = new Map<string, number>();
+  const heldDiscByItem = new Map<string, number>();
+  for (const d of pendingDiscRows ?? []) {
+    const key = d.evidence_item_id as string;
+    heldDiscByItem.set(key, (heldDiscByItem.get(key) ?? 0) + 1);
+    if (d.status === "pending") pendingDiscByItem.set(key, (pendingDiscByItem.get(key) ?? 0) + 1);
+  }
 
   const latestVersion = new Map<string, any>();
   for (const v of versionRows ?? []) {
@@ -510,6 +566,9 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
   return rows.map((r) => {
     const v = latestVersion.get(r.id);
     const linked = linksByItem.get(r.id)?.size ?? 0;
+    const openGapCount = openGapsByItem.get(r.id) ?? 0;
+    const pendingDiscrepancyCount = pendingDiscByItem.get(r.id) ?? 0;
+    const heldDiscrepancyCount = heldDiscByItem.get(r.id) ?? 0;
     return {
       itemId: r.id,
       title: r.title,
@@ -521,9 +580,16 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
       fileName: (v?.file_name as string) ?? r.title,
       uploadedAt: (v?.uploaded_at as string) ?? r.created_at,
       uploadedBy: (v?.uploaded_by as string | null) ?? null,
-      openGapCount: openGapsByItem.get(r.id) ?? 0,
+      openGapCount,
       unlinkedCount: r.obligation_id ? 0 : linked === 0 ? 1 : 0,
       needsOverrideReview: false,
+      pendingDiscrepancyCount,
+      heldDiscrepancyCount,
+      effectiveStatus: effectiveItemStatus({
+        runStatus: r.status as EvidenceItemStatus,
+        heldDiscrepancyCount,
+        openGapCount,
+      }),
     };
   });
 }

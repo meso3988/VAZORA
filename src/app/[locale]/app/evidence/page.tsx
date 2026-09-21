@@ -15,8 +15,9 @@ import { asLocale } from "@/i18n/params";
 
 const ORDER: EvidenceStatus[] = ["verified", "partial", "rejected", "pending"];
 const INBOX_CATEGORIES: InboxCategory[] = [
-  "needs_linking", "needs_verification", "needs_human_review", "partial",
-  "missing", "reverification_pending", "verified", "all",
+  "needs_linking", "needs_verification", "needs_human_review",
+  "verification_discrepancy", "partial", "missing", "reverification_pending",
+  "recent", "verified", "all",
 ];
 
 export async function generateMetadata(props: PageProps<"/[locale]/app/evidence">): Promise<Metadata> {

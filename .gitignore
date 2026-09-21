@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# QA fixture output — carries a generated throwaway tenant credential.
+# Regenerate with supabase/tests/qa-scenarios-ux.ts (the persisted definition).
+supabase/tests/qa-ux-scenarios.json

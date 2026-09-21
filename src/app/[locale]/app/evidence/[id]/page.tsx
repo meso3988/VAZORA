@@ -19,6 +19,7 @@ import { VersionHistory } from "@/components/app/evidence/version-history";
 import { Empty, Mono, PageHeader, Panel } from "@/components/app/primitives";
 import { auth } from "@/data/auth/provider";
 import { getEvidenceItemDetail } from "@/data/supabase/evidence-detail";
+import { effectiveItemStatus } from "@/domain/effective-status";
 import { asLocale } from "@/i18n/params";
 import { Link } from "@/i18n/navigation";
 
@@ -63,6 +64,21 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
   const verifiedCriteria = criterionChecks.filter((c) => (c.humanResult ?? c.result) === "verified").length;
   const totalCriteria = detail.obligationRequirements.length || criterionChecks.length;
 
+  // EFFECTIVE OPERATIONAL STATE vs LATEST VERIFICATION RESULT — while a
+  // same-version discrepancy is pending or retained, the previously accepted
+  // state stays in force and the item must not read as regressed.
+  const pendingDiscrepancies = detail.discrepancies.filter((d) => d.status === "pending");
+  const heldDiscrepancies = detail.discrepancies.filter(
+    (d) => d.status === "pending" || d.status === "kept_prior",
+  );
+  const confirmedRegressions = detail.discrepancies.filter((d) => d.status === "regression_confirmed");
+  const operationalStatus = effectiveItemStatus({
+    runStatus: detail.status,
+    heldDiscrepancyCount: heldDiscrepancies.length,
+    openGapCount: openGaps.length,
+  });
+  const statesDiverge = operationalStatus !== detail.status;
+
   const reqName = (rid: string | null) =>
     detail.requirements.find((r) => r.id === rid)?.name ??
     detail.obligationRequirements.find((r) => r.id === rid)?.name ??
@@ -91,7 +107,17 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
         title={detail.title}
         subtitle={
           <span className="flex flex-wrap items-center gap-3">
-            <ItemStatusBadge status={detail.status} />
+            {/* operational state is primary — never the raw latest verdict */}
+            <span className="inline-flex items-center gap-1.5">
+              <span className="text-[11px] text-muted">{dt("operationalLabel")}</span>
+              <ItemStatusBadge status={operationalStatus} />
+            </span>
+            {statesDiverge && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-[11px] text-muted">{dt("latestLabel")}</span>
+                <ItemStatusBadge status={detail.status} />
+              </span>
+            )}
             {totalCriteria > 0 && (
               <span className="text-xs text-muted">
                 {t("criteriaCount", { verified: verifiedCriteria, total: totalCriteria })}
@@ -141,6 +167,45 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
         <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
           {discrepancy === "kept" ? dt("keptNotice") : dt("regressionNotice")}
         </p>
+      )}
+
+      {/* ===== effective operational state vs latest verification ===== */}
+      {(heldDiscrepancies.length > 0 || confirmedRegressions.length > 0) && (
+        <section
+          className="flex flex-col gap-2 rounded-md border border-partial/40 bg-partial/5 px-4 py-3"
+          aria-labelledby="effective-state-heading"
+        >
+          <h2 id="effective-state-heading" className="text-[11px] font-medium tracking-wide text-muted">
+            {dt("effectiveHeading")}
+          </h2>
+          <dl className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <div className="flex items-center gap-2">
+              <dt className="text-[11px] text-muted">{dt("operationalLabel")}</dt>
+              <dd><ItemStatusBadge status={operationalStatus} /></dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <dt className="text-[11px] text-muted">{dt("latestLabel")}</dt>
+              <dd><ItemStatusBadge status={detail.status} /></dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <dt className="text-[11px] text-muted">{dt("discrepancyLabel")}</dt>
+              <dd className="text-xs font-medium text-partial">
+                {pendingDiscrepancies.length > 0
+                  ? dt("pending")
+                  : confirmedRegressions.length > 0
+                    ? dt("confirmed")
+                    : dt("kept")}
+              </dd>
+            </div>
+          </dl>
+          <p className="text-xs leading-relaxed text-muted">
+            {pendingDiscrepancies.length > 0
+              ? dt("priorInEffect")
+              : confirmedRegressions.length > 0
+                ? dt("confirmedLabel")
+                : dt("keptByHuman")}
+          </p>
+        </section>
       )}
 
       {/* ===== three-zone inspector — mobile order: gaps(2) → A→B→C(3) → history(4) ===== */}

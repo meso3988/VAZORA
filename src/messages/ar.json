@@ -1762,7 +1762,7 @@
         "columns": {
           "requirement": "الدليل المطلوب",
           "submitted": "المُقدَّم",
-          "verification": "التحقق",
+          "verification": "الحالة التشغيلية",
           "gap": "الفجوة المفتوحة",
           "next": "الإجراء التالي"
         },
@@ -1774,7 +1774,12 @@
         "resolveGap": "حل الفجوة",
         "inspect": "فحص",
         "upload": "رفع",
-        "uploadFor": "رفع دليل لـ{name}"
+        "uploadFor": "رفع دليل لـ{name}",
+        "verification": "الحالة التشغيلية",
+        "discrepancy": "تناقض في التحقق",
+        "latestModelResult": "آخر نتيجة تحقق: {result}",
+        "reviewDiscrepancy": "مراجعة التناقض",
+        "regressionConfirmed": "تراجع مؤكَّد من مخوَّل بشري"
       },
       "inbox": {
         "title": "صندوق وارد الأدلة",
@@ -1791,7 +1796,8 @@
           "partial": "جزئي ({count})",
           "missing": "مفقود ({count})",
           "verified": "مُتحقَّق ({count})",
-          "recent": "رُفع حديثًا ({count})"
+          "recent": "رُفع حديثًا ({count})",
+          "verification_discrepancy": "تناقضات التحقق ({count})"
         },
         "gaps": "{count} {count, plural, one {فجوة مفتوحة} other {فجوات مفتوحة}}",
         "next": {
@@ -1800,12 +1806,15 @@
           "waitRun": "إعادة التحقق جارية",
           "resolveGap": "حل {count} {count, plural, one {فجوة مفتوحة} other {فجوات مفتوحة}}",
           "inspect": "فحص",
-          "review": "مراجعة بشرية مطلوبة"
+          "review": "مراجعة بشرية مطلوبة",
+          "reviewDiscrepancy": "راجع تناقض التحقق"
         },
         "contractFilter": "العقد",
         "allContracts": "كل العقود",
         "apply": "تطبيق",
-        "uploadedBy": "بواسطة"
+        "uploadedBy": "بواسطة",
+        "discrepancies": "{count} {count, plural, one {تناقض} other {تناقضات}}",
+        "priorStateInForce": "الحالة التشغيلية السابقة سارية · آخر نتيجة تحقق: {latest}"
       },
       "discrepancy": {
         "title": "تناقضات التحقق",
@@ -1821,7 +1830,13 @@
         "confirmRegression": "تأكيد التراجع",
         "reasonPlaceholder": "سبب القرار (إلزامي)…",
         "keptNotice": "رُوجِع التناقض — أُبقي على حالة التحقق السابقة.",
-        "regressionNotice": "تأكَّد التراجع — فُتحت فجوة جديدة بإسناد بشري."
+        "regressionNotice": "تأكَّد التراجع — فُتحت فجوة جديدة بإسناد بشري.",
+        "effectiveHeading": "الحالة التشغيلية مقابل آخر نتيجة تحقق",
+        "operationalLabel": "الحالة التشغيلية",
+        "latestLabel": "آخر نتيجة تحقق",
+        "discrepancyLabel": "التناقض",
+        "priorInEffect": "الحالة التشغيلية السابقة (مُتحقَّقة) تبقى سارية حتى تُراجَع هذه الحالة.",
+        "keptByHuman": "أُبقي على حالة التحقق السابقة بقرار بشري مخوَّل."
       }
     },
     "risks": {
