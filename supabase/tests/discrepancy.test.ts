@@ -181,18 +181,28 @@ async function main() {
   check("c3-still-no-gap", (await gapsOf()).every((g: any) => g.status === "resolved"), "");
   check("c4-retained-event", (await eventsOf("evidence.verification_previous_state_retained")).length === 1, "");
 
-  // ===== D. new pending discrepancy → confirm regression ====================
-  // Another weaker rerun on v1? v2 is now latest — run explicitly against v1.
+  // C5/C6 — "remains in force": a further weaker rerun of the SAME unchanged
+  // v1 must not re-raise the question, and must not open a gap.
   scriptedQueue.push([scriptCheck("needs_human_review", null)]);
-  const run4 = await runEvidenceVerification({
+  const runC5 = await runEvidenceVerification({
     supabase: A, organizationId: alpha.orgId, evidenceItemId: itemId,
     evidenceVersionId: version1Id, userId: alpha.userId,
   });
-  check("d1-run4-weaker-v1", run4.ok === true, JSON.stringify(run4));
+  check("c5-repeat-not-requeued", runC5.ok === true && (await discrepanciesOf()).length === 1,
+    `discs=${(await discrepanciesOf()).length}`);
+  check("c6-repeat-no-gap", (await gapsOf()).every((g: any) => g.status === "resolved"),
+    `gaps=${JSON.stringify((await gapsOf()).map((g: any) => g.status))}`);
+
+  // ===== D. new pending discrepancy → confirm regression ====================
+  // v2 was verified in b4; a weaker rerun on v2 is its OWN question — the
+  // kept_prior decision on v1 must not swallow it (per-version scoping).
+  scriptedQueue.push([scriptCheck("needs_human_review", null)]);
+  const run4 = await runVerify(); // latest version = v2
+  check("d1-run4-weaker-v2", run4.ok === true, JSON.stringify(run4));
   const discs2 = await discrepanciesOf();
   const disc2 = discs2.find((d: any) => d.status === "pending");
-  check("d2-second-discrepancy", discs2.length === 2 && !!disc2 && disc2.evidence_version_id === version1Id,
-    `discs=${discs2.length}`);
+  check("d2-second-discrepancy", discs2.length === 2 && !!disc2 && disc2.evidence_version_id === version2Id,
+    `discs=${discs2.length} version=${disc2?.evidence_version_id === version2Id ? "v2" : "wrong"}`);
   check("d3-gaps-still-resolved", (await gapsOf()).every((g: any) => g.status === "resolved"),
     `gaps=${JSON.stringify((await gapsOf()).map((g: any) => g.status))}`);
 
@@ -225,13 +235,14 @@ async function main() {
     .select("verification_run_id, evidence_requirement_id, result, human_result, reason")
     .eq("organization_id", alpha.orgId)
     .order("created_at", { ascending: true });
-  check("e1-five-runs-intact", (runRows ?? []).length === 5 && (runRows ?? []).every((r: any) => r.status === "completed"),
+  check("e1-six-runs-intact", (runRows ?? []).length === 6 && (runRows ?? []).every((r: any) => r.status === "completed"),
     `runs=${(runRows ?? []).length}`);
   const criterionCheckResults = (checkRows ?? [])
     .filter((c: any) => c.evidence_requirement_id !== null)
     .map((c: any) => c.result);
-  check("e2-checks-untouched", criterionCheckResults.join(",") === "verified,needs_human_review,missing,verified,needs_human_review"
-    && (checkRows ?? []).length === 10
+  check("e2-checks-untouched",
+    criterionCheckResults.join(",") === "verified,needs_human_review,missing,verified,needs_human_review,needs_human_review"
+    && (checkRows ?? []).length === 12
     && (checkRows ?? []).every((c: any) => c.human_result === null),
     `results=${criterionCheckResults.join(",")} total=${(checkRows ?? []).length}`);
 

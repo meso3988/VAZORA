@@ -81,17 +81,28 @@ export async function recordSameVersionDiscrepancy(opts: {
   );
   if (!priorVerified) return null;
 
-  // One pending discrepancy per (item, requirement) — a rerun of the same
-  // open question updates nothing; the pending row already flags it.
-  const { data: existingPending } = await supabase
+  // Prior decisions on THIS exact (item, requirement, version) question.
+  // Scoped per version: each immutable file is its own factual question, so
+  // a stale decision on v1 must never silence a real v2 discrepancy.
+  const { data: priorDecisions } = await supabase
     .from("evidence_verification_discrepancies")
-    .select("id")
+    .select("id, status")
     .eq("organization_id", organizationId)
     .eq("evidence_item_id", evidenceItemId)
     .eq("evidence_requirement_id", evidenceRequirementId)
-    .eq("status", "pending")
-    .maybeSingle();
-  if (existingPending) return existingPending.id as string;
+    .eq("evidence_version_id", evidenceVersionId)
+    .in("status", ["pending", "kept_prior"]);
+
+  // Already flagged and awaiting review — one row per open question.
+  const pending = (priorDecisions ?? []).find((d) => d.status === "pending");
+  if (pending) return pending.id as string;
+
+  // A human already retained the prior verified state for this exact
+  // version: the decision stands until a NEW version arrives. Re-raising it
+  // on every rerun of unchanged bytes would be review-queue noise — suppress
+  // the new row AND the gap, which is precisely what "remains in force" means.
+  const kept = (priorDecisions ?? []).find((d) => d.status === "kept_prior");
+  if (kept) return kept.id as string;
 
   const { data: row, error } = await supabase
     .from("evidence_verification_discrepancies")
