@@ -202,6 +202,7 @@ type ObligationRow = {
   title: string;
   requirement_text: string;
   frequency: string | null;
+  due_date_normalized: string | null;
   activation_status: string;
   review_status: string;
   ai_payload: { source_clause_number?: string | null } | null;
@@ -227,7 +228,9 @@ function mapObligation(row: ObligationRow): Obligation {
     ownerName: "",
     status: row.activation_status === "active" ? "verified" : row.review_status === "rejected" ? "missing" : "pending",
     cadence: CADENCE_MAP[row.frequency ?? ""] ?? "one_time",
-    dueDate: "",
+    // Only a confidently normalized date is surfaced; an unparsed due rule
+    // stays empty rather than becoming a fabricated deadline.
+    dueDate: row.due_date_normalized ?? "",
     requiredEvidence: (row.obligation_evidence_requirements ?? []).map((r) => ({ en: r.name, ar: r.name })),
     evidenceIds: [],
   };

@@ -4,7 +4,7 @@ import { Empty, Mono, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusDot, StatusPill, statusTone } from "@/components/ui/status";
 import { claimReadiness, type Claim, type Evidence, type Obligation, type Risk } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
-import { cn, formatMoney, lt } from "@/lib/utils";
+import { cn, formatMoney, lt, validDate } from "@/lib/utils";
 
 export async function ObligationsTable({
   obligations,
@@ -52,7 +52,13 @@ export async function ObligationsTable({
             </Td>
             <Td className="whitespace-nowrap text-muted">{o.ownerName}</Td>
             <Td className="whitespace-nowrap text-muted">{cad(o.cadence)}</Td>
-            <Td><Mono className={cn("text-sm", o.status === "overdue" && "text-missing")}>{f.dateTime(new Date(o.dueDate), "short")}</Mono></Td>
+            <Td>
+              {/* An obligation may have no normalized due date — show that
+                  honestly instead of throwing on an Invalid Date. */}
+              {validDate(o.dueDate)
+                ? <Mono className={cn("text-sm", o.status === "overdue" && "text-missing")}>{f.dateTime(validDate(o.dueDate)!, "short")}</Mono>
+                : <span className="text-faint">—</span>}
+            </Td>
             <Td className="whitespace-nowrap text-muted">{t("evidenceCount", { count: o.evidenceIds.length })}</Td>
             <Td>{o.penaltyExposure ? <Mono className="text-sm text-at-risk">{formatMoney(o.penaltyExposure, locale, currency, { compact: true })}</Mono> : <span className="text-faint">—</span>}</Td>
             <Td><StatusPill status={o.status} subtle /></Td>

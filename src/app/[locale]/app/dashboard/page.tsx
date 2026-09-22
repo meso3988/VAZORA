@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { OfficerFeed } from "@/components/app/officer-feed";
+import { OfficerDashboardSummary } from "@/components/app/officer/dashboard-summary";
+import { buildTodayBrief } from "@/lib/officer/brief";
+import { buildOfficerContext } from "@/lib/officer/context";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { Mono, PageHeader, Panel, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { KpiGauge, KpiBars, KpiTrend, KpiHero } from "@/components/app/kpi-graphics";
 import { QueueBoard } from "@/components/app/queues";
@@ -35,6 +39,16 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
     db.claims.list(orgId),
     db.agent.listEvents(orgId, { limit: 5 }),
   ]);
+
+  // Executive summary from real monitoring — live tenants only.
+  let officerBrief: Awaited<ReturnType<typeof buildTodayBrief>> | null = null;
+  if (session.mode === "live" && orgId) {
+    const supabase = await createSupabaseServer();
+    const ctx = await buildOfficerContext({
+      supabase, organizationId: orgId, userId: session.user.id, locale,
+    });
+    if (ctx) officerBrief = await buildTodayBrief(ctx);
+  }
 
   const active = contracts.filter((c) => c.status !== "draft");
   const due = active.reduce((a, c) => a + c.health.obligationsDueThisMonth, 0);
@@ -224,7 +238,9 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
       </Panel>
 
       <Panel title={t("dashboard.officerActivity")} tone="emerald" icon={Bot} action={<Link href="/app/agent" className="flex items-center gap-1 text-xs text-emerald-100/90 hover:text-white">{t("nav.officer")} <ArrowRight size={12} className="rtl:-scale-x-100" /></Link>}>
-        <OfficerFeed events={events} contractTitles={titles} />
+        {/* Live tenants get the real executive summary from monitoring;
+            demo sessions keep the illustrative feed. */}
+        {officerBrief ? <OfficerDashboardSummary brief={officerBrief} /> : <OfficerFeed events={events} contractTitles={titles} />}
       </Panel>
     </>
   );

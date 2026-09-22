@@ -4,7 +4,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Mono, PageHeader, Panel } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
 import { requireTenant } from "@/data/context";
-import { daysBetween, lt } from "@/lib/utils";
+import { daysBetween, lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 import { DEMO_TODAY } from "@/data/mock/organization";
 
@@ -51,7 +51,7 @@ export default async function TasksPage(props: PageProps<"/[locale]/app/tasks">)
                     <div className="flex items-center gap-2">
                       <StatusPill status={a.status === "done" ? "verified" : a.status === "in_progress" ? "partial" : "pending"} subtle />
                       <span className="flex-1 truncate text-sm">{lt(a.title, locale)}</span>
-                      <Mono className="text-[11px] text-muted">{f.dateTime(new Date(a.dueDate), "short")}</Mono>
+                      <Mono className="text-[11px] text-muted">{validDate(a.dueDate) ? f.dateTime(validDate(a.dueDate)!, "short") : "—"}</Mono>
                     </div>
                     <span className="ps-7 text-xs text-muted">
                       {a.ownerName}{contracts.length ? <> · {titles[a.contractId ?? ""]}</> : null}

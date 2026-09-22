@@ -6,6 +6,7 @@ import {
   type OfficerCompletion,
   type OfficerToolCall,
 } from "@/lib/officer/provider";
+import { describeFailure, officerFetch } from "@/lib/officer/transport";
 
 /**
  * Native Anthropic Messages adapter for the Contract Officer.
@@ -52,33 +53,25 @@ export function makeAnthropicOfficer(): ContractOfficerProvider {
       }
 
       const t0 = Date.now();
-      let res: Response;
-      try {
-        res = await fetch(ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": key,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: MODEL(),
-            max_tokens: input.maxOutputTokens ?? 1500,
-            system: input.system,
-            messages,
-            tools: input.tools.map((t) => ({
-              name: t.name, description: t.description, input_schema: t.parameters,
-            })),
-          }),
-        });
-      } catch (e) {
-        return { ok: false, error: `provider network error: ${e instanceof Error ? e.message : "unknown"}` };
-      }
-      if (!res.ok) {
-        return { ok: false, error: `provider HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
-      }
+      const sent = await officerFetch(ENDPOINT, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: MODEL(),
+          max_tokens: input.maxOutputTokens ?? 1500,
+          system: input.system,
+          messages,
+          tools: input.tools.map((t) => ({
+            name: t.name, description: t.description, input_schema: t.parameters,
+          })),
+        }),
+      });
+      if (!sent.ok) return { ok: false, error: describeFailure(sent.failure), failure: sent.failure };
 
-      const payload = (await res.json()) as {
+      const payload = (await sent.response.json()) as {
         content?: { type: string; text?: string; id?: string; name?: string; input?: unknown }[];
         usage?: { input_tokens?: number; output_tokens?: number };
         model?: string;

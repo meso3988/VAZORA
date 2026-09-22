@@ -6,6 +6,7 @@ import {
   type OfficerCompletion,
   type OfficerToolCall,
 } from "@/lib/officer/provider";
+import { describeFailure, officerFetch } from "@/lib/officer/transport";
 
 /**
  * OpenAI-compatible Contract Officer adapter — any vendor exposing the
@@ -55,12 +56,9 @@ export function makeOpenAiCompatOfficer(): ContractOfficerProvider {
       }
 
       const t0 = Date.now();
-      let res: Response;
-      try {
-        res = await fetch(`${BASE().replace(/\/+$/, "")}/chat/completions`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-          body: JSON.stringify({
+      const sent = await officerFetch(`${BASE().replace(/\/+$/, "")}/chat/completions`, {
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+        body: JSON.stringify({
             model: MODEL(),
             messages,
             max_completion_tokens: input.maxOutputTokens ?? 1500,
@@ -70,16 +68,11 @@ export function makeOpenAiCompatOfficer(): ContractOfficerProvider {
               function: { name: t.name, description: t.description, parameters: t.parameters },
             })),
             tool_choice: "auto",
-          }),
-        });
-      } catch (e) {
-        return { ok: false, error: `provider network error: ${e instanceof Error ? e.message : "unknown"}` };
-      }
-      if (!res.ok) {
-        return { ok: false, error: `provider HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
-      }
+        }),
+      });
+      if (!sent.ok) return { ok: false, error: describeFailure(sent.failure), failure: sent.failure };
 
-      const payload = (await res.json()) as {
+      const payload = (await sent.response.json()) as {
         choices?: { message?: { content?: string | null; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] } }[];
         usage?: { prompt_tokens?: number; completion_tokens?: number };
         model?: string;

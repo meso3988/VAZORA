@@ -3,7 +3,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 
 import { Empty, Mono, Panel } from "@/components/app/primitives";
 import { requireTenant } from "@/data/context";
-import { lt } from "@/lib/utils";
+import { lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
 export default async function ContractActivity(props: PageProps<"/[locale]/app/contracts/[id]/activity">) {
@@ -30,7 +30,7 @@ export default async function ContractActivity(props: PageProps<"/[locale]/app/c
                 <span className="font-medium">{a.actor}</span> {lt(a.action, locale)}
                 {a.target && <> <Mono>{a.target}</Mono></>}
               </span>
-              <span className="text-xs text-muted">{f.dateTime(new Date(a.at), "medium")}</span>
+              <span className="text-xs text-muted">{validDate(a.at) ? f.dateTime(validDate(a.at)!, "medium") : "—"}</span>
             </li>
           ))}
         </ol>

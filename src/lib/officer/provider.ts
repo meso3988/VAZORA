@@ -45,7 +45,12 @@ export type OfficerCompletion =
       usage?: { inputTokens?: number; outputTokens?: number };
       durationMs?: number;
     }
-  | { ok: false; error: string };
+  | {
+      ok: false;
+      error: string;
+      /** transport diagnosis — lets callers distinguish a timeout from a refusal */
+      failure?: import("@/lib/officer/transport").TransportFailure;
+    };
 
 export interface ContractOfficerProvider {
   readonly id: string;

@@ -3,21 +3,29 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import {
+  acknowledgeOfficerObservation,
   approveOfficerActionForm,
   askOfficerQuestion,
+  explainOfficerObservation,
+  proposeObservationFollowUp,
   rejectOfficerActionForm,
+  runOfficerSweep,
   setOrganizationTimezone,
   startOfficerConversation,
 } from "@/app/[locale]/app/agent/actions";
+import { CommandCenter } from "@/components/app/officer/command-center";
 import { OfficerThread } from "@/components/app/officer/thread";
+import { TodayBriefPanel } from "@/components/app/officer/today-brief";
 import { Empty, Mono, PageHeader, Panel } from "@/components/app/primitives";
 import { auth } from "@/data/auth/provider";
 import type { OfficerTier } from "@/data/mock/queues";
 import { DEMO_OFFICER_ITEMS } from "@/data/mock/queues";
 import type { OfficerActionView, OfficerMessageView } from "@/domain/officer";
 import { roleHasCapability } from "@/lib/officer/authority";
+import { buildTodayBrief, renderBriefNarrative } from "@/lib/officer/brief";
 import { getConversation, listConversations } from "@/lib/officer/conversation";
 import { buildOfficerContext, ensureOfficerProfile } from "@/lib/officer/context";
+import { listObservations, markReviewed } from "@/lib/officer/observations";
 import { officerProviderConfigured } from "@/lib/officer/provider";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { Link } from "@/i18n/navigation";
@@ -44,7 +52,10 @@ const TIMEZONES = [
 export default async function AgentPage(props: PageProps<"/[locale]/app/agent">) {
   const locale = asLocale((await props.params).locale);
   setRequestLocale(locale);
-  const { c: conversationParam, error, approved, rejected } = await props.searchParams;
+  const {
+    c: conversationParam, error, approved, rejected,
+    swept, created, resolved, acknowledged, proposed,
+  } = await props.searchParams;
   const t = await getTranslations("app.officer");
   const session = await auth.getSession();
 
@@ -83,6 +94,22 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
 
   const canApprove = roleHasCapability(ctx.role, "officer.action.approve");
   const providerConfigured = officerProviderConfigured();
+
+  // Proactive monitoring — deterministic brief first; the narrative is one
+  // bounded model pass over it and is optional by design.
+  const brief = await buildTodayBrief(ctx);
+  const resolvedSince = brief.since;
+  const observations = await listObservations(ctx, { includeResolvedSince: resolvedSince });
+  const { data: lastSweep } = await supabase
+    .from("officer_sweep_runs")
+    .select("started_at, completed_at, status")
+    .eq("organization_id", ctx.organizationId)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const narrative = await renderBriefNarrative(ctx, brief, { displayName: null });
+  // Reading the Command Center IS the review — the watermark must be real.
+  await markReviewed(ctx);
 
   return (
     <>
@@ -141,12 +168,59 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
           {approved ? t("action.approvedNotice") : t("action.rejectedNotice")}
         </p>
       ) : null}
+      {typeof swept === "string" && swept && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
+          {t("center.sweptNotice", {
+            status: swept,
+            created: typeof created === "string" ? created : "0",
+            resolved: typeof resolved === "string" ? resolved : "0",
+          })}
+        </p>
+      )}
+      {typeof acknowledged === "string" && acknowledged && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
+          {t("center.acknowledgedNotice")}
+        </p>
+      )}
+      {typeof proposed === "string" && proposed && (
+        <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
+          {t("center.proposedNotice")}
+        </p>
+      )}
 
       {!providerConfigured && (
         <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
           {t("providerMissingNotice")}
         </p>
       )}
+
+      {/* ===== Today Brief — deterministic counts, optional narrative ===== */}
+      <Panel title={t("brief.title")} tone="amber">
+        <TodayBriefPanel
+          brief={brief}
+          narrative={narrative.text}
+          displayName={null}
+          locale={locale}
+          sweepAction={runOfficerSweep}
+          lastSweepAt={(lastSweep?.completed_at as string | null) ?? (lastSweep?.started_at as string | null) ?? null}
+          sweepStatus={(lastSweep?.status as string | null) ?? null}
+        />
+      </Panel>
+
+      {/* ===== Command Center — the working surface ===== */}
+      <Panel
+        title={t("center.title")}
+        tone={brief.counts.critical > 0 ? "rose" : observations.length ? "emerald" : "graphite"}
+        hint={t("center.hint", { count: observations.filter((o) => o.status !== "resolved").length })}
+      >
+        <CommandCenter
+          observations={observations}
+          locale={locale}
+          acknowledgeAction={acknowledgeOfficerObservation}
+          explainAction={explainOfficerObservation}
+          proposeFollowUpAction={proposeObservationFollowUp}
+        />
+      </Panel>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]">
         {/* conversation list */}
@@ -205,10 +279,6 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
         </Panel>
       </div>
 
-      {/* Proactive monitoring arrives in the next checkpoint — stated, not faked. */}
-      <Panel title={t("command")} tone="graphite">
-        <Empty>{t("monitoringUpcoming")}</Empty>
-      </Panel>
     </>
   );
 }

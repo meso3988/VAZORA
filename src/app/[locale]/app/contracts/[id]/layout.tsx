@@ -20,6 +20,11 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
   const contract = await db.contracts.getById(orgId, id);
   if (!contract) notFound();
 
+  const safeDate = (iso: string) => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? t("contract.dateUnknown") : f.dateTime(d, "medium");
+  };
+
   return (
     <>
       <PageHeader
@@ -40,9 +45,12 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
             <Mono className="text-xs">{formatMoney(contract.value, locale, contract.currency, { compact: true })}</Mono>
             <span aria-hidden>·</span>
             <span>
+              {/* A real contract may have no recorded start/end date. Formatting
+                  an invalid Date throws and takes the whole page down, so an
+                  unknown date renders as unknown. */}
               {t("contract.period", {
-                start: f.dateTime(new Date(contract.startDate), "medium"),
-                end: f.dateTime(new Date(contract.endDate), "medium"),
+                start: safeDate(contract.startDate),
+                end: safeDate(contract.endDate),
               })}
             </span>
           </span>

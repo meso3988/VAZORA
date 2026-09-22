@@ -136,6 +136,120 @@ export async function recordOfficerMemory(formData: FormData) {
   });
 }
 
+/** Run a contract sweep now. Deterministic detection; no model involved. */
+export async function runOfficerSweep(formData: FormData) {
+  const locale = localeOf(formData);
+  const ctx = await liveContext(locale);
+  const { runContractSweep } = await import("@/lib/officer/sweep");
+  const outcome = await runContractSweep({ ctx, trigger: "manual" });
+  redirect({
+    href: `/app/agent?swept=${outcome.status}&created=${outcome.created}&resolved=${outcome.resolved}`,
+    locale,
+  });
+}
+
+/** Acknowledge an observation — "seen", never "resolved". */
+export async function acknowledgeOfficerObservation(formData: FormData) {
+  const locale = localeOf(formData);
+  const ctx = await liveContext(locale);
+  const observationId = String(formData.get("observationId") ?? "").slice(0, 64);
+  const { acknowledgeObservation } = await import("@/lib/officer/observations");
+  const result = await acknowledgeObservation(ctx, observationId);
+  redirect({
+    href: `/app/agent?${result.ok ? "acknowledged=1" : `error=${result.error}`}`,
+    locale,
+  });
+}
+
+/**
+ * "Explain this" — starts (or reuses) a conversation and asks the Officer
+ * about ONE observation. The observation id is validated server-side and the
+ * context is injected from the database, never copied out of the browser.
+ */
+export async function explainOfficerObservation(formData: FormData) {
+  const locale = localeOf(formData);
+  const ctx = await liveContext(locale);
+  const observationId = String(formData.get("observationId") ?? "").slice(0, 64);
+
+  const { getObservation } = await import("@/lib/officer/observations");
+  const observation = await getObservation(ctx, observationId);
+  if (!observation) {
+    redirect({ href: "/app/agent?error=observation_not_found", locale });
+    throw new Error("unreachable");
+  }
+
+  const { createConversation, askOfficer } = await import("@/lib/officer/conversation");
+  const created = await createConversation(ctx, {
+    contractId: observation.contractId,
+    title: observation.title.slice(0, 80),
+  });
+  if (!created.ok) {
+    redirect({ href: `/app/agent?error=${created.error}`, locale });
+    throw new Error("unreachable");
+  }
+
+  // The question carries only server-held identifiers; the Officer must look
+  // the facts up itself rather than trusting a pasted summary.
+  const question = [
+    `Explain this monitoring finding and what should happen next.`,
+    `Finding type: ${observation.kind}. Severity: ${observation.severity}.`,
+    observation.obligationId ? `Obligation id: ${observation.obligationId}.` : "",
+    observation.contractId ? `Contract id: ${observation.contractId}.` : "",
+    observation.evidenceRequirementId ? `Evidence requirement id: ${observation.evidenceRequirementId}.` : "",
+    `Verify the current state with your tools before answering.`,
+  ].filter(Boolean).join(" ");
+
+  const asked = await askOfficer(ctx, { conversationId: created.conversation.id, question });
+  redirect({
+    href: asked.ok
+      ? `/app/agent?c=${created.conversation.id}`
+      : `/app/agent?c=${created.conversation.id}&error=${asked.error}`,
+    locale,
+  });
+}
+
+/**
+ * Propose the follow-up the sweep recommended for an observation. Creates an
+ * approval request — it changes nothing by itself.
+ */
+export async function proposeObservationFollowUp(formData: FormData) {
+  const locale = localeOf(formData);
+  const ctx = await liveContext(locale);
+  const observationId = String(formData.get("observationId") ?? "").slice(0, 64);
+
+  const { getObservation } = await import("@/lib/officer/observations");
+  const observation = await getObservation(ctx, observationId);
+  if (!observation || !observation.recommendedActionType) {
+    redirect({ href: "/app/agent?error=no_recommended_action", locale });
+    throw new Error("unreachable");
+  }
+
+  const { runOfficerTool } = await import("@/lib/officer/tools");
+  // Assignment needs a named person, which only a human can choose — so the
+  // Command Center routes it to an escalation rather than inventing an owner.
+  const result = observation.recommendedActionType === "obligation.assign_owner"
+    ? await runOfficerTool(ctx, "requestHumanApproval", {
+        actionType: "officer.escalate",
+        summary: `Assign an owner: ${observation.title}`.slice(0, 200),
+        reason: `${observation.detail ?? observation.title} (monitoring finding ${observation.kind})`.slice(0, 2000),
+        ...(observation.contractId ? { contractId: observation.contractId } : {}),
+        ...(observation.obligationId ? { obligationId: observation.obligationId } : {}),
+      })
+    : await runOfficerTool(ctx, "requestHumanApproval", {
+        actionType: observation.recommendedActionType === "officer.escalate"
+          ? "officer.escalate" : "officer.request_evidence_internal",
+        summary: observation.title.slice(0, 200),
+        reason: `${observation.detail ?? observation.title} (monitoring finding ${observation.kind})`.slice(0, 2000),
+        ...(observation.contractId ? { contractId: observation.contractId } : {}),
+        ...(observation.obligationId ? { obligationId: observation.obligationId } : {}),
+      });
+
+  redirect({
+    href: `/app/agent?${result.ok ? "proposed=1" : `error=${encodeURIComponent((result as { error: string }).error)}`}`,
+    locale,
+  });
+}
+
 /**
  * Set the organization timezone deliberately. Until this happens the
  * workspace prompts, rather than silently answering "today" in UTC.

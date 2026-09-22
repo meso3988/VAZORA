@@ -1396,7 +1396,8 @@
       "clauseTrace": "تتبع المادة",
       "clauseTraceHint": "المادة الأصلية ← المتطلب ← الدليل ← التحقق",
       "actions": "الإجراءات",
-      "sections": "أقسام العقد"
+      "sections": "أقسام العقد",
+      "dateUnknown": "غير مسجَّل"
     },
     "documents": {
       "title": "مستندات العقد",
@@ -1928,7 +1929,6 @@
       "providerMissing": "نموذج ضابط العقود غير مهيّأ",
       "providerMissingNotice": "لا يوجد نموذج مهيّأ لضابط العقود، لذلك لا يمكنه الإجابة. اضبط VAZORA_OFFICER_PROVIDER و VAZORA_OFFICER_MODEL.",
       "errorNotice": "تعذّر على الضابط إكمال الطلب ({code}).",
-      "monitoringUpcoming": "المراقبة الاستباقية (حرج / اليوم / هذا الأسبوع) تأتي في نقطة التفتيش التالية. لا شيء يُراقَب تلقائيًا بعد.",
       "demoFixtures": "بيانات توضيحية",
       "timezone": {
         "prompt": "حدّد المنطقة الزمنية لمنظمتك",
@@ -1960,6 +1960,79 @@
           "failed": "فشل",
           "cancelled": "ملغى"
         }
+      },
+      "brief": {
+        "title": "موجز اليوم",
+        "greeting": "صباح الخير.",
+        "greetingNamed": "صباح الخير، {name}.",
+        "quiet": "لا شيء يحتاج انتباهك حاليًا.",
+        "newIssues": "مسائل جديدة",
+        "resolved": "مُغلقة",
+        "approvals": "بانتظار الموافقة",
+        "critical": "حرج",
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "monitoring": "قيد المراقبة",
+        "since": "بالمقارنة مع {kind} في {at}",
+        "sinceKind": {
+          "last_review": "مراجعتك الأخيرة",
+          "last_sweep": "المسح السابق",
+          "last_24h": "آخر ٢٤ ساعة"
+        },
+        "changeCount": "{count} {count, plural, one {تغيير مسجَّل} other {تغييرات مسجَّلة}}",
+        "highestPriority": "الأعلى أولوية",
+        "runSweep": "شغّل المسح الآن",
+        "lastSweep": "آخر مسح {at}",
+        "partial": "جزئي"
+      },
+      "center": {
+        "title": "مركز القيادة",
+        "hint": "{count} {count, plural, one {بند مفتوح} other {بنود مفتوحة}}",
+        "empty": "لا شيء يحتاج انتباهك حاليًا.",
+        "section": {
+          "approvals": "بانتظار موافقتك",
+          "critical": "حرج",
+          "today": "اليوم",
+          "next_3_days": "الأيام الثلاثة القادمة",
+          "this_week": "هذا الأسبوع",
+          "monitoring": "قيد المراقبة",
+          "resolved": "أُغلقت حديثًا"
+        },
+        "severity": {
+          "critical": "حرج",
+          "high": "مرتفع",
+          "medium": "متوسط",
+          "low": "منخفض",
+          "informational": "للعلم"
+        },
+        "sources": "المصادر",
+        "firstSeen": "أول اكتشاف",
+        "lastSeen": "آخر ظهور",
+        "resolvedAt": "أُغلقت",
+        "acknowledged": "تم الاطلاع",
+        "recurring": "تكررت {count}×",
+        "explain": "اشرح هذا",
+        "acknowledge": "اطّلعت",
+        "proposeFollowUp": "اقترح متابعة",
+        "proposeAssignment": "اقترح إسنادًا",
+        "approveBelow": "اتخذ القرار على هذا المقترح في المحادثة:",
+        "sweptNotice": "المسح {status}: {created} جديدة، {resolved} أُغلقت.",
+        "acknowledgedNotice": "تم الاطلاع على الملاحظة. تبقى مفتوحة حتى يتغيّر الوضع الفعلي.",
+        "proposedNotice": "أُنشئ المقترح وهو بانتظار الموافقة."
+      },
+      "kind": {
+        "due_today": "مستحق اليوم",
+        "due_soon": "يستحق قريبًا",
+        "overdue": "متأخر",
+        "missing_required_evidence": "دليل مفقود",
+        "partial_evidence": "دليل جزئي",
+        "reverification_pending": "إعادة تحقق",
+        "verification_discrepancy": "تناقض تحقق",
+        "unassigned_obligation": "بلا مسؤول",
+        "external_dependency_pending": "بانتظار طرف خارجي",
+        "contract_expiry_approaching": "عقد ينتهي",
+        "recently_resolved": "أُغلقت",
+        "action_waiting_for_approval": "بانتظار الموافقة"
       }
     }
   }

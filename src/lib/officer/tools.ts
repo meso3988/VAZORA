@@ -779,6 +779,78 @@ export function listOfficerTools(): readonly OfficerTool[] {
 }
 
 /**
+ * Tool domains. Sending all 17 schemas on every round cost ~9.3k input
+ * tokens per question in Checkpoint 2. Grouping lets a narrow question carry
+ * only the schemas it plausibly needs.
+ *
+ * SAFETY: selection is deterministic (keyword + conversation scope), never an
+ * LLM pre-router that could silently hide a required tool. ORIENTATION tools
+ * are always present so the model can always find its way, and the caller
+ * escalates to the full set when the model asks for something outside the
+ * selected groups.
+ */
+export type ToolGroup = "ORIENTATION" | "CONTRACT" | "EVIDENCE" | "PEOPLE" | "ACTIVITY" | "ACTION";
+
+export const TOOL_GROUPS: Record<ToolGroup, readonly string[]> = {
+  ORIENTATION: ["getOrganizationSummary", "listContracts"],
+  CONTRACT: ["getContract", "getContractClause", "listObligations", "getObligation",
+             "getUpcomingObligations", "getOverdueObligations"],
+  EVIDENCE: ["getEvidenceStatus", "getEvidenceGaps", "getVerificationDiscrepancies"],
+  PEOPLE: ["getOrganizationMembers", "getAssignments"],
+  ACTIVITY: ["getRecentActivity"],
+  ACTION: ["createInternalAction", "proposeAssignment", "requestHumanApproval"],
+};
+
+/** Keywords that reliably imply a domain, in English and Arabic. */
+const GROUP_HINTS: Record<Exclude<ToolGroup, "ORIENTATION">, string[]> = {
+  CONTRACT: ["contract", "clause", "obligation", "due", "overdue", "deadline", "expiry", "expire",
+             "week", "today", "tomorrow", "month", "recurrence", "schedule", "requirement",
+             "عقد", "بند", "التزام", "موعد", "متأخر", "استحقاق", "أسبوع", "اليوم", "غدا", "شهر", "انتهاء"],
+  EVIDENCE: ["evidence", "verified", "verification", "gap", "discrepancy", "proof", "acknowledg",
+             "override", "report", "submitted", "missing", "incomplete",
+             "دليل", "أدلة", "تحقق", "فجوة", "تناقض", "إقرار", "تجاوز", "تقرير", "ناقص", "مفقود"],
+  PEOPLE: ["who", "owner", "assign", "responsible", "member", "team", "role",
+           "مين", "من", "مسؤول", "إسناد", "مالك", "فريق", "دور"],
+  ACTIVITY: ["changed", "change", "recent", "activity", "since", "yesterday", "history", "log",
+             "تغير", "تغيّر", "جديد", "نشاط", "أمس", "سجل", "منذ"],
+  ACTION: ["propose", "assign", "follow up", "follow-up", "escalate", "request", "recommend",
+           "approve", "action", "task",
+           "اقترح", "أسند", "متابعة", "تصعيد", "اطلب", "توصية", "إجراء", "مهمة"],
+};
+
+/**
+ * Deterministic tool selection for one question.
+ *
+ * Contract-scoped conversations skip ORIENTATION breadth by default but keep
+ * the contract/evidence domains, which is what "what is incomplete here?"
+ * needs. An unmatched question falls back to ALL tools — correctness first.
+ */
+export function selectToolGroups(opts: {
+  question: string;
+  contractScoped: boolean;
+}): { groups: ToolGroup[]; tools: OfficerTool[]; fullFallback: boolean } {
+  const q = opts.question.toLowerCase();
+  const groups: ToolGroup[] = ["ORIENTATION"];
+  for (const [group, hints] of Object.entries(GROUP_HINTS) as [Exclude<ToolGroup, "ORIENTATION">, string[]][]) {
+    if (hints.some((h) => q.includes(h))) groups.push(group);
+  }
+
+  // A question we cannot classify gets everything — never guess narrower.
+  if (groups.length === 1) {
+    return { groups: Object.keys(TOOL_GROUPS) as ToolGroup[], tools: [...TOOLS], fullFallback: true };
+  }
+
+  // Contract questions almost always end up asking about evidence, and
+  // evidence questions need the obligation they belong to. Pair them so the
+  // model is never one missing schema away from a wrong answer.
+  if (groups.includes("CONTRACT") && !groups.includes("EVIDENCE")) groups.push("EVIDENCE");
+  if (groups.includes("EVIDENCE") && !groups.includes("CONTRACT")) groups.push("CONTRACT");
+
+  const names = new Set(groups.flatMap((g) => TOOL_GROUPS[g]));
+  return { groups, tools: TOOLS.filter((t) => names.has(t.name)), fullFallback: false };
+}
+
+/**
  * Execute a model-requested tool.
  *
  * Unknown tools, invalid arguments and cross-tenant identifiers are refused

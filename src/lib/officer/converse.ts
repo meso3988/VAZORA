@@ -13,7 +13,13 @@ import {
   type OfficerToolSpec,
   type OfficerTurn,
 } from "@/lib/officer/provider";
-import { listOfficerTools, runOfficerTool } from "@/lib/officer/tools";
+import {
+  listOfficerTools,
+  runOfficerTool,
+  selectToolGroups,
+  type OfficerTool,
+  type ToolGroup,
+} from "@/lib/officer/tools";
 
 // Side-effect: register officer provider adapters.
 import "@/lib/officer/providers/anthropic";
@@ -33,12 +39,14 @@ import "@/lib/officer/providers/openai-compat";
 
 const MAX_ROUNDS = 5;
 const MAX_TOOL_CALLS = 12;
+/** Names of every registered tool — used to detect a needed-but-unsent schema. */
+const OFFICER_TOOL_NAMES = new Set(listOfficerTools().map((t) => t.name));
 /** Tool payload handed back to the model — bounded so context stays small. */
 const MAX_RESULT_CHARS = 6000;
 
 /** Minimal JSON Schema for the provider, derived from the zod input shape. */
-function toolSpecs(): OfficerToolSpec[] {
-  return listOfficerTools().map((t) => ({
+function toolSpecs(tools: readonly OfficerTool[] = listOfficerTools()): OfficerToolSpec[] {
+  return tools.map((t) => ({
     name: t.name,
     description: t.description,
     parameters: zodObjectToJsonSchema(t.input),
@@ -93,6 +101,11 @@ export type OfficerAnswer = {
   usage: { inputTokens: number; outputTokens: number };
   durationMs: number;
   rounds: number;
+  /** which tool domains were exposed for this question */
+  toolGroups: ToolGroup[];
+  /** true when selection was widened to every tool */
+  escalatedToFullToolset: boolean;
+  toolSchemasSent: number;
 };
 
 export type ConverseOutcome =
@@ -152,7 +165,11 @@ export async function converseWithOfficer(opts: {
     { role: "user", content: question },
   ];
 
-  const specs = toolSpecs();
+  // Deterministic schema selection — cuts prompt cost without hiding a tool
+  // the model actually needs (see selectToolGroups).
+  const selection = selectToolGroups({ question, contractScoped: !!contractScope });
+  let specs = toolSpecs(selection.tools);
+  let escalatedToFullToolset = selection.fullFallback;
   const toolCitations = new Map<string, OfficerCitation>();
   const invocations: OfficerToolInvocation[] = [];
   const proposedActionIds: string[] = [];
@@ -180,6 +197,15 @@ export async function converseWithOfficer(opts: {
     // Record the assistant's tool-call turn so the provider sees a coherent
     // transcript on the next round.
     messages.push({ role: "assistant", content: completion.text ?? "", toolCalls: completion.toolCalls });
+
+    // SAFE FALLBACK: if the model asked for a real tool that selection left
+    // out, widen to the full registry for the remaining rounds rather than
+    // letting a narrowed prompt produce a worse answer.
+    if (!escalatedToFullToolset &&
+        completion.toolCalls.some((c) => OFFICER_TOOL_NAMES.has(c.name) && !specs.some((s) => s.name === c.name))) {
+      specs = toolSpecs();
+      escalatedToFullToolset = true;
+    }
 
     for (const call of completion.toolCalls) {
       if (invocations.length >= MAX_TOOL_CALLS) {
@@ -244,6 +270,9 @@ export async function converseWithOfficer(opts: {
       usage: { inputTokens: usageIn, outputTokens: usageOut },
       durationMs: Date.now() - t0,
       rounds,
+      toolGroups: selection.groups,
+      escalatedToFullToolset,
+      toolSchemasSent: specs.length,
     },
   };
 }

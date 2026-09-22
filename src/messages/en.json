@@ -1396,7 +1396,8 @@
       "clauseTrace": "Clause trace",
       "clauseTraceHint": "Original clause → requirement → evidence → verification",
       "actions": "Actions",
-      "sections": "Contract sections"
+      "sections": "Contract sections",
+      "dateUnknown": "Not recorded"
     },
     "documents": {
       "title": "Contract documents",
@@ -1928,7 +1929,6 @@
       "providerMissing": "Contract Officer model not configured",
       "providerMissingNotice": "No Contract Officer model is configured, so the Officer cannot answer. Set VAZORA_OFFICER_PROVIDER and VAZORA_OFFICER_MODEL.",
       "errorNotice": "The Officer could not complete that request ({code}).",
-      "monitoringUpcoming": "Proactive monitoring (Critical / Today / This week) arrives in the next checkpoint. Nothing is being monitored automatically yet.",
       "demoFixtures": "Illustrative demo data",
       "timezone": {
         "prompt": "Set your organization timezone",
@@ -1960,6 +1960,79 @@
           "failed": "Failed",
           "cancelled": "Cancelled"
         }
+      },
+      "brief": {
+        "title": "Today's brief",
+        "greeting": "Good morning.",
+        "greetingNamed": "Good morning, {name}.",
+        "quiet": "Nothing currently requires your attention.",
+        "newIssues": "New issues",
+        "resolved": "Resolved",
+        "approvals": "Awaiting approval",
+        "critical": "Critical",
+        "today": "Today",
+        "thisWeek": "This week",
+        "monitoring": "Monitoring",
+        "since": "Compared against your {kind} at {at}",
+        "sinceKind": {
+          "last_review": "last review",
+          "last_sweep": "previous sweep",
+          "last_24h": "last 24 hours"
+        },
+        "changeCount": "{count} recorded {count, plural, one {change} other {changes}}",
+        "highestPriority": "Highest priority",
+        "runSweep": "Run sweep now",
+        "lastSweep": "last sweep {at}",
+        "partial": "partial"
+      },
+      "center": {
+        "title": "Command center",
+        "hint": "{count} open {count, plural, one {item} other {items}}",
+        "empty": "Nothing currently requires your attention.",
+        "section": {
+          "approvals": "Waiting for your approval",
+          "critical": "Critical",
+          "today": "Today",
+          "next_3_days": "Next 3 days",
+          "this_week": "This week",
+          "monitoring": "Monitoring",
+          "resolved": "Recently resolved"
+        },
+        "severity": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low",
+          "informational": "Informational"
+        },
+        "sources": "Sources",
+        "firstSeen": "First detected",
+        "lastSeen": "Last seen",
+        "resolvedAt": "Resolved",
+        "acknowledged": "Acknowledged",
+        "recurring": "Recurred {count}×",
+        "explain": "Explain this",
+        "acknowledge": "Acknowledge",
+        "proposeFollowUp": "Propose follow-up",
+        "proposeAssignment": "Propose assignment",
+        "approveBelow": "Decide on this proposal in the conversation:",
+        "sweptNotice": "Sweep {status}: {created} new, {resolved} resolved.",
+        "acknowledgedNotice": "Observation acknowledged. It stays open until the underlying condition changes.",
+        "proposedNotice": "Proposal created and is waiting for approval."
+      },
+      "kind": {
+        "due_today": "Due today",
+        "due_soon": "Due soon",
+        "overdue": "Overdue",
+        "missing_required_evidence": "Missing evidence",
+        "partial_evidence": "Partial evidence",
+        "reverification_pending": "Re-verifying",
+        "verification_discrepancy": "Verification discrepancy",
+        "unassigned_obligation": "Unassigned",
+        "external_dependency_pending": "Waiting on external party",
+        "contract_expiry_approaching": "Contract ending",
+        "recently_resolved": "Resolved",
+        "action_waiting_for_approval": "Awaiting approval"
       }
     }
   }

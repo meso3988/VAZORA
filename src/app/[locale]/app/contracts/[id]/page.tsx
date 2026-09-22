@@ -14,7 +14,7 @@ import { requireTenant } from "@/data/context";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
-import { formatMoney, lt } from "@/lib/utils";
+import { formatMoney, lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
 const STATUS_ORDER: ObligationStatus[] = ["verified", "partial", "missing", "overdue", "at_risk", "pending"];
@@ -267,7 +267,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
                     <span className="truncate text-sm">{lt(a.title, locale)}</span>
                     <span className="text-xs text-muted">{a.ownerName}</span>
                   </div>
-                  <Mono className="text-muted">{f.dateTime(new Date(a.dueDate), "short")}</Mono>
+                  <Mono className="text-muted">{validDate(a.dueDate) ? f.dateTime(validDate(a.dueDate)!, "short") : "—"}</Mono>
                 </li>
               ))}
             </ul>
@@ -280,7 +280,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
                     <span className="font-medium">{a.actor}</span> {lt(a.action, locale)}
                     {a.target && <> <Mono>{a.target}</Mono></>}
                   </span>
-                  <span className="text-xs text-muted">{f.dateTime(new Date(a.at), "medium")}</span>
+                  <span className="text-xs text-muted">{validDate(a.at) ? f.dateTime(validDate(a.at)!, "medium") : "—"}</span>
                 </li>
               ))}
             </ul>
