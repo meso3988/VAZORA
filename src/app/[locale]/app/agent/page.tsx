@@ -14,6 +14,7 @@ import {
   startOfficerConversation,
 } from "@/app/[locale]/app/agent/actions";
 import { CommandCenter } from "@/components/app/officer/command-center";
+import { ReviewBeacon } from "@/components/app/officer/review-beacon";
 import { OfficerThread } from "@/components/app/officer/thread";
 import { TodayBriefPanel } from "@/components/app/officer/today-brief";
 import { Empty, Mono, PageHeader, Panel } from "@/components/app/primitives";
@@ -25,7 +26,7 @@ import { roleHasCapability } from "@/lib/officer/authority";
 import { buildTodayBrief, renderBriefNarrative } from "@/lib/officer/brief";
 import { getConversation, listConversations } from "@/lib/officer/conversation";
 import { buildOfficerContext, ensureOfficerProfile } from "@/lib/officer/context";
-import { listObservations, markReviewed } from "@/lib/officer/observations";
+import { listObservations } from "@/lib/officer/observations";
 import { officerProviderConfigured } from "@/lib/officer/provider";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { Link } from "@/i18n/navigation";
@@ -109,13 +110,12 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
     .maybeSingle();
   const narrative = await renderBriefNarrative(ctx, brief, { displayName: null });
 
-  // The review watermark advances ONLY when a real review experience was
-  // produced: the brief and the observation set both exist, the Officer is
-  // enabled, and this request is not an error redirect. Moving it on a failed
-  // or unauthorized request would silently swallow changes the user never saw.
-  const reviewPresented =
-    ctx.officer.enabled && !(typeof error === "string" && error) && brief.since !== undefined;
-  if (reviewPresented) await markReviewed(ctx);
+  // The review watermark advances ONLY when the review experience has
+  // actually mounted in the user's browser — ReviewBeacon fires post-mount,
+  // so a failed render, an error redirect or a dropped response can never
+  // mark unseen changes as reviewed. Rendered only when a real review was
+  // produced: Officer enabled and this request carries no error.
+  const reviewPresented = ctx.officer.enabled && !(typeof error === "string" && error);
 
   return (
     <>
@@ -285,6 +285,8 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
         </Panel>
       </div>
 
+      {/* Post-mount review watermark — see comment above */}
+      {reviewPresented && <ReviewBeacon locale={locale} />}
     </>
   );
 }

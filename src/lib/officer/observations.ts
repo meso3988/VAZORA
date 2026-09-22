@@ -107,11 +107,12 @@ export async function acknowledgeObservation(ctx: OfficerContext, id: string): P
  * Advance the caller's review watermark.
  *
  * DOCUMENTED SEMANTIC: `last_reviewed_at` means "the moment a review
- * experience was successfully produced for THIS user" — a brief and the
- * observation set were both built and handed to the view. It must never move
- * on a failed request, an unauthorized request, a partial render failure, or
- * a mere navigation to the URL, because then "what changed since my last
- * review?" would silently skip changes the user never saw.
+ * experience was successfully presented to THIS user". The page only calls
+ * this from a post-mount client beacon, so it can never move on a failed
+ * request, an unauthorized request, a render failure, or a mere navigation
+ * to the URL — any of those would silently skip changes the user never saw.
+ * (Trade-off: a script-disabled session sees the review but does not advance
+ * the watermark — under-marking is safe, over-marking is not.)
  *
  * The watermark is per user (RLS restricts the row to its own user), so one
  * member reviewing does not consume another member's changes.

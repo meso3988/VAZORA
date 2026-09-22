@@ -46,6 +46,32 @@ function localeOf(formData: FormData): AppLocale {
   return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
 }
 
+/**
+ * Advance the caller's review watermark. Invoked by ReviewBeacon only AFTER
+ * the review UI has actually mounted in the browser — never during render,
+ * so a failed or partial render can never mark unseen changes as reviewed.
+ * Soft-fail by design: a beacon must never redirect or throw into the page.
+ */
+export async function markOfficerReviewed(locale: AppLocale): Promise<void> {
+  try {
+    const session = await auth.getSession();
+    if (!session || session.mode !== "live" || !session.organizationId) return;
+    const supabase = await createSupabaseServer();
+    const ctx = await buildOfficerContext({
+      supabase,
+      organizationId: session.organizationId,
+      userId: session.user.id,
+      locale,
+    });
+    if (!ctx?.officer.enabled) return;
+    const { markReviewed } = await import("@/lib/officer/observations");
+    await markReviewed(ctx);
+  } catch {
+    // A missed watermark is a stale "since last review" window — recoverable.
+    // A thrown beacon error would break the page — not acceptable.
+  }
+}
+
 /** Start a conversation (organization-wide, or scoped to one contract). */
 export async function startOfficerConversation(formData: FormData) {
   const locale = localeOf(formData);

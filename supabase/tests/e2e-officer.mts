@@ -61,7 +61,10 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
   const w = W[locale];
   try {
     await login(page, locale);
-    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    // /app/agent SSR awaits one bounded live model pass for the brief
+    // narrative — its worst case is the provider timeout (~90s), so the
+    // navigation timeout must exceed that, not the generic 60s.
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded", timeout: 150000 });
 
     const dir = await page.getAttribute("html", "dir");
     rec(`${tag} dir`, dir === (locale === "ar" ? "rtl" : "ltr"), `dir=${dir}`);
@@ -92,7 +95,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     const sweepBtn = page.getByRole("button", { name: w.runSweep });
     rec(`${tag} sweep-button-present`, (await sweepBtn.count()) === 1);
     await sweepBtn.first().click();
-    await page.waitForURL(/swept=/, { timeout: 90000 });
+    await page.waitForURL(/swept=/, { timeout: 150000, waitUntil: "domcontentloaded" });
     const afterSweep = await page.locator("body").innerText();
     rec(`${tag} sweep-ran`, /completed|partial|مكتمل/.test(page.url()) || shows(afterSweep, w.center),
       page.url().split("?")[1] ?? "");
@@ -108,7 +111,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     rec(`${tag} acknowledge-available`, ackCount >= 1, `buttons=${ackCount}`);
     if (ackCount) {
       await ackBtns.first().click();
-      await page.waitForURL(/acknowledged=1/, { timeout: 60000 });
+      await page.waitForURL(/acknowledged=1/, { timeout: 150000, waitUntil: "domcontentloaded" });
       const acked = await page.locator("body").innerText();
       rec(`${tag} acknowledge-applied`, shows(acked, w.acknowledged));
       // Acknowledged is NOT resolved — the item stays in its section.
@@ -124,15 +127,15 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
         sourceLink.click(),
       ]);
       rec(`${tag} source-opens`, page.url().includes("/app/contracts/"), `${href} → ${page.url().split("/app")[1]}`);
-      await page.goBack({ waitUntil: "domcontentloaded" });
+      await page.goBack({ waitUntil: "domcontentloaded", timeout: 150000 });
     }
 
     // ---------- REAL CLICK: explain this (grounded conversation) ----------
-    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded", timeout: 150000 });
     const explainBtns = page.getByRole("button", { name: w.explain });
     rec(`${tag} explain-available`, (await explainBtns.count()) >= 1);
     await explainBtns.first().click();
-    await page.waitForURL(/\?c=|&c=/, { timeout: 120000 });
+    await page.waitForURL(/\?c=|&c=/, { timeout: 150000, waitUntil: "domcontentloaded" });
     const explained = await page.locator("body").innerText();
     rec(`${tag} explain-created-conversation`, shows(explained, w.conversation));
     rec(`${tag} explain-officer-answered`, shows(explained, w.officerName));
@@ -144,7 +147,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     if (await box.count()) {
       await box.fill(locale === "ar" ? "إيش المتأخر عندي؟" : "What is overdue right now?");
       await page.getByRole("button", { name: locale === "ar" ? "إرسال" : "Send" }).first().click();
-      await page.waitForLoadState("domcontentloaded", { timeout: 120000 });
+      await page.waitForLoadState("domcontentloaded", { timeout: 150000 });
       await page.waitForTimeout(1500);
       const answered = await page.locator("body").innerText();
       rec(`${tag} ask-answered`, answered.includes("FM-008"), "grounded overdue contract named");
@@ -155,7 +158,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     const approveBtn = page.getByRole("button", { name: w.approve });
     if (await approveBtn.count()) {
       await approveBtn.first().click();
-      await page.waitForURL(/approved=/, { timeout: 60000 });
+      await page.waitForURL(/approved=/, { timeout: 150000, waitUntil: "domcontentloaded" });
       const approvedPage = await page.locator("body").innerText();
       rec(`${tag} approve-applied`,
         /Action approved|تمت الموافقة/.test(approvedPage),
@@ -175,7 +178,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
       "dashboard does not duplicate the whole command center");
 
     // ---------- rerun sweep: observations update, nothing duplicates ----------
-    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded", timeout: 150000 });
     // Count actual observation cards, not text mentions — the page also
     // repeats contract numbers in the brief, which makes text counts useless.
     const cardCount = () => page.locator("[data-observation-id]").count();
@@ -188,7 +191,9 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     const rerunBtn = page.getByRole("button", { name: w.runSweep });
     if (await rerunBtn.count()) {
       await rerunBtn.first().click();
-      await page.waitForURL(/swept=/, { timeout: 90000 });
+      // The redirect lands on /app/agent — its SSR includes the bounded
+      // narrative model call, so commit-and-match beats waiting for load.
+      await page.waitForURL(/swept=/, { timeout: 150000, waitUntil: "domcontentloaded" });
       const p = new URL(page.url()).searchParams;
       rec(`${tag} rerun-sweep-idempotent`, p.get("created") === "0",
         `created=${p.get("created")} resolved=${p.get("resolved")}`);
@@ -226,7 +231,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     rec(`${tag} logout-works`, !page.url().includes("/app/agent"), page.url().split("/").slice(3).join("/"));
 
     await login(page, locale);
-    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded", timeout: 150000 });
     const persisted = await page.locator("body").innerText();
     rec(`${tag} observations-persist`, persisted.includes("FM-008") || persisted.includes("BETA-200"),
       "monitoring survives a session boundary");
@@ -235,7 +240,7 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
     // The specific conversation thread is still readable.
     const convId = new URL(conversationUrl).searchParams.get("c");
     if (convId) {
-      await page.goto(`${BASE}/${locale}/app/agent?c=${convId}`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${BASE}/${locale}/app/agent?c=${convId}`, { waitUntil: "domcontentloaded", timeout: 150000 });
       const thread = await page.locator("body").innerText();
       rec(`${tag} conversation-thread-persists`, shows(thread, w.officerName) && shows(thread, w.sources),
         "answer and its sources survive logout/login");

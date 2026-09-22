@@ -73,6 +73,13 @@ const UNKNOWN_PATTERNS: RegExp[] = [
   /(غير مسجّل|غير مسجل|غير قابل للتحديد|غير موثّق)/,
 ];
 const isHonestUnknown = (text: string) => UNKNOWN_PATTERNS.some((p) => p.test(text));
+/**
+ * A "we don't know" answer that still states a figure is a fabrication
+ * regardless of phrasing — the mustNotAssert lists can only enumerate words,
+ * so quantified money is detected by pattern instead. Any currency code,
+ * symbol or ريال/ر.س next to a number counts unless the sentence negates it.
+ */
+const MONEY_PATTERN = /(SAR|USD|EUR|GBP|ريال|ر\.س|[$€£])\s?[\d\u0660-\u0669][\d\u0660-\u0669,.]*|[\d\u0660-\u0669][\d\u0660-\u0669,.]*\s?(SAR|USD|EUR|GBP|ريال|ر\.س)/gi;
 
 type ScenarioResult = {
   id: string; label: string; locale: string; pass: boolean;
@@ -182,6 +189,11 @@ async function runOnce(runIndex: number) {
 
     const missingFacts = (exp.mustSay?.(fx) ?? []).filter((s) => !says(a.text, s));
     const unsupportedClaims = (exp.mustNotAssert?.(fx) ?? []).filter((s) => assertsClaim(a.text, s));
+    if (exp.expectUnknown) {
+      for (const m of a.text.matchAll(MONEY_PATTERN)) {
+        if (assertsClaim(a.text, m[0])) unsupportedClaims.push(`invented amount: "${m[0]}"`);
+      }
+    }
 
     // Citation precision: re-validate independently of the runtime path.
     const revalidated = await validateCitations(ctx, a.citations.map((c) => ({ target: c.target, id: c.id })));
@@ -236,12 +248,44 @@ async function countOpenActions(fx: any, orgId: string): Promise<number> {
 }
 
 /** Fingerprint the frozen inputs so future model comparisons stay fair. */
-function writeManifest() {
+function fingerprint() {
   const files = ["fixture.ts", "ground-truth.ts"];
-  const entries = files.map((f) => {
+  return files.map((f) => {
     const buf = readFileSync(join(BENCH_DIR, f));
     return { file: f, bytes: buf.length, sha256: createHash("sha256").update(buf).digest("hex") };
   });
+}
+
+/**
+ * The freeze is ENFORCED, not just recorded: if a manifest exists, every
+ * frozen file must still hash to its recorded fingerprint. A silent rewrite
+ * would let a ground-truth edit pass unnoticed — the exact thing the freeze
+ * exists to prevent. To intentionally re-freeze (a new benchmark version is
+ * the correct path instead), set BENCH_REFREEZE=1.
+ */
+function verifyOrWriteManifest() {
+  const entries = fingerprint();
+  const path = join(BENCH_DIR, "manifest.json");
+  const existing = (() => {
+    try { return JSON.parse(readFileSync(path, "utf8")); } catch { return null; }
+  })();
+  if (existing && process.env.BENCH_REFREEZE !== "1") {
+    const frozen = new Map<string, string>(
+      (existing.files ?? []).map((f: any) => [f.file, f.sha256]),
+    );
+    const drifted = entries.filter((e) => frozen.get(e.file) !== e.sha256);
+    if (drifted.length) {
+      console.error("FROZEN BENCHMARK TAMPERED — refusing to run:");
+      for (const d of drifted) console.error(`  ${d.file}: hash no longer matches manifest.json`);
+      console.error("Cut a new benchmark version; never edit ground truth to change a score.");
+      process.exit(1);
+    }
+    if (existing.scenarioCount !== EXPECTATIONS.length) {
+      console.error(`FROZEN BENCHMARK TAMPERED — scenarioCount ${existing.scenarioCount} != ${EXPECTATIONS.length}`);
+      process.exit(1);
+    }
+    return existing;
+  }
   const manifest = {
     benchmark: BENCHMARK_VERSION,
     frozenAt: new Date().toISOString().slice(0, 10),
@@ -249,14 +293,18 @@ function writeManifest() {
     files: entries,
     note: "Ground truth is frozen. Never edit it to improve a model score — cut a new benchmark version instead.",
   };
-  writeFileSync(join(BENCH_DIR, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+  writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
   return manifest;
 }
 
 async function main() {
   const provider = getOfficerProvider();
   if (!provider) { console.error("FATAL: VAZORA_OFFICER_PROVIDER not configured"); process.exit(1); }
-  const manifest = writeManifest();
+  const manifest = verifyOrWriteManifest();
+  if (process.env.BENCH_VERIFY_ONLY === "1") {
+    console.log(`${BENCHMARK_VERSION} manifest verified — ${manifest.files.length} frozen files intact`);
+    return;
+  }
   console.log(`${BENCHMARK_VERSION} · ${EXPECTATIONS.length} scenarios · ${RUNS} run(s)`);
   console.log(`provider ${provider.id} · model ${provider.model}\n`);
 
@@ -324,7 +372,7 @@ async function main() {
     sweepFindings: sweepAll,
     scenarios: all,
   };
-  writeFileSync(join(here, "officer-benchmark-v1-report.json"), `${JSON.stringify(report, null, 2)}\n`);
+  writeFileSync(process.env.BENCH_REPORT ?? join(here, "officer-benchmark-v1-report.json"), `${JSON.stringify(report, null, 2)}\n`);
 
   console.log(`\n──── ${BENCHMARK_VERSION} ────`);
   console.log(`scenarios            ${metrics.scenariosPassed}/${metrics.scenariosTotal}`);
