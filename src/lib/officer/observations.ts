@@ -103,8 +103,19 @@ export async function acknowledgeObservation(ctx: OfficerContext, id: string): P
   return { ok: true };
 }
 
-/** Record that the user has reviewed the Command Center — the "since your
- * last visit" watermark. */
+/**
+ * Advance the caller's review watermark.
+ *
+ * DOCUMENTED SEMANTIC: `last_reviewed_at` means "the moment a review
+ * experience was successfully produced for THIS user" — a brief and the
+ * observation set were both built and handed to the view. It must never move
+ * on a failed request, an unauthorized request, a partial render failure, or
+ * a mere navigation to the URL, because then "what changed since my last
+ * review?" would silently skip changes the user never saw.
+ *
+ * The watermark is per user (RLS restricts the row to its own user), so one
+ * member reviewing does not consume another member's changes.
+ */
 export async function markReviewed(ctx: OfficerContext): Promise<void> {
   const now = new Date().toISOString();
   const { data } = await ctx.supabase

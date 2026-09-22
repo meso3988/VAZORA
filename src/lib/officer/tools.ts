@@ -257,31 +257,57 @@ const getObligation: OfficerTool = {
       .eq("id", args.obligationId)
       .maybeSingle();
     if (!o) return { ok: false, error: "obligation_not_found_in_organization" };
-    const [{ data: refs }, { data: reqs }] = await Promise.all([
+    const [{ data: refs }, { data: reqs }, { data: contract }] = await Promise.all([
       ctx.supabase.from("obligation_source_refs")
         .select("id, clause_id, page_number, source_snippet")
         .eq("organization_id", ctx.organizationId).eq("obligation_id", o.id),
       ctx.supabase.from("obligation_evidence_requirements")
         .select("id, name, description, evidence_type, required")
         .eq("organization_id", ctx.organizationId).eq("obligation_id", o.id),
+      ctx.supabase.from("contracts").select("contract_number, title")
+        .eq("organization_id", ctx.organizationId).eq("id", o.contract_id).maybeSingle(),
     ]);
+
+    // Resolve the clause NUMBER, not just an opaque id: "show me the source"
+    // must be answerable from this one call, or the model is left guessing
+    // whether traceability exists at all.
+    const clauseIds = [...new Set((refs ?? []).map((r: any) => r.clause_id).filter(Boolean))];
+    const { data: clauses } = clauseIds.length
+      ? await ctx.supabase.from("contract_clauses")
+          .select("id, clause_number, heading, page_number")
+          .eq("organization_id", ctx.organizationId).in("id", clauseIds)
+      : { data: [] as any[] };
+    const clauseById = new Map((clauses ?? []).map((c: any) => [c.id, c]));
+    const sourceRefs = (refs ?? []).map((r: any) => ({
+      ...r,
+      clause_number: clauseById.get(r.clause_id)?.clause_number ?? null,
+      clause_heading: clauseById.get(r.clause_id)?.heading ?? null,
+      clause_page: clauseById.get(r.clause_id)?.page_number ?? r.page_number ?? null,
+    }));
+
     const deadline = classifyDeadline({ today: ctx.clock.today, dueDate: o.due_date_normalized ?? null });
     const citations: OfficerCitation[] = [
       cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`),
-      ...(refs ?? []).filter((r: any) => r.clause_id)
-        .map((r: any) => cite("clause", r.clause_id, "Source clause", o.contract_id, `/app/contracts/${o.contract_id}`)),
+      ...sourceRefs.filter((r) => r.clause_id).map((r) =>
+        cite("clause", r.clause_id, r.clause_number ? `Clause ${r.clause_number}` : "Source clause",
+          o.contract_id, `/app/contracts/${o.contract_id}`)),
       ...(reqs ?? []).map((r: any) => cite("evidence_requirement", r.id, r.name, o.contract_id)),
     ];
     return ok(
       {
         obligation: o,
+        contract_number: contract?.contract_number ?? null,
+        contract_title: contract?.title ?? null,
         operational: o.review_status === "approved" && o.activation_status === "active",
         deadline,
-        sourceRefs: refs ?? [],
+        sourceRefs,
+        source_traceability: sourceRefs.length
+          ? "recorded"
+          : "none recorded for this obligation",
         evidenceRequirements: reqs ?? [],
       },
       citations,
-      `${o.title} · ${deadline.window}`,
+      `${o.title} · ${deadline.window}${sourceRefs[0]?.clause_number ? ` · clause ${sourceRefs[0].clause_number}` : ""}`,
     );
   },
 };
@@ -483,11 +509,61 @@ const getVerificationDiscrepancies: OfficerTool = {
       const ids = new Set((items ?? []).map((i: any) => i.id));
       rows = rows.filter((d: any) => ids.has(d.evidence_item_id));
     }
+    if (!rows.length) return ok([], [], "no discrepancies");
+
+    // Carry human-readable identity: a discrepancy the Officer cannot name by
+    // contract and requirement is an answer the user cannot act on.
+    const itemIds = [...new Set(rows.map((d: any) => d.evidence_item_id).filter(Boolean))];
+    const reqIds = [...new Set(rows.map((d: any) => d.evidence_requirement_id).filter(Boolean))];
+    const [{ data: items }, { data: reqs }] = await Promise.all([
+      itemIds.length
+        ? ctx.supabase.from("evidence_items").select("id, contract_id, title")
+            .eq("organization_id", ctx.organizationId).in("id", itemIds)
+        : Promise.resolve({ data: [] as any[] }),
+      reqIds.length
+        ? ctx.supabase.from("obligation_evidence_requirements").select("id, name, obligation_id")
+            .eq("organization_id", ctx.organizationId).in("id", reqIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const contractIds = [...new Set((items ?? []).map((i: any) => i.contract_id).filter(Boolean))];
+    const { data: contracts } = contractIds.length
+      ? await ctx.supabase.from("contracts").select("id, contract_number, title")
+          .eq("organization_id", ctx.organizationId).in("id", contractIds)
+      : { data: [] as any[] };
+    const itemById = new Map((items ?? []).map((i: any) => [i.id, i]));
+    const reqById = new Map((reqs ?? []).map((r: any) => [r.id, r]));
+    const contractById = new Map((contracts ?? []).map((c: any) => [c.id, c]));
+
+    const enriched = rows.map((d: any) => {
+      const item = itemById.get(d.evidence_item_id);
+      const contract = item ? contractById.get(item.contract_id) : null;
+      return {
+        ...d,
+        contract_number: contract?.contract_number ?? null,
+        contract_title: contract?.title ?? null,
+        evidence_item_title: item?.title ?? null,
+        requirement_name: reqById.get(d.evidence_requirement_id)?.name ?? null,
+        // Restate the Phase 3 invariant in the payload itself.
+        operational_state_note: d.status === "pending"
+          ? `The previously accepted result (${d.prior_result}) remains the operational state until a human decides.`
+          : null,
+      };
+    });
+
+    const citations: OfficerCitation[] = enriched.flatMap((d: any) => [
+      cite("verification_discrepancy", d.id,
+        `${d.contract_number ?? "discrepancy"}: ${d.prior_result} → ${d.current_result}`,
+        d.contract_id ?? null, `/app/evidence/${d.evidence_item_id}`),
+      ...(d.contract_number && itemById.get(d.evidence_item_id)
+        ? [cite("contract", itemById.get(d.evidence_item_id).contract_id, d.contract_number,
+            itemById.get(d.evidence_item_id).contract_id,
+            `/app/contracts/${itemById.get(d.evidence_item_id).contract_id}`)]
+        : []),
+    ]);
+
     return ok(
-      rows,
-      rows.map((d: any) => cite("verification_discrepancy", d.id,
-        `${d.prior_result} → ${d.current_result}`, null, `/app/evidence/${d.evidence_item_id}`)),
-      `${rows.filter((d: any) => d.status === "pending").length} pending of ${rows.length}`,
+      enriched, citations,
+      `${enriched.filter((d: any) => d.status === "pending").length} pending of ${enriched.length}`,
     );
   },
 };
@@ -495,26 +571,56 @@ const getVerificationDiscrepancies: OfficerTool = {
 const getRecentActivity: OfficerTool = {
   name: "getRecentActivity",
   toolClass: "READ_ONLY",
-  description: "Recent audit events — what actually changed and when. Used to answer 'what changed since…'.",
+  description:
+    "Recent audit events — what actually changed and when. Set sinceLastReview to answer 'what changed since my last review?': the server resolves the caller's own review watermark, so you never have to ask the user for a date or compute one.",
   input: z.object({
     contractId: z.string().uuid().optional(),
     sinceIso: z.string().datetime().optional(),
+    sinceLastReview: z.boolean().optional(),
     limit: z.number().int().min(1).max(200).optional(),
   }).strict(),
   handler: async (ctx, args) => {
+    // The watermark is server state for THIS user — never a model guess and
+    // never something the user should have to type.
+    let since: string | null = args.sinceIso ?? null;
+    let sinceSource = args.sinceIso ? "caller_supplied" : "none";
+    if (args.sinceLastReview) {
+      const { data: state } = await ctx.supabase
+        .from("officer_user_state")
+        .select("last_reviewed_at")
+        .eq("organization_id", ctx.organizationId)
+        .eq("user_id", ctx.userId)
+        .maybeSingle();
+      if (state?.last_reviewed_at) {
+        since = state.last_reviewed_at as string;
+        sinceSource = "last_review";
+      } else {
+        const { data: sweep } = await ctx.supabase
+          .from("officer_sweep_runs")
+          .select("started_at, completed_at")
+          .eq("organization_id", ctx.organizationId)
+          .in("status", ["completed", "partial"])
+          .order("started_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        since = (sweep?.completed_at as string | null) ?? (sweep?.started_at as string | null) ?? null;
+        sinceSource = since ? "previous_sweep" : "no_watermark_recorded";
+      }
+    }
+
     let q = ctx.supabase
       .from("activity_log")
       .select("id, event_type, entity_type, entity_id, actor_user_id, metadata, created_at")
       .eq("organization_id", ctx.organizationId)
       .order("created_at", { ascending: false })
       .limit(args.limit ?? 50);
-    if (args.sinceIso) q = q.gte("created_at", args.sinceIso);
+    if (since) q = q.gte("created_at", since);
     const { data } = await q;
     const rows = data ?? [];
     return ok(
-      rows,
+      { since, sinceSource, asOf: ctx.clock.nowIso, events: rows },
       rows.slice(0, 20).map((a: any) => cite("activity_event", a.id, a.event_type)),
-      `${rows.length} events`,
+      `${rows.length} events${since ? ` since ${since.slice(0, 10)} (${sinceSource})` : ""}`,
     );
   },
 };

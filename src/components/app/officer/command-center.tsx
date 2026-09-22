@@ -86,7 +86,13 @@ export async function CommandCenter({
             </header>
             <ul className="flex flex-col divide-y divide-line">
               {items.map((o) => (
-                <li key={o.id} className="flex flex-col gap-2.5 px-5 py-4">
+                <li
+                  key={o.id}
+                  data-observation-id={o.id}
+                  data-observation-bucket={section.key}
+                  data-observation-severity={o.severity}
+                  className="flex flex-col gap-2.5 px-5 py-4"
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={cn("text-[10px] font-semibold uppercase tracking-wide", SEVERITY_TONE[o.severity] ?? "text-muted")}>
                       {t(`severity.${o.severity}`)}

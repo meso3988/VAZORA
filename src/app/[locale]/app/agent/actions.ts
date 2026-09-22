@@ -136,10 +136,18 @@ export async function recordOfficerMemory(formData: FormData) {
   });
 }
 
-/** Run a contract sweep now. Deterministic detection; no model involved. */
+/**
+ * Run a contract sweep now. Deterministic detection; no model involved.
+ * Authorization is re-checked server-side — UI visibility is never the gate.
+ */
 export async function runOfficerSweep(formData: FormData) {
   const locale = localeOf(formData);
   const ctx = await liveContext(locale);
+  const { roleHasCapability } = await import("@/lib/officer/authority");
+  if (!roleHasCapability(ctx.role, "officer.sweep.run")) {
+    redirect({ href: "/app/agent?error=unauthorized_sweep", locale });
+    throw new Error("unreachable");
+  }
   const { runContractSweep } = await import("@/lib/officer/sweep");
   const outcome = await runContractSweep({ ctx, trigger: "manual" });
   redirect({

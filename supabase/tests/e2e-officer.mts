@@ -174,6 +174,73 @@ async function run(locale: "en" | "ar", viewport: { width: number; height: numbe
       !shows(dash, w.approvals) || !shows(dash, w.monitoring),
       "dashboard does not duplicate the whole command center");
 
+    // ---------- rerun sweep: observations update, nothing duplicates ----------
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    // Count actual observation cards, not text mentions — the page also
+    // repeats contract numbers in the brief, which makes text counts useless.
+    const cardCount = () => page.locator("[data-observation-id]").count();
+    const beforeRerun = await cardCount();
+    const distinctBefore = await page.evaluate(() =>
+      new Set([...document.querySelectorAll("[data-observation-id]")]
+        .map((n) => n.getAttribute("data-observation-id"))).size);
+    rec(`${tag} observation-cards-unique`, beforeRerun === distinctBefore,
+      `cards=${beforeRerun} distinct=${distinctBefore}`);
+    const rerunBtn = page.getByRole("button", { name: w.runSweep });
+    if (await rerunBtn.count()) {
+      await rerunBtn.first().click();
+      await page.waitForURL(/swept=/, { timeout: 90000 });
+      const p = new URL(page.url()).searchParams;
+      rec(`${tag} rerun-sweep-idempotent`, p.get("created") === "0",
+        `created=${p.get("created")} resolved=${p.get("resolved")}`);
+      const afterRerun = await cardCount();
+      rec(`${tag} rerun-no-new-cards`, afterRerun === beforeRerun,
+        `cards ${beforeRerun} → ${afterRerun}`);
+      const distinctAfter = await page.evaluate(() =>
+        new Set([...document.querySelectorAll("[data-observation-id]")]
+          .map((n) => n.getAttribute("data-observation-id"))).size);
+      rec(`${tag} rerun-no-duplicate-cards`, afterRerun === distinctAfter,
+        `cards=${afterRerun} distinct=${distinctAfter}`);
+      // Bucket integrity: an overdue card may only live in the critical section.
+      const misfiled = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-observation-severity='critical']")]
+          .filter((n) => n.getAttribute("data-observation-bucket") !== "critical").length);
+      rec(`${tag} critical-cards-in-critical-section`, misfiled === 0, `misfiled=${misfiled}`);
+    }
+
+    // ---------- logout → login → everything persists ----------
+    const conversationUrl = page.url();
+    // On narrow viewports the navigation (and sign-out) lives behind the menu
+    // toggle, so it must be opened first — the same as a real user would.
+    const signOutName = locale === "ar" ? "تسجيل الخروج" : "Sign out";
+    if (!(await page.getByRole("button", { name: signOutName }).first().isVisible().catch(() => false))) {
+      const menuToggle = page.getByRole("button", { name: locale === "ar" ? "القائمة" : "Menu" });
+      rec(`${tag} mobile-menu-toggle-present`, (await menuToggle.count()) >= 1);
+      await menuToggle.first().click();
+      await page.waitForTimeout(400);
+      rec(`${tag} mobile-menu-exposes-signout`,
+        await page.getByRole("button", { name: signOutName }).first().isVisible(),
+        "sign-out reachable from the collapsed navigation");
+    }
+    await page.getByRole("button", { name: signOutName }).first().click();
+    await page.waitForURL(/\/(login|$)|\/(en|ar)\/?$/, { timeout: 60000 });
+    rec(`${tag} logout-works`, !page.url().includes("/app/agent"), page.url().split("/").slice(3).join("/"));
+
+    await login(page, locale);
+    await page.goto(`${BASE}/${locale}/app/agent`, { waitUntil: "domcontentloaded" });
+    const persisted = await page.locator("body").innerText();
+    rec(`${tag} observations-persist`, persisted.includes("FM-008") || persisted.includes("BETA-200"),
+      "monitoring survives a session boundary");
+    rec(`${tag} conversations-persist`, shows(persisted, w.conversation),
+      "conversation list still present");
+    // The specific conversation thread is still readable.
+    const convId = new URL(conversationUrl).searchParams.get("c");
+    if (convId) {
+      await page.goto(`${BASE}/${locale}/app/agent?c=${convId}`, { waitUntil: "domcontentloaded" });
+      const thread = await page.locator("body").innerText();
+      rec(`${tag} conversation-thread-persists`, shows(thread, w.officerName) && shows(thread, w.sources),
+        "answer and its sources survive logout/login");
+    }
+
     const overflow = await page.evaluate(() =>
       document.documentElement.scrollWidth > document.documentElement.clientWidth + 2);
     rec(`${tag} no-horizontal-overflow`, !overflow);

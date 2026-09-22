@@ -108,8 +108,14 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
     .limit(1)
     .maybeSingle();
   const narrative = await renderBriefNarrative(ctx, brief, { displayName: null });
-  // Reading the Command Center IS the review — the watermark must be real.
-  await markReviewed(ctx);
+
+  // The review watermark advances ONLY when a real review experience was
+  // produced: the brief and the observation set both exist, the Officer is
+  // enabled, and this request is not an error redirect. Moving it on a failed
+  // or unauthorized request would silently swallow changes the user never saw.
+  const reviewPresented =
+    ctx.officer.enabled && !(typeof error === "string" && error) && brief.since !== undefined;
+  if (reviewPresented) await markReviewed(ctx);
 
   return (
     <>

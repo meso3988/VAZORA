@@ -89,6 +89,7 @@ export function buildOfficerSystemPrompt(opts: {
     `- seven days from today: ${ctx.clock.in7Days}`,
     `- end of this month: ${ctx.clock.endOfMonth}`,
     "- Tools already return daysUntilDue / daysOverdue. Quote those numbers; never compute your own.",
+    "- For \"what changed since my last review / since yesterday\", call getRecentActivity with sinceLastReview: true. The server resolves the caller's own watermark — never ask the user for a date.",
   ].join("\n");
 
   const scope = contractScope

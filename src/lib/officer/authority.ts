@@ -39,6 +39,7 @@ export type Capability =
   | "officer.memory.write"    // record confirmed organizational memory
   | "officer.action.propose"  // ask the officer to draft a proposal
   | "officer.action.approve"  // approve a proposed action
+  | "officer.sweep.run"       // trigger a manual contract sweep
   | "obligation.assign"       // assign an owner
   | "obligation.reschedule"   // change a due date
   | "evidence.override"       // human override on a verification check
@@ -46,8 +47,15 @@ export type Capability =
   | "contract.activate"       // activate contractual change
   | "external.communicate";   // email/WhatsApp/portal — Phase 4C, nobody yet
 
+/**
+ * Every member may read, converse, ask for a proposal and refresh
+ * monitoring. A sweep is a read-only detection pass that writes only the
+ * Officer's own observations — it changes no contract, obligation, evidence
+ * or gap — so withholding it would block ordinary work without protecting
+ * anything.
+ */
 const READ_SET: Capability[] = [
-  "officer.read", "officer.converse", "officer.action.propose",
+  "officer.read", "officer.converse", "officer.action.propose", "officer.sweep.run",
 ];
 
 /**
