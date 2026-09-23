@@ -15,7 +15,7 @@ for (const line of readFileSync(join(root, ".env.local"), "utf8").split("\n")) {
   if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
 }
 
-import { seedBenchmarkOrganization } from "../benchmarks/contract-officer-benchmark-v1/fixture";
+import { seedBenchmarkOrganization, teardownBenchmarkOrganization } from "../benchmarks/contract-officer-benchmark-v2/fixture";
 
 import { approveOfficerAction, rejectOfficerAction } from "../../src/lib/officer/actions";
 import { authorizeAction, roleHasCapability } from "../../src/lib/officer/authority";
@@ -299,6 +299,12 @@ async function main() {
   const clientLeak = readFileSync(join(root, "src/lib/officer/sweep.ts"), "utf8");
   check("service-role-not-in-officer-lib", !clientLeak.includes("SERVICE_ROLE"));
   check("sweep-route-is-server-only", !routeSrc.includes('"use client"'));
+
+  // Benchmark tenants are disposable — cascade-remove them so they never accumulate.
+  for (const fx of [alpha, beta]) {
+    const td = await teardownBenchmarkOrganization(fx);
+    check(`cleanup-${fx.orgId.slice(0, 8)}`, td.ok, td.error ?? "");
+  }
 
   const passed = checks.filter((c) => c.pass).length;
   console.log(`\nOFFICER SECURITY: ${passed}/${checks.length} PASS`);

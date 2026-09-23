@@ -108,8 +108,21 @@ export type OfficerAnswer = {
   toolSchemasSent: number;
 };
 
+/**
+ * Evaluation-only trace: the exact arguments the model sent and the exact
+ * payload the tool returned. Lives on the OUTCOME, not on OfficerAnswer —
+ * it is never persisted to a message row and never reaches the UI.
+ */
+export type OfficerToolTrace = {
+  tool: string;
+  args: unknown;
+  ok: boolean;
+  /** the serialized JSON the model actually saw as the tool result */
+  payload: string;
+};
+
 export type ConverseOutcome =
-  | { ok: true; answer: OfficerAnswer }
+  | { ok: true; answer: OfficerAnswer; trace?: OfficerToolTrace[] }
   | { ok: false; error: string };
 
 /** Collect citations the tools themselves produced — these are ground truth. */
@@ -150,6 +163,8 @@ export async function converseWithOfficer(opts: {
   history?: { role: "user" | "assistant"; content: string }[];
   contractScope?: { id: string; number: string; title: string } | null;
   conversationId?: string | null;
+  /** benchmark/evaluation only: capture raw tool args+payloads */
+  collectTrace?: boolean;
 }): Promise<ConverseOutcome> {
   const { ctx, question, contractScope } = opts;
   const provider = getOfficerProvider();
@@ -172,6 +187,7 @@ export async function converseWithOfficer(opts: {
   let escalatedToFullToolset = selection.fullFallback;
   const toolCitations = new Map<string, OfficerCitation>();
   const invocations: OfficerToolInvocation[] = [];
+  const trace: OfficerToolTrace[] = [];
   const proposedActionIds: string[] = [];
   const seenCalls = new Set<string>();
   let usageIn = 0;
@@ -215,6 +231,7 @@ export async function converseWithOfficer(opts: {
       }
       const result = await executeCall(ctx, call, seenCalls);
       invocations.push(result.invocation);
+      if (opts.collectTrace) trace.push({ tool: call.name, args: call.arguments ?? {}, ok: result.invocation.ok, payload: result.payload });
       if (result.citations.length) mergeToolCitations(toolCitations, result.citations);
       if (result.actionId) proposedActionIds.push(result.actionId);
       messages.push({ role: "tool", toolCallId: call.id, name: call.name, content: result.payload });
@@ -274,6 +291,7 @@ export async function converseWithOfficer(opts: {
       escalatedToFullToolset,
       toolSchemasSent: specs.length,
     },
+    ...(opts.collectTrace ? { trace } : {}),
   };
 }
 

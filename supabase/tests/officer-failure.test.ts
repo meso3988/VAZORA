@@ -20,7 +20,7 @@ for (const line of readFileSync(join(root, ".env.local"), "utf8").split("\n")) {
 process.env.VAZORA_OFFICER_TIMEOUT_MS = "2500";
 process.env.VAZORA_OFFICER_MAX_RETRIES = "1";
 
-import { seedBenchmarkOrganization } from "../benchmarks/contract-officer-benchmark-v1/fixture";
+import { seedBenchmarkOrganization, teardownBenchmarkOrganization } from "../benchmarks/contract-officer-benchmark-v2/fixture";
 
 import { askOfficer, createConversation, getConversation } from "../../src/lib/officer/conversation";
 import { buildOfficerContext, ensureOfficerProfile } from "../../src/lib/officer/context";
@@ -217,6 +217,9 @@ async function main() {
     afterRecovery?.messages.length === 3 &&
     afterRecovery.messages.filter((m) => m.role === "assistant").length === 1,
     `messages=${afterRecovery?.messages.length}`);
+
+  const td = await teardownBenchmarkOrganization(fx);
+  check("cleanup-benchmark-tenant", td.ok, td.error ?? "");
 
   const passed = checks.filter((c) => c.pass).length;
   console.log(`\nOFFICER FAILURE: ${passed}/${checks.length} PASS`);
