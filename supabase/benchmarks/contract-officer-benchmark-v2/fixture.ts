@@ -62,6 +62,10 @@ export async function seedBenchmarkOrganization(opts: { label: string; timezone?
     slug: `qa-bench-${opts.label}-${Date.now()}`, created_by: userId,
     timezone, timezone_set_at: new Date().toISOString(),
   });
+
+  // Everything below runs under a self-heal: a seed that dies partway must
+  // not strand a benchmark organization — cascade-remove it before rethrowing.
+  try {
   await seed("organization_members", { organization_id: orgId, user_id: userId, role: "owner" });
 
   // A second member so ownership questions have a real answer.
@@ -356,6 +360,10 @@ export async function seedBenchmarkOrganization(opts: { label: string; timezone?
       f: { ...f, number: "ZETA-600", dueDate: addDays(today, 4), req: fReq },
     },
   };
+  } catch (seedErr) {
+    await client.from("organizations").delete().eq("id", orgId);
+    throw seedErr;
+  }
 }
 
 /**

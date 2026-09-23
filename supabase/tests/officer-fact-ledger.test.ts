@@ -216,5 +216,42 @@ check("clause-split", splitClauses("A is done but B is not").length >= 2);
   check("per-clause-entity-binding", day?.entityKey === "contract:BETA-200", JSON.stringify(claims));
 }
 
+// ---------- regression: second-review defects ---------------------------------
+{
+  // "partially verified" must normalize to its own state, not collapse to verified.
+  const claims = extractClaims("The report is partially verified.", entities);
+  const st = claims.find((c) => c.type === "verification_state");
+  check("partially-verified-not-verified", st?.value === "partially_verified", JSON.stringify(claims));
+}
+{
+  // "pending approval" is a workflow status, not a verification state —
+  // extracting it would false-fail legitimate action answers.
+  const claims = extractClaims("I created a proposal pending your approval.", entities);
+  check("pending-approval-not-verify-state", !claims.some((c) => c.type === "verification_state"), JSON.stringify(claims));
+  const review = extractClaims("The check is pending review.", entities);
+  check("pending-review-still-state", review.some((c) => c.type === "verification_state" && c.value === "needs_review"));
+}
+{
+  // Boundary matching: "7.3" must not bind inside "27.35".
+  const claims = extractClaims("Clause 27.35 of BETA-200 applies.", entities);
+  const cn = claims.find((c) => c.type === "clause_number");
+  check("clause-boundary-no-substring", cn?.value === "27.35" && cn?.entityKey !== `clause:${CLAUSE_B}`, JSON.stringify(claims));
+}
+{
+  // Raw-fallback boundary: "6" embedded in "2026" is not support for a day count.
+  const narrow = buildCorpus({
+    toolPayloads: [{ tool: "getContractContext", payload: JSON.stringify({ ref: "see 2026-01-16 memo 6606" }) }],
+    question: "", contextValues: [], entities,
+  });
+  const claims = extractClaims("It is 6 days overdue.", entities); // no entity → global path
+  const scored = scoreClaims(claims, narrow);
+  check("raw-fallback-needs-boundary",
+    scored.some((c) => c.type === "day_count" && !c.supported), JSON.stringify(scored));
+}
+{
+  const claims = extractClaims("Open gaps remain on BETA-200.", entities);
+  check("gap-plural-extracts", claims.some((c) => c.type === "gap_state" && c.value === "open"), JSON.stringify(claims));
+}
+
 console.log(`\n${pass} passed · ${fail} failed`);
 if (fail) { console.error(`failures: ${failures.join(", ")}`); process.exit(1); }

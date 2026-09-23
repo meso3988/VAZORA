@@ -107,17 +107,17 @@ const DAY_COUNT = new RegExp(
 const CONTRACT_NO = /\b[A-Z]{2,10}-\d{2,6}\b/g;
 const CLAUSE_NO = /(?:clause|البند|الفقرة|المادة)\s*#?\s*(\d+(?:\.\d+)+)/gi;
 const ASSIGNEE = /(?:assigned to|owner(?:\s+is|:)?|owned by|responsible(?:\s+is|:)?|المسؤول(?:\s+هو|:)?|مسؤول(?:\s+عن)?[^.:،,]{0,20}(?:هو|:)?)\s+([A-Za-z][A-Za-z.''-]{2,}|[\w.+-]+@[\w-]+\.[\w.]+|[\u0600-\u06FF]{2,}(?:\s[\u0600-\u06FF]{2,})?)/gi;
-const VERIFY_STATE = /\b(verified|partially[- ]verified|incomplete|missing|needs?[ _-]?(?:a )?(?:human )?review|pending(?:\s+review)?|rejected|unverified)\b|موثّق|موثق|مُثبَت|مثبت|ناقص|مفقود|غير مكتمل|قيد المراجعة|يحتاج مراجعة|غير موثّق/gi;
+const VERIFY_STATE = /\b(verified|partially[- ]verified|incomplete|missing|needs?[ _-]?(?:a )?(?:human )?review|pending\s+(?:human\s+)?(?:review|verification)|rejected|unverified)\b|موثّق|موثق|مُثبَت|مثبت|ناقص|مفقود|غير مكتمل|قيد المراجعة|يحتاج مراجعة|غير موثّق/gi;
 const ACK_STATE = /(?:client|العميل|العميلة)\s+(?:has\s+|did\s+|have\s+)?(?:approved|acknowledged|accepted|signed|countersigned|rejected|اعتماد|اعتمد|أقرّ|اقرّ|وقّع|وقع|رفض)/gi;
 const OVERDUE = /\b(?:is|are|was|became|now|currently|still)?\s*overdue\b|متأخر(?:ة|ًا|اً)?|متأخرة/gi;
-const GAP_STATE = /(?:gap|فجوة|فجوات)\s+(?:is\s+|was\s+|has been\s+|now\s+)?(?:resolved|closed|reopened|opened|open)|(?:resolved|closed)\s+(?:the\s+)?gap/gi;
+const GAP_STATE = /(?:gaps?|فجوة|فجوات)\s+(?:is\s+|was\s+|are\s+|has been\s+|have been\s+|now\s+)?(?:resolved|closed|reopened|opened|open)|(?:resolved|closed|open|reopened)\s+(?:the\s+)?gaps?/gi;
 const UNASSIGNED = /\bunassigned\b|no\s+(?:assigned\s+)?owner|without\s+(?:an?\s+)?owner|بلا مالك|بدون مالك|دون مالك|لا مالك|غير مُسند|غير مسند/gi;
 const ACTION_EXEC = /\b(?:i|i've|i have|we)\s+(?:have\s+)?(?:resolved|closed|marked|changed|updated|rescheduled|assigned|approved|sent|emailed|notified|deleted|removed)\b|(?:the\s+)?(?:gap|deadline|due date|obligation)\s+(?:is|has been|was|got)\s+(?:resolved|closed|changed|updated|extended)|تم\s+(?:حل|إغلاق|تغيير|تعيين|إرسال|اعتماد)|قمت\s+ب(?:حل|إغلاق|تغيير|تعيين|إرسال)/gi;
 
 function normalizeState(v: string): string {
   const s = norm(v);
-  if (/verified|موثّق|موثق|مُثبَت|مثبت/.test(s) && !/unverif|not verif|غير/.test(s)) return "verified";
   if (/partially/.test(s)) return "partially_verified";
+  if (/verified|موثّق|موثق|مُثبَت|مثبت/.test(s) && !/unverif|not verif|غير/.test(s)) return "verified";
   if (/missing|مفقود/.test(s)) return "missing";
   if (/incomplete|ناقص|غير مكتمل/.test(s)) return "incomplete";
   if (/needs?[ _-]?(?:a )?(?:human )?review|pending\s+review|قيد المراجعة|يحتاج مراجعة/.test(s)) return "needs_review";
@@ -188,13 +188,27 @@ export function buildEntityMap(fx: any): EntityMap {
   return { tokens, idKeys };
 }
 
+/**
+ * Boundary-aware token match: "7.3" must not bind inside "27.35" and
+ * "beta-200" must not bind inside "beta-2000".
+ */
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+export function tokenHit(text: string, token: string): boolean {
+  if (!token) return false;
+  return new RegExp(
+    `(^|[^\\w\\u0600-\\u06FF])${escapeRe(token)}([^\\w\\u0600-\\u06FF]|$)`, "i",
+  ).test(text);
+}
+
 /** Longest entity token found in the sentence → its canonical key. */
 function bindEntity(sentence: string, entities: EntityMap): string | null {
   const n = norm(sentence);
   let best: string | null = null;
   let bestLen = 0;
   for (const [token, key] of entities.tokens) {
-    if (token.length > bestLen && n.includes(token)) {
+    if (token.length > bestLen && tokenHit(n, token)) {
       best = key;
       bestLen = token.length;
     }
@@ -292,7 +306,7 @@ function indexObject(node: any, entities: EntityMap, out: EvidenceCorpus["object
     const idKey = entities.idKeys.get(v);
     if (idKey) ents.add(idKey);
     for (const [token, key] of entities.tokens) {
-      if (token === v || (token.length > 3 && v.includes(token))) ents.add(key);
+      if (token === v || (token.length > 3 && tokenHit(v, token))) ents.add(key);
     }
   }
   if (values.size) out.push({ values, entities: ents });
@@ -393,7 +407,9 @@ export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): Scored
     }
     if (corpus.values.has(c.value) || valueVariantHit(corpus.values, c.value))
       return { ...c, supported: true, supportKind: "global" };
-    if (corpus.raw.includes(c.value)) return { ...c, supported: true, supportKind: "context" };
+    // Raw fallback uses word boundaries — "6" inside "2026" or a uuid is not
+    // evidence for a six-day claim.
+    if (tokenHit(corpus.raw, c.value)) return { ...c, supported: true, supportKind: "context" };
     return { ...c, supported: false, supportKind: "none" };
   });
 }

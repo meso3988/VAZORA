@@ -82,7 +82,7 @@ export const EXPECTATIONS: Expectation[] = [
     requiredAny: ["getOverdueObligations", "getOrganizationSummary", "getUpcomingObligations"],
     optionalTools: ["getEvidenceGaps", "listContracts", "getVerificationDiscrepancies", "getRecentActivity", "getEvidenceStatus", "listObligations"],
     expectedFacts: () => [{ type: "contract_number", value: "beta-200" }],
-    forbiddenFacts: (fx) => [
+    forbiddenFacts: () => [
       { type: "overdue_state", entityKey: ck("ALPHA-100") },
       { type: "overdue_state", entityKey: ck("EPSILON-500") },
       { type: "overdue_state", entityKey: ck("DELTA-400") },
@@ -99,7 +99,7 @@ export const EXPECTATIONS: Expectation[] = [
       { type: "contract_number", value: "beta-200" },
       { type: "day_count", value: "6", entityKey: bObligation(fx) },
     ],
-    forbiddenFacts: (fx) => [
+    forbiddenFacts: () => [
       { type: "overdue_state", entityKey: ck("ALPHA-100") },
       { type: "overdue_state", entityKey: ck("GAMMA-300") },
       { type: "overdue_state", entityKey: ck("DELTA-400") },
@@ -268,11 +268,11 @@ export const EXPECTATIONS: Expectation[] = [
   },
   {
     id: "Q17", label: "Healthy contract",
-    question: (fx) => `Show me a healthy contract.`,
+    question: () => `Show me a healthy contract.`,
     requiredAny: ["listContracts", "getOrganizationSummary", "getEvidenceGaps", "listObligations", "getEvidenceStatus"],
     optionalTools: STATE_LOOKUPS,
     expectedFacts: () => [{ type: "contract_number", value: "alpha-100" }],
-    forbiddenFacts: (fx) => [
+    forbiddenFacts: () => [
       { type: "overdue_state", entityKey: ck("ALPHA-100") },
       { type: "verification_state", value: "missing", entityKey: ck("ALPHA-100") },
       { type: "verification_state", value: "incomplete", entityKey: ck("ALPHA-100") },
@@ -463,7 +463,7 @@ export const EXPECTATIONS: Expectation[] = [
     question: (fx) => `أي بند في العقد يفرض ${fx.contracts.b.obligationTitle} على ${fx.contracts.b.number}؟`,
     requiredAny: ["getObligation", "getContractClause"],
     optionalTools: ["getContract", "listObligations", "getEvidenceStatus"],
-    expectedFacts: (fx) => [{ type: "clause_number", value: "7.3" }],
+    expectedFacts: () => [{ type: "clause_number", value: "7.3" }],
     expectedCitations: (fx) => [{ target: "clause", id: fx.contracts.b.clauseId }],
   },
   {

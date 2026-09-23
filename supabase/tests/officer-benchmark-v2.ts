@@ -27,6 +27,7 @@ for (const line of readFileSync(join(root, ".env.local"), "utf8").split("\n")) {
 import {
   BENCHMARK_VERSION, seedBenchmarkOrganization,
   teardownBenchmarkOrganization, verifyBenchmarkCleanup,
+  type BenchmarkFixture,
 } from "../benchmarks/contract-officer-benchmark-v2/fixture";
 import { EXPECTATIONS, SWEEP_EXPECTATIONS, TOOL_UNIVERSE } from "../benchmarks/contract-officer-benchmark-v2/ground-truth";
 import {
@@ -95,7 +96,10 @@ async function checkInvariant(name: string, fx: any): Promise<{ pass: boolean; d
   }
 }
 
-/** entityKey → the citation ids that legitimately support claims about it. */
+/** entityKey → the citation ids that legitimately support claims about it.
+ *  Strictly scoped: an obligation claim is supported by the obligation itself,
+ *  its source clause, its requirement family or its gap — NOT by a bare
+ *  contract row (that is the "random same-contract citation" case). */
 function buildEntityCitations(fx: any): Map<string, Set<string>> {
   const m = new Map<string, Set<string>>();
   const put = (key: string, ids: (string | null | undefined)[]) =>
@@ -104,17 +108,59 @@ function buildEntityCitations(fx: any): Map<string, Set<string>> {
     const reqIds = [c.req, c.kpiReq].filter(Boolean)
       .flatMap((r: any) => [r.reqId, r.itemId, r.checkId, r.versionId]);
     put(`contract:${c.number}`, [c.contractId, c.clauseId, c.docId, c.obligationId, c.discrepancyId, ...reqIds]);
-    put(`clause:${c.clauseId}`, [c.clauseId, c.contractId]);
-    put(`obligation:${c.obligationId}`, [c.obligationId, c.clauseId, c.contractId, c.discrepancyId, ...reqIds]);
+    put(`clause:${c.clauseId}`, [c.clauseId, c.docId]);
+    put(`obligation:${c.obligationId}`, [c.obligationId, c.clauseId, c.discrepancyId, ...reqIds]);
     for (const r of [c.req, c.kpiReq].filter(Boolean) as any[]) {
-      put(`requirement:${r.reqId}`, [r.reqId, r.itemId, r.checkId, r.versionId, c.obligationId, c.contractId, c.discrepancyId]);
+      put(`requirement:${r.reqId}`, [r.reqId, r.itemId, r.checkId, r.versionId, c.obligationId, c.discrepancyId]);
       if (r.itemId) put(`evidence_item:${r.itemId}`, [r.itemId, r.versionId, r.checkId, r.reqId, c.obligationId, c.discrepancyId]);
       // requirement-without-item claims bind through the requirement key
-      put(`evidence_item:${r.reqId}`, [r.reqId, c.obligationId, c.contractId]);
+      put(`evidence_item:${r.reqId}`, [r.reqId, c.obligationId]);
     }
   }
   for (const e of fx.memberEmails ?? []) put(`member:${e}`, [fx.userId]);
   return m;
+}
+
+/**
+ * Semantic citation family — DIRECTIONAL, not transitive. For an expected
+ * citation on row X, these ids count as satisfying it:
+ *   contract    → the contract and its components (obligation/clause/req/gap…)
+ *   obligation  → itself, its source clause, its requirement family, its gaps
+ *   clause      → itself or its document
+ *   requirement → itself, its item/check/version, its gaps
+ *   item/check  → itself or its requirement
+ *   gap         → itself only
+ * A bare contract row never satisfies an obligation/requirement expectation.
+ */
+function buildCitationFamilies(fx: any, gapRows: any[]): Map<string, Set<string>> {
+  const fam = new Map<string, Set<string>>();
+  const add = (id: string | null | undefined, ...ids: (string | null | undefined)[]) => {
+    if (!id) return;
+    fam.set(id, new Set([id, ...(fam.get(id) ?? []), ...(ids.filter(Boolean) as string[])]));
+  };
+  for (const c of Object.values<any>(fx.contracts)) {
+    const reqItems: string[] = [];
+    for (const r of [c.req, c.kpiReq].filter(Boolean) as any[]) {
+      const rIds = [r.reqId, r.itemId, r.checkId, r.versionId, r.runId].filter(Boolean) as string[];
+      reqItems.push(...rIds);
+      add(r.reqId, r.itemId, r.checkId, r.versionId, r.runId);
+      for (const x of rIds) if (x !== r.reqId) add(x, r.reqId);
+    }
+    add(c.contractId, c.clauseId, c.docId, c.obligationId, c.discrepancyId, ...reqItems);
+    add(c.obligationId, c.clauseId, c.discrepancyId, ...reqItems);
+    add(c.clauseId, c.docId);
+    if (c.discrepancyId) add(c.discrepancyId, c.obligationId);
+  }
+  for (const g of gapRows) {
+    add(g.id);
+    add(g.evidence_requirement_id, g.id);
+    add(g.obligation_id, g.id);
+    if (g.contract_id) {
+      const c = Object.values<any>(fx.contracts).find((x) => x.contractId === g.contract_id);
+      if (c) add(c.contractId, g.id);
+    }
+  }
+  return fam;
 }
 
 // ---------- scenario result ---------------------------------------------------
@@ -154,11 +200,42 @@ function argMatches(actual: Record<string, unknown>, expected: Record<string, un
   return true;
 }
 
+// Tenants under test — drained on ANY exit path. A benchmark run killed by
+// EPIPE (piped to `head`), a signal, or an exception must not strand an org.
+const pendingTenants = new Set<BenchmarkFixture>();
+let draining = false;
+async function drainTenants() {
+  if (draining) return;
+  draining = true;
+  for (const fx of [...pendingTenants]) {
+    try {
+      const td = await teardownBenchmarkOrganization(fx);
+      const vf = await verifyBenchmarkCleanup(fx);
+      if (!td.ok || !vf.clean) {
+        console.error(`CLEANUP FAIL org=${fx.orgId} ${td.error ?? ""} leftovers=${vf.leftovers.join(",")}`);
+      }
+    } catch (e) {
+      console.error(`CLEANUP THREW org=${fx.orgId}: ${e}`);
+    }
+    pendingTenants.delete(fx);
+  }
+}
+for (const sig of ["SIGINT", "SIGTERM"] as const) {
+  process.once(sig, () => {
+    drainTenants().finally(() => process.exit(sig === "SIGINT" ? 130 : 143));
+  });
+}
+process.once("uncaughtException", (e) => {
+  console.error(e);
+  drainTenants().finally(() => process.exit(1));
+});
+
 async function runOnce(runIndex: number) {
   const provider = getOfficerProvider();
   if (!provider) throw new Error("no Officer provider configured (VAZORA_OFFICER_PROVIDER)");
 
   const fx = await seedBenchmarkOrganization({ label: `r${runIndex}` });
+  if (!KEEP_TENANT) pendingTenants.add(fx);
   await ensureOfficerProfile({ supabase: fx.client, organizationId: fx.orgId });
   const baseCtx = await buildOfficerContext({
     supabase: fx.client, organizationId: fx.orgId, userId: fx.userId, locale: "en",
@@ -173,15 +250,8 @@ async function runOnce(runIndex: number) {
   const { data: gapRows } = await fx.client.from("evidence_gaps")
     .select("id,evidence_requirement_id,obligation_id,contract_id")
     .eq("organization_id", fx.orgId);
-  const reqGapIds = new Map<string, string[]>();
-  const oblGapIds = new Map<string, string[]>();
+  const citationFamilies = buildCitationFamilies(fx, gapRows ?? []);
   for (const g of gapRows ?? []) {
-    if (g.evidence_requirement_id) {
-      reqGapIds.set(g.evidence_requirement_id, [...(reqGapIds.get(g.evidence_requirement_id) ?? []), g.id]);
-    }
-    if (g.obligation_id) {
-      oblGapIds.set(g.obligation_id, [...(oblGapIds.get(g.obligation_id) ?? []), g.id]);
-    }
     for (const key of [
       `requirement:${g.evidence_requirement_id}`,
       `obligation:${g.obligation_id}`,
@@ -372,10 +442,7 @@ async function runOnce(runIndex: number) {
     // A citation to the requirement's gap row or the obligation's gap row
     // supports the same claim — they are the same semantic entity.
     const expectedCitesHit = expectedCites.filter((e) =>
-      a.citations.some((c) =>
-        c.id === e.id ||
-        (reqGapIds.get(e.id) ?? []).includes(c.id) ||
-        (oblGapIds.get(e.id) ?? []).includes(c.id))).length;
+      a.citations.some((c) => (citationFamilies.get(e.id) ?? new Set([e.id])).has(c.id))).length;
     const claimChecks = bindCitationsToClaims(
       scored.filter((c) => c.supported),
       a.citations.map((c) => ({ target: c.target, id: c.id })),
@@ -473,7 +540,9 @@ async function runOnce(runIndex: number) {
     const td = await teardownBenchmarkOrganization(fx);
     const vf = await verifyBenchmarkCleanup(fx);
     cleanup = { ok: td.ok, error: td.error, leftovers: vf.leftovers };
-    if (!td.ok || !vf.clean) console.log(`CLEANUP FAIL org=${fx.orgId} ${td.error} leftovers=${vf.leftovers}`);
+    // A failed cleanup stays pending — drainTenants() retries it at exit.
+    if (td.ok && vf.clean) pendingTenants.delete(fx);
+    else console.log(`CLEANUP FAIL org=${fx.orgId} ${td.error} leftovers=${vf.leftovers}`);
   }
 
   return { fx, sweep, sweepFindings, results, observations: observations.length, cleanup };
@@ -578,9 +647,13 @@ async function main() {
   console.log(`provider ${provider.id} · model ${provider.model}\n`);
 
   const runs: Awaited<ReturnType<typeof runOnce>>[] = [];
-  for (let i = 1; i <= RUNS; i++) {
-    console.log(`──── run ${i}/${RUNS} ────`);
-    runs.push(await runOnce(i));
+  try {
+    for (let i = 1; i <= RUNS; i++) {
+      console.log(`──── run ${i}/${RUNS} ────`);
+      runs.push(await runOnce(i));
+    }
+  } finally {
+    await drainTenants();
   }
 
   const attempted = runs.flatMap((r) => r.results);
@@ -649,11 +722,11 @@ async function main() {
     cleanups: runs.map((r) => r.cleanup),
     tenantsLeaked: runs.filter((r) => !r.cleanup.ok || r.cleanup.leftovers.length > 0).length,
     lexicalAnchorMisses: sum((r) => r.mustSayMissing.length),
-    avgToolSchemasSent: +(sum((r) => r.toolSchemasSent) / all.length).toFixed(1),
-    fullRegistryFallbackRate: +(all.filter((r) => r.escalated).length / all.length).toFixed(3),
+    avgToolSchemasSent: all.length ? +(sum((r) => r.toolSchemasSent) / all.length).toFixed(1) : 0,
+    fullRegistryFallbackRate: all.length ? +(all.filter((r) => r.escalated).length / all.length).toFixed(3) : 0,
     tokensIn: sum((r) => r.inputTokens),
     tokensOut: sum((r) => r.outputTokens),
-    avgTokensInPerQuestion: Math.round(sum((r) => r.inputTokens) / all.length),
+    avgTokensInPerQuestion: all.length ? Math.round(sum((r) => r.inputTokens) / all.length) : 0,
     medianLatencyMs: (() => {
       const xs = all.map((r) => r.durationMs).filter((x) => x > 0).sort((a, b) => a - b);
       return xs.length ? xs[Math.floor(xs.length / 2)] : 0;
