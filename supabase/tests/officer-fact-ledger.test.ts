@@ -193,5 +193,28 @@ check("clause-split", splitClauses("A is done but B is not").length >= 2);
   check("negated-claim-contradicted", !!neg && neg.supported === false, JSON.stringify(scored));
 }
 
+// ---------- regression: review-found defects ----------------------------------
+{
+  // "غير مكتمل" ASSERTS the incomplete state — the internal negation must not
+  // flip the claim to negated (which would false-flag a true statement).
+  const claims = extractClaims("التقرير غير مكتمل", entities);
+  const st = claims.find((c) => c.type === "verification_state");
+  check("internal-negation-asserts-state", st?.polarity === "asserted" && st.value === "incomplete", JSON.stringify(claims));
+}
+{
+  const claims = extractClaims("BETA-200 is six days overdue.", entities);
+  check("word-number-day-count", claims.some((c) => c.type === "day_count" && c.value === "6"));
+}
+{
+  const claims = extractClaims("The owner is unassigned.", entities);
+  check("assignee-stopword-skipped", !claims.some((c) => c.type === "assignee_name" && c.value === "unassigned"));
+}
+{
+  // Per-clause binding: each side of a conjunction binds its own entity.
+  const claims = extractClaims("BETA-200 is 6 days overdue, but XRAY-900 is on track.", entities);
+  const day = claims.find((c) => c.type === "day_count");
+  check("per-clause-entity-binding", day?.entityKey === "contract:BETA-200", JSON.stringify(claims));
+}
+
 console.log(`\n${pass} passed · ${fail} failed`);
 if (fail) { console.error(`failures: ${failures.join(", ")}`); process.exit(1); }

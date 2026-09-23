@@ -174,9 +174,13 @@ async function runOnce(runIndex: number) {
     .select("id,evidence_requirement_id,obligation_id,contract_id")
     .eq("organization_id", fx.orgId);
   const reqGapIds = new Map<string, string[]>();
+  const oblGapIds = new Map<string, string[]>();
   for (const g of gapRows ?? []) {
     if (g.evidence_requirement_id) {
       reqGapIds.set(g.evidence_requirement_id, [...(reqGapIds.get(g.evidence_requirement_id) ?? []), g.id]);
+    }
+    if (g.obligation_id) {
+      oblGapIds.set(g.obligation_id, [...(oblGapIds.get(g.obligation_id) ?? []), g.id]);
     }
     for (const key of [
       `requirement:${g.evidence_requirement_id}`,
@@ -295,8 +299,11 @@ async function runOnce(runIndex: number) {
     const allowed = new Set([
       ...(exp.requiredTools ?? []), ...(exp.requiredAny ?? []), ...(exp.optionalTools ?? []),
     ]);
-    const missingRequired = (exp.requiredTools ?? []).filter((t) => !tools.includes(t));
-    const requiredAnyHit = !exp.requiredAny?.length || exp.requiredAny.some((t) => tools.includes(t));
+    // Recall requires a SUCCESSFUL call — an attempt rejected by validation
+    // does not satisfy a requirement (it still counts in toolErrors).
+    const okTools = a.toolInvocations.filter((t) => t.ok).map((t) => t.tool);
+    const missingRequired = (exp.requiredTools ?? []).filter((t) => !okTools.includes(t));
+    const requiredAnyHit = !exp.requiredAny?.length || exp.requiredAny.some((t) => okTools.includes(t));
     const recallTotal = (exp.requiredTools?.length ?? 0) + (exp.requiredAny?.length ? 1 : 0);
     const recallHit = (exp.requiredTools?.length ?? 0) - missingRequired.length + (requiredAnyHit && exp.requiredAny?.length ? 1 : 0);
     const forbiddenTools = (exp.forbidTools ?? []).filter((t) => tools.includes(t));
@@ -362,9 +369,13 @@ async function runOnce(runIndex: number) {
     // --- citations: validity / relevance / claim support ---
     const revalidated = await validateCitations(ctx, a.citations.map((c) => ({ target: c.target, id: c.id })));
     const expectedCites = exp.expectedCitations?.(fx) ?? [];
+    // A citation to the requirement's gap row or the obligation's gap row
+    // supports the same claim — they are the same semantic entity.
     const expectedCitesHit = expectedCites.filter((e) =>
       a.citations.some((c) =>
-        c.id === e.id || (reqGapIds.get(e.id) ?? []).includes(c.id))).length;
+        c.id === e.id ||
+        (reqGapIds.get(e.id) ?? []).includes(c.id) ||
+        (oblGapIds.get(e.id) ?? []).includes(c.id))).length;
     const claimChecks = bindCitationsToClaims(
       scored.filter((c) => c.supported),
       a.citations.map((c) => ({ target: c.target, id: c.id })),

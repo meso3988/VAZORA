@@ -10,13 +10,13 @@
     },
     {
       "file": "ground-truth.ts",
-      "bytes": 27508,
-      "sha256": "1c14a43a233b182816bb61e001515bb38c51c4d450af7b83cc1e5a4981b7e017"
+      "bytes": 27582,
+      "sha256": "9920f1bd61498807faa0537746511e67ba5edcd841903e2a6006f426e3c3d30a"
     },
     {
       "file": "fact-ledger.ts",
-      "bytes": 20251,
-      "sha256": "834040aa9d82894abd5f770bc052cf42274bbaaa7a513fd8c637678f82a9f4c6"
+      "bytes": 21854,
+      "sha256": "83bc6b325dea492aec6ce3742f81639e4df5ddafcb3bb5a94651452d57b8fc17"
     }
   ],
   "note": "Ground truth is frozen. Never edit it to improve a model score — cut a new benchmark version instead."

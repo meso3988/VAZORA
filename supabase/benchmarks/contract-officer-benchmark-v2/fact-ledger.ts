@@ -98,7 +98,12 @@ const ISO_DATE = /\b(?:19|20)\d{2}-\d{2}-\d{2}\b/g;
 const MONTH_DATE = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s*(?:19|20)\d{2})?|\b\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?(?:,?\s*(?:19|20)\d{2})?/gi;
 // \b is ASCII-only in JS — Arabic word edges need an explicit boundary.
 const AR_BOUNDARY = "(?![ء-٩])";
-const DAY_COUNT = new RegExp(`${AR_NUM}\\s*(?:days?\\b|يومًا?|أيام|يوم)${AR_BOUNDARY}`, "gi");
+const NUM_WORDS: Record<string, string> = {
+  one: "1", two: "2", three: "3", four: "4", five: "5", six: "6",
+  seven: "7", eight: "8", nine: "9", ten: "10", eleven: "11", twelve: "12",
+};
+const DAY_COUNT = new RegExp(
+  `(?:${AR_NUM}|\\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\\b)\\s*(?:days?\\b|يومًا?|أيام|يوم)${AR_BOUNDARY}`, "gi");
 const CONTRACT_NO = /\b[A-Z]{2,10}-\d{2,6}\b/g;
 const CLAUSE_NO = /(?:clause|البند|الفقرة|المادة)\s*#?\s*(\d+(?:\.\d+)+)/gi;
 const ASSIGNEE = /(?:assigned to|owner(?:\s+is|:)?|owned by|responsible(?:\s+is|:)?|المسؤول(?:\s+هو|:)?|مسؤول(?:\s+عن)?[^.:،,]{0,20}(?:هو|:)?)\s+([A-Za-z][A-Za-z.''-]{2,}|[\w.+-]+@[\w-]+\.[\w.]+|[\u0600-\u06FF]{2,}(?:\s[\u0600-\u06FF]{2,})?)/gi;
@@ -203,12 +208,18 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
   const claims: FactClaim[] = [];
   const sentences = text.split(/(?<=[.!؟?])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
   for (const sentence of sentences) {
-    const entityKey = bindEntity(sentence, entities);
+    const sentenceEntity = bindEntity(sentence, entities);
     for (const clause of splitClauses(sentence)) {
       const polarity: FactClaim["polarity"] = isNegatedClause(clause) ? "negated" : "asserted";
+      // Bind per clause first ("A is overdue, but B is fine") — fall back to
+      // the sentence-level entity when the clause names none.
+      const entityKey = bindEntity(clause, entities) ?? sentenceEntity;
       const push = (type: ClaimType, raw: string, value: string) => {
         if (!value) return;
-        claims.push({ type, raw, value: norm(value), entityKey, polarity, sentence });
+        // A state expression with its own internal negation ("غير مكتمل",
+        // "not verified") ASSERTS a negative state — it is not a negated claim.
+        const claimPolarity = polarity === "negated" && !NEGATION.test(raw) ? "negated" : "asserted";
+        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence });
       };
       let m: RegExpExecArray | null;
       const each = (re: RegExp, fn: (m: RegExpExecArray) => void) => {
@@ -224,11 +235,16 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
       each(MONTH_DATE, (mm) => push("iso_date", mm[0], normalizeMonthDate(mm[0])));
       each(DAY_COUNT, (mm) => {
         const d = normalizeDigits(mm[0]).match(/\d+/);
-        if (d) push("day_count", mm[0], d[0]);
+        const w = mm[0].toLowerCase().match(/one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve/);
+        const v = d?.[0] ?? (w ? NUM_WORDS[w[0]] : undefined);
+        if (v) push("day_count", mm[0], v);
       });
       each(CONTRACT_NO, (mm) => push("contract_number", mm[0], mm[0]));
       each(CLAUSE_NO, (mm) => push("clause_number", mm[0], mm[1]));
-      each(ASSIGNEE, (mm) => push("assignee_name", mm[0], mm[1]));
+      const ASSIGNEE_STOP = new Set(["unassigned", "none", "nobody", "no one", "vacant", "tbd", "unknown", "no owner", "not assigned"]);
+      each(ASSIGNEE, (mm) => {
+        if (!ASSIGNEE_STOP.has(norm(mm[1]))) push("assignee_name", mm[0], mm[1]);
+      });
       each(VERIFY_STATE, (mm) => push("verification_state", mm[0], normalizeState(mm[0])));
       each(ACK_STATE, (mm) => push("acknowledgement_state", mm[0], normalizeState(mm[0]) === "verified" ? "acknowledged" : normalizeState(mm[0]) === "rejected" ? "rejected" : "acknowledged"));
       each(OVERDUE, (mm) => push("overdue_state", mm[0], "overdue"));
@@ -347,6 +363,13 @@ function valueVariantHit(values: Set<string>, v: string): boolean {
   if (/^\d{2}-\d{2}$/.test(v)) {
     for (const x of values) if (x.endsWith(`-${v}`)) return true;
   }
+  // Semantic aliases: a rejected/failed check supports an "unverified" claim.
+  const ALIASES: Record<string, string[]> = {
+    unverified: ["rejected", "failed", "unverified", "not_verified"],
+    needs_review: ["pending", "needs_review", "pending_review"],
+    missing: ["missing", "not_found", "absent"],
+  };
+  for (const a of ALIASES[v] ?? []) if (values.has(a)) return true;
   return false;
 }
 
@@ -355,8 +378,8 @@ export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): Scored
     if (c.polarity === "negated") {
       if (!PREDICATE_TYPES.has(c.type)) return { ...c, supported: true, supportKind: "global" };
       const contradicted = c.entityKey
-        ? corpus.objects.some((o) => o.entities.has(c.entityKey!) && o.values.has(c.value))
-        : corpus.values.has(c.value);
+        ? corpus.objects.some((o) => o.entities.has(c.entityKey!) && (o.values.has(c.value) || valueVariantHit(o.values, c.value)))
+        : (corpus.values.has(c.value) || valueVariantHit(corpus.values, c.value));
       return { ...c, supported: !contradicted, supportKind: contradicted ? "none" : "global" };
     }
     // Entity-bound claim: value and entity must co-occur in the SAME
