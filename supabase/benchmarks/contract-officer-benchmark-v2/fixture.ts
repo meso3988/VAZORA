@@ -366,14 +366,27 @@ export async function seedBenchmarkOrganization(opts: { label: string; timezone?
   }
 }
 
+/** Explicit benchmark markers — teardown refuses anything unmarked. */
+export const BENCHMARK_ORG_SLUG = /^qa-bench-/;
+export const BENCHMARK_ORG_NAME = /^Benchmark Contracting /;
+export function isBenchmarkOrg(org: { slug?: string | null; name?: string | null } | null | undefined): boolean {
+  return !!org && BENCHMARK_ORG_SLUG.test(org.slug ?? "") && BENCHMARK_ORG_NAME.test(org.name ?? "");
+}
+
 /**
- * Remove a benchmark organization and everything it cascades to. Benchmark
- * tenants are marked by `qa-bench-*` identities and deleted by id only —
- * non-benchmark organizations are never touched. Auth user rows cannot be
- * deleted with the anon key; they are single-org disposable identities that
- * lose all data access when membership disappears with the cascade.
+ * Remove a benchmark organization and everything it cascades to. The delete
+ * is refused unless the target row reads back with BOTH benchmark markers —
+ * a malformed or non-benchmark id can never reach the DELETE. Auth user rows
+ * cannot be deleted with the anon key; they are single-org disposable
+ * identities that lose all data access when membership cascades away.
  */
 export async function teardownBenchmarkOrganization(fx: BenchmarkFixture) {
+  const { data: org, error: selErr } = await fx.client
+    .from("organizations").select("slug,name").eq("id", fx.orgId).maybeSingle();
+  if (selErr) return { ok: false, error: selErr.message };
+  if (!isBenchmarkOrg(org)) {
+    return { ok: false, error: "refused: target is not a marked benchmark organization" };
+  }
   const { error } = await fx.client.from("organizations").delete().eq("id", fx.orgId);
   return { ok: !error, error: error?.message ?? null };
 }

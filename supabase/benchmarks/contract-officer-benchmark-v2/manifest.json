@@ -5,8 +5,8 @@
   "files": [
     {
       "file": "fixture.ts",
-      "bytes": 20890,
-      "sha256": "48af0d6277e7d0ffb14c22e9a110f33577593fa8dda824ca94562af885319807"
+      "bytes": 21615,
+      "sha256": "8fc6e583c8fafe449db312635f45338fe63a47eed4455d6b8b327b73cabb0910"
     },
     {
       "file": "ground-truth.ts",

@@ -300,6 +300,26 @@ async function main() {
   check("service-role-not-in-officer-lib", !clientLeak.includes("SERVICE_ROLE"));
   check("sweep-route-is-server-only", !routeSrc.includes('"use client"'));
 
+  // Teardown must refuse anything that is not an explicitly marked benchmark
+  // org — even when the caller legitimately owns the target.
+  {
+    const realOrgId = crypto.randomUUID();
+    const { error: insErr } = await alpha.client.from("organizations").insert({
+      id: realOrgId, name: "Real Production Org", slug: `prod-${Date.now()}`,
+      created_by: alpha.userId, timezone: "Asia/Riyadh",
+      timezone_set_at: new Date().toISOString(),
+    });
+    check("nonbench-org-seeded", !insErr, insErr?.message ?? "");
+    const refused = await teardownBenchmarkOrganization({ ...alpha, orgId: realOrgId });
+    check("teardown-refuses-unmarked-org", !refused.ok, refused.error ?? "");
+    const { data: still } = await alpha.client.from("organizations")
+      .select("id").eq("id", realOrgId).maybeSingle();
+    check("unmarked-org-survives", !!still);
+    await alpha.client.from("organizations").delete().eq("id", realOrgId); // direct owner delete, not teardown
+    const missing = await teardownBenchmarkOrganization({ ...alpha, orgId: crypto.randomUUID() });
+    check("teardown-refuses-unknown-id", !missing.ok);
+  }
+
   // Benchmark tenants are disposable — cascade-remove them so they never accumulate.
   for (const fx of [alpha, beta]) {
     const td = await teardownBenchmarkOrganization(fx);
