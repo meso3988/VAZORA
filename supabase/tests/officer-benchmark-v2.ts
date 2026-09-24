@@ -322,9 +322,22 @@ async function runOnce(runIndex: number) {
   const results: ScenarioResult[] = [];
   for (const exp of EXPECTATIONS) {
     const locale = exp.locale ?? "en";
-    const ctx = await buildOfficerContext({
-      supabase: fx.client, organizationId: fx.orgId, userId: fx.userId, locale,
-    });
+    // Infrastructure resilience only (no scoring impact): buildOfficerContext
+    // returns null on any transient REST failure. Retry with backoff and
+    // surface the underlying cause instead of aborting a multi-run gate.
+    let ctx = null as Awaited<ReturnType<typeof buildOfficerContext>>;
+    for (let attempt = 1; attempt <= 4 && !ctx; attempt++) {
+      ctx = await buildOfficerContext({
+        supabase: fx.client, organizationId: fx.orgId, userId: fx.userId, locale,
+      });
+      if (!ctx) {
+        const { error: memErr } = await fx.client.from("organization_members")
+          .select("role").eq("organization_id", fx.orgId).eq("user_id", fx.userId).maybeSingle();
+        const { data: sess } = await fx.client.auth.getSession();
+        console.log(`        · ctx attempt ${attempt} null — membership err=${memErr?.message ?? "none"} session=${sess?.session ? "present" : "absent"}`);
+        await new Promise((r) => setTimeout(r, 1500 * attempt));
+      }
+    }
     if (!ctx) throw new Error("ctx");
     const question = exp.question(fx);
 
