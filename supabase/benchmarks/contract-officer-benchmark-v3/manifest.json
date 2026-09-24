@@ -1,0 +1,47 @@
+{
+  "benchmark": "contract-officer-benchmark-v3",
+  "revision": 1,
+  "frozenAt": "2026-09-24T23:02:00.531Z",
+  "scenarioCount": 37,
+  "files": [
+    {
+      "file": "fixture.ts",
+      "bytes": 24046,
+      "sha256": "a4e45d6f3088b7c27e9a252fff404c80d35e4351944864ec14955687d2cab83a"
+    },
+    {
+      "file": "ground-truth.ts",
+      "bytes": 32360,
+      "sha256": "ee59a9aada63d4f864be7bac8c91395fd6cefb12d150ce08227d4b16ba648843"
+    },
+    {
+      "file": "fact-ledger.ts",
+      "bytes": 25850,
+      "sha256": "c2cbbe847867de09b560913a5fd36628668db28a8475c4228e88647680b9aa82"
+    },
+    {
+      "file": "scoring.ts",
+      "bytes": 8946,
+      "sha256": "5f6947980a1c3967034a34ea1fc5aae8ba189e687155effa9442fafa6f61331f"
+    },
+    {
+      "file": "gate.ts",
+      "bytes": 5753,
+      "sha256": "cc3c7c7e600c50db6ea134b23d66e408e2da811de5cbce0970f04e04193b13e7"
+    },
+    {
+      "file": "../../../tests/officer-benchmark-v3.ts",
+      "bytes": 44985,
+      "sha256": "d032c818bf494f339f3abc34f492b8171e5f0ee1c512161b5c6a769a4f4893e8"
+    }
+  ],
+  "revisions": [
+    {
+      "revision": 1,
+      "at": "2026-09-24T23:02:00.533Z",
+      "reason": "initial v3 freeze: M1-M8 corrections + gate criteria defined before any live v3 run",
+      "afterResults": false
+    }
+  ],
+  "note": "Ground truth, scoring and gate criteria are frozen. Changes require a recorded revision; never edit to improve a score."
+}

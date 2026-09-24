@@ -12,10 +12,13 @@ for (const line of readFileSync(join(here, "..", "..", ".env.local"), "utf8").sp
   if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
 }
 
-import {
-  buildEntityMap, buildCorpus, extractClaims, scoreClaims,
-  bindCitationsToClaims, splitClauses, isNegatedClause,
-} from "../benchmarks/contract-officer-benchmark-v2/fact-ledger";
+// LEDGER=v3 runs this whole v2 regression suite against the v3 ledger, proving
+// the v3 corrections did not break any previously correct behavior.
+import * as ledgerV2 from "../benchmarks/contract-officer-benchmark-v2/fact-ledger";
+import * as ledgerV3 from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+const L = (process.env.LEDGER === "v3" ? ledgerV3 : ledgerV2) as typeof ledgerV2;
+const { buildEntityMap, buildCorpus, extractClaims, scoreClaims, bindCitationsToClaims, splitClauses, isNegatedClause } = L;
+console.log(`fact-ledger under test: ${process.env.LEDGER === "v3" ? "v3" : "v2"}`);
 
 let pass = 0, fail = 0;
 const failures: string[] = [];
