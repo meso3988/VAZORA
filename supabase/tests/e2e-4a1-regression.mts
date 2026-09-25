@@ -23,7 +23,9 @@ const OM = fx.contracts.om.id as string;
 const LIVE = (process.env.LIVE_TURNS ?? "en-desktop,ar-desktop,en-mobile,ar-mobile").split(",");
 const MAX_CALLS = Number(process.env.BROWSER_MAX_CALLS ?? 0);
 const MAX_TOKENS = Number(process.env.BROWSER_MAX_TOKENS ?? 0);
-const TURN_CALLS = 5, TURN_TOKENS = 21_000;
+const TURN_CALLS = 5, TURN_TOKENS = Number(process.env.BROWSER_TURN_TOKENS ?? 21_000);
+/** The production build the browser must be talking to (.next/BUILD_ID). */
+const EXPECT_BUILD_ID = process.env.EXPECT_BUILD_ID ?? "";
 const START_ISO = new Date().toISOString();
 
 const results: { t: string; ok: boolean | null; d?: string }[] = [];
@@ -73,6 +75,7 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
   try {
     await login(page, locale);
     rec(`${tag}: login`, page.url().includes(`/${locale}/app`));
+    if (EXPECT_BUILD_ID) rec(`${tag}: served by build ${EXPECT_BUILD_ID}`, (await page.content()).includes(EXPECT_BUILD_ID));
 
     const dir = await page.locator("html").getAttribute("dir");
     rec(`${tag}: dir=${dir}`, dir === (ar ? "rtl" : "ltr"));
