@@ -11,7 +11,7 @@ import {
   type ObligationFacts,
   type RequirementFacts,
 } from "../../src/lib/officer/detectors";
-import { addDays, buildClock, endOfMonth, localDate, nextMonthlyOccurrence } from "../../src/lib/officer/time";
+import { addDays, buildClock, endOfMonth, localDate, nextMonthlyOccurrence, zonedStartOfDayIso } from "../../src/lib/officer/time";
 import type { EffectiveEvidenceStatus } from "../../src/domain/evidence";
 
 let passed = 0;
@@ -292,6 +292,20 @@ const TODAY = "2026-05-20";
     const c = buildClock(instant, tz);
     check(`h-${tz}-consistent`, c.today === localDate(instant, tz) && c.timeZone === tz, `${c.today}`);
   }
+}
+
+// ---- Phase 4A.2: calendar windows are server-resolved local midnights ----
+{
+  check("w1-riyadh-midnight", zonedStartOfDayIso("2026-09-23", "Asia/Riyadh") === "2026-09-22T21:00:00.000Z");
+  check("w2-utc-midnight", zonedStartOfDayIso("2026-09-23", "UTC") === "2026-09-23T00:00:00.000Z");
+  // New York DST starts 2026-03-08 02:00 local: midnight is still EST (-5)
+  check("w3-ny-dst-start-day", zonedStartOfDayIso("2026-03-08", "America/New_York") === "2026-03-08T05:00:00.000Z");
+  check("w4-ny-after-dst", zonedStartOfDayIso("2026-03-09", "America/New_York") === "2026-03-09T04:00:00.000Z");
+  const c = buildClock(new Date("2026-09-24T01:30:00Z"), "Asia/Riyadh"); // 04:30 local, 24 Sep
+  check("w5-clock-yesterday", c.yesterday === "2026-09-23", c.yesterday);
+  check("w6-clock-start-of-yesterday", c.startOfYesterdayIso === "2026-09-22T21:00:00.000Z", c.startOfYesterdayIso);
+  check("w7-clock-start-of-today", c.startOfTodayIso === "2026-09-23T21:00:00.000Z", c.startOfTodayIso);
+  check("w8-yesterday-before-today", c.startOfYesterdayIso < c.startOfTodayIso && c.startOfLast7DaysIso < c.startOfYesterdayIso);
 }
 
 console.log(`\nofficer-timezone tests: ${passed} passed, ${failed} failed`);

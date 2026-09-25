@@ -117,28 +117,59 @@ export function nextMonthlyOccurrence(today: CalendarDate, dayOfMonth: number): 
   return m === 12 ? clamp(y + 1, 1) : clamp(y, m + 1);
 }
 
+/** Offset (ms) of `timeZone` from UTC at instant `at`. */
+function zoneOffsetMs(at: number, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(at));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  return Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second")) - at;
+}
+
+/**
+ * The UTC instant of local midnight at the start of `date` in `timeZone`.
+ * Two passes so a DST transition between the guess and the answer is
+ * absorbed — "since yesterday" must never be off by an hour.
+ */
+export function zonedStartOfDayIso(date: CalendarDate, timeZone: string): string {
+  const label = dayAnchor(date);
+  const first = label - zoneOffsetMs(label, timeZone);
+  return new Date(label - zoneOffsetMs(first, timeZone)).toISOString();
+}
+
 /** The resolved clock handed to the Officer — already computed, never guessed. */
 export type OfficerClock = {
   timeZone: string;
   /** ISO instant the answer was computed at */
   nowIso: string;
   today: CalendarDate;
+  yesterday: CalendarDate;
   localTime: string;
   endOfMonth: CalendarDate;
   in3Days: CalendarDate;
   in7Days: CalendarDate;
+  /** local-midnight instants for activity windows */
+  startOfTodayIso: string;
+  startOfYesterdayIso: string;
+  startOfLast7DaysIso: string;
 };
 
 export function buildClock(now: Date, orgTimeZone: string | null | undefined): OfficerClock {
   const timeZone = resolveTimeZone(orgTimeZone);
   const today = localDate(now, timeZone);
+  const yesterday = addDays(today, -1);
   return {
     timeZone,
     nowIso: now.toISOString(),
     today,
+    yesterday,
     localTime: localTime(now, timeZone),
     endOfMonth: endOfMonth(today),
     in3Days: addDays(today, 3),
     in7Days: addDays(today, 7),
+    startOfTodayIso: zonedStartOfDayIso(today, timeZone),
+    startOfYesterdayIso: zonedStartOfDayIso(yesterday, timeZone),
+    startOfLast7DaysIso: zonedStartOfDayIso(addDays(today, -7), timeZone),
   };
 }

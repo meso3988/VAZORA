@@ -300,6 +300,65 @@ async function main() {
   check("service-role-not-in-officer-lib", !clientLeak.includes("SERVICE_ROLE"));
   check("sweep-route-is-server-only", !routeSrc.includes('"use client"'));
 
+  // ---- Phase 4A.2 authority: resolve/chase stay narrow ----------------------
+  {
+    // The contract resolver is tenant-scoped: both tenants hold "ALPHA-100",
+    // but beta's lookup must never surface alpha's contract ids.
+    const alphaIds = new Set(Object.values<any>(alpha.contracts).map((k) => k.contractId));
+    const betaList = await runOfficerTool(betaCtx!, "listContracts", {});
+    const betaRows = (betaList.ok ? (betaList.data as any[]) : []);
+    check("resolver-tenant-scoped", betaList.ok && betaRows.length > 0 && betaRows.every((c: any) => !alphaIds.has(c.id)),
+      `${betaRows.length} rows`);
+
+    // "Resolve this gap" → human-review escalation: a proposal, never a closure.
+    const gapsBefore = new Map(((await alpha.client.from("evidence_gaps").select("id,status").eq("organization_id", alpha.orgId)).data ?? [])
+      .map((g: any) => [g.id, g.status]));
+    const route = await runOfficerTool(ctx, "requestHumanApproval", {
+      actionType: "officer.escalate", summary: "Human review requested for the missing client acknowledgement",
+      reason: "User asked to mark the gap resolved; only verification or an authorized review can close it.",
+      contractId: alpha.contracts.c.contractId, obligationId: alpha.contracts.c.obligationId,
+    });
+    const routed = route.ok ? (route.data as any) : null;
+    check("resolve-routes-to-human-review-proposal",
+      !!routed && routed.status === "waiting_for_approval" && routed.requires_approval === true, JSON.stringify(routed));
+    const gapsAfter = new Map(((await alpha.client.from("evidence_gaps").select("id,status").eq("organization_id", alpha.orgId)).data ?? [])
+      .map((g: any) => [g.id, g.status]));
+    check("resolve-request-changes-no-gap",
+      gapsAfter.size === gapsBefore.size && [...gapsBefore].every(([id, s]) => gapsAfter.get(id) === s));
+
+    // A model cannot propose an external send or a direct gap dismissal/override.
+    for (const actionType of ["external.send_message", "evidence.dismiss_gap", "evidence.human_override"]) {
+      const r = await runOfficerTool(ctx, "requestHumanApproval", { actionType, summary: "x-x-x", reason: "x-x-x" });
+      check(`model-cannot-propose-${actionType}`, !r.ok && /invalid_arguments/.test(r.error), r.ok ? "accepted" : r.error);
+    }
+
+    // "Chase" = internal follow-up only.
+    const chase = await runOfficerTool(ctx, "createInternalAction", {
+      actionType: "officer.internal_task", title: "Chase the missing client acknowledgement",
+      reason: "Internal follow-up requested by the user.", contractId: alpha.contracts.c.contractId,
+    });
+    const chased = chase.ok ? (chase.data as any) : null;
+    check("chase-is-internal-task", !!chased && chased.action_type === "officer.internal_task" && chased.status === "suggested",
+      JSON.stringify(chased));
+
+    // Calendar window: "since yesterday" is local midnight, not the review watermark.
+    const oldAt = new Date(Date.now() - 3 * 86_400_000).toISOString();
+    await alpha.client.from("activity_log").insert({
+      organization_id: alpha.orgId, actor_user_id: alpha.userId, event_type: "qa.window_old",
+      entity_type: "contract", entity_id: alpha.contracts.a.contractId, metadata: {}, created_at: oldAt,
+    });
+    await alpha.client.from("activity_log").insert({
+      organization_id: alpha.orgId, actor_user_id: alpha.userId, event_type: "qa.window_new",
+      entity_type: "contract", entity_id: alpha.contracts.a.contractId, metadata: {},
+    });
+    const win = await runOfficerTool(ctx, "getRecentActivity", { window: "since_yesterday", limit: 200 });
+    const wd = win.ok ? (win.data as any) : null;
+    const types = new Set((wd?.events ?? []).map((e: any) => e.event_type));
+    check("window-since-yesterday-server-resolved", wd?.sinceSource === "since_yesterday" && wd?.since === ctx!.clock.startOfYesterdayIso,
+      `${wd?.sinceSource} ${wd?.since}`);
+    check("window-includes-recent-excludes-old", types.has("qa.window_new") && !types.has("qa.window_old"), [...types].join(","));
+  }
+
   // Teardown must refuse anything that is not an explicitly marked benchmark
   // org — even when the caller legitimately owns the target.
   {

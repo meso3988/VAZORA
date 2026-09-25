@@ -96,6 +96,18 @@ for (const c of CASES) {
   check("f2-empty-question-full-fallback", sel2.tools.length === ALL.length);
 }
 
+// ---- Phase 4A.2: resolve/chase intents reach the proposal tools --------
+{
+  const has = (q: string, tool: string) => selectToolGroups({ question: q, contractScoped: false }).tools.some((t) => t.name === tool);
+  check("r1-resolve-gap-reaches-human-review", has("Mark the missing acknowledgement on GAMMA-300 as resolved.", "requestHumanApproval"));
+  check("r2-close-gap-reaches-human-review", has("Please close the evidence gap on BETA-200.", "requestHumanApproval"));
+  check("r3-arabic-close-reaches-human-review", has("أغلق فجوة الدليل على BETA-200", "requestHumanApproval"));
+  check("r4-chase-reaches-internal-action", has("Create an internal follow-up to chase the missing client acknowledgement.", "createInternalAction"));
+  check("r5-read-question-stays-narrow", !has("Which obligations are overdue?", "requestHumanApproval"));
+  const names = listOfficerTools().map((t) => t.name).join(",");
+  check("r6-no-closing-tool-exists", !/close|resolve|dismiss|approve|execute|override/i.test(names), names);
+}
+
 // ---- selection never invents a tool -------------------------------------
 {
   const all = new Set(ALL.map((t) => t.name));

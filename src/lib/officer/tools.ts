@@ -572,11 +572,12 @@ const getRecentActivity: OfficerTool = {
   name: "getRecentActivity",
   toolClass: "READ_ONLY",
   description:
-    "Recent audit events — what actually changed and when. Set sinceLastReview to answer 'what changed since my last review?': the server resolves the caller's own review watermark, so you never have to ask the user for a date or compute one.",
+    "Recent audit events — what actually changed and when. Set sinceLastReview ONLY for 'since my last review': the server resolves the caller's own review watermark. For calendar windows ('since yesterday', 'today', 'this week / last 7 days') set window instead — the server resolves local midnight in the organization's timezone. Never compute a date yourself.",
   input: z.object({
     contractId: z.string().uuid().optional(),
     sinceIso: z.string().datetime().optional(),
     sinceLastReview: z.boolean().optional(),
+    window: z.enum(["since_yesterday", "today", "last_7_days"]).optional(),
     limit: z.number().int().min(1).max(200).optional(),
   }).strict(),
   handler: async (ctx, args) => {
@@ -584,7 +585,14 @@ const getRecentActivity: OfficerTool = {
     // never something the user should have to type.
     let since: string | null = args.sinceIso ?? null;
     let sinceSource = args.sinceIso ? "caller_supplied" : "none";
-    if (args.sinceLastReview) {
+    if (args.window) {
+      // Calendar windows are distinct from the review watermark: "since
+      // yesterday" is local midnight yesterday, not the last time you looked.
+      since = args.window === "today" ? ctx.clock.startOfTodayIso
+        : args.window === "since_yesterday" ? ctx.clock.startOfYesterdayIso
+        : ctx.clock.startOfLast7DaysIso;
+      sinceSource = args.window;
+    } else if (args.sinceLastReview) {
       const { data: state } = await ctx.supabase
         .from("officer_user_state")
         .select("last_reviewed_at")
@@ -919,9 +927,13 @@ const GROUP_HINTS: Record<Exclude<ToolGroup, "ORIENTATION">, string[]> = {
            "مين", "من", "مسؤول", "إسناد", "مالك", "فريق", "دور"],
   ACTIVITY: ["changed", "change", "recent", "activity", "since", "yesterday", "history", "log",
              "تغير", "تغيّر", "جديد", "نشاط", "أمس", "سجل", "منذ"],
+  // "resolve/close/dismiss" must reach requestHumanApproval so the Officer can
+  // route to the human-review workflow — there is no tool that closes a gap.
   ACTION: ["propose", "assign", "follow up", "follow-up", "escalate", "request", "recommend",
-           "approve", "action", "task",
-           "اقترح", "أسند", "متابعة", "تصعيد", "اطلب", "توصية", "إجراء", "مهمة"],
+           "approve", "action", "task", "chase", "remind",
+           "resolve", "close", "dismiss", "mark ",
+           "اقترح", "أسند", "متابعة", "تصعيد", "اطلب", "توصية", "إجراء", "مهمة",
+           "حلّ", "محلول", "أغلق", "إغلاق", "تجاهل", "ذكّر", "تابع"],
 };
 
 /**
