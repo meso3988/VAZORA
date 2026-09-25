@@ -89,8 +89,8 @@ async function main() {
     await ensureOfficerProfile({ supabase: client, organizationId: orgId });
     const nowCtx = await buildOfficerContext({ supabase: client, organizationId: orgId, userId, locale: "en" });
     const window = async (ctx: any) => {
-      const r = await runOfficerTool(ctx, "getRecentActivity", { window: "since_yesterday", limit: 200 });
-      return new Set(((r.ok ? (r.data as any).events : []) as any[]).map((e) => e.event_type));
+      const r = await runOfficerTool(ctx, "getRecentActivity", { window: "since_yesterday", limit: 25 });
+      return new Set(((r.ok ? (r.data as any).changes : []) as any[]).map((e) => e.event_type));
     };
     const today = await window(nowCtx);
     check("backdated-row-cannot-hide-from-since-yesterday", today.has("qa.spoof_past"), [...today].join(","));

@@ -568,17 +568,69 @@ const getVerificationDiscrepancies: OfficerTool = {
   },
 };
 
+/**
+ * The Officer's own bookkeeping (sweep runs, observation lifecycle). It is
+ * summarized as counts and never listed, so a sweep that writes dozens of
+ * rows cannot crowd real business changes out of the model's context.
+ */
+const SYSTEM_EVENT_PATTERNS = ["officer.sweep_%", "officer.observation_%"];
+const ACTIVITY_PAGE_MAX = 25;
+/** Keeps one page well under converse's per-result context cap. */
+const ACTIVITY_PAGE_CHARS = 4500;
+const SYSTEM_SUMMARY_CAP = 1000;
+
+/** "created_at|id" — a stable keyset cursor (ties on created_at broken by id). */
+const encodeCursor = (row: { created_at: string; id: string }) => `${row.created_at}|${row.id}`;
+function decodeCursor(cursor: string): { at: string; id: string } | null {
+  const [at, id] = cursor.split("|");
+  return at && id && !Number.isNaN(Date.parse(at)) && /^[0-9a-f-]{36}$/i.test(id) ? { at, id } : null;
+}
+
+/** Readable references: contract numbers and titles instead of raw ids. */
+async function activityLabels(ctx: OfficerContext, rows: any[]) {
+  const idsOf = (type: string) => [...new Set(rows.filter((r) => r.entity_type === type && r.entity_id).map((r) => r.entity_id))];
+  const [obs, items, checks] = await Promise.all([
+    idsOf("obligation").length ? ctx.supabase.from("contract_obligations").select("id, title, contract_id").eq("organization_id", ctx.organizationId).in("id", idsOf("obligation")) : { data: [] },
+    idsOf("evidence_item").length ? ctx.supabase.from("evidence_items").select("id, title, contract_id").eq("organization_id", ctx.organizationId).in("id", idsOf("evidence_item")) : { data: [] },
+    idsOf("evidence_verification_check").length ? ctx.supabase.from("evidence_verification_checks").select("id, check_label").eq("organization_id", ctx.organizationId).in("id", idsOf("evidence_verification_check")) : { data: [] },
+  ]);
+  const contractIds = [...new Set([...idsOf("contract"), ...(obs.data ?? []).map((o: any) => o.contract_id), ...(items.data ?? []).map((i: any) => i.contract_id)].filter(Boolean))];
+  const { data: contracts } = contractIds.length
+    ? await ctx.supabase.from("contracts").select("id, contract_number").eq("organization_id", ctx.organizationId).in("id", contractIds)
+    : { data: [] as any[] };
+  const number = new Map((contracts ?? []).map((c: any) => [c.id, c.contract_number]));
+  const ob = new Map((obs.data ?? []).map((o: any) => [o.id, o]));
+  const it = new Map((items.data ?? []).map((i: any) => [i.id, i]));
+  const ck = new Map((checks.data ?? []).map((c: any) => [c.id, c]));
+  return (r: any): { label: string | null; contract_number: string | null } => {
+    if (r.entity_type === "obligation" && ob.has(r.entity_id)) return { label: ob.get(r.entity_id).title, contract_number: number.get(ob.get(r.entity_id).contract_id) ?? null };
+    if (r.entity_type === "evidence_item" && it.has(r.entity_id)) return { label: it.get(r.entity_id).title, contract_number: number.get(it.get(r.entity_id).contract_id) ?? null };
+    if (r.entity_type === "evidence_verification_check" && ck.has(r.entity_id)) return { label: ck.get(r.entity_id).check_label, contract_number: null };
+    if (r.entity_type === "contract" && number.has(r.entity_id)) return { label: number.get(r.entity_id), contract_number: number.get(r.entity_id) };
+    return { label: null, contract_number: typeof r.metadata?.contract === "string" ? r.metadata.contract : null };
+  };
+}
+
+/** Metadata as bounded data: long strings are clipped, never interpreted. */
+function compactMetadata(meta: unknown): Record<string, unknown> {
+  if (!meta || typeof meta !== "object") return {};
+  return Object.fromEntries(Object.entries(meta as Record<string, unknown>)
+    .filter(([, v]) => v !== null && v !== undefined)
+    .map(([k, v]) => [k, typeof v === "string" && v.length > 200 ? `${v.slice(0, 200)}…` : v]));
+}
+
 const getRecentActivity: OfficerTool = {
   name: "getRecentActivity",
   toolClass: "READ_ONLY",
   description:
-    "Recent audit events — what actually changed and when. Set sinceLastReview ONLY for 'since my last review': the server resolves the caller's own review watermark. For calendar windows ('since yesterday', 'today', 'this week / last 7 days') set window instead — the server resolves local midnight in the organization's timezone. Never compute a date yourself.",
+    "Recorded business changes — what changed and when (a change record does not prove what is true NOW). Set sinceLastReview ONLY for 'since my last review': the server resolves the caller's own review watermark. For calendar windows ('since yesterday', 'today', 'this week / last 7 days') set window — the server resolves local midnight in the organization's timezone; never compute a date. Results are paged: if complete is false, pass before=nextBefore for the next page, or tell the user the list is partial. The Officer's own sweep bookkeeping is summarized in systemSummary, not listed. contractId limits changes to that contract.",
   input: z.object({
     contractId: z.string().uuid().optional(),
     sinceIso: z.string().datetime().optional(),
     sinceLastReview: z.boolean().optional(),
     window: z.enum(["since_yesterday", "today", "last_7_days"]).optional(),
-    limit: z.number().int().min(1).max(200).optional(),
+    before: z.string().max(120).optional(),
+    limit: z.number().int().min(1).max(ACTIVITY_PAGE_MAX).optional(),
   }).strict(),
   handler: async (ctx, args) => {
     // The watermark is server state for THIS user — never a model guess and
@@ -616,19 +668,70 @@ const getRecentActivity: OfficerTool = {
       }
     }
 
+    // Contract scope: the contract itself, its obligations and its evidence.
+    let scopeIds: string[] | null = null;
+    if (args.contractId) {
+      if (!(await resolveContract(ctx, args.contractId))) return { ok: false, error: "contract_not_found_in_organization" };
+      const [{ data: obs }, { data: items }] = await Promise.all([
+        ctx.supabase.from("contract_obligations").select("id").eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId),
+        ctx.supabase.from("evidence_items").select("id").eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId),
+      ]);
+      scopeIds = [args.contractId, ...(obs ?? []).map((o: any) => o.id), ...(items ?? []).map((i: any) => i.id)];
+    }
+    const cursor = args.before ? decodeCursor(args.before) : null;
+    if (args.before && !cursor) return { ok: false, error: "invalid_cursor" };
+
+    const pageSize = args.limit ?? 20;
     let q = ctx.supabase
       .from("activity_log")
-      .select("id, event_type, entity_type, entity_id, actor_user_id, metadata, created_at")
-      .eq("organization_id", ctx.organizationId)
-      .order("created_at", { ascending: false })
-      .limit(args.limit ?? 50);
+      .select("id, event_type, entity_type, entity_id, metadata, created_at")
+      .eq("organization_id", ctx.organizationId);
+    for (const p of SYSTEM_EVENT_PATTERNS) q = q.not("event_type", "like", p);
     if (since) q = q.gte("created_at", since);
-    const { data } = await q;
-    const rows = data ?? [];
+    if (scopeIds) q = q.in("entity_id", scopeIds);
+    if (cursor) q = q.or(`created_at.lt."${cursor.at}",and(created_at.eq."${cursor.at}",id.lt.${cursor.id})`);
+    const { data, error } = await q
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(pageSize + 1);
+    if (error) return { ok: false, error: `activity_query_failed: ${error.message}` };
+    const fetched = data ?? [];
+    let hasMore = fetched.length > pageSize;
+    const rows = fetched.slice(0, pageSize);
+    const labelOf = await activityLabels(ctx, rows);
+    // entity_id stays for follow-up tool calls; label/contract_number are what
+    // the user should see. No label is invented when nothing resolves.
+    const events = rows.map((r: any) => ({
+      id: r.id, event_type: r.event_type, created_at: r.created_at, entity_type: r.entity_type, entity_id: r.entity_id,
+      ...labelOf(r), details: compactMetadata(r.metadata),
+    }));
+    // Size-bound the page: overflow moves to the next page instead of being
+    // cut off blindly by the context cap.
+    while (events.length > 1 && JSON.stringify(events).length > ACTIVITY_PAGE_CHARS) { events.pop(); hasMore = true; }
+    const last = events[events.length - 1];
+
+    // System bookkeeping: counted in the same window, never listed.
+    let systemSummary: { counts: Record<string, number>; complete: boolean } | null = null;
+    if (!scopeIds) {
+      let sq = ctx.supabase.from("activity_log").select("event_type")
+        .eq("organization_id", ctx.organizationId)
+        .or(SYSTEM_EVENT_PATTERNS.map((p) => `event_type.like.${p}`).join(","));
+      if (since) sq = sq.gte("created_at", since);
+      const { data: sys } = await sq.limit(SYSTEM_SUMMARY_CAP);
+      const counts: Record<string, number> = {};
+      for (const s of sys ?? []) counts[s.event_type] = (counts[s.event_type] ?? 0) + 1;
+      systemSummary = { counts, complete: (sys ?? []).length < SYSTEM_SUMMARY_CAP };
+    }
+
     return ok(
-      { since, sinceSource, asOf: ctx.clock.nowIso, events: rows },
-      rows.slice(0, 20).map((a: any) => cite("activity_event", a.id, a.event_type)),
-      `${rows.length} events${since ? ` since ${since.slice(0, 10)} (${sinceSource})` : ""}`,
+      {
+        since, sinceSource, asOf: ctx.clock.nowIso, contractScoped: !!scopeIds,
+        changes: events, hasMore, complete: !hasMore,
+        nextBefore: hasMore && last ? encodeCursor(last) : null,
+        systemSummary,
+      },
+      events.map((e) => cite("activity_event", e.id, e.label ? `${e.event_type} — ${e.label}` : e.event_type)),
+      `${events.length} change(s)${hasMore ? " (more available)" : ""}${since ? ` since ${since.slice(0, 10)} (${sinceSource})` : ""}`,
     );
   },
 };

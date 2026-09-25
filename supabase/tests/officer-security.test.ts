@@ -348,17 +348,17 @@ async function main() {
       organization_id: alpha.orgId, actor_user_id: alpha.userId, event_type: "qa.window_new",
       entity_type: "contract", entity_id: alpha.contracts.a.contractId, metadata: {},
     });
-    const win = await runOfficerTool(ctx, "getRecentActivity", { window: "since_yesterday", limit: 200 });
+    const win = await runOfficerTool(ctx, "getRecentActivity", { window: "since_yesterday", limit: 25 });
     const wd = win.ok ? (win.data as any) : null;
-    const types = new Set((wd?.events ?? []).map((e: any) => e.event_type));
+    const types = new Set((wd?.changes ?? []).map((e: any) => e.event_type));
     check("window-since-yesterday-server-resolved", wd?.sinceSource === "since_yesterday" && wd?.since === ctx!.clock.startOfYesterdayIso,
       `${wd?.sinceSource} ${wd?.since}`);
     check("window-includes-recent", types.has("qa.window_new"), [...types].join(","));
     const laterCtx = await buildOfficerContext({
       supabase: alpha.client, organizationId: alpha.orgId, userId: alpha.userId, locale: "en", now: new Date(Date.now() + 2 * 86_400_000),
     });
-    const later = await runOfficerTool(laterCtx!, "getRecentActivity", { window: "since_yesterday", limit: 200 });
-    const laterTypes = new Set(((later.ok ? (later.data as any).events : []) as any[]).map((e) => e.event_type));
+    const later = await runOfficerTool(laterCtx!, "getRecentActivity", { window: "since_yesterday", limit: 25 });
+    const laterTypes = new Set(((later.ok ? (later.data as any).changes : []) as any[]).map((e) => e.event_type));
     check("window-excludes-rows-recorded-before-it", !laterTypes.has("qa.window_new"), [...laterTypes].join(","));
   }
 
