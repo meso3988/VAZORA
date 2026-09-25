@@ -17,11 +17,40 @@ const EMAIL = fx.login.email as string;
 const PASS = fx.login.password as string;
 const OM = fx.contracts.om.id as string;
 
-const results: { t: string; ok: boolean; d?: string }[] = [];
-const rec = (t: string, ok: boolean, d = "") => {
+// Paid-call control: only combos in LIVE_TURNS send a model request, and each
+// only if its worst case (OFFICER_MAX_ROUNDS requests, TURN_TOKENS) still fits
+// the remaining shared budget. Usage is read back from officer_messages.
+const LIVE = (process.env.LIVE_TURNS ?? "en-desktop,ar-desktop,en-mobile,ar-mobile").split(",");
+const MAX_CALLS = Number(process.env.BROWSER_MAX_CALLS ?? 0);
+const MAX_TOKENS = Number(process.env.BROWSER_MAX_TOKENS ?? 0);
+const TURN_CALLS = 5, TURN_TOKENS = 21_000;
+const START_ISO = new Date().toISOString();
+
+const results: { t: string; ok: boolean | null; d?: string }[] = [];
+const rec = (t: string, ok: boolean | null, d = "") => {
   results.push({ t, ok, d });
-  console.log(`${ok ? "PASS" : "FAIL"}  ${t}${d ? " — " + d : ""}`);
+  console.log(`${ok === null ? "NOT ASSESSED" : ok ? "PASS" : "FAIL"}  ${t}${d ? " — " + d : ""}`);
 };
+
+import { createClient } from "@supabase/supabase-js";
+for (const line of readFileSync(join(here, "..", "..", ".env.local"), "utf8").split("\n")) {
+  const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
+  if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
+}
+/** Actual usage of assistant turns created by this run (API-reported, all rounds). */
+async function usageSoFar() {
+  const c = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } }) as any;
+  await c.auth.signInWithPassword({ email: EMAIL, password: PASS });
+  const { data } = await c.from("officer_messages").select("usage_tokens_input, usage_tokens_output, tool_invocations")
+    .eq("organization_id", fx.orgId).eq("role", "assistant").gte("created_at", START_ISO);
+  const rows = data ?? [];
+  return {
+    turns: rows.length,
+    tokens: rows.reduce((n: number, r: any) => n + (r.usage_tokens_input ?? 0) + (r.usage_tokens_output ?? 0), 0),
+    // rounds are not persisted: upper bound = min(max rounds, tool calls + 1)
+    callsUpperBound: rows.reduce((n: number, r: any) => n + Math.min(TURN_CALLS, (r.tool_invocations?.length ?? 0) + 1), 0),
+  };
+}
 const text = (p: Page) => p.locator("body").innerText();
 
 async function login(page: Page, locale: "en" | "ar") {
@@ -88,7 +117,12 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
     let reply = "";
     const before = new Set((await text(page)).split("\n").map((l) => l.trim()).filter(Boolean));
     const linksBefore = await page.locator('a[href*="/app/"]').count();
-    if (await composer.count() > 0) {
+    const used = await usageSoFar();
+    const fits = MAX_CALLS - used.callsUpperBound >= TURN_CALLS && MAX_TOKENS - used.tokens >= TURN_TOKENS;
+    if (!LIVE.includes(tag) || !fits) {
+      const why = !LIVE.includes(tag) ? "no live model turn allotted (shared budget)" : `budget: ${used.callsUpperBound}/${MAX_CALLS} calls, ${used.tokens}/${MAX_TOKENS} tokens`;
+      for (const n of ["conversation answered", "reply grounded in seeded contracts", "citations rendered", "no invented money in reply"]) rec(`${tag}: ${n}`, null, why);
+    } else if (await composer.count() > 0) {
       await composer.fill(ar ? "ما هي الالتزامات المتأخرة؟" : "Which obligations are overdue?");
       await composer.locator("xpath=ancestor::form[1]").locator('button[type="submit"]').first().click();
       try {
@@ -103,13 +137,15 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
       reply = (await text(page)).split("\n").map((l) => l.trim())
         .filter((l) => l && !before.has(l)).join("\n");
     }
-    rec(`${tag}: conversation answered`, answered && reply.length > 20,
-      answered ? `${reply.length} chars new` : "no reply within 150s");
-    rec(`${tag}: reply grounded in seeded contracts`, /FM-008|OM-014|OPS-021/.test(reply));
-    const citeCount = (await page.locator('a[href*="/app/"]').count()) - linksBefore;
-    rec(`${tag}: citations rendered`, citeCount > 0, `${citeCount} new citation links`);
-    rec(`${tag}: no invented money in reply`,
-      !/(SAR|USD|ر\.س|ريال)\s?[\d٠-٩][\d٠-٩,.٬]*|[\d٠-٩][\d٠-٩,.٬]*\s?(SAR|USD|ر\.س|ريال)/i.test(reply));
+    if (LIVE.includes(tag) && fits) {
+      rec(`${tag}: conversation answered`, answered && reply.length > 20,
+        answered ? `${reply.length} chars new` : "no reply within 150s");
+      rec(`${tag}: reply grounded in seeded contracts`, /FM-008|OM-014|OPS-021/.test(reply));
+      const citeCount = (await page.locator('a[href*="/app/"]').count()) - linksBefore;
+      rec(`${tag}: citations rendered`, citeCount > 0, `${citeCount} new citation links`);
+      rec(`${tag}: no invented money in reply`,
+        !/(SAR|USD|ر\.س|ريال)\s?[\d٠-٩][\d٠-٩,.٬]*|[\d٠-٩][\d٠-٩,.٬]*\s?(SAR|USD|ر\.س|ريال)/i.test(reply));
+    }
 
     // ---- Tasks page -------------------------------------------------------
     await page.goto(`${BASE}/${locale}/app/tasks`);
@@ -132,10 +168,14 @@ async function main() {
   await suite("en", MOBILE, "en-mobile");
   await suite("ar", MOBILE, "ar-mobile");
 
-  const pass = results.filter((r) => r.ok).length;
-  console.log(`\n4A.1 BROWSER REGRESSION: ${pass}/${results.length} PASS`);
-  for (const r of results.filter((x) => !x.ok)) console.log(`  FAILED: ${r.t} ${r.d ?? ""}`);
-  if (pass !== results.length) process.exitCode = 1;
+  const pass = results.filter((r) => r.ok === true).length;
+  const failed = results.filter((r) => r.ok === false);
+  const notAssessed = results.filter((r) => r.ok === null).length;
+  const used = await usageSoFar();
+  console.log(`\n4A.1 BROWSER REGRESSION: ${pass} PASS · ${failed.length} FAIL · ${notAssessed} NOT ASSESSED`);
+  for (const r of failed) console.log(`  FAILED: ${r.t} ${r.d ?? ""}`);
+  console.log(`BROWSER MODEL USAGE: ${used.turns} turns · ${used.tokens} tokens (API-reported) · ≤${used.callsUpperBound} requests (upper bound)`);
+  if (failed.length) process.exitCode = 1;
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
