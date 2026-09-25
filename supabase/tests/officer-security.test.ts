@@ -341,12 +341,9 @@ async function main() {
     check("chase-is-internal-task", !!chased && chased.action_type === "officer.internal_task" && chased.status === "suggested",
       JSON.stringify(chased));
 
-    // Calendar window: "since yesterday" is local midnight, not the review watermark.
-    const oldAt = new Date(Date.now() - 3 * 86_400_000).toISOString();
-    await alpha.client.from("activity_log").insert({
-      organization_id: alpha.orgId, actor_user_id: alpha.userId, event_type: "qa.window_old",
-      entity_type: "contract", entity_id: alpha.contracts.a.contractId, metadata: {}, created_at: oldAt,
-    });
+    // Calendar window: "since yesterday" is local midnight, not the review
+    // watermark. Recording time is database-controlled (0012), so synthetic
+    // time moves the Officer CLOCK (injectable), never the audit row.
     await alpha.client.from("activity_log").insert({
       organization_id: alpha.orgId, actor_user_id: alpha.userId, event_type: "qa.window_new",
       entity_type: "contract", entity_id: alpha.contracts.a.contractId, metadata: {},
@@ -356,7 +353,13 @@ async function main() {
     const types = new Set((wd?.events ?? []).map((e: any) => e.event_type));
     check("window-since-yesterday-server-resolved", wd?.sinceSource === "since_yesterday" && wd?.since === ctx!.clock.startOfYesterdayIso,
       `${wd?.sinceSource} ${wd?.since}`);
-    check("window-includes-recent-excludes-old", types.has("qa.window_new") && !types.has("qa.window_old"), [...types].join(","));
+    check("window-includes-recent", types.has("qa.window_new"), [...types].join(","));
+    const laterCtx = await buildOfficerContext({
+      supabase: alpha.client, organizationId: alpha.orgId, userId: alpha.userId, locale: "en", now: new Date(Date.now() + 2 * 86_400_000),
+    });
+    const later = await runOfficerTool(laterCtx!, "getRecentActivity", { window: "since_yesterday", limit: 200 });
+    const laterTypes = new Set(((later.ok ? (later.data as any).events : []) as any[]).map((e) => e.event_type));
+    check("window-excludes-rows-recorded-before-it", !laterTypes.has("qa.window_new"), [...laterTypes].join(","));
   }
 
   // Teardown must refuse anything that is not an explicitly marked benchmark
