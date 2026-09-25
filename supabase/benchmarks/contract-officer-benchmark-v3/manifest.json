@@ -1,7 +1,7 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 2,
-  "frozenAt": "2026-09-25T01:51:55.848Z",
+  "revision": 3,
+  "frozenAt": "2026-09-25T02:32:27.329Z",
   "scenarioCount": 37,
   "files": [
     {
@@ -31,8 +31,8 @@
     },
     {
       "file": "../../../tests/officer-benchmark-v3.ts",
-      "bytes": 44985,
-      "sha256": "d032c818bf494f339f3abc34f492b8171e5f0ee1c512161b5c6a769a4f4893e8"
+      "bytes": 46048,
+      "sha256": "76d38e12aefdcb9b608cbb27f6c8f72d088ce16ec219c87d219c2a94c6ca741a"
     }
   ],
   "revisions": [
@@ -46,6 +46,12 @@
       "revision": 2,
       "at": "2026-09-25T01:51:55.850Z",
       "reason": "remove back-dated old_epsilon_document: audit recording time becomes DB-controlled (migration 0012), so the event cannot be synthesized; since_yesterday precision limited to invented changes. Made before any live v3 results.",
+      "afterResults": false
+    },
+    {
+      "revision": 3,
+      "at": "2026-09-25T02:32:27.332Z",
+      "reason": "harness budget enforcement: per-turn worst-case reservation (OFFICER_MAX_ROUNDS requests, 21k tokens), failed turns counted as max rounds, transport retries must be 0 so every request is counted. No scoring or ground-truth change. Made before any live v3 results.",
       "afterResults": false
     }
   ],

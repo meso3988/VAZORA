@@ -100,6 +100,13 @@ async function main() {
     const later = await window(laterCtx);
     check("futuredated-row-does-not-stay-new", !later.has("qa.spoof_future"), [...later].join(","));
     check("window-ages-out-by-recording-time", !later.has("qa.legit") && !later.has("qa.spoof_past"));
+    // Negative case preserved from benchmark v3 rev 1 (whose back-dated live
+    // event is no longer possible): an event recorded BEFORE yesterday, per
+    // the controlled clock, is excluded from "since yesterday". OFFLINE-TESTED
+    // via the injectable clock — not live-proven in a model run.
+    const beforeYesterday = !!legit.data && Date.parse(legit.data.created_at) < Date.parse(laterCtx!.clock.startOfYesterdayIso);
+    check("before-yesterday-event-excluded-controlled-clock", beforeYesterday && !later.has("qa.legit"),
+      `recorded=${legit.data?.created_at} window-start=${laterCtx!.clock.startOfYesterdayIso}`);
   } finally {
     const { error } = await client.from("organizations").delete().eq("id", orgId);
     const { count } = await client.from("activity_log").select("id", { count: "exact", head: true }).eq("organization_id", orgId);

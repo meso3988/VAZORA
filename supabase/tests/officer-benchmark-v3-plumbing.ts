@@ -19,6 +19,7 @@ process.env.VAZORA_OFFICER_PROVIDER = "qa-plumbing-officer";
 process.env.BENCH_REPORT_DIR = mkdtempSync(join(tmpdir(), "vazora-v3-plumbing-"));
 process.env.BENCH_MAX_TOKENS ??= "1000000";
 process.env.BENCH_MAX_CALLS ??= "1000";
+process.env.VAZORA_OFFICER_MAX_RETRIES ??= "0";
 
 // Round 1 asks for one read-only tool; round 2 answers with honest-unknown text.
 const scripted: ContractOfficerProvider = {

@@ -51,7 +51,7 @@ import {
 
 import { validateCitations } from "../../src/lib/officer/citations";
 import { buildOfficerContext, ensureOfficerProfile } from "../../src/lib/officer/context";
-import { converseWithOfficer, type ConverseOutcome } from "../../src/lib/officer/converse";
+import { converseWithOfficer, OFFICER_MAX_ROUNDS, type ConverseOutcome } from "../../src/lib/officer/converse";
 import { listObservations } from "../../src/lib/officer/observations";
 import { getOfficerProvider } from "../../src/lib/officer/provider";
 import { runContractSweep } from "../../src/lib/officer/sweep";
@@ -67,6 +67,10 @@ const MODE = ONLY.length || RUNS < 3 ? "diagnostic" : "gate";
 const KEEP_TENANT = process.env.BENCH_KEEPTENANT === "1";
 const MAX_TOKENS = Number(process.env.BENCH_MAX_TOKENS ?? 0);
 const MAX_CALLS = Number(process.env.BENCH_MAX_CALLS ?? 0);
+// A turn may issue up to OFFICER_MAX_ROUNDS provider requests; it only starts
+// when that many requests AND the token reserve (observed v2 per-turn max
+// 20,368) still fit, so a turn can never push the run past its caps.
+const TURN_TOKEN_RESERVE = Number(process.env.BENCH_TURN_TOKEN_RESERVE ?? 21_000);
 const FATAL_PROVIDER = /credit|quota|insufficient|billing|\b401\b|\b403\b|invalid api key|incorrect api key|unauthori[sz]ed|authentication/i;
 
 const sha256 = (buf: Buffer | string) => createHash("sha256").update(buf).digest("hex");
@@ -149,7 +153,8 @@ function provenance(manifest: Manifest, provider: { id: string; model: string } 
       baseUrl: process.env.VAZORA_AI_BASE_URL ?? null,
     },
     manifest: { revision: manifest.revision, sha256: sha256(readFileSync(join(BENCH_DIR, "manifest.json"))) },
-    budget: { maxTokens: MAX_TOKENS, maxCalls: MAX_CALLS },
+    budget: { maxTokens: MAX_TOKENS, maxCalls: MAX_CALLS, turnTokenReserve: TURN_TOKEN_RESERVE, turnCallReserve: OFFICER_MAX_ROUNDS,
+      transportRetries: process.env.VAZORA_OFFICER_MAX_RETRIES ?? "default" },
     mode: MODE, runs: RUNS, only: ONLY,
   };
 }
@@ -301,9 +306,11 @@ type ScenarioResult = {
 
 // ---------- budget / fatal provider --------------------------------------------
 
-const budget = { tokens: 0, calls: 0 };
+const budget = { tokens: 0, calls: 0, callsUpperBound: false };
 let abortReason: string | null = null;
-const overBudget = () => (MAX_TOKENS > 0 && budget.tokens >= MAX_TOKENS) || (MAX_CALLS > 0 && budget.calls >= MAX_CALLS);
+/** true when the NEXT turn could exceed either cap in the worst case */
+const overBudget = () =>
+  MAX_TOKENS - budget.tokens < TURN_TOKEN_RESERVE || MAX_CALLS - budget.calls < OFFICER_MAX_ROUNDS;
 
 async function officerTurn(fx: any, locale: "en" | "ar", question: string, retries: { n: number }) {
   let ctx = null as Awaited<ReturnType<typeof buildOfficerContext>>;
@@ -314,10 +321,13 @@ async function officerTurn(fx: any, locale: "en" | "ar", question: string, retri
   if (!ctx) return { ctx: null, outcome: null as ConverseOutcome | null };
   const outcome = await converseWithOfficer({ ctx, question, collectTrace: true });
   if (outcome.ok) {
+    // completion tokens already include any billed reasoning tokens
     budget.tokens += outcome.answer.usage.inputTokens + outcome.answer.usage.outputTokens;
     budget.calls += Math.max(1, outcome.answer.rounds);
   } else {
-    budget.calls += 1;
+    // A failed turn hides how many rounds ran: count the worst case.
+    budget.calls += OFFICER_MAX_ROUNDS;
+    budget.callsUpperBound = true;
     if (FATAL_PROVIDER.test(outcome.error)) abortReason = `provider: ${outcome.error.slice(0, 160)}`;
   }
   return { ctx, outcome };
@@ -698,6 +708,11 @@ async function main() {
   if (!provider) { console.error("FATAL: VAZORA_OFFICER_PROVIDER not configured"); process.exit(1); }
   if (!(MAX_TOKENS > 0 && MAX_CALLS > 0)) {
     console.error("Refusing a paid run without an agreed budget: set BENCH_MAX_TOKENS and BENCH_MAX_CALLS.");
+    process.exit(1);
+  }
+  // Hidden transport retries would be real requests the budget cannot see.
+  if (process.env.VAZORA_OFFICER_MAX_RETRIES !== "0") {
+    console.error("Refusing a paid run with transport retries enabled: set VAZORA_OFFICER_MAX_RETRIES=0 so every request is counted.");
     process.exit(1);
   }
   const prov = provenance(manifest, provider);
