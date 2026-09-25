@@ -21,6 +21,11 @@ const OM = fx.contracts.om.id as string;
 // only if its worst case (OFFICER_MAX_ROUNDS requests, TURN_TOKENS) still fits
 // the remaining shared budget. Usage is read back from officer_messages.
 const LIVE = (process.env.LIVE_TURNS ?? "en-desktop,ar-desktop,en-mobile,ar-mobile").split(",");
+// Which combos run at all (default: all four). E2E_COMBOS=en-mobile restricts
+// the run to a single combination without touching the others.
+const COMBOS = (process.env.E2E_COMBOS ?? "en-desktop,ar-desktop,en-mobile,ar-mobile").split(",");
+// Optional Playwright trace (screenshots+snapshots) saved per combo.
+const TRACE_DIR = process.env.E2E_TRACE_DIR ?? "";
 const MAX_CALLS = Number(process.env.BROWSER_MAX_CALLS ?? 0);
 const MAX_TOKENS = Number(process.env.BROWSER_MAX_TOKENS ?? 0);
 const TURN_CALLS = 5, TURN_TOKENS = Number(process.env.BROWSER_TURN_TOKENS ?? 21_000);
@@ -55,8 +60,21 @@ async function usageSoFar() {
 }
 const text = (p: Page) => p.locator("body").innerText();
 
+// Navigation timing evidence: every goto is logged with status and duration.
+async function nav(page: Page, url: string) {
+  const t0 = Date.now();
+  try {
+    const res = await page.goto(url);
+    console.log(`NAV ${url} -> ${res?.status() ?? "?"} in ${Date.now() - t0}ms`);
+    return res;
+  } catch (e) {
+    console.log(`NAV ${url} FAILED after ${Date.now() - t0}ms: ${String(e).split("\n")[0].slice(0, 160)}`);
+    throw e;
+  }
+}
+
 async function login(page: Page, locale: "en" | "ar") {
-  await page.goto(`${BASE}/${locale}/login`);
+  await nav(page, `${BASE}/${locale}/login`);
   await page.locator('input[name="email"]').fill(EMAIL);
   await page.locator('input[name="password"]').fill(PASS);
   await page.locator('form button[type="submit"]').first().click();
@@ -66,6 +84,7 @@ async function login(page: Page, locale: "en" | "ar") {
 async function suite(locale: "en" | "ar", viewport: { width: number; height: number }, tag: string) {
   const browser = await chromium.launch({ channel: "chrome" });
   const ctx = await browser.newContext({ viewport, locale: locale === "ar" ? "ar-SA" : "en-US" });
+  if (TRACE_DIR) await ctx.tracing.start({ screenshots: true, snapshots: true });
   const page = await ctx.newPage();
   const consoleErrors: string[] = [];
   page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text().slice(0, 120)); });
@@ -81,7 +100,7 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
     rec(`${tag}: dir=${dir}`, dir === (ar ? "rtl" : "ltr"));
 
     // ---- Command Center (dashboard): observations + approval card ----------
-    await page.goto(`${BASE}/${locale}/app/dashboard`);
+    await nav(page, `${BASE}/${locale}/app/dashboard`);
     await page.waitForLoadState("networkidle");
     const dash = await text(page);
     rec(`${tag}: command center renders`, dash.length > 200, `${dash.length} chars`);
@@ -97,13 +116,13 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
     rec(`${tag}: approval controls present`, approveBtns >= 2, `${approveBtns} controls`);
 
     // ---- Contract-scoped Officer page -------------------------------------
-    await page.goto(`${BASE}/${locale}/app/contracts/${OM}/officer`);
+    await nav(page, `${BASE}/${locale}/app/contracts/${OM}/officer`);
     await page.waitForLoadState("networkidle");
     const off = await text(page);
     rec(`${tag}: contract officer page renders`, off.length > 120, `${off.length} chars`);
 
     // ---- Conversation (agent thread) + citations --------------------------
-    await page.goto(`${BASE}/${locale}/app/agent`);
+    await nav(page, `${BASE}/${locale}/app/agent`);
     await page.waitForLoadState("networkidle");
     // A fresh tenant has no conversation — start one via the product control.
     if (await page.locator("textarea").count() === 0) {
@@ -151,7 +170,7 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
     }
 
     // ---- Tasks page -------------------------------------------------------
-    await page.goto(`${BASE}/${locale}/app/tasks`);
+    await nav(page, `${BASE}/${locale}/app/tasks`);
     await page.waitForLoadState("networkidle");
     rec(`${tag}: tasks page renders`, (await text(page)).length > 120);
 
@@ -159,6 +178,7 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
   } catch (e) {
     rec(`${tag}: suite threw`, false, String(e).slice(0, 200));
   } finally {
+    if (TRACE_DIR) await ctx.tracing.stop({ path: join(TRACE_DIR, `e2e-trace-${tag}.zip`) }).catch(() => {});
     await browser.close();
   }
 }
@@ -166,10 +186,13 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
 async function main() {
   const DESKTOP = { width: 1440, height: 900 };
   const MOBILE = { width: 390, height: 844 };
-  await suite("en", DESKTOP, "en-desktop");
-  await suite("ar", DESKTOP, "ar-desktop");
-  await suite("en", MOBILE, "en-mobile");
-  await suite("ar", MOBILE, "ar-mobile");
+  const specs = [
+    { tag: "en-desktop", locale: "en" as const, vp: DESKTOP },
+    { tag: "ar-desktop", locale: "ar" as const, vp: DESKTOP },
+    { tag: "en-mobile", locale: "en" as const, vp: MOBILE },
+    { tag: "ar-mobile", locale: "ar" as const, vp: MOBILE },
+  ];
+  for (const s of specs) if (COMBOS.includes(s.tag)) await suite(s.locale, s.vp, s.tag);
 
   const pass = results.filter((r) => r.ok === true).length;
   const failed = results.filter((r) => r.ok === false);
