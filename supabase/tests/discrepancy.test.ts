@@ -269,7 +269,9 @@ async function main() {
   });
   check("f4-forged-org-decide", betaAsAlpha.ok === false, JSON.stringify(betaAsAlpha));
   // Alpha-side sanity: discrepancy1 unchanged (still kept_prior).
-  check("f5-alpha-state-unchanged", (await discrepanciesOf())[0].status === "kept_prior", "");
+  // By id — discrepanciesOf() is unordered and the tenant now holds several rows.
+  const disc1Now = (await discrepanciesOf()).find((d: any) => d.id === disc1.id);
+  check("f5-alpha-state-unchanged", disc1Now?.status === "kept_prior", `status=${disc1Now?.status}`);
 
   const passed = checks.filter((c) => c.pass).length;
   console.log(`\n${passed}/${checks.length} PASS`);
