@@ -9,11 +9,11 @@
 import * as r3 from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/fact-ledger";
 import * as r3gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/ground-truth";
 import * as r3gate from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/gate";
-import * as r4 from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
-import * as r4scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import * as r4gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
-import * as r4gate from "../benchmarks/contract-officer-benchmark-v3/gate";
-import { scoreAnswer } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
+import * as r4 from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/fact-ledger";
+import * as r4scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/scoring";
+import * as r4gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/ground-truth";
+import * as r4gate from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/gate";
+import { scoreAnswer } from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/evaluate";
 
 let pass = 0, fail = 0;
 const failures: string[] = [];

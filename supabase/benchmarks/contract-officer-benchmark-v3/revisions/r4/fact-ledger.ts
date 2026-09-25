@@ -36,15 +36,6 @@
 //       claimed entity to that contract by id
 //   L   a sentence naming no entity inherits its LINE's entity only when
 //       everything named on that line belongs to one contract
-//
-// r5 correction (paired tests in officer-benchmark-v3-r5.test.ts):
-//   H   RECORDED HISTORY — "was recorded as <state>" is a claim about what an
-//       event recorded, not about current state. It is supported ONLY by an
-//       activity event that the answer actually CITES and that matches the
-//       record (entity), the recorded status, and the historical context
-//       (the event's action, e.g. an upload). Past tense alone, or a citation
-//       alone, is not enough; free-text event content never supports a
-//       current-state claim.
 // ============================================================================
 
 // ---------- normalization ---------------------------------------------------
@@ -137,10 +128,6 @@ export type FactClaim = {
   sentence: string;
   /** r4: the clause the claim was extracted from (change vs current-state) */
   clause?: string;
-  /** r5: framed as recorded history ("was recorded as …") */
-  historical?: boolean;
-  /** r5: the cited activity event that supports the historical claim */
-  historicalEventId?: string;
 };
 
 const MONTHS: Record<string, string> = {
@@ -344,7 +331,7 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
       // the sentence-level entity, then (r4) an unambiguous line entity.
       const entityKey = bindEntity(clause, entities) ?? sentenceEntity;
       let at = 0;
-      const push = (type: ClaimType, raw: string, value: string, extra: Partial<FactClaim> = {}) => {
+      const push = (type: ClaimType, raw: string, value: string) => {
         if (!value) return;
         // r4: negation is scoped to the colon-delimited segment holding the
         // match — "has one open gap: no verified acknowledgement is recorded"
@@ -354,7 +341,7 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
         // "not verified") ASSERTS a negative state — it is not a negated claim.
         const claimPolarity: FactClaim["polarity"] = attributed ? "attributed"
           : negated && !NEGATION.test(raw) ? "negated" : "asserted";
-        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence, clause, ...extra });
+        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence, clause });
       };
       let m: RegExpExecArray | null;
       const each = (re: RegExp, fn: (m: RegExpExecArray) => void) => {
@@ -392,9 +379,7 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
         // not evidence awaiting verification.
         const describesDiscrepancy = /^pending\s+verification$/i.test(mm[0]) &&
           /^\s+discrepanc/i.test(clause.slice(mm.index + mm[0].length));
-        // r5: "…was recorded as awaiting verification" = recorded history.
-        const historical = RECORDED_AS.test(clause.slice(0, mm.index));
-        push("verification_state", mm[0], describesDiscrepancy ? "pending" : normalizeState(mm[0]), historical ? { historical: true } : {});
+        push("verification_state", mm[0], describesDiscrepancy ? "pending" : normalizeState(mm[0]));
       });
       each(ACK_STATE, (mm) => push("acknowledgement_state", mm[0], normalizeState(mm[0]) === "verified" ? "acknowledged" : normalizeState(mm[0]) === "rejected" ? "rejected" : "acknowledged"));
       each(OVERDUE, (mm) => push("overdue_state", mm[0], "overdue"));
@@ -681,8 +666,7 @@ export function bindCitationsToClaims(
     if (!satisfied && activity) {
       satisfied = group.every((c) => {
         if (!isChangeClaim(c)) return false;
-        // r5: a verified historical claim is bound to the exact event that supports it
-        const ev = c.historicalEventId ? citations.find((x) => x.id === c.historicalEventId) : citations.find((x) => {
+        const ev = citations.find((x) => {
           const e = activity.get(x.id);
           return !!e && e.entities.has(entityKey) && (e.values.has(c.value) || valueVariantHit(e.values, c.value));
         });
@@ -697,24 +681,7 @@ export function bindCitationsToClaims(
 
 // ---------- r4: activity events as change evidence ----------------------------
 
-export type ActivityIndex = Map<string, {
-  values: Set<string>; entities: Set<string>;
-  /** r5: the event's action, and the statuses its content RECORDED (history only) */
-  eventType?: string; recordedStates?: Set<string>;
-}>;
-
-/** r5: statuses written in an event's content — evidence of HISTORY, never of current state. */
-function recordedStatesOf(node: any): Set<string> {
-  const strings = new Set<string>();
-  collectLeaves(node, strings);
-  const states = new Set<string>();
-  for (const s of strings) {
-    VERIFY_STATE.lastIndex = 0;
-    let m: RegExpExecArray | null;
-    while ((m = VERIFY_STATE.exec(s))) states.add(normalizeState(m[0]));
-  }
-  return states;
-}
+export type ActivityIndex = Map<string, { values: Set<string>; entities: Set<string> }>;
 
 /** Every activity event the model received (incl. fully visible events of a truncated result), by id. */
 export function buildActivityIndex(toolPayloads: { tool: string; payload: string }[], entities: EntityMap): ActivityIndex {
@@ -726,7 +693,7 @@ export function buildActivityIndex(toolPayloads: { tool: string; payload: string
       const values = new Set<string>();
       collectLeaves(node, values);
       collectMarkers(node, values);
-      idx.set(node.id, { values, entities: entitiesOf(values, entities), eventType: node.event_type, recordedStates: recordedStatesOf(node) });
+      idx.set(node.id, { values, entities: entitiesOf(values, entities) });
     }
     for (const v of Object.values(node)) if (typeof v === "object") walk(v);
   };
@@ -748,47 +715,8 @@ const PRESENT_STATE = /\b(is|are|remains?|still|currently|now)\b|لا يزال|�
  * true now ("is assigned", "remains missing").
  */
 export function isChangeClaim(c: FactClaim): boolean {
-  if (c.historicalEventId) return true; // r5: verified recorded history
   const clause = c.clause ?? c.sentence;
   if (!CHANGE_VERB.test(clause)) return false;
   if (IDENTITY_TYPES.has(c.type)) return true;
   return PAST_AUX.test(clause) && !PRESENT_STATE.test(clause);
-}
-
-// ---------- r5: recorded history -------------------------------------------------
-
-/** "…was recorded as <state>" — the state is what an event RECORDED. */
-const RECORDED_AS = /\b(?:was|were|had been)\s+(?:recorded|logged|registered|marked)\s+as\s+$|(?:سُ?جِّ?لَ?ت?|سُجل)\s+(?:على أنه|على أنها|بأنه|بأنها|بوصفه|كـ?)\s*$/i;
-
-/** The event's action must be the historical context the answer describes. */
-const ACTION_FAMILIES: { clause: RegExp; event: RegExp }[] = [
-  { clause: /upload|received|new version|رفع|استلام|نسخة/i, event: /upload|version|received/i },
-  { clause: /confirm|تأكيد|أُكِّد/i, event: /confirm/i },
-  { clause: /assign|إسناد|أُسند/i, event: /assign/i },
-  { clause: /overr|تجاوز/i, event: /override/i },
-];
-
-/**
- * Resolve r5 historical claims. A claim framed as recorded history is
- * supported ONLY by an activity event the answer CITES whose
- *   (a) entity is the claimed record,
- *   (b) recorded content states that same status, and
- *   (c) action matches the context the sentence describes (e.g. an upload).
- * Otherwise it is unsupported — whatever the current state is. Current-state
- * claims are untouched (they still need current-state evidence).
- */
-export function resolveHistoricalClaims(
-  claims: ScoredClaim[], citations: { target: string; id: string }[], activity: ActivityIndex,
-): ScoredClaim[] {
-  return claims.map((c) => {
-    if (!c.historical || c.polarity !== "asserted") return c;
-    const hit = c.entityKey ? citations.find((x) => {
-      const e = activity.get(x.id);
-      return !!e && e.entities.has(c.entityKey!) && !!e.recordedStates?.has(c.value) &&
-        ACTION_FAMILIES.some((f) => f.clause.test(c.sentence) && f.event.test(e.eventType ?? ""));
-    }) : undefined;
-    return hit
-      ? { ...c, supported: true, supportKind: "object", historicalEventId: hit.id }
-      : { ...c, supported: false, supportKind: "none", historicalEventId: undefined };
-  });
 }

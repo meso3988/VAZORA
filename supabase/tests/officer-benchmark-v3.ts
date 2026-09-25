@@ -63,6 +63,8 @@ const FROZEN_FILES = [
   "fixture.ts", "ground-truth.ts", "fact-ledger.ts", "scoring.ts", "gate.ts", "evaluate.ts",
   // r4: the frozen revision-3 rules, kept byte-identical for re-scoring
   "revisions/r3/fact-ledger.ts", "revisions/r3/scoring.ts", "revisions/r3/ground-truth.ts", "revisions/r3/gate.ts",
+  // r5: the frozen revision-4 rules and scoring core, byte-identical
+  "revisions/r4/fact-ledger.ts", "revisions/r4/scoring.ts", "revisions/r4/ground-truth.ts", "revisions/r4/gate.ts", "revisions/r4/evaluate.ts",
 ];
 const RUNS = Number(process.env.BENCH_RUNS ?? 1);
 const ONLY = (process.env.BENCH_ONLY ?? "").split(",").map((s) => s.trim()).filter(Boolean);

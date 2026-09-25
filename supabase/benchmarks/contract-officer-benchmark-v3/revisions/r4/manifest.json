@@ -1,7 +1,7 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 5,
-  "frozenAt": "2026-09-25T15:57:50.282Z",
+  "revision": 4,
+  "frozenAt": "2026-09-25T04:23:41.107Z",
   "scenarioCount": 37,
   "files": [
     {
@@ -16,8 +16,8 @@
     },
     {
       "file": "fact-ledger.ts",
-      "bytes": 40642,
-      "sha256": "b6aa29cd241fe22b2c6d1035ea0c65d5c4707d204eb96949a1953263b24e0508"
+      "bytes": 36751,
+      "sha256": "b62c86a778c828b76fc7145bdb1b1058f8cc90173942881faa18beff257c6e66"
     },
     {
       "file": "scoring.ts",
@@ -31,8 +31,8 @@
     },
     {
       "file": "evaluate.ts",
-      "bytes": 16007,
-      "sha256": "36e9bcbd8aaad4a8bc6b583bb395df2e64f445f87e820d822c5ae65bf13e30d8"
+      "bytes": 15786,
+      "sha256": "7ba8baee2fadbb05ac2979aa167e8402514878270bcec20fcb4fdffdb800dd4c"
     },
     {
       "file": "revisions/r3/fact-ledger.ts",
@@ -55,34 +55,9 @@
       "sha256": "cc3c7c7e600c50db6ea134b23d66e408e2da811de5cbce0970f04e04193b13e7"
     },
     {
-      "file": "revisions/r4/fact-ledger.ts",
-      "bytes": 36751,
-      "sha256": "b62c86a778c828b76fc7145bdb1b1058f8cc90173942881faa18beff257c6e66"
-    },
-    {
-      "file": "revisions/r4/scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
-    },
-    {
-      "file": "revisions/r4/ground-truth.ts",
-      "bytes": 32621,
-      "sha256": "105ba00fbec18ac2c48ee7b56c7bed8db0d39bd9457e5394e89061f28d8ec85f"
-    },
-    {
-      "file": "revisions/r4/gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
-    },
-    {
-      "file": "revisions/r4/evaluate.ts",
-      "bytes": 15786,
-      "sha256": "7ba8baee2fadbb05ac2979aa167e8402514878270bcec20fcb4fdffdb800dd4c"
-    },
-    {
       "file": "../../../tests/officer-benchmark-v3.ts",
-      "bytes": 38881,
-      "sha256": "397f73cf956304e53ffbe2512248be5baba2a3fea8687ce01902e9a2ffa0d7a3"
+      "bytes": 38667,
+      "sha256": "d3dc71802c8928b963315f853a3ccb9305711f60f4e210542e4571d4fd3cafaf"
     }
   ],
   "revisions": [
@@ -108,12 +83,6 @@
       "revision": 4,
       "at": "2026-09-25T04:23:41.109Z",
       "reason": "User-approved revision 4 (decisions 2026-09-25) after the r3 diagnostic: open gap != missing (typed causes only); explicit state flags; colon-scoped negation; truncated output uses only fully visible objects; activity events support recorded-change claims, never current state; overrode/sentence-level change attribution; id-linked contract claims; single-contract line attribution; blocked citations reported separately, unauthorized reads/disclosures zero-tolerance. Numerical thresholds unchanged. r3 rules kept byte-identical in revisions/r3; r3 report and failures preserved.",
-      "afterResults": true
-    },
-    {
-      "revision": 5,
-      "at": "2026-09-25T15:57:50.296Z",
-      "reason": "User-approved revision 5 (2026-09-25), an after-results correction following the r4 follow-up diagnostic: a claim framed as recorded history ('was recorded as <state>') is supported only by an activity event the answer cites whose record, recorded status and action/context match; past tense or a citation alone is insufficient; free-text event content never supports current state; current-state claims unchanged. Revision 4 rules and scoring core kept byte-identical in revisions/r4; r4 reports and failures preserved. Numerical thresholds unchanged.",
       "afterResults": true
     }
   ],

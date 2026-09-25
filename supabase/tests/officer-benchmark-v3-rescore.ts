@@ -24,11 +24,19 @@ import { fileURLToPath } from "node:url";
 import * as r3ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/fact-ledger";
 import * as r3scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/scoring";
 import * as r3gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/ground-truth";
-import * as r4ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
-import * as r4scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import * as r4gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
+import * as r4ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/fact-ledger";
+import * as r4scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/scoring";
+import * as r4gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/ground-truth";
+import { scoreAnswer as scoreAnswerR4 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/evaluate";
+import * as curLedger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as curScoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
+import * as curGt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
 import { INJECTIONS } from "../benchmarks/contract-officer-benchmark-v3/fixture";
 import { scoreAnswer, type RuleModules } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
+
+// FROM = the revision the saved report was scored with (parity target);
+// the comparison target is always the current revision.
+const FROM = (process.env.RESCORE_FROM ?? "r3") as "r3" | "r4";
 import { localDate } from "../../src/lib/officer/time";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -180,74 +188,84 @@ function restrict(exp: any, fx: any, notAssessed: string[]) {
 }
 
 function carriedLive(s: any, orgId: string | null) {
-  const displayedInvalid = s.securityFailures.filter((f: string) => f.startsWith("invalid citation surfaced")).map((f: string) => f);
+  const displayedInvalid = s.securityFailures.filter((f: string) => f.startsWith("invalid citation surfaced") || f.startsWith("unauthorized disclosure")).map((f: string) => f);
   const dbFails = s.securityFailures.filter((f: string) => f.startsWith("db invariant")).map((f: string) => {
     const m = f.match(/^db invariant (\S+): (.*)$/); return { name: m?.[1] ?? "?", pass: false, detail: m?.[2] ?? "" };
   });
   const passed = Number(s.metrics.dbChecksPassed ?? 0);
+  // r4+ reports persist the server's blocked list (with reasons); r3 only a count
+  const blocked = Array.isArray(s.blockedCitations) && Array.isArray(s.turns?.[0]?.rejectedCitations)
+    ? s.turns[0].rejectedCitations.map((b: any) => ({ id: b.id, target: b.target, reason: b.reason }))
+    : Math.max(0, Number(s.metrics.citationsRejected ?? 0) - displayedInvalid.length);
   return {
-    displayedInvalid, displayedValidCount: Number(s.metrics.citationsValid ?? 0),
-    blocked: Math.max(0, Number(s.metrics.citationsRejected ?? 0) - displayedInvalid.length),
+    displayedInvalid, displayedValidCount: Number(s.metrics.citationsValid ?? 0), blocked,
     dbInvariants: [...dbFails, ...Array.from({ length: passed }, () => ({ name: "carried", pass: true, detail: "" }))],
     orgId,
   };
 }
 
 // ---------- run -----------------------------------------------------------------
-const fx = reconstruct();
-const entityMaps = { r3: r3ledger.buildEntityMap(fx), r4: r4ledger.buildEntityMap(fx) };
+// Prefer the identity the run persisted (r4+ harness); reconstruct only for r3 reports.
+const persisted = report.runs[0].fixtureIdentity;
+const fx: any = persisted
+  ? { ...persisted, gapRows: reconstruct().gapRows }
+  : reconstruct();
 const entityToIds = buildEntityCitations(fx);
 const families = buildCitationFamilies(fx);
-const MODS: Record<"r3" | "r4", RuleModules> = {
-  r3: { ledger: r3ledger, scoring: r3scoring, gt: r3gt },
-  r4: { ledger: r4ledger, scoring: r4scoring, gt: r4gt },
+type Rev = { label: string; mods: RuleModules; score: typeof scoreAnswer; r4: boolean };
+const REVS: Record<"from" | "to", Rev> = {
+  from: FROM === "r3"
+    ? { label: "r3", mods: { ledger: r3ledger, scoring: r3scoring, gt: r3gt }, score: scoreAnswer, r4: false }
+    : { label: "r4", mods: { ledger: r4ledger, scoring: r4scoring, gt: r4gt }, score: scoreAnswerR4 as typeof scoreAnswer, r4: true },
+  to: { label: "r5", mods: { ledger: curLedger, scoring: curScoring, gt: curGt }, score: scoreAnswer, r4: true },
 };
 const expsBy = (gt: any) => new Map<string, any>(gt.EXPECTATIONS.map((e: any) => [e.id, e]));
-const EXP = { r3: expsBy(r3gt), r4: expsBy(r4gt) };
 
-console.log(`re-scoring ${reportPath.split("/").pop()} (recorded at revision ${report.provenance.manifest.revision})`);
-console.log(`identity: org ${fx.orgId ? "found" : "NOT FOUND"} · contracts ${Object.values<any>(fx.contracts).filter((c) => c.contractId).length}/6 · obligations ${Object.values<any>(fx.contracts).filter((c) => c.obligationId).length}/6 · clauses ${Object.values<any>(fx.contracts).filter((c) => c.clauseId).length}/6\n`);
+console.log(`re-scoring ${reportPath.split("/").pop()} (recorded at revision ${report.provenance.manifest.revision}) · ${REVS.from.label} → ${REVS.to.label}`);
+console.log(`identity: ${persisted ? "PERSISTED by the run (no reconstruction)" : "reconstructed from saved tool results"} · org ${fx.orgId ? "found" : "NOT FOUND"} · contracts ${Object.values<any>(fx.contracts).filter((c) => c.contractId).length}/6 · obligations ${Object.values<any>(fx.contracts).filter((c) => c.obligationId).length}/6 · clauses ${Object.values<any>(fx.contracts).filter((c) => c.clauseId).length}/6\n`);
 
 const rows: any[] = [];
 let parityOk = true;
 for (const s of results) {
-  if (s.status !== "answered") { rows.push({ id: s.id, status: s.status, r3: "NOT ASSESSED", r4: "NOT ASSESSED" }); continue; }
+  if (s.status !== "answered") { rows.push({ id: s.id, status: s.status }); continue; }
   const turns = s.turns.map((t: any) => ({ ...t, citations: (t.citations ?? []).map((c: any) => ({ target: c.target, id: c.id })) }));
   const out: any = {};
-  for (const rev of ["r3", "r4"] as const) {
+  for (const key of ["from", "to"] as const) {
+    const rev = REVS[key];
     const notAssessed: string[] = [];
-    const exp = restrict(EXP[rev].get(s.id), fx, notAssessed);
-    const r = scoreAnswer({
-      mods: MODS[rev], exp, fx, question: turns[0].question, turns,
-      env: { entityMap: entityMaps[rev], entityToIds, families }, live: carriedLive(s, fx.orgId), r4: rev === "r4",
+    const exp = restrict(expsBy(rev.mods.gt).get(s.id), fx, notAssessed);
+    const r = rev.score({
+      mods: rev.mods, exp, fx, question: turns[0].question, turns,
+      env: { entityMap: rev.mods.ledger.buildEntityMap(fx), entityToIds, families }, live: carriedLive(s, fx.orgId), r4: rev.r4,
     });
     r.notAssessed.push(...notAssessed);
-    out[rev] = r;
+    out[key] = r;
   }
   const live = [...s.productFailures, ...s.securityFailures].sort();
-  const off = [...out.r3.productFailures, ...out.r3.securityFailures].sort();
+  const off = [...out.from.productFailures, ...out.from.securityFailures].sort();
   const parity = JSON.stringify(live) === JSON.stringify(off);
   if (!parity) parityOk = false;
-  const r4f = [...out.r4.productFailures, ...out.r4.securityFailures];
+  const toF = [...out.to.productFailures, ...out.to.securityFailures];
   rows.push({
-    id: s.id, status: "answered", liveR3: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
-    r4: out.r4.correctnessPass ? "PASS" : `FAIL(${r4f.length})`,
-    removed: live.filter((f: string) => !r4f.includes(f)), added: r4f.filter((f) => !live.includes(f)),
+    id: s.id, status: "answered", live: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
+    to: out.to.correctnessPass ? "PASS" : `FAIL(${toF.length})`,
+    removed: live.filter((f: string) => !toF.includes(f)), added: toF.filter((f) => !live.includes(f)),
     parityDiff: parity ? null : { liveOnly: live.filter((f: string) => !off.includes(f)), offlineOnly: off.filter((f) => !live.includes(f)) },
-    r4security: out.r4.securityFailures, r4notAssessed: out.r4.notAssessed, blocked: out.r4.blockedDetail, metrics: out.r4.metrics,
+    security: out.to.securityFailures, notAssessed: out.to.notAssessed, metrics: out.to.metrics,
   });
 }
 
+const [F, T] = [REVS.from.label, REVS.to.label];
 for (const r of rows) {
   if (r.status !== "answered") { console.log(`${r.id.padEnd(4)} ${r.status.toUpperCase()} — NOT ASSESSED (no saved answer)`); continue; }
-  console.log(`${r.id.padEnd(4)} live r3 ${r.liveR3.padEnd(8)} · offline r3 parity ${r.parity ? "✓" : "✗"} · r4 ${r.r4}`);
+  console.log(`${r.id.padEnd(4)} live ${F} ${r.live.padEnd(8)} · offline ${F} parity ${r.parity ? "✓" : "✗"} · ${T} ${r.to}`);
   if (r.parityDiff) console.log(`       PARITY DIFF live-only=${JSON.stringify(r.parityDiff.liveOnly)} offline-only=${JSON.stringify(r.parityDiff.offlineOnly)}`);
   for (const f of r.removed) console.log(`       − ${f}`);
   for (const f of r.added) console.log(`       + ${f}`);
-  for (const n of r.r4notAssessed) console.log(`       NOT ASSESSED ${n}`);
+  for (const n of r.notAssessed) console.log(`       NOT ASSESSED ${n}`);
 }
 const answered = rows.filter((r) => r.status === "answered");
 const sum = (k: string) => answered.reduce((n, r) => n + (Number(r.metrics[k]) || 0), 0);
-console.log(`\nparity with live r3: ${parityOk ? "ALL MATCH" : "MISMATCHES — see PARITY DIFF"}`);
-console.log(`r3 (live)      correct ${answered.filter((r) => r.liveR3 === "PASS").length}/${answered.length}`);
-console.log(`r4 (re-scored) correct ${answered.filter((r) => r.r4 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · security failures ${answered.reduce((n, r) => n + r.r4security.length, 0)} · blocked-before-disclosure ${sum("blockedBeforeDisclosure")} · unauthorized disclosures ${sum("unauthorizedDisclosures")} · unauthorized reads ${answered.some((r) => r.metrics.unauthorizedReads === null) ? "NOT ASSESSED (partial)" : sum("unauthorizedReads")}`);
+console.log(`\nparity with live ${F}: ${parityOk ? "ALL MATCH" : "MISMATCHES — see PARITY DIFF"}`);
+console.log(`${F} (live)      correct ${answered.filter((r) => r.live === "PASS").length}/${answered.length}`);
+console.log(`${T} (re-scored) correct ${answered.filter((r) => r.to === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + r.security.length, 0)} · blocked-before-disclosure ${sum("blockedBeforeDisclosure")} · unauthorized disclosures ${sum("unauthorizedDisclosures")} · unauthorized reads ${answered.some((r) => r.metrics.unauthorizedReads === null) ? "NOT ASSESSED (partial)" : sum("unauthorizedReads")}`);

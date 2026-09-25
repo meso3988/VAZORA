@@ -159,12 +159,7 @@ export function scoreAnswer(opts: {
     contextValues: [fx.today, fx.email, ...(fx.memberEmails ?? []), ...Object.values<any>(fx.contracts).flatMap((k) => [k.number, k.title])].filter(Boolean),
     entities: env.entityMap,
   });
-  const displayed = a.citations.map((c) => ({ target: c.target, id: c.id }));
-  const activity = r4 && ledger.buildActivityIndex ? ledger.buildActivityIndex(payloads, env.entityMap) : undefined;
-  // r5: recorded-history claims are supported only by a matching CITED event
-  const scored: any[] = ledger.resolveHistoricalClaims && activity
-    ? ledger.resolveHistoricalClaims(ledger.scoreClaims(claims, corpus), displayed, activity)
-    : ledger.scoreClaims(claims, corpus);
+  const scored: any[] = ledger.scoreClaims(claims, corpus);
   const asserted = scored.filter((c) => c.polarity === "asserted");
   const unsupported = scored.filter((c) => !c.supported);
   for (const c of unsupported) r.productFailures.push(`unsupported ${c.polarity} ${c.type} "${c.raw}" → ${c.value}${c.entityKey ? ` @${c.entityKey}` : ""}`);
@@ -192,6 +187,7 @@ export function scoreAnswer(opts: {
   if (unknownHonest === false && uv.length === 0) r.productFailures.push("no explicit uncertainty signal for an unknown");
 
   // citations
+  const displayed = a.citations.map((c) => ({ target: c.target, id: c.id }));
   const blockedCount = Array.isArray(live.blocked) ? live.blocked.length : live.blocked;
   if (r4) {
     // r4 — citation outcomes split; only actual disclosure/read is a breach
@@ -215,6 +211,7 @@ export function scoreAnswer(opts: {
   const expectedCites: { target: string; id: string }[] = exp.expectedCitations?.(fx) ?? [];
   const citesHit = expectedCites.filter((e) => displayed.some((c) => (env.families.get(e.id) ?? new Set([e.id])).has(c.id))).length;
   if (citesHit < expectedCites.length) r.productFailures.push(`citation coverage ${citesHit}/${expectedCites.length}`);
+  const activity = r4 && ledger.buildActivityIndex ? ledger.buildActivityIndex(payloads, env.entityMap) : undefined;
   const claimChecks: any[] = ledger.bindCitationsToClaims(scored.filter((c) => c.supported), displayed, env.entityToIds, activity);
   for (const c of claimChecks.filter((x) => !x.satisfied)) r.productFailures.push(`claim not supported by any citation: ${c.claimEntity}`);
   const relevantIds = new Set<string>();
