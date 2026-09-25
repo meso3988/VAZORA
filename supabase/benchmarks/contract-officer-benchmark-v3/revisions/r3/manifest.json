@@ -1,7 +1,7 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 4,
-  "frozenAt": "2026-09-25T04:23:41.107Z",
+  "revision": 3,
+  "frozenAt": "2026-09-25T02:32:27.329Z",
   "scenarioCount": 37,
   "files": [
     {
@@ -11,53 +11,28 @@
     },
     {
       "file": "ground-truth.ts",
-      "bytes": 32621,
-      "sha256": "105ba00fbec18ac2c48ee7b56c7bed8db0d39bd9457e5394e89061f28d8ec85f"
-    },
-    {
-      "file": "fact-ledger.ts",
-      "bytes": 36751,
-      "sha256": "b62c86a778c828b76fc7145bdb1b1058f8cc90173942881faa18beff257c6e66"
-    },
-    {
-      "file": "scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
-    },
-    {
-      "file": "gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
-    },
-    {
-      "file": "evaluate.ts",
-      "bytes": 15786,
-      "sha256": "7ba8baee2fadbb05ac2979aa167e8402514878270bcec20fcb4fdffdb800dd4c"
-    },
-    {
-      "file": "revisions/r3/fact-ledger.ts",
-      "bytes": 25850,
-      "sha256": "c2cbbe847867de09b560913a5fd36628668db28a8475c4228e88647680b9aa82"
-    },
-    {
-      "file": "revisions/r3/scoring.ts",
-      "bytes": 8946,
-      "sha256": "5f6947980a1c3967034a34ea1fc5aae8ba189e687155effa9442fafa6f61331f"
-    },
-    {
-      "file": "revisions/r3/ground-truth.ts",
       "bytes": 32426,
       "sha256": "fe9205d6e07f072dc673c24c46ab265282b163d7963f9c625ee600331b1e08c4"
     },
     {
-      "file": "revisions/r3/gate.ts",
+      "file": "fact-ledger.ts",
+      "bytes": 25850,
+      "sha256": "c2cbbe847867de09b560913a5fd36628668db28a8475c4228e88647680b9aa82"
+    },
+    {
+      "file": "scoring.ts",
+      "bytes": 8946,
+      "sha256": "5f6947980a1c3967034a34ea1fc5aae8ba189e687155effa9442fafa6f61331f"
+    },
+    {
+      "file": "gate.ts",
       "bytes": 5753,
       "sha256": "cc3c7c7e600c50db6ea134b23d66e408e2da811de5cbce0970f04e04193b13e7"
     },
     {
       "file": "../../../tests/officer-benchmark-v3.ts",
-      "bytes": 38667,
-      "sha256": "d3dc71802c8928b963315f853a3ccb9305711f60f4e210542e4571d4fd3cafaf"
+      "bytes": 46048,
+      "sha256": "76d38e12aefdcb9b608cbb27f6c8f72d088ce16ec219c87d219c2a94c6ca741a"
     }
   ],
   "revisions": [
@@ -78,12 +53,6 @@
       "at": "2026-09-25T02:32:27.332Z",
       "reason": "harness budget enforcement: per-turn worst-case reservation (OFFICER_MAX_ROUNDS requests, 21k tokens), failed turns counted as max rounds, transport retries must be 0 so every request is counted. No scoring or ground-truth change. Made before any live v3 results.",
       "afterResults": false
-    },
-    {
-      "revision": 4,
-      "at": "2026-09-25T04:23:41.109Z",
-      "reason": "User-approved revision 4 (decisions 2026-09-25) after the r3 diagnostic: open gap != missing (typed causes only); explicit state flags; colon-scoped negation; truncated output uses only fully visible objects; activity events support recorded-change claims, never current state; overrode/sentence-level change attribution; id-linked contract claims; single-contract line attribution; blocked citations reported separately, unauthorized reads/disclosures zero-tolerance. Numerical thresholds unchanged. r3 rules kept byte-identical in revisions/r3; r3 report and failures preserved.",
-      "afterResults": true
     }
   ],
   "note": "Ground truth, scoring and gate criteria are frozen. Changes require a recorded revision; never edit to improve a score."

@@ -88,30 +88,23 @@ export type ChangeWindow = "since_yesterday" | "since_last_review";
  * been recorded "now" and mislabelled out-of-window. "since_yesterday" has
  * no out-of-window event in a synthetic tenant (precision = invented changes
  * only); "since_last_review" keeps two real out-of-window events.
- *
- * Revision 4: a mention = entity AND action in the SAME sentence. The entity
- * may be named by contract number or by its own obligation/requirement title
- * (fixture.ts); the override action accepts "overrode/overridden". A human
- * override is never credited by AI-verification wording ("VAZORA verified").
  */
-export const CHANGE_EVENTS: {
-  id: string; windows: Record<ChangeWindow, boolean>; mention: { entity: RegExp; action: RegExp };
-}[] = [
+export const CHANGE_EVENTS: { id: string; windows: Record<ChangeWindow, boolean>; mention: RegExp }[] = [
   {
     id: "alpha_assignment", windows: { since_yesterday: true, since_last_review: false },
-    mention: { entity: /ALPHA-100|Monthly maintenance summary/i, action: /assign|owner|إسناد|تعيين|أسند|مسؤول/i },
+    mention: /(assign|owner|إسناد|تعيين|أسند|مسؤول)[^.\n]{0,80}ALPHA-100|ALPHA-100[^.\n]{0,80}(assign|owner|إسناد|تعيين|أسند|مسؤول)/i,
   },
   {
     id: "delta_human_override", windows: { since_yesterday: true, since_last_review: false },
-    mention: { entity: /DELTA-400|KPI/i, action: /overr(?:ide|ode|idden|iding)|تجاوز|قرار بشري/i },
+    mention: /(override|تجاوز|قرار بشري)[^.\n]{0,80}(DELTA-400|KPI)|(DELTA-400|KPI)[^.\n]{0,80}(override|تجاوز|قرار بشري)/i,
   },
   {
     id: "zeta_evidence_upload", windows: { since_yesterday: true, since_last_review: true },
-    mention: { entity: /ZETA-600|logistics report|اللوجستي/i, action: /upload|received|version|رفع|استلام|نسخة/i },
+    mention: /ZETA-600[^.\n]{0,100}(upload|received|version|رفع|استلام|نسخة)|(upload|received|version|رفع|استلام|نسخة)[^.\n]{0,100}(ZETA-600|logistics report)/i,
   },
   {
     id: "gamma_due_confirmed", windows: { since_yesterday: true, since_last_review: true },
-    mention: { entity: /GAMMA-300|Client-acknowledged performance report/i, action: /due date|deadline|confirm|موعد|تأكيد/i },
+    mention: /GAMMA-300[^.\n]{0,100}(due date|deadline|confirm|موعد|تأكيد)|(due date|deadline|confirm|موعد|تأكيد)[^.\n]{0,100}GAMMA-300/i,
   },
 ];
 

@@ -19,23 +19,6 @@
 //   M5b "owner role", "المسؤول المؤكد عن" are not person names
 //   Q/A a clause attributed to the user ("you mentioned…") is QUOTED, not asserted
 //   M2  "SAR 1,000,000.00" normalizes to 1000000 (decimals are not digits)
-//
-// r4 corrections (paired tests in officer-benchmark-v3-r4.test.ts):
-//   G   an open gap alone supports "open gap", never a specific absence;
-//       typed causes decide (gap_type missing_evidence → "missing";
-//       partial_evidence → "incomplete"); "not submitted" needs an explicit
-//       no-submission state; awaiting verification ≠ pending human review
-//   F   boolean state flags count (unassigned: true); absent fields do not
-//   N   negation is scoped to the ": " segment holding the match
-//   T   truncated results: only fully visible objects give entity-bound support
-//   A   activity events support claims about the recorded change, never
-//       current-state claims
-//   D   "1 pending verification discrepancy" = a pending discrepancy (not
-//       evidence awaiting verification)
-//   C   a contract-number claim is supported when the object links the
-//       claimed entity to that contract by id
-//   L   a sentence naming no entity inherits its LINE's entity only when
-//       everything named on that line belongs to one contract
 // ============================================================================
 
 // ---------- normalization ---------------------------------------------------
@@ -80,13 +63,6 @@ export function isNegatedClause(clause: string): boolean {
   return NEGATION.test(clause);
 }
 
-/** The ": "-delimited segment of `clause` that contains offset `at`. */
-export function colonSegment(clause: string, at: number): string {
-  const start = clause.lastIndexOf(": ", at - 1);
-  const end = clause.indexOf(": ", at);
-  return clause.slice(start < 0 ? 0 : start + 2, end < 0 ? clause.length : end);
-}
-
 /**
  * Attribution markers: the clause reports what the USER said, not what the
  * system holds. "You mentioned the client approved verbally" quotes a user
@@ -126,8 +102,6 @@ export type FactClaim = {
   /** attributed = quoting the user; never counted as a system-truth assertion */
   polarity: "asserted" | "negated" | "attributed";
   sentence: string;
-  /** r4: the clause the claim was extracted from (change vs current-state) */
-  clause?: string;
 };
 
 const MONTHS: Record<string, string> = {
@@ -152,10 +126,7 @@ const DAY_COUNT = new RegExp(
 const CONTRACT_NO = /\b[A-Z]{2,10}-\d{2,6}\b/g;
 const CLAUSE_NO = /(?:clause|البند|الفقرة|المادة)\s*#?\s*(\d+(?:\.\d+)+)/gi;
 const ASSIGNEE = /(?:assigned to|owner(?:\s+is|:)?|owned by|responsible(?:\s+is|:)?|المسؤول(?:\s+هو|:)?|مسؤول(?:\s+عن)?[^.:،,]{0,20}(?:هو|:)?)\s+([A-Za-z][A-Za-z.''-]{2,}|[\w.+-]+@[\w-]+\.[\w.]+|[\u0600-\u06FF]{2,}(?:\s[\u0600-\u06FF]{2,})?)/gi;
-// r4: "not submitted" is its own claim (only an explicit no-submission state
-// supports it); "awaiting/pending verification" is distinct from "pending /
-// awaiting human review".
-const VERIFY_STATE = /\b(not (?:yet )?(?:been )?submitted|never (?:been )?submitted|nothing (?:has been |was )?(?:uploaded|submitted)|verified|partially[- ]verified|incomplete|missing|needs?[ _-]?(?:a )?(?:human )?review|(?:pending|awaiting)\s+(?:human\s+)?(?:review|verification)|rejected|unverified)\b|لم يُ?رفع|لم يُ?قدَّ?م|موثّق|موثق|مُثبَت|مثبت|ناقص|مفقود|غير مكتمل|قيد المراجعة|بانتظار التحقق|يحتاج مراجعة|غير موثّق/gi;
+const VERIFY_STATE = /\b(verified|partially[- ]verified|incomplete|missing|needs?[ _-]?(?:a )?(?:human )?review|pending\s+(?:human\s+)?(?:review|verification)|rejected|unverified)\b|موثّق|موثق|مُثبَت|مثبت|ناقص|مفقود|غير مكتمل|قيد المراجعة|يحتاج مراجعة|غير موثّق/gi;
 const ACK_STATE = /(?:client|العميل|العميلة)\s+(?:has\s+|did\s+|have\s+)?(?:approved|acknowledged|accepted|signed|countersigned|rejected|اعتماد|اعتمد|أقرّ|اقرّ|وقّع|وقع|رفض)/gi;
 const OVERDUE = /\b(?:is|are|was|became|now|currently|still)?\s*overdue\b|متأخر(?:ة|ًا|اً)?|متأخرة/gi;
 const GAP_STATE = /(?:gaps?|فجوة|فجوات)\s+(?:is\s+|was\s+|are\s+|has been\s+|have been\s+|now\s+)?(?:resolved|closed|reopened|opened|open)|(?:resolved|closed|open|reopened)\s+(?:the\s+)?gaps?/gi;
@@ -185,16 +156,12 @@ const ASSIGNEE_STOP = new Set([
 
 function normalizeState(v: string): string {
   const s = norm(v);
-  if (/not (?:yet )?(?:been )?submitted|never (?:been )?submitted|nothing (?:has been |was )?(?:uploaded|submitted)|لم يُ?رفع|لم يُ?قدَّ?م/.test(s)) return "not_submitted";
   if (/partially/.test(s)) return "partially_verified";
   if (/verified|موثّق|موثق|مُثبَت|مثبت/.test(s) && !/unverif|not verif|غير/.test(s)) return "verified";
   if (/missing|مفقود/.test(s)) return "missing";
   if (/incomplete|ناقص|غير مكتمل/.test(s)) return "incomplete";
-  if (/needs?[ _-]?(?:a )?(?:human )?review|(?:pending|awaiting)\s+(?:human\s+)?review|قيد المراجعة|يحتاج مراجعة/.test(s)) return "needs_review";
-  // r4: awaiting verification ≠ pending human review (domain: a pending
-  // discrepancy awaits authorized human review — evidence.ts)
-  if (/(?:pending|awaiting)\s+verification|بانتظار التحقق/.test(s)) return "awaiting_verification";
-  if (/^pending$/.test(s)) return "pending";
+  if (/needs?[ _-]?(?:a )?(?:human )?review|pending\s+(?:human\s+)?review|قيد المراجعة|يحتاج مراجعة/.test(s)) return "needs_review";
+  if (/^pending(?:\s+verification)?$/.test(s)) return "pending";
   if (/rejected|رفض/.test(s)) return "rejected";
   if (/unverified|غير موثّق|غير موثق/.test(s)) return "unverified";
   return s;
@@ -218,8 +185,6 @@ export type EntityMap = {
   tokens: Map<string, string>;
   /** uuid → canonical entity key, so uuid-bearing tool objects bind too */
   idKeys: Map<string, string>;
-  /** r4: entity key → owning contract number (unambiguous line attribution) */
-  families?: Map<string, string>;
 };
 
 export function buildEntityMap(fx: any): EntityMap {
@@ -233,8 +198,6 @@ export function buildEntityMap(fx: any): EntityMap {
   const addId = (id: string | null | undefined, key: string) => {
     if (id) idKeys.set(norm(id), key);
   };
-  // r4: entity key → the contract it belongs to (for unambiguous line attribution)
-  const families = new Map<string, string>();
   const addReq = (c: any, req: any) => {
     if (!req) return;
     const reqKey = `requirement:${req.reqId}`;
@@ -245,8 +208,6 @@ export function buildEntityMap(fx: any): EntityMap {
     addId(req.itemId, itemKey);
     addId(req.checkId, itemKey);
     addId(req.versionId, itemKey);
-    families.set(reqKey, c.number);
-    families.set(itemKey, c.number);
   };
   for (const [k, c] of Object.entries<any>(fx.contracts ?? {})) {
     const cKey = `contract:${c.number}`;
@@ -260,31 +221,11 @@ export function buildEntityMap(fx: any): EntityMap {
     addId(c.obligationId, oKey);
     addReq(c, c.req);
     addReq(c, c.kpiReq);
-    for (const key of [cKey, oKey, `clause:${c.clauseId}`]) families.set(key, c.number);
     void k;
   }
   for (const name of fx.memberNames ?? []) add(name, `member:${name}`);
   for (const e of fx.memberEmails ?? []) { add(e, `member:${e}`); }
-  return { tokens, idKeys, families };
-}
-
-/**
- * r4: the line's entity, ONLY when every entity named on the line belongs to
- * one contract (e.g. a bullet "Quarterly security compliance statement —
- * EPSILON-500 … no owner is recorded"). A line naming two contracts, or none,
- * gives no fallback.
- */
-function lineEntity(line: string, entities: EntityMap): string | null {
-  if (!entities.families) return null;
-  const n = norm(line);
-  const fams = new Set<string>();
-  for (const [token, key] of entities.tokens) {
-    if (!tokenHit(n, token)) continue;
-    const f = entities.families.get(key);
-    if (!f) return null;
-    fams.add(f);
-  }
-  return fams.size === 1 ? bindEntity(line, entities) : null;
+  return { tokens, idKeys };
 }
 
 /**
@@ -319,34 +260,27 @@ function bindEntity(sentence: string, entities: EntityMap): string | null {
 
 export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
   const claims: FactClaim[] = [];
-  const units = text.split(/\n+/).flatMap((line) => {
-    const lineKey = lineEntity(line, entities);
-    return line.split(/(?<=[.!؟?])\s+/).map((s) => s.trim()).filter(Boolean).map((sentence) => ({ sentence, lineKey }));
-  });
-  for (const { sentence, lineKey } of units) {
-    const sentenceEntity = bindEntity(sentence, entities) ?? lineKey;
+  const sentences = text.split(/(?<=[.!؟?])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+  for (const sentence of sentences) {
+    const sentenceEntity = bindEntity(sentence, entities);
     for (const clause of splitClauses(sentence)) {
-      const attributed = isAttributedClause(clause);
+      const polarity: FactClaim["polarity"] = isAttributedClause(clause) ? "attributed"
+        : isNegatedClause(clause) ? "negated" : "asserted";
       // Bind per clause first ("A is overdue, but B is fine") — fall back to
-      // the sentence-level entity, then (r4) an unambiguous line entity.
+      // the sentence-level entity when the clause names none.
       const entityKey = bindEntity(clause, entities) ?? sentenceEntity;
-      let at = 0;
       const push = (type: ClaimType, raw: string, value: string) => {
         if (!value) return;
-        // r4: negation is scoped to the colon-delimited segment holding the
-        // match — "has one open gap: no verified acknowledgement is recorded"
-        // negates the acknowledgement, not the gap.
-        const negated = isNegatedClause(colonSegment(clause, at));
         // A state expression with its own internal negation ("غير مكتمل",
         // "not verified") ASSERTS a negative state — it is not a negated claim.
-        const claimPolarity: FactClaim["polarity"] = attributed ? "attributed"
-          : negated && !NEGATION.test(raw) ? "negated" : "asserted";
-        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence, clause });
+        const claimPolarity: FactClaim["polarity"] = polarity === "attributed" ? "attributed"
+          : polarity === "negated" && !NEGATION.test(raw) ? "negated" : "asserted";
+        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence });
       };
       let m: RegExpExecArray | null;
       const each = (re: RegExp, fn: (m: RegExpExecArray) => void) => {
         re.lastIndex = 0;
-        while ((m = re.exec(clause))) { at = m.index; fn(m); }
+        while ((m = re.exec(clause))) fn(m);
       };
       each(MONEY, (mm) => {
         const digits = normalizeDigits(mm[0]).match(/[\d,.\u066C\u066B]+/);
@@ -374,13 +308,7 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
         const first = captured.split(" ")[0];
         if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) push("assignee_name", mm[0], mm[1]);
       });
-      each(VERIFY_STATE, (mm) => {
-        // "1 pending verification discrepancy" describes a PENDING DISCREPANCY,
-        // not evidence awaiting verification.
-        const describesDiscrepancy = /^pending\s+verification$/i.test(mm[0]) &&
-          /^\s+discrepanc/i.test(clause.slice(mm.index + mm[0].length));
-        push("verification_state", mm[0], describesDiscrepancy ? "pending" : normalizeState(mm[0]));
-      });
+      each(VERIFY_STATE, (mm) => push("verification_state", mm[0], normalizeState(mm[0])));
       each(ACK_STATE, (mm) => push("acknowledgement_state", mm[0], normalizeState(mm[0]) === "verified" ? "acknowledged" : normalizeState(mm[0]) === "rejected" ? "rejected" : "acknowledged"));
       each(OVERDUE, (mm) => push("overdue_state", mm[0], "overdue"));
       each(GAP_STATE, (mm) => push("gap_state", mm[0], /resolv|closed|مغلق|محلول|حل/i.test(mm[0]) ? "resolved" : "open"));
@@ -419,39 +347,11 @@ function collectLeaves(node: any, into: Set<string>) {
   if (typeof node === "object") { for (const v of Object.values(node)) collectLeaves(v, into); }
 }
 
-/**
- * r4 — typed state fields → the claim values they establish, per product
- * semantics (engine.ts gapTypeFor, detectors.ts, domain/evidence.ts):
- *   gap_type missing_evidence   ← the check found the evidence missing / not
- *                                 found → "missing" (NOT "not submitted")
- *   gap_type partial_evidence   → "incomplete"
- *   gap_type other/contradiction/quality, or a bare status "open"
- *                               → no specific absence claim (cause not
- *                                 established; supports "open gap" only)
- * An absent field establishes nothing.
- */
-const STATE_FIELD_MARKERS: Record<string, Record<string, string[]>> = {
-  gap_type: { missing_evidence: ["missing"], partial_evidence: ["incomplete", "partially_verified"] },
-  kind: {
-    missing_required_evidence: ["missing"], unassigned_obligation: ["unassigned"],
-    overdue: ["overdue"], verification_discrepancy: ["needs_review"],
-  },
-  status: { verification_pending: ["awaiting_verification"], received: ["awaiting_verification"], evidence_received: ["awaiting_verification"] },
-};
-/** Boolean state flags: `true` establishes the state; false or absent does not. */
-const FLAG_MARKERS: Record<string, string> = { unassigned: "unassigned", openGap: "gap_open" };
-
-function collectMarkers(node: any, into: Set<string>) {
+function indexObject(node: any, entities: EntityMap, out: EvidenceCorpus["objects"], inheritedTags: string[] = []) {
   if (node == null || typeof node !== "object") return;
-  if (Array.isArray(node)) { for (const v of node) collectMarkers(v, into); return; }
-  for (const [k, v] of Object.entries(node)) {
-    if (v === true && FLAG_MARKERS[k]) into.add(FLAG_MARKERS[k]);
-    else if (typeof v === "string") for (const mk of STATE_FIELD_MARKERS[k]?.[v] ?? []) into.add(mk);
-    else if (typeof v === "object") collectMarkers(v, into);
-  }
-}
-
-function entitiesOf(values: Set<string>, entities: EntityMap): Set<string> {
+  const values = new Set<string>();
+  collectLeaves(node, values);
+  for (const t of inheritedTags) values.add(t);
   const ents = new Set<string>();
   for (const v of values) {
     const idKey = entities.idKeys.get(v);
@@ -460,50 +360,6 @@ function entitiesOf(values: Set<string>, entities: EntityMap): Set<string> {
       if (token === v || (token.length > 3 && tokenHit(v, token))) ents.add(key);
     }
   }
-  return ents;
-}
-
-/**
- * r4 — complete JSON objects inside a TRUNCATED tool result string. Only
- * objects the model saw in full are returned (maximal balanced spans); the
- * partial object at the cut, and anything after it, contribute no
- * entity-bound support — nothing is inferred beyond what was received.
- */
-export function completeObjects(s: string): unknown[] {
-  const spans: [number, number][] = [];
-  const stack: number[] = [];
-  let inStr = false, esc = false;
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    if (inStr) {
-      if (esc) esc = false;
-      else if (ch === "\\") esc = true;
-      else if (ch === "\"") inStr = false;
-      continue;
-    }
-    if (ch === "\"") inStr = true;
-    else if (ch === "{") stack.push(i);
-    else if (ch === "}" && stack.length) spans.push([stack.pop()!, i]);
-  }
-  const maximal = spans.filter(([a, b]) => !spans.some(([c, d]) => c < a && d > b));
-  const out: unknown[] = [];
-  for (const [a, b] of maximal) { try { out.push(JSON.parse(s.slice(a, b + 1))); } catch { /* not a whole object */ } }
-  return out;
-}
-
-/** Parsed payload objects: whole result, or its fully visible objects if truncated. */
-function payloadObjects(parsed: any): unknown[] {
-  if (parsed && parsed.truncated === true && typeof parsed.data === "string") return completeObjects(parsed.data);
-  return [parsed];
-}
-
-function indexObject(node: any, entities: EntityMap, out: EvidenceCorpus["objects"], inheritedTags: string[] = []) {
-  if (node == null || typeof node !== "object") return;
-  const values = new Set<string>();
-  collectLeaves(node, values);
-  collectMarkers(node, values);
-  for (const t of inheritedTags) values.add(t);
-  const ents = entitiesOf(values, entities);
   if (values.size) out.push({ values, entities: ents });
   if (Array.isArray(node)) for (const v of node) indexObject(v, entities, out, inheritedTags);
   else for (const v of Object.values(node)) if (typeof v === "object" && v) indexObject(v, entities, out, inheritedTags);
@@ -538,11 +394,9 @@ export function buildCorpus(opts: {
     collectLeaves(payload, values);
     for (const t of tags) values.add(t);
     try {
-      for (const obj of payloadObjects(JSON.parse(payload))) {
-        collectLeaves(obj, values);
-        collectMarkers(obj, values);
-        indexObject(obj, opts.entities, objects, tags);
-      }
+      const parsed = JSON.parse(payload);
+      collectLeaves(parsed, values);
+      indexObject(parsed, opts.entities, objects, tags);
     } catch { /* payload stayed opaque; raw scan still applies */ }
   }
   for (const v of [...opts.contextValues]) collectLeaves(v, values);
@@ -579,7 +433,6 @@ function valueVariantHit(values: Set<string>, v: string): boolean {
     unverified: ["rejected", "failed", "unverified", "not_verified"],
     needs_review: ["pending", "needs_review", "pending_review", "needs_human_review", "pending_human_review"],
     missing: ["missing", "not_found", "absent"],
-    awaiting_verification: ["awaiting_verification", "verification_pending"],
   };
   for (const a of ALIASES[v] ?? []) if (values.has(a)) return true;
   return false;
@@ -604,13 +457,8 @@ export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): Scored
     // tool-result object. No global fallback — that is the whole point of
     // binding (a "12 days" true of XRAY-900 cannot support BETA-200).
     if (c.entityKey) {
-      // r4: a contract-number claim is also supported when the object links
-      // the claimed entity to that contract BY ID (a gap row carries
-      // contract_id, not the literal "GAMMA-300").
-      const contractKey = c.type === "contract_number" ? `contract:${c.value}` : null;
       const co = corpus.objects.some((o) => o.entities.has(c.entityKey!) &&
-        (o.values.has(c.value) || valueVariantHit(o.values, c.value) ||
-          (!!contractKey && [...o.entities].some((k) => k.toLowerCase() === contractKey))));
+        (o.values.has(c.value) || valueVariantHit(o.values, c.value)));
       if (co) return { ...c, supported: true, supportKind: "object" };
       return { ...c, supported: false, supportKind: "none" };
     }
@@ -643,80 +491,24 @@ export function bindCitationsToClaims(
   claims: ScoredClaim[],
   citations: { target: string; id: string }[],
   entityToIds: Map<string, Set<string>>,
-  activity?: ActivityIndex,
 ): ClaimCitationCheck[] {
   const citedIds = new Set(citations.map((c) => c.id));
-  const byEntity = new Map<string, ScoredClaim[]>();
+  const checks: ClaimCitationCheck[] = [];
+  const seen = new Set<string>();
   for (const c of claims) {
     if (!c.entityKey || c.polarity !== "asserted") continue;
     // member-bound claims are contextual — no citation target exists for
     // members; citations belong on the operational entity (obligation etc.)
     if (c.entityKey.startsWith("member:")) continue;
-    byEntity.set(c.entityKey, [...(byEntity.get(c.entityKey) ?? []), c]);
-  }
-  const checks: ClaimCitationCheck[] = [];
-  for (const [entityKey, group] of byEntity) {
-    const allowed = entityToIds.get(entityKey) ?? new Set([entityKey]);
+    if (seen.has(c.entityKey)) continue;
+    seen.add(c.entityKey);
+    const allowed = entityToIds.get(c.entityKey) ?? new Set([c.entityKey]);
     const hits = citations.filter((x) => allowed.has(x.id)).map((x) => `${x.target}:${x.id}`);
-    let satisfied = hits.length > 0 || [...allowed].some((id) => citedIds.has(id));
-    // r4: an authorized activity event supports a claim about the RECORDED
-    // CHANGE when its entity and values match. It never proves current state:
-    // the entity passes only if EVERY claim about it is such a change claim.
-    const activityHits: string[] = [];
-    if (!satisfied && activity) {
-      satisfied = group.every((c) => {
-        if (!isChangeClaim(c)) return false;
-        const ev = citations.find((x) => {
-          const e = activity.get(x.id);
-          return !!e && e.entities.has(entityKey) && (e.values.has(c.value) || valueVariantHit(e.values, c.value));
-        });
-        if (ev) activityHits.push(`${ev.target}:${ev.id}`);
-        return !!ev;
-      });
-    }
-    checks.push({ claimEntity: entityKey, satisfied, citedBy: hits.length ? hits : activityHits });
+    checks.push({
+      claimEntity: c.entityKey,
+      satisfied: hits.length > 0 || [...allowed].some((id) => citedIds.has(id)),
+      citedBy: hits,
+    });
   }
   return checks;
-}
-
-// ---------- r4: activity events as change evidence ----------------------------
-
-export type ActivityIndex = Map<string, { values: Set<string>; entities: Set<string> }>;
-
-/** Every activity event the model received (incl. fully visible events of a truncated result), by id. */
-export function buildActivityIndex(toolPayloads: { tool: string; payload: string }[], entities: EntityMap): ActivityIndex {
-  const idx: ActivityIndex = new Map();
-  const walk = (node: any) => {
-    if (node == null || typeof node !== "object") return;
-    if (Array.isArray(node)) { node.forEach(walk); return; }
-    if (typeof node.id === "string" && typeof node.event_type === "string") {
-      const values = new Set<string>();
-      collectLeaves(node, values);
-      collectMarkers(node, values);
-      idx.set(node.id, { values, entities: entitiesOf(values, entities) });
-    }
-    for (const v of Object.values(node)) if (typeof v === "object") walk(v);
-  };
-  for (const p of toolPayloads) {
-    if (p.tool !== "getRecentActivity") continue;
-    try { payloadObjects(JSON.parse(p.payload)).forEach(walk); } catch { /* opaque */ }
-  }
-  return idx;
-}
-
-const IDENTITY_TYPES = new Set<ClaimType>(["contract_number", "clause_number", "iso_date", "day_count"]);
-const CHANGE_VERB = /\b(uploaded|submitted|confirmed|assigned|reassigned|created|raised|flagged|recorded|resolved|closed|reopened|approved|rejected|overrode|overridden|updated|changed|completed|added|removed|received|escalated)\b|تم |رُفع|أُكِّد|أُسند|تجاوز|أُنشئ/i;
-const PAST_AUX = /\b(was|were|has been|have been|had been|got)\b/i;
-const PRESENT_STATE = /\b(is|are|remains?|still|currently|now)\b|لا يزال|يظل|حاليًا/i;
-
-/**
- * A claim ABOUT A RECORDED CHANGE: its clause describes a change, and a state
- * or assignee claim is phrased in the past ("was assigned"), never as what is
- * true now ("is assigned", "remains missing").
- */
-export function isChangeClaim(c: FactClaim): boolean {
-  const clause = c.clause ?? c.sentence;
-  if (!CHANGE_VERB.test(clause)) return false;
-  if (IDENTITY_TYPES.has(c.type)) return true;
-  return PAST_AUX.test(clause) && !PRESENT_STATE.test(clause);
 }

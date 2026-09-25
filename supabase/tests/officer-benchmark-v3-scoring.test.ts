@@ -11,12 +11,12 @@
 // they are transcribed verbatim below with their source location.
 
 import * as v2 from "../benchmarks/contract-officer-benchmark-v2/fact-ledger";
-import * as v3 from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as v3 from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/fact-ledger";
 import {
   gapInvariant, lexicalMisses, classifyToolCalls, unknownViolations,
   scoreChangeWindow, idempotency, type WindowedChange,
-} from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import { CHANGE_EVENTS, TOOL_UNIVERSE } from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
+} from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/scoring";
+import { CHANGE_EVENTS, TOOL_UNIVERSE } from "../benchmarks/contract-officer-benchmark-v3/revisions/r3/ground-truth";
 
 let pass = 0, fail = 0;
 const failures: string[] = [];

@@ -148,26 +148,13 @@ function clauseOf(c: ScoredClaim): string[] {
  * question. Recall = in-window events mentioned / in-window events;
  * precision = in-window mentioned / (in-window + out-of-window mentioned).
  */
-/**
- * r4: a structured mention is credited when the entity AND the action occur
- * in the SAME sentence (any distance). v3 r3 used fixed 80–100 char windows
- * and literal verbs, so "The GAMMA-300 … report … its due date was
- * subsequently confirmed" and "a human overrode the check" were missed.
- * Entity in one sentence and action in another is still not a mention.
- */
-export type ChangeMention = RegExp | { entity: RegExp; action: RegExp };
-export type WindowedChange = { id: string; inWindow: boolean; mention: ChangeMention };
-
-export function mentions(m: ChangeMention, text: string): boolean {
-  if (m instanceof RegExp) return m.test(text);
-  return text.split(/(?<=[.!؟?])\s+|\n+/).some((s) => m.entity.test(s) && m.action.test(s));
-}
+export type WindowedChange = { id: string; inWindow: boolean; mention: RegExp };
 
 export function scoreChangeWindow(changes: WindowedChange[], text: string) {
   const inWin = changes.filter((c) => c.inWindow);
   const outWin = changes.filter((c) => !c.inWindow);
-  const inHit = inWin.filter((c) => mentions(c.mention, text)).map((c) => c.id);
-  const outHit = outWin.filter((c) => mentions(c.mention, text)).map((c) => c.id);
+  const inHit = inWin.filter((c) => c.mention.test(text)).map((c) => c.id);
+  const outHit = outWin.filter((c) => c.mention.test(text)).map((c) => c.id);
   const mentioned = inHit.length + outHit.length;
   return {
     recall: inWin.length ? inHit.length / inWin.length : null,
