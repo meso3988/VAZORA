@@ -81,8 +81,13 @@ export type ChangeWindow = "since_yesterday" | "since_last_review";
 /**
  * M7 — every change event in the tenant with its membership per window.
  * Fixture seed events are created before the sweep; windowed events are
- * created by seedWindowedChanges() after it (old_epsilon_document is
- * back-dated three days).
+ * created by seedWindowedChanges() after it.
+ *
+ * Revision 2: the back-dated old_epsilon_document event was removed — audit
+ * recording time is database-controlled (migration 0012), so it would have
+ * been recorded "now" and mislabelled out-of-window. "since_yesterday" has
+ * no out-of-window event in a synthetic tenant (precision = invented changes
+ * only); "since_last_review" keeps two real out-of-window events.
  */
 export const CHANGE_EVENTS: { id: string; windows: Record<ChangeWindow, boolean>; mention: RegExp }[] = [
   {
@@ -100,10 +105,6 @@ export const CHANGE_EVENTS: { id: string; windows: Record<ChangeWindow, boolean>
   {
     id: "gamma_due_confirmed", windows: { since_yesterday: true, since_last_review: true },
     mention: /GAMMA-300[^.\n]{0,100}(due date|deadline|confirm|موعد|تأكيد)|(due date|deadline|confirm|موعد|تأكيد)[^.\n]{0,100}GAMMA-300/i,
-  },
-  {
-    id: "old_epsilon_document", windows: { since_yesterday: false, since_last_review: false },
-    mention: /EPSILON-500[^.\n]{0,100}(document|security plan|upload|مستند|خطة)|(document|security plan|مستند|خطة)[^.\n]{0,100}EPSILON-500/i,
   },
 ];
 

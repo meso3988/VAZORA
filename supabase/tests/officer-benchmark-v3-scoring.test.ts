@@ -272,8 +272,11 @@ const v2IdempotencyViolation = (a05Delta: number) => a05Delta > 0;
   const yCorrect = "Since yesterday: ALPHA-100's summary was assigned an owner; a human override was recorded on the DELTA-400 KPI table; the ZETA-600 logistics report was uploaded; the GAMMA-300 due date was confirmed.";
   const y = scoreChangeWindow(forWindow("since_yesterday"), yCorrect);
   check("M7 FIXED v3 'since yesterday' complete answer: recall 1, precision 1", y.recall === 1 && y.precision === 1, JSON.stringify(y));
-  const yLeak = scoreChangeWindow(forWindow("since_yesterday"), `${yCorrect} The EPSILON-500 security plan document was uploaded.`);
-  check("M7 GUARD v3 a 3-day-old event is outside 'since yesterday'", yLeak.outOfWindowMentioned.includes("old_epsilon_document"));
+  // Rev 2: no out-of-window event exists for "since yesterday" in the tenant
+  // (recording time is DB-controlled); the pure rule is still proven here.
+  const synthetic = [...forWindow("since_yesterday"), { id: "synthetic_old", inWindow: false, mention: /EPSILON-500[^.\n]{0,80}document/i }];
+  const yLeak = scoreChangeWindow(synthetic, `${yCorrect} The EPSILON-500 security plan document was uploaded.`);
+  check("M7 GUARD v3 an out-of-window event lowers 'since yesterday' precision", yLeak.outOfWindowMentioned.includes("synthetic_old") && (yLeak.precision ?? 1) < 1);
   const yMiss = scoreChangeWindow(forWindow("since_yesterday"), "Since yesterday: the ZETA-600 logistics report was uploaded.");
   check("M7 GUARD v3 an incomplete answer has recall < 1", yMiss.recall !== null && yMiss.recall < 1);
 }

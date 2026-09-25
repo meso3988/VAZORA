@@ -370,10 +370,14 @@ export async function seedBenchmarkOrganization(opts: { label: string; timezone?
  * M7 — change events with KNOWN window membership. Called by the harness
  * AFTER the sweep, so the product's "since my last review" window (which
  * falls back to the last completed sweep for a user with no watermark) has
- * real in-window events, and "since yesterday" has a real out-of-window one.
+ * real in-window AND out-of-window events.
  *
- *   outOfWindow_old   — back-dated 3 days: outside "since yesterday" AND
- *                       outside "since my last review"
+ * Revision 2: activity_log recording time is database-controlled (migration
+ * 0012), so an event cannot be back-dated. "since yesterday" therefore has
+ * no synthesizable out-of-window event; its precision is measured against
+ * invented changes only. "since my last review" keeps real out-of-window
+ * events (seeded before the sweep).
+ *
  *   (fixture seed)    — ALPHA assignment, DELTA human override: created
  *                       before the sweep → inside "since yesterday",
  *                       outside "since my last review"
@@ -384,20 +388,14 @@ export async function seedBenchmarkOrganization(opts: { label: string; timezone?
  * receipt only — it never closes a gap (receipt ≠ verification).
  */
 export async function seedWindowedChanges(fx: BenchmarkFixture) {
-  const threeDaysAgo = new Date(Date.now() - 3 * 86_400_000).toISOString();
   const rows = [
     {
-      key: "old_epsilon_document", created_at: threeDaysAgo,
-      event_type: "contract.document_uploaded", entity_type: "contract", entity_id: fx.contracts.e.contractId,
-      metadata: { contract: "EPSILON-500", document: "Security plan v1" },
-    },
-    {
-      key: "zeta_evidence_upload", created_at: undefined,
+      key: "zeta_evidence_upload",
       event_type: "evidence.version_uploaded", entity_type: "evidence_item", entity_id: fx.contracts.f.req.itemId ?? null,
       metadata: { contract: "ZETA-600", requirement: "Monthly logistics report", note: "received — awaiting verification" },
     },
     {
-      key: "gamma_due_confirmed", created_at: undefined,
+      key: "gamma_due_confirmed",
       event_type: "obligation.due_date_confirmed", entity_type: "obligation", entity_id: fx.contracts.c.obligationId,
       metadata: { contract: "GAMMA-300", obligation: "Client-acknowledged performance report" },
     },
@@ -406,7 +404,6 @@ export async function seedWindowedChanges(fx: BenchmarkFixture) {
     const { error } = await fx.client.from("activity_log").insert({
       organization_id: fx.orgId, actor_user_id: fx.userId,
       event_type: r.event_type, entity_type: r.entity_type, entity_id: r.entity_id, metadata: r.metadata,
-      ...(r.created_at ? { created_at: r.created_at } : {}),
     });
     if (error) throw new Error(`seed windowed change ${r.key}: ${error.message}`);
   }

@@ -1,18 +1,18 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 1,
-  "frozenAt": "2026-09-24T23:02:00.531Z",
+  "revision": 2,
+  "frozenAt": "2026-09-25T01:51:55.848Z",
   "scenarioCount": 37,
   "files": [
     {
       "file": "fixture.ts",
-      "bytes": 24046,
-      "sha256": "a4e45d6f3088b7c27e9a252fff404c80d35e4351944864ec14955687d2cab83a"
+      "bytes": 23779,
+      "sha256": "bc6e16d46c3cf02b450a6fb7f9a2fa570fbc02e49169e1d3f6ade820efdb4a3d"
     },
     {
       "file": "ground-truth.ts",
-      "bytes": 32360,
-      "sha256": "ee59a9aada63d4f864be7bac8c91395fd6cefb12d150ce08227d4b16ba648843"
+      "bytes": 32426,
+      "sha256": "fe9205d6e07f072dc673c24c46ab265282b163d7963f9c625ee600331b1e08c4"
     },
     {
       "file": "fact-ledger.ts",
@@ -40,6 +40,12 @@
       "revision": 1,
       "at": "2026-09-24T23:02:00.533Z",
       "reason": "initial v3 freeze: M1-M8 corrections + gate criteria defined before any live v3 run",
+      "afterResults": false
+    },
+    {
+      "revision": 2,
+      "at": "2026-09-25T01:51:55.850Z",
+      "reason": "remove back-dated old_epsilon_document: audit recording time becomes DB-controlled (migration 0012), so the event cannot be synthesized; since_yesterday precision limited to invented changes. Made before any live v3 results.",
       "afterResults": false
     }
   ],
