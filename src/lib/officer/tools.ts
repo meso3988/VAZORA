@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { effectiveItemStatus, effectiveStatusForRequirement } from "@/domain/effective-status";
 import type { OfficerCitation } from "@/domain/officer";
+import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-identity";
 import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
 import type { OfficerContext } from "@/lib/officer/context";
 import { classifyDeadline } from "@/lib/officer/time";
@@ -814,6 +815,60 @@ const getAssignments: OfficerTool = {
 // ---------------------------------------------------------------------------
 
 /** Insert an officer_actions proposal. Never executes anything itself. */
+const OPEN_PROPOSAL = ["suggested", "waiting_for_approval"];
+const PROPOSAL_COLUMNS = "id, status, requires_approval, action_type";
+
+/**
+ * Resolve the structured target of a proposal inside the caller's
+ * organization, most specific first: gap → obligation → contract. Parents are
+ * DERIVED from the child, so "same gap, contract id omitted" and "same gap,
+ * contract id supplied" are one target; a supplied parent that contradicts the
+ * child is refused rather than guessed.
+ */
+async function resolveActionTarget(
+  ctx: OfficerContext,
+  input: { contractId?: string | null; obligationId?: string | null; gapId?: string | null },
+): Promise<{ ok: true; target: ActionTarget } | { ok: false; error: string }> {
+  let contractId = input.contractId ?? null;
+  let obligationId = input.obligationId ?? null;
+  const gapId = input.gapId ?? null;
+  const clash = (given: string | null, actual: string | null) => !!given && !!actual && given !== actual;
+
+  if (gapId) {
+    const { data: gap } = await ctx.supabase
+      .from("evidence_gaps").select("id, contract_id, obligation_id")
+      .eq("organization_id", ctx.organizationId).eq("id", gapId).maybeSingle();
+    if (!gap) return { ok: false, error: "gap_not_found_in_organization" };
+    if (clash(contractId, gap.contract_id) || clash(obligationId, gap.obligation_id)) {
+      return { ok: false, error: "target_mismatch: gap does not belong to the given contract/obligation" };
+    }
+    contractId = gap.contract_id;
+    obligationId = gap.obligation_id ?? obligationId;
+  }
+  if (obligationId) {
+    const { data: ob } = await ctx.supabase
+      .from("contract_obligations").select("id, contract_id")
+      .eq("organization_id", ctx.organizationId).eq("id", obligationId).maybeSingle();
+    if (!ob) return { ok: false, error: "obligation_not_found_in_organization" };
+    if (clash(contractId, ob.contract_id)) {
+      return { ok: false, error: "target_mismatch: obligation does not belong to the given contract" };
+    }
+    contractId = ob.contract_id;
+  }
+  if (contractId && !(await resolveContract(ctx, contractId))) {
+    return { ok: false, error: "contract_not_found_in_organization" };
+  }
+  return { ok: true, target: { contractId, obligationId, gapId } };
+}
+
+async function findOpenProposal(ctx: OfficerContext, key: string) {
+  const { data } = await ctx.supabase
+    .from("officer_actions").select(PROPOSAL_COLUMNS)
+    .eq("organization_id", ctx.organizationId).eq("idempotency_key", key)
+    .in("status", OPEN_PROPOSAL).maybeSingle();
+  return data ?? null;
+}
+
 async function proposeAction(
   ctx: OfficerContext,
   input: {
@@ -822,6 +877,7 @@ async function proposeAction(
     reason: string;
     contractId?: string | null;
     obligationId?: string | null;
+    gapId?: string | null;
     conversationId?: string | null;
     riskLevel?: "low" | "medium" | "high";
     citations?: OfficerCitation[];
@@ -837,59 +893,79 @@ async function proposeAction(
   if (!auth.allowed && auth.reason === "not_available_yet") {
     return { ok: false, error: "action_channel_not_available_in_phase_4a" };
   }
-  if (input.contractId && !(await resolveContract(ctx, input.contractId))) {
-    return { ok: false, error: "contract_not_found_in_organization" };
+  const resolved = await resolveActionTarget(ctx, input);
+  if (!resolved.ok) return resolved;
+  const { target } = resolved;
+
+  // IDEMPOTENCY: identity = action type + structured target + operational
+  // parameters, derived here — never the model's wording. The partial unique
+  // index (migration 0013) makes "one open proposal per identity" atomic.
+  const key = actionIdentityKey(input.actionType, target, input.args);
+  const reused = (row: any) =>
+    ok({ ...row, reused: true }, input.citations ?? [], `existing open proposal reused (${row.status}); nothing new was created`);
+
+  const existing = await findOpenProposal(ctx, key);
+  if (existing) return reused(existing);
+
+  // Open proposals recorded before 0013 have no key: derive theirs from their
+  // stored structured columns so the transition cannot create a duplicate.
+  const { data: legacy } = await ctx.supabase
+    .from("officer_actions")
+    .select(`${PROPOSAL_COLUMNS}, contract_id, obligation_id, arguments`)
+    .eq("organization_id", ctx.organizationId).eq("action_type", input.actionType)
+    .is("idempotency_key", null).in("status", OPEN_PROPOSAL);
+  const legacyHit = (legacy ?? []).find((d: any) => actionIdentityKey(input.actionType,
+    { contractId: d.contract_id, obligationId: d.obligation_id, gapId: null }, d.arguments ?? {}) === key);
+  if (legacyHit) {
+    const { id, status, requires_approval, action_type } = legacyHit as any;
+    return reused({ id, status, requires_approval, action_type });
   }
 
-  // IDEMPOTENCY: a repeated click or a model re-proposing the same thing
-  // must not create a second approval request for an identical open action.
-  const { data: dupes } = await ctx.supabase
-    .from("officer_actions")
-    .select("id, status, requires_approval, action_type, arguments, contract_id")
-    .eq("organization_id", ctx.organizationId)
-    .eq("action_type", input.actionType)
-    .in("status", ["suggested", "waiting_for_approval"]);
-  const argKey = JSON.stringify(input.args ?? {});
-  const existing = (dupes ?? []).find(
-    (d: any) => JSON.stringify(d.arguments ?? {}) === argKey && (d.contract_id ?? null) === (input.contractId ?? null),
-  );
-  if (existing) {
-    return ok(existing, input.citations ?? [], `existing open proposal reused (${existing.status})`);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data, error } = await ctx.supabase
+      .from("officer_actions")
+      .insert({
+        organization_id: ctx.organizationId,
+        contract_id: target.contractId,
+        obligation_id: target.obligationId,
+        evidence_gap_id: target.gapId,
+        idempotency_key: key,
+        conversation_id: input.conversationId ?? null,
+        action_type: input.actionType,
+        arguments: input.args,
+        reason: input.reason,
+        citations: input.citations ?? [],
+        risk_level: input.riskLevel ?? (requiresApproval ? "medium" : "low"),
+        requires_approval: requiresApproval,
+        status: requiresApproval ? "waiting_for_approval" : "suggested",
+        proposed_by: null, // proposed by the Officer, not by a human
+      })
+      .select(PROPOSAL_COLUMNS)
+      .single();
+    if (data) return ok({ ...data, reused: false }, input.citations ?? [], `proposed ${input.actionType} (${data.status})`);
+    // A concurrent request won the insert: return ITS proposal.
+    if (error?.code === "23505") {
+      const winner = await findOpenProposal(ctx, key);
+      if (winner) return reused(winner);
+      continue; // the winner was decided in between — an open slot exists again
+    }
+    return { ok: false, error: `proposal_failed: ${error?.message ?? "unknown"}` };
   }
-
-  const { data, error } = await ctx.supabase
-    .from("officer_actions")
-    .insert({
-      organization_id: ctx.organizationId,
-      contract_id: input.contractId ?? null,
-      obligation_id: input.obligationId ?? null,
-      conversation_id: input.conversationId ?? null,
-      action_type: input.actionType,
-      arguments: input.args,
-      reason: input.reason,
-      citations: input.citations ?? [],
-      risk_level: input.riskLevel ?? (requiresApproval ? "medium" : "low"),
-      requires_approval: requiresApproval,
-      status: requiresApproval ? "waiting_for_approval" : "suggested",
-      proposed_by: null, // proposed by the Officer, not by a human
-    })
-    .select("id, status, requires_approval, action_type")
-    .single();
-  if (error || !data) return { ok: false, error: `proposal_failed: ${error?.message ?? "unknown"}` };
-  return ok(data, input.citations ?? [], `proposed ${input.actionType} (${data.status})`);
+  return { ok: false, error: "proposal_failed: identity contention" };
 }
 
 const createInternalAction: OfficerTool = {
   name: "createInternalAction",
   toolClass: "SAFE_INTERNAL_WRITE",
   description:
-    "Record an internal officer note or follow-up task. Internal bookkeeping only — it changes no contract, obligation, evidence or gap.",
+    "Propose an internal officer note or follow-up task (a human confirms it). Internal bookkeeping only — it sends nothing and changes no contract, obligation, evidence or gap. Pass gapId when the follow-up concerns one specific evidence gap. If an open proposal for the same target exists it is returned with reused=true and nothing new is created.",
   input: z.object({
     actionType: z.enum(["officer.note", "officer.internal_task"]),
     title: z.string().min(3).max(200),
     reason: z.string().min(3).max(2000),
     contractId: z.string().uuid().optional(),
     obligationId: z.string().uuid().optional(),
+    gapId: z.string().uuid().optional(),
     conversationId: z.string().uuid().optional(),
   }).strict(),
   handler: (ctx, args) =>
@@ -899,6 +975,7 @@ const createInternalAction: OfficerTool = {
       reason: args.reason,
       contractId: args.contractId ?? null,
       obligationId: args.obligationId ?? null,
+      gapId: args.gapId ?? null,
       conversationId: args.conversationId ?? null,
       riskLevel: "low",
     }),
@@ -943,13 +1020,14 @@ const requestHumanApproval: OfficerTool = {
   name: "requestHumanApproval",
   toolClass: "APPROVAL_REQUIRED",
   description:
-    "Escalate to a human: request internal evidence, escalate to a contract manager, or ask for review of a discrepancy. Creates an approval request; nothing is sent externally in Phase 4A.",
+    "Escalate to a human: request internal evidence, escalate to a contract manager, or ask for review of a discrepancy. Creates an approval request; nothing is sent externally in Phase 4A. Pass gapId when it concerns one specific evidence gap. An existing open request for the same target is returned with reused=true.",
   input: z.object({
     actionType: z.enum(["officer.request_evidence_internal", "officer.escalate"]),
     summary: z.string().min(3).max(200),
     reason: z.string().min(3).max(2000),
     contractId: z.string().uuid().optional(),
     obligationId: z.string().uuid().optional(),
+    gapId: z.string().uuid().optional(),
     conversationId: z.string().uuid().optional(),
     riskLevel: z.enum(["low", "medium", "high"]).optional(),
   }).strict(),
@@ -960,6 +1038,7 @@ const requestHumanApproval: OfficerTool = {
       reason: args.reason,
       contractId: args.contractId ?? null,
       obligationId: args.obligationId ?? null,
+      gapId: args.gapId ?? null,
       conversationId: args.conversationId ?? null,
       riskLevel: args.riskLevel ?? "medium",
     }),

@@ -8,6 +8,10 @@ import type { OfficerContext } from "@/lib/officer/context";
 import { loadUsableMemory } from "@/lib/officer/memory";
 import { buildOfficerSystemPrompt } from "@/lib/officer/prompt";
 import {
+  buildActionReceipts, composeActionAnswer, isActionRequest,
+  type ActionAttempt, type ActionReceipt,
+} from "@/lib/officer/receipts";
+import {
   getOfficerProvider,
   type OfficerToolCall,
   type OfficerToolSpec,
@@ -17,6 +21,7 @@ import {
   listOfficerTools,
   runOfficerTool,
   selectToolGroups,
+  TOOL_GROUPS,
   type OfficerTool,
   type ToolGroup,
 } from "@/lib/officer/tools";
@@ -43,6 +48,7 @@ const MAX_TOOL_CALLS = 12;
 const OFFICER_TOOL_NAMES = new Set(listOfficerTools().map((t) => t.name));
 /** Tool payload handed back to the model — bounded so context stays small. */
 const MAX_RESULT_CHARS = 6000;
+const ACTION_TOOLS = new Set(TOOL_GROUPS.ACTION);
 
 /** Minimal JSON Schema for the provider, derived from the zod input shape. */
 function toolSpecs(tools: readonly OfficerTool[] = listOfficerTools()): OfficerToolSpec[] {
@@ -90,6 +96,10 @@ export type OfficerAnswer = {
   citations: OfficerCitation[];
   toolInvocations: OfficerToolInvocation[];
   proposedActionIds: string[];
+  /** authoritative outcome of every action attempted this turn (from records) */
+  actionReceipts: ActionReceipt[];
+  /** model sentences removed because no record backs the completion they claim */
+  removedClaims: string[];
   /** citations the model produced that did not survive validation */
   rejectedCitations: RejectedCitation[];
   /** true when the officer reported having no verified record */
@@ -189,6 +199,7 @@ export async function converseWithOfficer(opts: {
   const invocations: OfficerToolInvocation[] = [];
   const trace: OfficerToolTrace[] = [];
   const proposedActionIds: string[] = [];
+  const attempts: ActionAttempt[] = [];
   const seenCalls = new Set<string>();
   let usageIn = 0;
   let usageOut = 0;
@@ -234,6 +245,11 @@ export async function converseWithOfficer(opts: {
       if (opts.collectTrace) trace.push({ tool: call.name, args: call.arguments ?? {}, ok: result.invocation.ok, payload: result.payload });
       if (result.citations.length) mergeToolCitations(toolCitations, result.citations);
       if (result.actionId) proposedActionIds.push(result.actionId);
+      // A suppressed in-turn repeat did nothing new; the first call's receipt stands.
+      if (ACTION_TOOLS.has(call.name) && result.invocation.summary !== "repeated identical call suppressed") {
+        attempts.push({ tool: call.name, ok: result.invocation.ok, error: result.invocation.ok ? null : result.invocation.summary,
+          actionId: result.actionId, reused: result.reused });
+      }
       messages.push({ role: "tool", toolCallId: call.id, name: call.name, content: result.payload });
     }
   }
@@ -271,11 +287,19 @@ export async function converseWithOfficer(opts: {
   for (const c of valid) merged.set(`${c.target}:${c.id}`, c);
   for (const [k, c] of toolCitations) if (!merged.has(k)) merged.set(k, c);
 
+  // Action status comes from records, not prose (see receipts.ts).
+  const actionReceipts = await buildActionReceipts(ctx, attempts);
+  const composed = composeActionAnswer({
+    locale: ctx.locale, text: clean, receipts: actionReceipts, actionRequested: isActionRequest(question),
+  });
+
   const lower = clean.toLowerCase();
   return {
     ok: true,
     answer: {
-      text: clean,
+      text: composed.text,
+      actionReceipts,
+      removedClaims: composed.removed,
       budgetExhausted,
       citations: [...merged.values()].slice(0, 24),
       toolInvocations: invocations,
@@ -318,7 +342,7 @@ async function executeCall(
   ctx: OfficerContext,
   call: OfficerToolCall,
   seen: Set<string>,
-): Promise<{ invocation: OfficerToolInvocation; payload: string; citations: OfficerCitation[]; actionId: string | null }> {
+): Promise<{ invocation: OfficerToolInvocation; payload: string; citations: OfficerCitation[]; actionId: string | null; reused: boolean }> {
   const t0 = Date.now();
   const signature = `${call.name}:${JSON.stringify(call.arguments ?? {})}`;
   if (seen.has(signature)) {
@@ -327,6 +351,7 @@ async function executeCall(
       payload: JSON.stringify({ ok: false, error: "duplicate_call_already_answered" }),
       citations: [],
       actionId: null,
+      reused: false,
     };
   }
   seen.add(signature);
@@ -339,6 +364,7 @@ async function executeCall(
       payload: JSON.stringify({ ok: false, error: result.error }),
       citations: [],
       actionId: null,
+      reused: false,
     };
   }
 
@@ -362,6 +388,7 @@ async function executeCall(
     payload,
     citations: result.citations,
     actionId,
+    reused: actionId !== null && (result.data as any).reused === true,
   };
 }
 
