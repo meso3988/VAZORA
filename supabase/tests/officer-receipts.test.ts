@@ -137,6 +137,40 @@ check("AR legit: informational turn — 'تم إسناد' history kept",
 check("AR: action turn — agentless 'تم إسناد' claim removed without a completed assignment",
   enforceActionClaims("تم إسناد الالتزام إلى فيصل.", none, true).removed.length === 1);
 
+// ---- precision: a record backs only its own operation ------------------------------------------
+const heldAssign = fresh("approved", "obligation.assign_owner", { execution_result: { executed: false, held: "approved_but_not_executed_in_phase_4a" } });
+for (const t of [
+  "I completed the internal follow-up task and sent it to the client.",
+  "I completed the follow-up task and assigned the obligation to Faisal.",
+  "I completed the follow-up task and verified the evidence.",
+  "I completed the follow-up task and resolved the gap.",
+  "I completed the escalation.",
+  "I executed the owner assignment.",
+]) check(`PRECISION completed internal task does not back: "${t}"`, removed(t, [done]));
+check("PRECISION completed internal task backs exactly that operation", kept("I completed the internal follow-up task.", [done]));
+check("PRECISION new internal task does not back 'I created an escalation'",
+  removed("I created an escalation for the GAMMA-300 gap.", [fresh("suggested", "officer.internal_task")]));
+check("PRECISION new escalation backs 'I created an escalation'",
+  kept("I created an escalation for the GAMMA-300 gap.", [fresh("waiting_for_approval", "officer.escalate")]));
+check("PRECISION human approval, record approved-not-executed → passive statement kept",
+  kept("The owner assignment has been approved by the authorized user; it is not yet executed.", [heldAssign]));
+check("PRECISION same statement while the record still awaits approval → removed",
+  removed("The owner assignment has been approved by the authorized user; it is not yet executed.", [fresh("waiting_for_approval", "obligation.assign_owner")]));
+check("PRECISION approved-not-executed does NOT back 'assigned' (approved ≠ executed)",
+  removed("The obligation has been assigned to Faisal.", [heldAssign]));
+check("PRECISION approved-not-executed does NOT back 'executed'",
+  removed("The owner assignment has been executed.", [heldAssign]));
+check("PRECISION the Officer never approves: 'I approved the assignment' removed even when a human approved it",
+  removed("I approved the owner assignment.", [heldAssign]));
+check("PRECISION historical human approval (third person, informational) kept",
+  enforceActionClaims("The KPI override was approved by the contract manager on 12 September.", none, false).removed.length === 0);
+check("PRECISION AR human approval backed by an approved record kept",
+  kept("تمت الموافقة على إسناد المالك من المستخدم المخوّل، ولم يُنفَّذ بعد.", [heldAssign]));
+check("PRECISION AR same while awaiting approval → removed",
+  removed("تمت الموافقة على إسناد المالك من المستخدم المخوّل، ولم يُنفَّذ بعد.", [fresh("waiting_for_approval", "obligation.assign_owner")]));
+check("PRECISION reused proposal: 'I created …' removed, reuse statement by the receipt",
+  removed("I created an internal follow-up task.", [reusedR("suggested", "officer.internal_task")]));
+
 // ---- rendering ------------------------------------------------------------------------------
 const arTxt = renderReceipts("ar", [reusedR("suggested", "officer.internal_task")], true);
 check("AR receipt: reused → no new proposal", /لم يُنشأ مقترح جديد/.test(arTxt), arTxt);

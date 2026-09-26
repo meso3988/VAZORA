@@ -104,7 +104,7 @@ check("external-action-declared-but-ungranted",
   const names = listOfficerTools().map((t) => t.name);
   check("all-tools-grouped-for-selection", names.every((n) => grouped.has(n)),
     names.filter((n) => !grouped.has(n)).join(","));
-  check("tool-count-stable", names.length === 17, `${names.length} tools`);
+  check("tool-count-stable", names.length === 18, `${names.length} tools`);
 }
 
 // ---- the sweep endpoint is the documented headless entry point ------------
