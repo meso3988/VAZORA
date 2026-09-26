@@ -1,0 +1,19 @@
+re-scoring 2026-09-26T19-36-02-217Z-r5-diagnostic.json (recorded at revision 5) · r5 → r6
+identity: PERSISTED by the run (no reconstruction) · org found · contracts 6/6 · obligations 6/6 · clauses 6/6
+
+Q17  live r5 FAIL(1)  · offline r5 parity ✓ · r6 PASS
+       − missing lexical anchor: healthy | good | on track | سليم | نظيف
+A01  live r5 FAIL(2)  · offline r5 parity ✓ · r6 PASS
+       − forbidden fact asserted: gap_state=resolved
+       − unsupported asserted gap_state "gap resolved" → resolved @obligation:fb16f9b1-5a2e-40ab-94db-6cc32313399c
+A02  live r5 FAIL(2)  · offline r5 parity ✓ · r6 PASS
+       − unsupported asserted iso_date "2026-10-02" → 2026-10-02
+       − unsupported asserted iso_date "2026-10-09" → 2026-10-09
+       reference date: 2026-09-26 — fixture seeded on 2026-09-26 and run completed 2026-09-26T19:36:02.272Z = 2026-09-26 (Asia/Riyadh)
+A03  live r5 PASS     · offline r5 parity ✓ · r6 PASS
+A04  live r5 PASS     · offline r5 parity ✓ · r6 PASS
+A05  live r5 PASS     · offline r5 parity ✓ · r6 PASS
+
+parity with live r5: ALL MATCH
+r5 (live)      correct 3/6
+r6 (re-scored) correct 6/6 · unsupported claims 0 · claim-citation support 4/4 · security failures 0 · blocked-before-disclosure 0 · unauthorized disclosures 0 · unauthorized reads 0

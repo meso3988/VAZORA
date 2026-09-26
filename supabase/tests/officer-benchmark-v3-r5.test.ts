@@ -7,7 +7,7 @@
 // Deterministic; no model, no network. Payload shapes mirror tools.ts.
 
 import * as r4 from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/fact-ledger";
-import * as r5 from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as r5 from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/fact-ledger";
 
 let pass = 0, fail = 0;
 const failures: string[] = [];

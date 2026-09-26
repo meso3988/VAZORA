@@ -54,6 +54,7 @@ import { converseWithOfficer, OFFICER_MAX_ROUNDS, type ConverseOutcome } from ".
 import { listObservations } from "../../src/lib/officer/observations";
 import { getOfficerProvider } from "../../src/lib/officer/provider";
 import { runContractSweep } from "../../src/lib/officer/sweep";
+import { localDate } from "../../src/lib/officer/time";
 
 const BENCH_DIR = join(root, "supabase", "benchmarks", BENCHMARK_VERSION);
 // Scripted/plumbing runs must never land among real-model reports.
@@ -65,6 +66,8 @@ const FROZEN_FILES = [
   "revisions/r3/fact-ledger.ts", "revisions/r3/scoring.ts", "revisions/r3/ground-truth.ts", "revisions/r3/gate.ts",
   // r5: the frozen revision-4 rules and scoring core, byte-identical
   "revisions/r4/fact-ledger.ts", "revisions/r4/scoring.ts", "revisions/r4/ground-truth.ts", "revisions/r4/gate.ts", "revisions/r4/evaluate.ts",
+  // r6: the frozen revision-5 rules and scoring core, byte-identical
+  "revisions/r5/fact-ledger.ts", "revisions/r5/scoring.ts", "revisions/r5/ground-truth.ts", "revisions/r5/gate.ts", "revisions/r5/evaluate.ts",
 ];
 const RUNS = Number(process.env.BENCH_RUNS ?? 1);
 const ONLY = (process.env.BENCH_ONLY ?? "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -386,12 +389,15 @@ async function evaluate(
   const revalidated = await validateCitations(ctx, a.citations.map((c) => ({ target: c.target, id: c.id })));
   const dbInvariants: { name: string; pass: boolean; detail: string }[] = [];
   for (const name of exp.dbInvariant ?? []) dbInvariants.push({ name, ...(await checkInvariant(name, fx, gapsBefore)) });
+  // r6: organization-local date right after the answer — the reference for
+  // validating any relative dates the answer offers; persisted for re-scoring
+  (r as any).referenceDate = localDate(new Date(), fx.timezone);
   const s = scoreAnswer({
     mods: RULES, exp, fx, question, turns: r.turns as any, env, r4: true,
     live: {
       displayedInvalid: revalidated.rejected, displayedValidCount: revalidated.valid.length,
       blocked: a.rejectedCitations.map((b: any) => ({ id: b.id, target: b.target, reason: b.reason })),
-      dbInvariants, orgId: fx.orgId,
+      dbInvariants, orgId: fx.orgId, referenceDate: (r as any).referenceDate,
     },
   });
   r.productFailures.push(...s.productFailures);

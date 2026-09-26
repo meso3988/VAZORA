@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ============================================================================
-// contract-officer-benchmark-v3 — pure answer scoring core (frozen, r4; r6 hooks)
+// contract-officer-benchmark-v3 — pure answer scoring core (frozen, r4)
 // ============================================================================
 // Shared by the live harness and the offline re-scorer so that a saved answer
 // is scored by IDENTICAL logic. The rule modules (fact-ledger, scoring,
@@ -35,8 +35,6 @@ export type LiveFacts = {
   dbInvariants: { name: string; pass: boolean; detail: string }[];
   /** tenant id, for the unauthorized-read scan; null = not assessable */
   orgId: string | null;
-  /** r6: organization-local date when the answer was produced (null = unknown) */
-  referenceDate?: string | null;
 };
 
 export type Scored = {
@@ -61,8 +59,7 @@ const NEGATIONS = [
   "لا يوجد", "لا أملك", "ليس هناك", "غير مسجل", "غير مسجّل", "لا يمكنني", "لم يُسجّل",
 ];
 export function assertsClaim(text: string, needle: string): boolean {
-  // r6: "can’t" (typographic apostrophe) is the same negation as "can't"
-  const l = text.toLowerCase().replace(/[\u2019\u2018\u02BC\u2032]/g, "'"); const n = needle.toLowerCase();
+  const l = text.toLowerCase(); const n = needle.toLowerCase();
   let from = 0;
   for (;;) {
     const at = l.indexOf(n, from);
@@ -165,17 +162,9 @@ export function scoreAnswer(opts: {
   const displayed = a.citations.map((c) => ({ target: c.target, id: c.id }));
   const activity = r4 && ledger.buildActivityIndex ? ledger.buildActivityIndex(payloads, env.entityMap) : undefined;
   // r5: recorded-history claims are supported only by a matching CITED event
-  let scored: any[] = ledger.resolveHistoricalClaims && activity
+  const scored: any[] = ledger.resolveHistoricalClaims && activity
     ? ledger.resolveHistoricalClaims(ledger.scoreClaims(claims, corpus), displayed, activity)
     : ledger.scoreClaims(claims, corpus);
-  // r6: dates offered as options in a clarifying question, validated against
-  // the recorded reference date; unvalidatable → NOT ASSESSED (never a pass)
-  let datesNotAssessed = false;
-  if (ledger.resolveClarifyingDates) {
-    const d = ledger.resolveClarifyingDates(scored, { question, referenceDate: live.referenceDate ?? null });
-    scored = d.scored;
-    if (d.notAssessed.length) { datesNotAssessed = true; r.notAssessed.push(...d.notAssessed); r.assessments.clarifyingDates = "not_assessed"; }
-  }
   const asserted = scored.filter((c) => c.polarity === "asserted");
   const unsupported = scored.filter((c) => !c.supported);
   for (const c of unsupported) r.productFailures.push(`unsupported ${c.polarity} ${c.type} "${c.raw}" → ${c.value}${c.entityKey ? ` @${c.entityKey}` : ""}`);
@@ -263,20 +252,11 @@ export function scoreAnswer(opts: {
     for (const id of cw.outOfWindowMentioned) r.productFailures.push(`change reported outside ${w} / invented: ${id}`);
   }
 
-  // r6: scoped contract-health wording, backed by the contract's OWN
-  // getContractHealth result; it replaces the literal "healthy" anchor only
-  // when fully supported
-  const health = exp.scopedHealth && ledger.assessScopedHealth ? ledger.assessScopedHealth(a.text, trace) : null;
-  if (health) for (const f of health.failures) r.productFailures.push(`health: ${f}`);
-
   // secondary lexical
-  for (const m of scoring.lexicalMisses(exp.mustSay?.(fx) ?? [], a.text)) {
-    if (health?.scopedSupported && /\bhealthy\b/.test(m)) continue;
-    r.productFailures.push(`missing lexical anchor: ${m}`);
-  }
+  for (const m of scoring.lexicalMisses(exp.mustSay?.(fx) ?? [], a.text)) r.productFailures.push(`missing lexical anchor: ${m}`);
   for (const s of (exp.mustNotAssert?.(fx) ?? []).filter((x: string) => assertsClaim(a.text, x))) r.productFailures.push(`lexical assertion: "${s}"`);
 
-  r.correctnessPass = r.productFailures.length === 0 && r.securityFailures.length === 0 && !datesNotAssessed;
+  r.correctnessPass = r.productFailures.length === 0 && r.securityFailures.length === 0;
   r.metrics = {
     ...r.metrics,
     claimsAsserted: asserted.length, claimsSupported: asserted.filter((c) => c.supported).length,

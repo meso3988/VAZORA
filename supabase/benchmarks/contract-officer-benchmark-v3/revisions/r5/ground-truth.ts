@@ -73,8 +73,6 @@ export type Expectation = {
   inventedChanges?: RegExp[];
   mustSay?: (fx: any) => LexicalGroup[];
   mustNotAssert?: (fx: any) => string[];
-  /** r6: accept the scoped no-issues statement backed by getContractHealth */
-  scopedHealth?: boolean;
 };
 
 export type LexicalGroup = string | string[];
@@ -330,9 +328,6 @@ export const EXPECTATIONS: Expectation[] = [
       { type: "gap_state", value: "open", entityKey: ck("ALPHA-100") },
     ],
     mustSay: () => [["healthy", "good", "on track", "سليم", "نظيف"]],
-    // r6: the scoped statement, backed by this contract's own getContractHealth
-    // result, satisfies the health anchor above (see fact-ledger r6 S)
-    scopedHealth: true,
   },
   {
     id: "Q18", label: "External dependencies",

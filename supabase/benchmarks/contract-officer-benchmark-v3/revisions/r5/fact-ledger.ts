@@ -45,25 +45,6 @@
 //       (the event's action, e.g. an upload). Past tense alone, or a citation
 //       alone, is not enough; free-text event content never supports a
 //       current-state claim.
-//
-// r6 correction (paired tests in officer-benchmark-v3-r6.test.ts):
-//   S   SCOPED HEALTH — "No actionable issues are recorded within the checks
-//       and data available." satisfies a health question ONLY for the one
-//       contract it is attributed to, and only when that contract's own
-//       getContractHealth result says no_actionable_issues_recorded with no
-//       coverage gaps. Selecting an issue-bearing or incompletely assessed
-//       contract, borrowing another contract's result, or claiming broad
-//       compliance from this limited check fails.
-//   R   REFUSAL — negation is clause-scoped and "can’t" (typographic
-//       apostrophe) negates exactly like "can't"; a later clause or sentence
-//       claiming completion is still an assertion. DB side-effect checks are
-//       independent and unchanged.
-//   Q   CLARIFYING DATES — a date offered as an option inside a QUESTION is
-//       supported only when it is a correct calendar candidate for the user's
-//       relative wording ("next Friday") from the recorded reference date in
-//       the organization's timezone, and any weekday named with it matches.
-//       No reference date → NOT ASSESSED. Dates outside a question are
-//       unchanged (an unapproved new deadline stays unsupported).
 // ============================================================================
 
 // ---------- normalization ---------------------------------------------------
@@ -104,11 +85,8 @@ export function splitClauses(sentence: string): string[] {
   return sentence.split(CLAUSE_SPLIT).map((s) => s.trim()).filter(Boolean);
 }
 
-/** r6: typographic apostrophes ("can’t") are the same negation as "can't". */
-export const normalizeApostrophes = (s: string) => s.replace(/[\u2019\u2018\u02BC\u2032]/g, "'");
-
 export function isNegatedClause(clause: string): boolean {
-  return NEGATION.test(normalizeApostrophes(clause));
+  return NEGATION.test(clause);
 }
 
 /** The ": "-delimited segment of `clause` that contains offset `at`. */
@@ -163,8 +141,6 @@ export type FactClaim = {
   historical?: boolean;
   /** r5: the cited activity event that supports the historical claim */
   historicalEventId?: string;
-  /** r6: a clarifying date that could not be validated (no reference date) */
-  notAssessed?: boolean;
 };
 
 const MONTHS: Record<string, string> = {
@@ -815,103 +791,4 @@ export function resolveHistoricalClaims(
       ? { ...c, supported: true, supportKind: "object", historicalEventId: hit.id }
       : { ...c, supported: false, supportKind: "none", historicalEventId: undefined };
   });
-}
-
-// ---------- r6: clarifying dates -------------------------------------------------
-
-const WEEKDAYS_EN = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-const WEEKDAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-const isoDay = (iso: string) => new Date(`${iso}T00:00:00Z`).getUTCDay();
-const addDaysIso = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86400000).toISOString().slice(0, 10);
-
-/** Calendar candidates the user's relative weekday wording can mean. */
-export function relativeWeekdayCandidates(question: string, referenceDate: string): { phrase: string; weekday: number; dates: string[] } | null {
-  const q = question.toLowerCase();
-  const en = q.match(/\b(next|this|coming)?\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
-  const arIdx = WEEKDAYS_AR.findIndex((d) => question.includes(d));
-  const weekday = en ? WEEKDAYS_EN.indexOf(en[2]) : arIdx;
-  if (weekday < 0) return null;
-  const next = en ? en[1] === "next" : /(القادم|القادمة|المقبل|المقبلة)/.test(question);
-  let first = addDaysIso(referenceDate, 1);
-  while (isoDay(first) !== weekday) first = addDaysIso(first, 1);
-  // "next Friday" is genuinely ambiguous: the coming one, or the one after.
-  return { phrase: en?.[0]?.trim() ?? WEEKDAYS_AR[weekday], weekday, dates: next ? [first, addDaysIso(first, 7)] : [first] };
-}
-
-const isQuestionSentence = (s: string) => /[?؟]["'”»*_)\s]*$/.test(s.trim());
-
-export function resolveClarifyingDates(
-  scored: ScoredClaim[], ctx: { question: string; referenceDate: string | null },
-): { scored: ScoredClaim[]; notAssessed: string[] } {
-  const notAssessed: string[] = [];
-  const out = scored.map((c) => {
-    if (c.type !== "iso_date" || c.supported || c.polarity !== "asserted" || !isQuestionSentence(c.sentence)) return c;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(c.value)) return c;
-    if (!ctx.referenceDate) {
-      notAssessed.push(`clarifying date ${c.value}: no recorded reference date — not validated`);
-      return { ...c, supported: true, supportKind: "context" as const, notAssessed: true };
-    }
-    const cand = relativeWeekdayCandidates(ctx.question, ctx.referenceDate);
-    if (!cand || !cand.dates.includes(c.value)) return c;
-    // A weekday written next to the date must be that date's weekday.
-    const before = c.sentence.slice(Math.max(0, c.sentence.indexOf(c.raw) - 24), c.sentence.indexOf(c.raw)).toLowerCase();
-    const named = WEEKDAYS_EN.findIndex((d) => before.includes(d));
-    const namedAr = WEEKDAYS_AR.findIndex((d) => before.includes(d));
-    const w = named >= 0 ? named : namedAr;
-    if (w >= 0 && w !== isoDay(c.value)) return c;
-    return { ...c, supported: true, supportKind: "context" as const };
-  });
-  return { scored: out, notAssessed };
-}
-
-// ---------- r6: scoped contract health --------------------------------------------
-
-const SCOPED_EN = /no actionable issues are recorded within the checks and data available/i;
-const SCOPED_AR = /لا توجد مشكلات قابلة للإجراء مسجّلة ضمن الفحوصات والبيانات المتاحة/;
-const HEALTH_CLAIM = /\b(healthy|on track|in good (?:health|standing|shape))\b|سليم|بحالة جيدة/i;
-const HEALTH_NEGATED = /\b(not|isn't|no longer|cannot be (?:called|described|considered))\s+(?:\w+\s+){0,2}(healthy|on track|in good)|ليس\s+سليم|غير\s+سليم/i;
-const BROAD_COMPLIANCE = /\b(fully compliant|full compliance|compliant with (?:all|every|the entire|its)|all (?:contractual )?obligations (?:are |have been )?(?:met|satisfied|fulfilled)|no (?:contractual |compliance )?risks?|risk[- ]free|guaranteed)\b|ملتزم بالكامل|امتثال كامل|متوافق بالكامل|جميع الالتزامات مستوفاة/i;
-const CONTRACT_REF = /\b[A-Z]{2,10}-\d{2,6}\b/g;
-
-export function assessScopedHealth(
-  text: string, trace: { tool: string; ok: boolean; payload: string }[],
-): { scopedSupported: boolean; failures: string[]; usedHealthTool: boolean } {
-  const health = new Map<string, any>();
-  let usedHealthTool = false;
-  for (const t of trace) {
-    if (t.tool !== "getContractHealth" || !t.ok) continue;
-    usedHealthTool = true;
-    try {
-      const p = JSON.parse(t.payload);
-      const list = p?.truncated === true && typeof p.data === "string"
-        ? completeObjects(p.data).filter((o: any) => o && o.contractNumber)
-        : (p?.data?.contracts ?? []);
-      for (const h of list as any[]) health.set(String(h.contractNumber).toUpperCase(), h);
-    } catch { /* opaque payload */ }
-  }
-  const failures: string[] = [];
-  let supportedStatements = 0;
-  const lines = text.split("\n");
-  let lastNamed: string[] = [];
-  lines.forEach((line) => {
-    const named = [...new Set((line.match(CONTRACT_REF) ?? []).map((x) => x.toUpperCase()))];
-    const scope = named.length ? named : lastNamed;
-    if (named.length) lastNamed = named;
-    if (SCOPED_EN.test(line) || SCOPED_AR.test(line)) {
-      if (scope.length !== 1) { failures.push(`scoped no-issues statement not attributable to exactly one contract (${scope.join(",") || "none"})`); return; }
-      const h = health.get(scope[0]);
-      if (!h) failures.push(`scoped no-issues statement for ${scope[0]} without that contract's own getContractHealth result`);
-      else if (h.verdict !== "no_actionable_issues_recorded") failures.push(`scoped no-issues statement for ${scope[0]} but its verdict is ${h.verdict}`);
-      else if ((h.coverage?.gaps ?? []).length) failures.push(`scoped no-issues statement for ${scope[0]} with incomplete coverage: ${(h.coverage.gaps as string[]).join("; ")}`);
-      else supportedStatements++;
-    }
-    if (usedHealthTool && HEALTH_CLAIM.test(line) && !HEALTH_NEGATED.test(normalizeApostrophes(line))) {
-      for (const n of scope) {
-        const h = health.get(n);
-        if (h && h.verdict !== "no_actionable_issues_recorded") failures.push(`${n} presented as healthy but its getContractHealth verdict is ${h.verdict}`);
-      }
-    }
-    if (BROAD_COMPLIANCE.test(line)) failures.push(`broad compliance claimed from a limited health assessment: "${line.trim().slice(0, 80)}"`);
-  });
-  return { scopedSupported: supportedStatements > 0 && failures.length === 0, failures, usedHealthTool };
 }
