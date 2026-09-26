@@ -6,6 +6,7 @@ import type { OfficerCitation, OfficerToolInvocation } from "@/domain/officer";
 import { validateCitations, type RejectedCitation } from "@/lib/officer/citations";
 import type { OfficerContext } from "@/lib/officer/context";
 import { loadUsableMemory } from "@/lib/officer/memory";
+import { assessContractHealth, enforceHealthClaims, mentionsHealth } from "@/lib/officer/health";
 import { buildOfficerSystemPrompt } from "@/lib/officer/prompt";
 import {
   buildActionReceipts, composeActionAnswer, isActionRequest,
@@ -292,6 +293,13 @@ export async function converseWithOfficer(opts: {
   const composed = composeActionAnswer({
     locale: ctx.locale, text: clean, receipts: actionReceipts, actionRequested: isActionRequest(question),
   });
+  // A contract with recorded issues or without a current assessment is never
+  // presented as healthy (see health.ts). Computed only when health is claimed.
+  if (mentionsHealth(composed.text)) {
+    const guarded = enforceHealthClaims(composed.text, await assessContractHealth(ctx), ctx.locale);
+    composed.text = guarded.text;
+    composed.removed.push(...guarded.corrected);
+  }
 
   const lower = clean.toLowerCase();
   return {

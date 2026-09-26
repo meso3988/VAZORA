@@ -170,7 +170,12 @@ export function isActionRequest(question: string): boolean {
 
 // ---------- completion-claim enforcement -----------------------------------------
 
-type ClaimKind = "send" | "create" | "assign" | "resolve" | "verify" | "escalate" | "approve" | "complete";
+/**
+ * "approve" = a human approval described in the passive ("has been approved"),
+ * backed only by an approved/completed record; "self_approve" = the Officer
+ * claiming it approved something, which it never can.
+ */
+type ClaimKind = "send" | "create" | "assign" | "resolve" | "verify" | "escalate" | "approve" | "self_approve" | "complete";
 
 /** verb → kind; English past forms and Arabic first-person / "تم + masdar" forms */
 const KIND_PATTERNS: [ClaimKind, RegExp][] = [
@@ -178,11 +183,24 @@ const KIND_PATTERNS: [ClaimKind, RegExp][] = [
   ["resolve", /\b(resolved|closed|dismissed|marked\b.*\b(resolved|closed|complete|done))\b|أغلقت|اغلقت|حللت|تم\s+(إغلاق|اغلاق|حل|حلّ)/i],
   ["assign", /\b(assigned|reassigned)\b|أسندت|اسندت|عيّنت|عينت|تم\s+(إسناد|اسناد|تعيين)/i],
   ["verify", /\bverified\b|تحققت|تحقّقت/i],
-  ["approve", /\bapproved\b|وافقت|اعتمدت/i],
+  ["approve", /\bapproved\b|وافقت|اعتمدت|تمت\s+الموافقة|تم\s+اعتماد/i],
   ["escalate", /\b(escalated|submitted|requested|raised|flagged)\b|صعّدت|صعدت|طلبت|تم\s+تصعيد/i],
   ["create", /\b(created|opened|logged|added|recorded|set up|scheduled)\b|أنشأت|انشأت|أضفت|تم\s+(إنشاء|انشاء)/i],
-  ["complete", /\b(done|completed|taken care of|handled)\b|أنجزت|أكملت|تم\s+(تنفيذ|إنجاز)/i],
+  ["complete", /\b(done|completed|executed|carried out|taken care of|handled)\b|أنجزت|أكملت|نفّذت|نفذت|تم\s+(تنفيذ|إنجاز)/i],
 ];
+
+/** Which operation a sentence talks about — a claim must match THAT record type. */
+const OBJECT_TYPES: [RegExp, string][] = [
+  [/\b(follow[- ]?up|task|reminder)\b|متابعة|مهمة/i, "officer.internal_task"],
+  [/\bnote\b|ملاحظة/i, "officer.note"],
+  [/\bescalat\w*|\breview request\b|تصعيد/i, "officer.escalate"],
+  [/\bevidence request\b|\brequest(?:ed)? (?:for |the )?evidence\b|طلب دليل/i, "officer.request_evidence_internal"],
+  [/\bassign\w*|\bowner\b|إسناد|مالك/i, "obligation.assign_owner"],
+];
+function objectTypes(s: string): string[] | null {
+  const t = OBJECT_TYPES.filter(([re]) => re.test(s)).map(([, type]) => type);
+  return t.length ? t : null;
+}
 
 const NEGATED = /\b(not|no|never|nothing|cannot|unable|without|neither|nor)\b|n['’]t\b|(^|\s)(لا|لم|لن|ليس|لست|لسنا|غير|يتعذر|تعذر|دون|بدون)(\s|$)/i;
 const CONDITIONAL = /\b(until|unless|once|if|when|whether|after|before|will|would|could|can|should|may|might|only|to be)\b|(^|\s)(حتى|عندما|إذا|اذا|إن|لو|بعد|قبل|سوف|يمكن|يمكنني|أستطيع|فقط|ينبغي)(\s|$)/i;
@@ -193,18 +211,29 @@ const FIRST_PERSON = /\b(i|we|i['’]ve|we['’]ve|i['’]ll)\b|^[-*•\d.)\s]*(
  * how recorded history is described ("تم إسناد الالتزام"), so they count as
  * the Officer's own claim only in a turn where the user asked it to act.
  */
-const AGENTLESS = /\b(has|have)\s+been\s+(sent|emailed|forwarded|delivered|resolved|closed|assigned|escalated|submitted|completed|done)\b|(^|\s)تم\s/i;
+const AGENTLESS = /\b(has|have)\s+been\s+(sent|emailed|forwarded|delivered|resolved|closed|assigned|escalated|submitted|completed|done|approved|executed|carried out)\b|(^|\s)(تم|تمت)\s/i;
 const QUOTED = /“[^”]*”|"[^"]*"|«[^»]*»|‘[^’]*’/g;
 /** clause boundaries — negation/conditionals scope to their own clause */
 const CLAUSE = /,|;|:|،|\s(?:and|but|while|whereas)\s|\s(?:لكن|لكنّ|بينما)\s/i;
 
-function supported(kind: ClaimKind, receipts: ActionReceipt[]): boolean {
-  const fresh = receipts.filter((r) => !r.reused);
+const NEVER = new Set<ClaimKind>(["send", "resolve", "verify", "self_approve"]);
+
+/**
+ * A claim is backed only by a record of the SAME operation (when the sentence
+ * names one) in a state that makes the claim true. A completed internal task
+ * backs "completed the follow-up task" — never "sent", "assigned", "verified",
+ * "approved" or "resolved".
+ */
+function supported(kind: ClaimKind, receipts: ActionReceipt[], types: string[] | null): boolean {
+  const pool = types ? receipts.filter((r) => r.actionType && types.includes(r.actionType)) : receipts;
+  const fresh = pool.filter((r) => !r.reused);
   switch (kind) {
-    // No Phase 4A Officer operation sends, resolves, verifies or approves.
-    case "send": case "resolve": case "verify": case "approve": return false;
+    // No Phase 4A Officer operation sends, resolves or verifies, and the
+    // Officer never approves — approval is a human decision.
+    case "send": case "resolve": case "verify": case "self_approve": return false;
+    case "approve": return pool.some((r) => r.outcome === "approved_not_executed" || r.outcome === "completed");
     case "assign": return receipts.some((r) => r.actionType === "obligation.assign_owner" && r.outcome === "completed");
-    case "complete": return receipts.some((r) => r.outcome === "completed");
+    case "complete": return pool.some((r) => r.outcome === "completed");
     case "create": return fresh.some((r) => ["proposed", "awaiting_approval", "approved_not_executed", "completed"].includes(r.outcome));
     case "escalate": return fresh.some((r) => ["awaiting_approval", "approved_not_executed", "completed"].includes(r.outcome));
   }
@@ -219,7 +248,8 @@ function supported(kind: ClaimKind, receipts: ActionReceipt[]): boolean {
 export function completionClaimKinds(sentence: string, actionTurn = true): ClaimKind[] {
   const s = sentence.replace(QUOTED, " ").trim();
   if (!s || /[?؟]\s*$/.test(s)) return [];
-  const speaker = FIRST_PERSON.test(s) || (actionTurn && AGENTLESS.test(s));
+  const self = FIRST_PERSON.test(s);
+  const speaker = self || (actionTurn && AGENTLESS.test(s));
   if (!speaker) return [];
   const kinds = new Set<ClaimKind>();
   // Negation scopes to its clause; modality/condition carries forward
@@ -228,7 +258,9 @@ export function completionClaimKinds(sentence: string, actionTurn = true): Claim
   for (const clause of s.split(CLAUSE)) {
     modal ||= CONDITIONAL.test(clause);
     if (modal || NEGATED.test(clause)) continue;
-    for (const [k, re] of KIND_PATTERNS) if (re.test(clause)) kinds.add(k);
+    for (const [k, re] of KIND_PATTERNS) {
+      if (re.test(clause)) kinds.add(k === "approve" && self ? "self_approve" : k);
+    }
   }
   return [...kinds];
 }
@@ -241,8 +273,10 @@ export function enforceActionClaims(
     const parts = ln.split(/(?<=[.!。])\s+/);
     const kept = parts.filter((p) => {
       const kinds = completionClaimKinds(p, actionTurn);
-      const bad = kinds.length > 0 && !kinds.some((k) => supported(k, receipts)) ||
-        kinds.some((k) => ["send", "resolve", "verify", "approve"].includes(k));
+      const types = objectTypes(p.replace(QUOTED, " "));
+      // Every claim in the sentence must be backed — one true claim does not
+      // carry an unrelated one ("created the task and sent it").
+      const bad = kinds.some((k) => NEVER.has(k) || !supported(k, receipts, types));
       if (bad) removed.push(p.trim());
       return !bad;
     });

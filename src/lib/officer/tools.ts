@@ -5,6 +5,7 @@ import { z } from "zod";
 import { effectiveItemStatus, effectiveStatusForRequirement } from "@/domain/effective-status";
 import type { OfficerCitation } from "@/domain/officer";
 import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-identity";
+import { assessContractHealth } from "@/lib/officer/health";
 import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
 import type { OfficerContext } from "@/lib/officer/context";
 import { classifyDeadline } from "@/lib/officer/time";
@@ -1044,6 +1045,25 @@ const requestHumanApproval: OfficerTool = {
     }),
 };
 
+const getContractHealth: OfficerTool = {
+  name: "getContractHealth",
+  toolClass: "READ_ONLY",
+  description:
+    "Health of one or all active contracts from the monitoring sweep: unresolved actionable issues (unassigned, overdue, missing evidence, pending discrepancy review, waiting approvals) and whether the assessment is current. Call this BEFORE calling any contract healthy or issue-free. verdict: actionable_issues | no_actionable_issues_recorded | assessment_incomplete.",
+  input: z.object({ contractId: z.string().uuid().optional() }).strict(),
+  handler: async (ctx, args) => {
+    if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
+      return { ok: false, error: "contract_not_found_in_organization" };
+    }
+    const health = await assessContractHealth(ctx, { contractIds: args.contractId ? [args.contractId] : undefined });
+    return ok(
+      { contracts: health },
+      health.map((h) => cite("contract", h.contractId, `${h.contractNumber} — ${h.title}`, h.contractId, `/app/contracts/${h.contractId}`)),
+      `${health.length} contract(s): ${health.filter((h) => h.verdict === "no_actionable_issues_recorded").length} without recorded actionable issues`,
+    );
+  },
+};
+
 // ---------------------------------------------------------------------------
 // Registry
 // ---------------------------------------------------------------------------
@@ -1057,6 +1077,7 @@ const TOOLS: OfficerTool[] = [
   getObligation,
   getUpcomingObligations,
   getOverdueObligations,
+  getContractHealth,
   getEvidenceStatus,
   getEvidenceGaps,
   getVerificationDiscrepancies,
@@ -1090,7 +1111,7 @@ export type ToolGroup = "ORIENTATION" | "CONTRACT" | "EVIDENCE" | "PEOPLE" | "AC
 export const TOOL_GROUPS: Record<ToolGroup, readonly string[]> = {
   ORIENTATION: ["getOrganizationSummary", "listContracts"],
   CONTRACT: ["getContract", "getContractClause", "listObligations", "getObligation",
-             "getUpcomingObligations", "getOverdueObligations"],
+             "getUpcomingObligations", "getOverdueObligations", "getContractHealth"],
   EVIDENCE: ["getEvidenceStatus", "getEvidenceGaps", "getVerificationDiscrepancies"],
   PEOPLE: ["getOrganizationMembers", "getAssignments"],
   ACTIVITY: ["getRecentActivity"],
@@ -1101,6 +1122,7 @@ export const TOOL_GROUPS: Record<ToolGroup, readonly string[]> = {
 const GROUP_HINTS: Record<Exclude<ToolGroup, "ORIENTATION">, string[]> = {
   CONTRACT: ["contract", "clause", "obligation", "due", "overdue", "deadline", "expiry", "expire",
              "week", "today", "tomorrow", "month", "recurrence", "schedule", "requirement",
+             "healthy", "health", "on track", "سليم", "صحي", "بحالة جيدة",
              "عقد", "بند", "التزام", "موعد", "متأخر", "استحقاق", "أسبوع", "اليوم", "غدا", "شهر", "انتهاء"],
   EVIDENCE: ["evidence", "verified", "verification", "gap", "discrepancy", "proof", "acknowledg",
              "override", "report", "submitted", "missing", "incomplete",
