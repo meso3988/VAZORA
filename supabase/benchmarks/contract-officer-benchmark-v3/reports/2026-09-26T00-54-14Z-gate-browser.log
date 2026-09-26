@@ -1,0 +1,84 @@
+NAV http://localhost:3003/en/login -> 200 in 1206ms
+PASS  en-desktop: login
+PASS  en-desktop: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  en-desktop: dir=ltr
+NAV http://localhost:3003/en/app/dashboard -> 200 in 4087ms
+PASS  en-desktop: command center renders — 3251 chars
+PASS  en-desktop: observations visible — FM-008,OM-014,OPS-021
+PASS  en-desktop: approval card visible — waiting-for-approval section
+PASS  en-desktop: approval controls present — 7 controls
+NAV http://localhost:3003/en/app/contracts/547ce6e2-1730-457d-a6e5-3181b5449e35/officer -> 200 in 1343ms
+PASS  en-desktop: contract officer page renders — 660 chars
+NAV http://localhost:3003/en/app/agent -> 200 in 7214ms
+PASS  en-desktop: composer present
+PASS  en-desktop: conversation answered — 697 chars new
+PASS  en-desktop: reply grounded in seeded contracts
+PASS  en-desktop: citations rendered — 2 new citation links
+PASS  en-desktop: no invented money in reply
+NAV http://localhost:3003/en/app/tasks -> 200 in 1383ms
+PASS  en-desktop: tasks page renders
+PASS  en-desktop: no console errors
+NAV http://localhost:3003/ar/login -> 200 in 481ms
+PASS  ar-desktop: login
+PASS  ar-desktop: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  ar-desktop: dir=rtl
+NAV http://localhost:3003/ar/app/dashboard -> 200 in 3491ms
+PASS  ar-desktop: command center renders — 2835 chars
+PASS  ar-desktop: observations visible — FM-008,OM-014,OPS-021
+PASS  ar-desktop: approval card visible — waiting-for-approval section
+PASS  ar-desktop: approval controls present — 3 controls
+NAV http://localhost:3003/ar/app/contracts/547ce6e2-1730-457d-a6e5-3181b5449e35/officer -> 200 in 1323ms
+PASS  ar-desktop: contract officer page renders — 607 chars
+NAV http://localhost:3003/ar/app/agent -> 200 in 11829ms
+PASS  ar-desktop: composer present
+PASS  ar-desktop: conversation answered — 753 chars new
+PASS  ar-desktop: reply grounded in seeded contracts
+PASS  ar-desktop: citations rendered — 2 new citation links
+PASS  ar-desktop: no invented money in reply
+NAV http://localhost:3003/ar/app/tasks -> 200 in 1504ms
+PASS  ar-desktop: tasks page renders
+PASS  ar-desktop: no console errors
+NAV http://localhost:3003/en/login -> 200 in 433ms
+PASS  en-mobile: login
+PASS  en-mobile: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  en-mobile: dir=ltr
+NAV http://localhost:3003/en/app/dashboard -> 200 in 3964ms
+PASS  en-mobile: command center renders — 3069 chars
+PASS  en-mobile: observations visible — FM-008,OM-014,OPS-021
+PASS  en-mobile: approval card visible — waiting-for-approval section
+PASS  en-mobile: approval controls present — 7 controls
+NAV http://localhost:3003/en/app/contracts/547ce6e2-1730-457d-a6e5-3181b5449e35/officer -> 200 in 1263ms
+PASS  en-mobile: contract officer page renders — 478 chars
+NAV http://localhost:3003/en/app/agent -> 200 in 8417ms
+PASS  en-mobile: composer present
+PASS  en-mobile: conversation answered — 312 chars new
+FAIL  en-mobile: reply grounded in seeded contracts
+PASS  en-mobile: citations rendered — 2 new citation links
+PASS  en-mobile: no invented money in reply
+NAV http://localhost:3003/en/app/tasks -> 200 in 1357ms
+PASS  en-mobile: tasks page renders
+PASS  en-mobile: no console errors
+NAV http://localhost:3003/ar/login -> 200 in 294ms
+PASS  ar-mobile: login
+PASS  ar-mobile: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  ar-mobile: dir=rtl
+NAV http://localhost:3003/ar/app/dashboard -> 200 in 3772ms
+PASS  ar-mobile: command center renders — 2651 chars
+PASS  ar-mobile: observations visible — FM-008,OM-014,OPS-021
+PASS  ar-mobile: approval card visible — waiting-for-approval section
+PASS  ar-mobile: approval controls present — 3 controls
+NAV http://localhost:3003/ar/app/contracts/547ce6e2-1730-457d-a6e5-3181b5449e35/officer -> 200 in 1313ms
+PASS  ar-mobile: contract officer page renders — 423 chars
+NAV http://localhost:3003/ar/app/agent -> 200 in 12027ms
+PASS  ar-mobile: composer present
+PASS  ar-mobile: conversation answered — 691 chars new
+PASS  ar-mobile: reply grounded in seeded contracts
+PASS  ar-mobile: citations rendered — 2 new citation links
+PASS  ar-mobile: no invented money in reply
+NAV http://localhost:3003/ar/app/tasks -> 200 in 1440ms
+PASS  ar-mobile: tasks page renders
+PASS  ar-mobile: no console errors
+
+4A.1 BROWSER REGRESSION: 59 PASS · 1 FAIL · 0 NOT ASSESSED
+  FAILED: en-mobile: reply grounded in seeded contracts 
+BROWSER MODEL USAGE: 4 turns · 19577 tokens (API-reported) · ≤8 requests (upper bound)
