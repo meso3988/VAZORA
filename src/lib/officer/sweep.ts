@@ -79,14 +79,50 @@ export async function runContractSweep(opts: {
   const t0 = Date.now();
   const failures: { contract_id: string; error: string }[] = [];
   const allFindings: Finding[] = [];
+  // Contracts whose replacement scan completed — only these may have their
+  // previous observations resolved.
+  const scanned = new Set<string>();
+  let orgScanned = false;
   let contractsDone = 0;
 
-  const { data: contracts } = await ctx.supabase
-    .from("contracts")
-    .select("id, contract_number, title, status, end_date")
-    .eq("organization_id", ctx.organizationId)
-    .eq("status", "active");
-  const contractRows = contracts ?? [];
+  const finish = async (status: "completed" | "partial" | "failed", counts = { created: 0, updated: 0, resolved: 0 }) => {
+    // The run is only published (completed/partial) if this write succeeds;
+    // otherwise it stays "running"/"failed" and no consumer treats it as fresh.
+    const { error: finErr } = await ctx.supabase.from("officer_sweep_runs")
+      .update({
+        status, completed_at: new Date().toISOString(), duration_ms: Date.now() - t0,
+        observations_created: counts.created, observations_updated: counts.updated, observations_resolved: counts.resolved,
+        failures,
+      })
+      .eq("id", sweepRunId).eq("organization_id", ctx.organizationId);
+    const published = !finErr ? status : "failed";
+    if (finErr) failures.push({ contract_id: "organization", error: "sweep_run_publish_failed" });
+    await log(ctx, "officer.sweep_completed", sweepRunId, {
+      status: published, contracts_total: contractRows.length, contracts_done: contractsDone,
+      ...counts, failures: failures.length,
+    });
+    return {
+      ok: published !== "failed", sweepRunId,
+      contractsTotal: contractRows.length, contractsDone,
+      ...counts, failures, status: published,
+    } as SweepOutcome;
+  };
+
+  let contractRows: any[] = [];
+  try {
+    const { data: contracts, error: cErr } = await ctx.supabase
+      .from("contracts")
+      .select("id, contract_number, title, status, end_date")
+      .eq("organization_id", ctx.organizationId)
+      .eq("status", "active");
+    if (cErr || !Array.isArray(contracts)) throw new Error("read_failed:contracts");
+    contractRows = contracts;
+  } catch {
+    // Without the contract list nothing can be assessed — and nothing may be
+    // resolved (an empty list would otherwise resolve every observation).
+    failures.push({ contract_id: "organization", error: "read_failed:contracts" });
+    return finish("failed");
+  }
 
   await ctx.supabase.from("officer_sweep_runs")
     .update({ contracts_total: contractRows.length })
@@ -94,18 +130,22 @@ export async function runContractSweep(opts: {
 
   for (const c of contractRows) {
     try {
-      allFindings.push(...detectForContract({
-        today,
-        contract: {
-          contractId: c.id as string,
-          contractNumber: c.contract_number as string,
-          title: c.title as string,
-          endDate: (c.end_date as string | null) ?? null,
-          status: c.status as string,
-        },
-        thresholds: th,
-      }));
-      allFindings.push(...(await sweepContract(ctx, c, today, th)));
+      const found = [
+        ...detectForContract({
+          today,
+          contract: {
+            contractId: c.id as string,
+            contractNumber: c.contract_number as string,
+            title: c.title as string,
+            endDate: (c.end_date as string | null) ?? null,
+            status: c.status as string,
+          },
+          thresholds: th,
+        }),
+        ...(await sweepContract(ctx, c, today, th)),
+      ];
+      allFindings.push(...found);
+      scanned.add(c.id as string);
       contractsDone++;
       // Progress is persisted per contract so a partial run is resumable and
       // visible rather than silently lost.
@@ -114,46 +154,54 @@ export async function runContractSweep(opts: {
         .eq("id", sweepRunId).eq("organization_id", ctx.organizationId);
     } catch (e) {
       // Codes only — never contract or evidence text in a log.
-      failures.push({ contract_id: c.id as string, error: e instanceof Error ? e.message.slice(0, 200) : "unknown" });
+      failures.push({ contract_id: c.id as string, error: e instanceof SweepReadError ? e.message : "scan_failed" });
     }
   }
 
   // Organization-level: approvals a human still owes a decision on.
   try {
-    const { data: actions } = await ctx.supabase
+    const { data: actions, error: aErr } = await ctx.supabase
       .from("officer_actions")
       .select("id, action_type, contract_id, obligation_id, reason")
       .eq("organization_id", ctx.organizationId)
       .in("status", ["suggested", "waiting_for_approval"]);
-    allFindings.push(...detectWaitingApprovals((actions ?? []).map((a: any) => ({
+    if (aErr || !Array.isArray(actions)) throw new SweepReadError("officer_actions");
+    allFindings.push(...detectWaitingApprovals(actions.map((a: any) => ({
       id: a.id, actionType: a.action_type, contractId: a.contract_id,
       obligationId: a.obligation_id, reason: a.reason,
     }))));
+    orgScanned = true;
   } catch (e) {
-    failures.push({ contract_id: "organization", error: e instanceof Error ? e.message.slice(0, 200) : "unknown" });
+    failures.push({ contract_id: "organization", error: e instanceof SweepReadError ? e.message : "scan_failed" });
   }
 
-  const { created, updated, resolved } = await reconcileObservations(ctx, allFindings, sweepRunId);
+  let counts = { created: 0, updated: 0, resolved: 0 };
+  try {
+    const rec = await reconcileObservations(ctx, allFindings, sweepRunId, { scanned, orgScanned, allContractsScanned: scanned.size === contractRows.length });
+    counts = { created: rec.created, updated: rec.updated, resolved: rec.resolved };
+    for (const w of rec.writeFailures) {
+      if (!failures.some((f) => f.contract_id === w)) failures.push({ contract_id: w, error: "observation_write_failed" });
+      if (w !== "organization") scanned.delete(w);
+    }
+  } catch (e) {
+    failures.push({ contract_id: "organization", error: e instanceof SweepReadError ? e.message : "reconcile_failed" });
+    return finish("failed");
+  }
 
-  const status = failures.length === 0 ? "completed" : contractsDone > 0 ? "partial" : "failed";
-  await ctx.supabase.from("officer_sweep_runs")
-    .update({
-      status, completed_at: new Date().toISOString(), duration_ms: Date.now() - t0,
-      observations_created: created, observations_updated: updated, observations_resolved: resolved,
-      failures,
-    })
-    .eq("id", sweepRunId).eq("organization_id", ctx.organizationId);
+  // A contract counts as assessed only if its scan AND its writes succeeded.
+  const status = failures.length === 0 ? "completed" : scanned.size > 0 ? "partial" : "failed";
+  return finish(status, counts);
+}
 
-  await log(ctx, "officer.sweep_completed", sweepRunId, {
-    status, contracts_total: contractRows.length, contracts_done: contractsDone,
-    created, updated, resolved, failures: failures.length,
-  });
+/** A required read failed; message is a safe code, never database text. */
+class SweepReadError extends Error {
+  constructor(table: string) { super(`read_failed:${table}`); }
+}
 
-  return {
-    ok: status !== "failed", sweepRunId,
-    contractsTotal: contractRows.length, contractsDone,
-    created, updated, resolved, failures, status,
-  };
+/** Unwrap a query result; any error or missing data aborts this contract's scan. */
+function must<T = any[]>(res: { data: any; error: any }, table: string): T {
+  if (res.error || res.data == null) throw new SweepReadError(table);
+  return res.data as T;
 }
 
 /** Gather one contract's operational facts and run the detectors over them. */
@@ -165,19 +213,19 @@ async function sweepContract(
 ): Promise<Finding[]> {
   const contractId = contract.id as string;
 
-  const { data: obligations } = await ctx.supabase
+  const obligations = must(await ctx.supabase
     .from("contract_obligations")
     .select("id, title, due_date_normalized, due_rule_raw, financial_condition, penalty_condition, payment_linked, external_dependency, requires_external_acknowledgement, owner_role_suggested")
     .eq("organization_id", ctx.organizationId)
     .eq("contract_id", contractId)
     .eq("review_status", "approved")
-    .eq("activation_status", "active");
-  const obRows = obligations ?? [];
+    .eq("activation_status", "active"), "contract_obligations");
+  const obRows = obligations as any[];
   if (!obRows.length) return [];
 
   const obIds = obRows.map((o: any) => o.id as string);
 
-  const [{ data: reqRows }, { data: refRows }, { data: assignRows }] = await Promise.all([
+  const [reqRes, refRes, assignRes] = await Promise.all([
     ctx.supabase.from("obligation_evidence_requirements")
       .select("id, obligation_id, name, required")
       .eq("organization_id", ctx.organizationId).in("obligation_id", obIds),
@@ -188,9 +236,12 @@ async function sweepContract(
       .select("obligation_id, suggestion_kind, approved")
       .eq("organization_id", ctx.organizationId).in("obligation_id", obIds),
   ]);
+  const reqRows = must(reqRes, "obligation_evidence_requirements");
+  const refRows = must(refRes, "obligation_source_refs");
+  const assignRows = must(assignRes, "obligation_assignment_suggestions");
 
   const reqIds = (reqRows ?? []).map((r: any) => r.id as string);
-  const [{ data: checkRows }, { data: gapRows }, { data: discRows }] = reqIds.length
+  const [checkRes, gapRes, discRes] = reqIds.length
     ? await Promise.all([
         ctx.supabase.from("evidence_verification_checks")
           .select("evidence_requirement_id, result, human_result, verification_run_id, created_at")
@@ -204,15 +255,18 @@ async function sweepContract(
           .select("*")
           .eq("organization_id", ctx.organizationId).in("evidence_requirement_id", reqIds),
       ])
-    : [{ data: [] as any[] }, { data: [] as any[] }, { data: [] as any[] }];
+    : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }];
+  const checkRows = must(checkRes, "evidence_verification_checks");
+  const gapRows = must(gapRes, "evidence_gaps");
+  const discRows = must(discRes, "evidence_verification_discrepancies");
 
   // Version each latest check examined — effective status is version-scoped.
   const runIds = [...new Set((checkRows ?? []).map((c: any) => c.verification_run_id).filter(Boolean))];
-  const { data: runRows } = runIds.length
+  const runRows = must(runIds.length
     ? await ctx.supabase.from("evidence_verification_runs")
         .select("id, evidence_version_id")
         .eq("organization_id", ctx.organizationId).in("id", runIds)
-    : { data: [] as any[] };
+    : { data: [] as any[], error: null }, "evidence_verification_runs");
   const versionByRun = new Map((runRows ?? []).map((r: any) => [r.id, r.evidence_version_id]));
 
   const discrepancies: VerificationDiscrepancyView[] = (discRows ?? []).map((d: any) => ({
@@ -289,26 +343,34 @@ async function sweepContract(
  *   present + already active   → touch last_seen_at (NO duplicate)
  *   present + previously resolved → reopen, preserving first_detected_at and
  *                                   counting the reopen
- *   absent  + currently active → resolve (history retained)
+ *   absent  + currently active → resolve (history retained) — ONLY when the
+ *                                replacement scan for that scope completed
+ *                                and its own writes succeeded
+ *
+ * Every write result is checked. A failed write marks its contract (or the
+ * organization scope) as failed so it is never published as assessed.
  */
 async function reconcileObservations(
   ctx: OfficerContext,
   findings: Finding[],
   sweepRunId: string,
-): Promise<{ created: number; updated: number; resolved: number }> {
+  scope: { scanned: Set<string>; orgScanned: boolean; allContractsScanned: boolean },
+): Promise<{ created: number; updated: number; resolved: number; writeFailures: string[] }> {
   const now = new Date().toISOString();
   // Collapse identical dedupe keys within one sweep (belt and braces).
   const byKey = new Map<string, Finding>();
   for (const f of findings) if (!byKey.has(f.dedupeKey)) byKey.set(f.dedupeKey, f);
 
-  const { data: existingRows } = await ctx.supabase
+  const { data: existingRows, error: exErr } = await ctx.supabase
     .from("officer_observations")
-    .select("id, dedupe_key, status, first_detected_at, reopen_count")
+    .select("id, dedupe_key, status, first_detected_at, reopen_count, contract_id, kind")
     .eq("organization_id", ctx.organizationId);
-  const existing = existingRows ?? [];
+  // Without the current observation set we can neither avoid duplicates nor
+  // resolve safely — abort the whole publication.
+  if (exErr || !Array.isArray(existingRows)) throw new SweepReadError("officer_observations");
   const activeByKey = new Map<string, any>();
   const resolvedByKey = new Map<string, any>();
-  for (const row of existing) {
+  for (const row of existingRows) {
     if (row.status === "active" || row.status === "acknowledged") activeByKey.set(row.dedupe_key, row);
     else if (!resolvedByKey.has(row.dedupe_key)) resolvedByKey.set(row.dedupe_key, row);
   }
@@ -316,11 +378,14 @@ async function reconcileObservations(
   let created = 0;
   let updated = 0;
   let resolved = 0;
+  const writeFailures = new Set<string>();
+  const scopeOf = (contractId: string | null, kind: string) =>
+    kind === "action_waiting_for_approval" || !contractId ? "organization" : contractId;
 
   for (const [key, f] of byKey) {
     const open = activeByKey.get(key);
     if (open) {
-      await ctx.supabase.from("officer_observations")
+      const { error } = await ctx.supabase.from("officer_observations")
         .update({
           last_seen_at: now, severity: f.severity, time_bucket: f.timeBucket,
           priority: f.priority, priority_reason: f.priorityReason,
@@ -329,12 +394,12 @@ async function reconcileObservations(
           sweep_run_id: sweepRunId,
         })
         .eq("id", open.id).eq("organization_id", ctx.organizationId);
-      updated++;
+      if (error) writeFailures.add(scopeOf(f.contractId, f.kind)); else updated++;
       continue;
     }
 
     const previously = resolvedByKey.get(key);
-    const { data: inserted } = await ctx.supabase
+    const { data: inserted, error } = await ctx.supabase
       .from("officer_observations")
       .insert({
         organization_id: ctx.organizationId,
@@ -366,26 +431,36 @@ async function reconcileObservations(
       })
       .select("id")
       .single();
-    if (inserted) {
-      created++;
-      await log(ctx, "officer.observation_created", inserted.id as string, {
-        kind: f.kind, severity: f.severity, contract_id: f.contractId,
-        obligation_id: f.obligationId, reopened: !!previously,
-      });
-    }
+    if (error || !inserted) { writeFailures.add(scopeOf(f.contractId, f.kind)); continue; }
+    created++;
+    await log(ctx, "officer.observation_created", inserted.id as string, {
+      kind: f.kind, severity: f.severity, contract_id: f.contractId,
+      obligation_id: f.obligationId, reopened: !!previously,
+    });
   }
 
-  // Conditions that no longer hold are resolved, never deleted.
+  // Conditions that no longer hold are resolved, never deleted — but only in
+  // scopes whose replacement scan completed and whose writes all succeeded.
+  // A failed, partial or unsaved scan leaves previous observations active.
+  const mayResolve = (row: any) => {
+    const sc = scopeOf(row.contract_id, row.kind);
+    if (writeFailures.has(sc)) return false;
+    if (sc === "organization") {
+      return row.kind === "action_waiting_for_approval" ? scope.orgScanned : scope.orgScanned && scope.allContractsScanned;
+    }
+    return scope.scanned.has(sc);
+  };
   for (const [key, row] of activeByKey) {
-    if (byKey.has(key)) continue;
-    await ctx.supabase.from("officer_observations")
+    if (byKey.has(key) || !mayResolve(row)) continue;
+    const { error } = await ctx.supabase.from("officer_observations")
       .update({ status: "resolved", resolved_at: now, time_bucket: "resolved", last_seen_at: now })
       .eq("id", row.id).eq("organization_id", ctx.organizationId);
+    if (error) { writeFailures.add(scopeOf(row.contract_id, row.kind)); continue; }
     resolved++;
     await log(ctx, "officer.observation_resolved", row.id as string, { dedupe_key: key });
   }
 
-  return { created, updated, resolved };
+  return { created, updated, resolved, writeFailures: [...writeFailures] };
 }
 
 async function log(ctx: OfficerContext, eventType: string, entityId: string, metadata: Record<string, unknown>) {

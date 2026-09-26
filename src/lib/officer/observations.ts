@@ -41,27 +41,61 @@ export function mapObservation(row: any): ObservationRow {
   };
 }
 
+/** Upper bound per read; hitting it means the list may be incomplete. */
+const OBSERVATION_READ_LIMIT = 1000;
+
+/**
+ * A failed or truncated read is NOT an empty list. Callers get an explicit
+ * outcome so "no observations" can never be produced by an error.
+ */
+export type ObservationRead =
+  | { ok: true; rows: ObservationRow[] }
+  | { ok: false; code: "observations_read_failed" | "observations_truncated" };
+
 /** Active + acknowledged observations, plus recently resolved for context. */
+export async function readObservations(
+  ctx: OfficerContext,
+  opts: { includeResolvedSince?: string | null; contractId?: string | null } = {},
+): Promise<ObservationRead> {
+  const base = () => {
+    let q = ctx.supabase
+      .from("officer_observations")
+      .select("*")
+      .eq("organization_id", ctx.organizationId)
+      .order("priority", { ascending: true })
+      .order("last_seen_at", { ascending: false })
+      .limit(OBSERVATION_READ_LIMIT);
+    if (opts.contractId) q = q.eq("contract_id", opts.contractId);
+    return q;
+  };
+  try {
+    // Open rows are read on their own, so accumulated history can never push
+    // an unresolved issue out of the window.
+    const open = await base().in("status", ["active", "acknowledged"]);
+    if (open.error || !Array.isArray(open.data)) return { ok: false, code: "observations_read_failed" };
+    let resolved: any[] = [];
+    if (opts.includeResolvedSince) {
+      const r = await base().eq("status", "resolved").gte("resolved_at", opts.includeResolvedSince);
+      if (r.error || !Array.isArray(r.data)) return { ok: false, code: "observations_read_failed" };
+      resolved = r.data;
+    }
+    if (open.data.length >= OBSERVATION_READ_LIMIT || resolved.length >= OBSERVATION_READ_LIMIT) {
+      return { ok: false, code: "observations_truncated" };
+    }
+    return { ok: true, rows: [...open.data, ...resolved].map(mapObservation) };
+  } catch {
+    return { ok: false, code: "observations_read_failed" };
+  }
+}
+
+/** Throwing variant for callers without an incomplete state of their own. */
 export async function listObservations(
   ctx: OfficerContext,
   opts: { includeResolvedSince?: string | null; contractId?: string | null } = {},
 ): Promise<ObservationRow[]> {
-  let q = ctx.supabase
-    .from("officer_observations")
-    .select("*")
-    .eq("organization_id", ctx.organizationId)
-    .order("priority", { ascending: true })
-    .order("last_seen_at", { ascending: false })
-    .limit(300);
-  if (opts.contractId) q = q.eq("contract_id", opts.contractId);
-  const { data } = await q;
-  const rows = (data ?? []).map(mapObservation);
-  const since = opts.includeResolvedSince ? Date.parse(opts.includeResolvedSince) : null;
-  return rows.filter((r) => {
-    if (r.status === "active" || r.status === "acknowledged") return true;
-    if (r.status === "resolved" && since && r.resolvedAt && Date.parse(r.resolvedAt) >= since) return true;
-    return false;
-  });
+  const r = await readObservations(ctx, opts);
+  if (!r.ok) throw new Error(r.code);
+  return r.rows;
 }
 
 /** One observation, validated against the caller's organization. */

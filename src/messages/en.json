@@ -1983,7 +1983,10 @@
         "highestPriority": "Highest priority",
         "runSweep": "Run sweep now",
         "lastSweep": "last sweep {at}",
-        "partial": "partial"
+        "partial": "partial",
+        "incomplete": "I could not complete the current assessment. The last successful assessment is shown separately and may be outdated.",
+        "incompleteNever": "I could not complete the current assessment, and there is no earlier successful assessment.",
+        "lastSuccessful": "Last successful assessment: {at}"
       },
       "center": {
         "title": "Command center",

@@ -55,6 +55,17 @@ export async function TodayBriefPanel({
         </span>
       </div>
 
+      {!brief.assessment.complete && (
+        <p role="status" className="rounded-sm border border-line bg-bg px-3 py-2 text-sm text-partial">
+          {brief.assessment.lastSuccessfulAt ? t("incomplete") : t("incompleteNever")}
+          {brief.assessment.lastSuccessfulAt && (
+            <span className="ms-1 text-[11px] text-faint">
+              {t("lastSuccessful", { at: f.dateTime(new Date(brief.assessment.lastSuccessfulAt), "short") })}
+            </span>
+          )}
+        </p>
+      )}
+
       {brief.quiet ? (
         <p className="text-sm text-verified">{t("quiet")}</p>
       ) : (

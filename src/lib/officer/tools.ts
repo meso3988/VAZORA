@@ -5,7 +5,7 @@ import { z } from "zod";
 import { effectiveItemStatus, effectiveStatusForRequirement } from "@/domain/effective-status";
 import type { OfficerCitation } from "@/domain/officer";
 import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-identity";
-import { assessContractHealth } from "@/lib/officer/health";
+import { assessContractHealth, HealthUnavailableError } from "@/lib/officer/health";
 import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
 import type { OfficerContext } from "@/lib/officer/context";
 import { classifyDeadline } from "@/lib/officer/time";
@@ -1055,7 +1055,13 @@ const getContractHealth: OfficerTool = {
     if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
       return { ok: false, error: "contract_not_found_in_organization" };
     }
-    const health = await assessContractHealth(ctx, { contractIds: args.contractId ? [args.contractId] : undefined });
+    let health;
+    try {
+      health = await assessContractHealth(ctx, { contractIds: args.contractId ? [args.contractId] : undefined });
+    } catch (e) {
+      // Safe code only — never a raw database message.
+      return { ok: false, error: `health_assessment_unavailable: ${e instanceof HealthUnavailableError ? e.code : "read_failed"}` };
+    }
     return ok(
       { contracts: health },
       health.map((h) => cite("contract", h.contractId, `${h.contractNumber} — ${h.title}`, h.contractId, `/app/contracts/${h.contractId}`)),

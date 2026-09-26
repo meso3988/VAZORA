@@ -20,6 +20,11 @@ export async function OfficerDashboardSummary({ brief }: { brief: TodayBrief }) 
 
   return (
     <div className="flex flex-col gap-3 p-5">
+      {!brief.assessment.complete && (
+        <p role="status" className="text-sm text-partial">
+          {brief.assessment.lastSuccessfulAt ? bt("incomplete") : bt("incompleteNever")}
+        </p>
+      )}
       <dl className="flex flex-wrap gap-x-6 gap-y-2">
         <div className="flex flex-col">
           <dt className="text-[10px] font-medium uppercase tracking-wide text-muted">{bt("critical")}</dt>

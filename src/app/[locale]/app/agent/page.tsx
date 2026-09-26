@@ -26,7 +26,7 @@ import { roleHasCapability } from "@/lib/officer/authority";
 import { buildTodayBrief, renderBriefNarrative } from "@/lib/officer/brief";
 import { getConversation, listConversations } from "@/lib/officer/conversation";
 import { buildOfficerContext, ensureOfficerProfile } from "@/lib/officer/context";
-import { listObservations } from "@/lib/officer/observations";
+import { readObservations } from "@/lib/officer/observations";
 import { officerProviderConfigured } from "@/lib/officer/provider";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { Link } from "@/i18n/navigation";
@@ -98,9 +98,16 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
 
   // Proactive monitoring — deterministic brief first; the narrative is one
   // bounded model pass over it and is optional by design.
-  const brief = await buildTodayBrief(ctx);
-  const resolvedSince = brief.since;
-  const observations = await listObservations(ctx, { includeResolvedSince: resolvedSince });
+  const built = await buildTodayBrief(ctx);
+  const resolvedSince = built.since;
+  // A failed observation read is shown as an incomplete assessment, never as
+  // an empty (calm) Command Center.
+  const obsRead = await readObservations(ctx, { includeResolvedSince: resolvedSince });
+  const observations = obsRead.ok ? obsRead.rows : [];
+  const brief = obsRead.ok ? built : {
+    ...built, quiet: false,
+    assessment: { ...built.assessment, complete: false, reasons: [...new Set([...built.assessment.reasons, obsRead.code])] },
+  };
   const { data: lastSweep } = await supabase
     .from("officer_sweep_runs")
     .select("started_at, completed_at, status")

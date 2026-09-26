@@ -296,7 +296,9 @@ export async function converseWithOfficer(opts: {
   // A contract with recorded issues or without a current assessment is never
   // presented as healthy (see health.ts). Computed only when health is claimed.
   if (mentionsHealth(composed.text)) {
-    const guarded = enforceHealthClaims(composed.text, await assessContractHealth(ctx), ctx.locale);
+    // An assessment that cannot even be read backs no reassurance at all.
+    const health = await assessContractHealth(ctx).catch(() => null);
+    const guarded = enforceHealthClaims(composed.text, health, ctx.locale);
     composed.text = guarded.text;
     composed.removed.push(...guarded.corrected);
   }

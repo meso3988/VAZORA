@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { OfficerContext } from "@/lib/officer/context";
-import { getUserState, listObservations, type ObservationRow } from "@/lib/officer/observations";
+import { getUserState, readObservations, type ObservationRow } from "@/lib/officer/observations";
 import { getOfficerProvider } from "@/lib/officer/provider";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -68,8 +68,17 @@ export type TodayBrief = {
     citations: { target: string; id: string; label: string }[];
   }[];
   changes: BriefChange[];
-  /** true when nothing needs attention — do not manufacture activity */
+  /** true when nothing needs attention — do not manufacture activity.
+   *  Only ever true for a COMPLETE assessment. */
   quiet: boolean;
+  /** whether the monitoring behind these numbers actually completed */
+  assessment: {
+    complete: boolean;
+    /** safe codes, e.g. observations_read_failed, latest_sweep_failed */
+    reasons: string[];
+    /** last published sweep — historical context, not a fresh result */
+    lastSuccessfulAt: string | null;
+  };
 };
 
 const SEVERITY_ORDER = ["critical", "high", "medium", "low", "informational"];
@@ -82,13 +91,27 @@ const SEVERITY_ORDER = ["critical", "high", "medium", "low", "informational"];
 export async function buildTodayBrief(ctx: OfficerContext): Promise<TodayBrief> {
   const userState = await getUserState(ctx);
 
-  const { data: lastSweep } = await ctx.supabase
+  const reasons: string[] = [];
+  const { data: lastSweep, error: sweepErr } = await ctx.supabase
     .from("officer_sweep_runs")
     .select("started_at, completed_at")
     .eq("organization_id", ctx.organizationId)
     .in("status", ["completed", "partial"])
     .order("started_at", { ascending: false })
     .limit(2);
+  if (sweepErr) reasons.push("sweep_history_read_failed");
+  // The most recent ATTEMPT decides freshness: a failed/partial/unfinished
+  // run means the current picture was not fully assessed.
+  const { data: attempt, error: attemptErr } = await ctx.supabase
+    .from("officer_sweep_runs")
+    .select("status, failures")
+    .eq("organization_id", ctx.organizationId)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (attemptErr) reasons.push("sweep_history_read_failed");
+  else if (!attempt) reasons.push("never_assessed");
+  else if (attempt.status !== "completed") reasons.push(`latest_sweep_${attempt.status}`);
   // index 1 = the sweep before the most recent one
   const previousSweepAt = (lastSweep ?? [])[1]?.completed_at ?? (lastSweep ?? [])[1]?.started_at ?? null;
 
@@ -103,25 +126,29 @@ export async function buildTodayBrief(ctx: OfficerContext): Promise<TodayBrief> 
     sinceKind = "last_24h";
   }
 
-  const observations = await listObservations(ctx, { includeResolvedSince: since });
+  const read = await readObservations(ctx, { includeResolvedSince: since });
+  if (!read.ok) reasons.push(read.code);
+  const observations = read.ok ? read.rows : [];
   const open = observations.filter((o) => o.status === "active" || o.status === "acknowledged");
   const resolvedSince = observations.filter((o) => o.status === "resolved");
 
   const newIssues = open.filter((o) => Date.parse(o.firstDetectedAt) >= Date.parse(since)).length;
 
-  const { count: approvalsWaiting } = await ctx.supabase
+  const { count: approvalsWaiting, error: approvalsErr } = await ctx.supabase
     .from("officer_actions")
     .select("id", { count: "exact", head: true })
     .eq("organization_id", ctx.organizationId)
     .in("status", ["suggested", "waiting_for_approval"]);
+  if (approvalsErr) reasons.push("approvals_read_failed");
 
-  const { data: events } = await ctx.supabase
+  const { data: events, error: eventsErr } = await ctx.supabase
     .from("activity_log")
     .select("event_type, entity_type, entity_id, created_at")
     .eq("organization_id", ctx.organizationId)
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(100);
+  if (eventsErr) reasons.push("activity_read_failed");
   const changes: BriefChange[] = (events ?? [])
     .filter((e: any) => CHANGE_EVENTS[e.event_type])
     .map((e: any) => ({
@@ -158,7 +185,12 @@ export async function buildTodayBrief(ctx: OfficerContext): Promise<TodayBrief> 
       supportingFacts: o.supportingFacts, citations: o.citations,
     })),
     changes,
-    quiet: open.length === 0 && (approvalsWaiting ?? 0) === 0,
+    quiet: reasons.length === 0 && open.length === 0 && (approvalsWaiting ?? 0) === 0,
+    assessment: {
+      complete: reasons.length === 0,
+      reasons: [...new Set(reasons)],
+      lastSuccessfulAt: (lastSweep ?? [])[0]?.completed_at ?? (lastSweep ?? [])[0]?.started_at ?? null,
+    },
   };
 }
 
@@ -173,7 +205,8 @@ export async function renderBriefNarrative(
   opts: { displayName?: string | null } = {},
 ): Promise<{ text: string | null; provider: string | null; model: string | null; usage?: { inputTokens?: number; outputTokens?: number } }> {
   const provider = getOfficerProvider();
-  if (!provider || !ctx.officer.enabled || brief.quiet) {
+  // No model wording over an incomplete assessment — it could only reassure.
+  if (!provider || !ctx.officer.enabled || brief.quiet || !brief.assessment.complete) {
     return { text: null, provider: null, model: null };
   }
 
