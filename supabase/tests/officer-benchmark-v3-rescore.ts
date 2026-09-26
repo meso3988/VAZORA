@@ -28,15 +28,20 @@ import * as r4ledger from "../benchmarks/contract-officer-benchmark-v3/revisions
 import * as r4scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/scoring";
 import * as r4gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/ground-truth";
 import { scoreAnswer as scoreAnswerR4 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r4/evaluate";
+import * as r5ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/fact-ledger";
+import * as r5scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/scoring";
+import * as r5gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/ground-truth";
+import { scoreAnswer as scoreAnswerR5 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/evaluate";
 import * as curLedger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
 import * as curScoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
 import * as curGt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
 import { INJECTIONS } from "../benchmarks/contract-officer-benchmark-v3/fixture";
 import { scoreAnswer, type RuleModules } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
+import { buildCitationFamilies, buildEntityCitations } from "./officer-benchmark-v3-env";
 
 // FROM = the revision the saved report was scored with (parity target);
 // the comparison target is always the current revision.
-const FROM = (process.env.RESCORE_FROM ?? "r3") as "r3" | "r4";
+const FROM = (process.env.RESCORE_FROM ?? "r3") as "r3" | "r4" | "r5";
 import { localDate } from "../../src/lib/officer/time";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -124,54 +129,6 @@ function reconstruct() {
 }
 
 // ---------- citation scopes (identical to the harness) ---------------------------
-function buildEntityCitations(fx: any): Map<string, Set<string>> {
-  const m = new Map<string, Set<string>>();
-  const put = (key: string, ids: (string | null | undefined)[]) => m.set(key, new Set(ids.filter(Boolean) as string[]));
-  for (const c of Object.values<any>(fx.contracts)) {
-    const reqIds = [c.req, c.kpiReq].filter(Boolean).flatMap((r: any) => [r.reqId, r.itemId, r.checkId, r.versionId]);
-    put(`contract:${c.number}`, [c.contractId, c.clauseId, c.docId, c.obligationId, c.discrepancyId, ...reqIds]);
-    put(`clause:${c.clauseId}`, [c.clauseId, c.docId]);
-    put(`obligation:${c.obligationId}`, [c.obligationId, c.clauseId, c.discrepancyId, ...reqIds]);
-    for (const r of [c.req, c.kpiReq].filter(Boolean) as any[]) {
-      put(`requirement:${r.reqId}`, [r.reqId, r.itemId, r.checkId, r.versionId, c.obligationId, c.discrepancyId]);
-      if (r.itemId) put(`evidence_item:${r.itemId}`, [r.itemId, r.versionId, r.checkId, r.reqId, c.obligationId, c.discrepancyId]);
-      put(`evidence_item:${r.reqId}`, [r.reqId, c.obligationId]);
-    }
-  }
-  for (const e of fx.memberEmails ?? []) put(`member:${e}`, [fx.userId]);
-  for (const g of fx.gapRows ?? []) {
-    for (const key of [`requirement:${g.evidence_requirement_id}`, `obligation:${g.obligation_id}`,
-      g.contract_id && `contract:${Object.values<any>(fx.contracts).find((c) => c.contractId === g.contract_id)?.number}`,
-    ].filter(Boolean) as string[]) m.set(key, new Set([...(m.get(key) ?? []), g.id]));
-  }
-  return m;
-}
-function buildCitationFamilies(fx: any): Map<string, Set<string>> {
-  const fam = new Map<string, Set<string>>();
-  const add = (id: string | null | undefined, ...ids: (string | null | undefined)[]) => {
-    if (!id) return;
-    fam.set(id, new Set([id, ...(fam.get(id) ?? []), ...(ids.filter(Boolean) as string[])]));
-  };
-  for (const c of Object.values<any>(fx.contracts)) {
-    const reqItems: string[] = [];
-    for (const r of [c.req, c.kpiReq].filter(Boolean) as any[]) {
-      const rIds = [r.reqId, r.itemId, r.checkId, r.versionId, r.runId].filter(Boolean) as string[];
-      reqItems.push(...rIds);
-      add(r.reqId, r.itemId, r.checkId, r.versionId, r.runId);
-      for (const x of rIds) if (x !== r.reqId) add(x, r.reqId);
-    }
-    add(c.contractId, c.clauseId, c.docId, c.obligationId, c.discrepancyId, ...reqItems);
-    add(c.obligationId, c.clauseId, c.discrepancyId, ...reqItems);
-    add(c.clauseId, c.docId);
-    if (c.discrepancyId) add(c.discrepancyId, c.obligationId);
-  }
-  for (const g of fx.gapRows ?? []) {
-    add(g.id); add(g.evidence_requirement_id, g.id); add(g.obligation_id, g.id);
-    const c = Object.values<any>(fx.contracts).find((x) => x.contractId === g.contract_id);
-    if (c) add(c.contractId, g.id);
-  }
-  return fam;
-}
 
 // ---------- expectations restricted to reconstructable ids -------------------------
 const hasUndefined = (v: unknown) => JSON.stringify(v, (_k, x) => (x === undefined ? "__UNDEF__" : x)).includes("__UNDEF__") || /:undefined\b/.test(JSON.stringify(v));
@@ -187,6 +144,21 @@ function restrict(exp: any, fx: any, notAssessed: string[]) {
   return out;
 }
 
+/**
+ * r6: the organization-local date the answer was produced on. Persisted by the
+ * r6 harness; for earlier reports it is derived ONLY when the fixture's seeded
+ * date and the report's completion time fall on the same organization-local
+ * day (the answer happened in between). Otherwise null → NOT ASSESSED.
+ */
+function referenceDateFor(s: any): { date: string | null; basis: string } {
+  if (typeof s.referenceDate === "string") return { date: s.referenceDate, basis: "persisted by the run" };
+  if (!fx.today || !fx.timezone || !report.ranAt) return { date: null, basis: "no seeded date / timezone / completion time" };
+  const end = localDate(new Date(report.ranAt), fx.timezone);
+  return end === fx.today
+    ? { date: fx.today, basis: `fixture seeded on ${fx.today} and run completed ${report.ranAt} = ${end} (${fx.timezone})` }
+    : { date: null, basis: `seed date ${fx.today} ≠ completion date ${end} (${fx.timezone}) — day boundary crossed` };
+}
+
 function carriedLive(s: any, orgId: string | null) {
   const displayedInvalid = s.securityFailures.filter((f: string) => f.startsWith("invalid citation surfaced") || f.startsWith("unauthorized disclosure")).map((f: string) => f);
   const dbFails = s.securityFailures.filter((f: string) => f.startsWith("db invariant")).map((f: string) => {
@@ -200,7 +172,7 @@ function carriedLive(s: any, orgId: string | null) {
   return {
     displayedInvalid, displayedValidCount: Number(s.metrics.citationsValid ?? 0), blocked,
     dbInvariants: [...dbFails, ...Array.from({ length: passed }, () => ({ name: "carried", pass: true, detail: "" }))],
-    orgId,
+    orgId, referenceDate: referenceDateFor(s).date,
   };
 }
 
@@ -216,8 +188,10 @@ type Rev = { label: string; mods: RuleModules; score: typeof scoreAnswer; r4: bo
 const REVS: Record<"from" | "to", Rev> = {
   from: FROM === "r3"
     ? { label: "r3", mods: { ledger: r3ledger, scoring: r3scoring, gt: r3gt }, score: scoreAnswer, r4: false }
-    : { label: "r4", mods: { ledger: r4ledger, scoring: r4scoring, gt: r4gt }, score: scoreAnswerR4 as typeof scoreAnswer, r4: true },
-  to: { label: "r5", mods: { ledger: curLedger, scoring: curScoring, gt: curGt }, score: scoreAnswer, r4: true },
+    : FROM === "r4"
+      ? { label: "r4", mods: { ledger: r4ledger, scoring: r4scoring, gt: r4gt }, score: scoreAnswerR4 as typeof scoreAnswer, r4: true }
+      : { label: "r5", mods: { ledger: r5ledger, scoring: r5scoring, gt: r5gt }, score: scoreAnswerR5 as typeof scoreAnswer, r4: true },
+  to: { label: "r6", mods: { ledger: curLedger, scoring: curScoring, gt: curGt }, score: scoreAnswer, r4: true },
 };
 const expsBy = (gt: any) => new Map<string, any>(gt.EXPECTATIONS.map((e: any) => [e.id, e]));
 
@@ -252,6 +226,7 @@ for (const s of results) {
     removed: live.filter((f: string) => !toF.includes(f)), added: toF.filter((f) => !live.includes(f)),
     parityDiff: parity ? null : { liveOnly: live.filter((f: string) => !off.includes(f)), offlineOnly: off.filter((f) => !live.includes(f)) },
     security: out.to.securityFailures, notAssessed: out.to.notAssessed, metrics: out.to.metrics,
+    referenceBasis: s.id === "A02" ? (() => { const d = referenceDateFor(s); return `${d.date ?? "NONE"} — ${d.basis}`; })() : null,
   });
 }
 
@@ -263,6 +238,7 @@ for (const r of rows) {
   for (const f of r.removed) console.log(`       − ${f}`);
   for (const f of r.added) console.log(`       + ${f}`);
   for (const n of r.notAssessed) console.log(`       NOT ASSESSED ${n}`);
+  if (r.referenceBasis) console.log(`       reference date: ${r.referenceBasis}`);
 }
 const answered = rows.filter((r) => r.status === "answered");
 const sum = (k: string) => answered.reduce((n, r) => n + (Number(r.metrics[k]) || 0), 0);
