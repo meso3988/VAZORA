@@ -58,6 +58,20 @@ async function usageSoFar() {
     callsUpperBound: rows.reduce((n: number, r: any) => n + Math.min(TURN_CALLS, (r.tool_invocations?.length ?? 0) + 1), 0),
   };
 }
+/**
+ * The assistant turn created by THIS submission, identified by conversation id
+ * (from ?c=) and message id — not by a page-wide text difference, which fails
+ * when an identical earlier answer is already rendered on the page.
+ */
+async function newAssistantTurn(conversationId: string | null, sinceIso: string) {
+  if (!conversationId) return null;
+  const c = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } }) as any;
+  await c.auth.signInWithPassword({ email: EMAIL, password: PASS });
+  const { data } = await c.from("officer_messages").select("id, content, citations, created_at")
+    .eq("organization_id", fx.orgId).eq("conversation_id", conversationId).eq("role", "assistant")
+    .gte("created_at", sinceIso).order("created_at", { ascending: false }).limit(1);
+  return (data ?? [])[0] ?? null;
+}
 const text = (p: Page) => p.locator("body").innerText();
 
 // Navigation timing evidence: every goto is logged with status and duration.
@@ -137,15 +151,17 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
     // A real grounded turn through the PRODUCT path (not the benchmark path).
     let answered = false;
     let reply = "";
+    let turn: { id: string; content: string; citations: unknown[] } | null = null;
     const before = new Set((await text(page)).split("\n").map((l) => l.trim()).filter(Boolean));
     const linksBefore = await page.locator('a[href*="/app/"]').count();
     const used = await usageSoFar();
     const fits = MAX_CALLS - used.callsUpperBound >= TURN_CALLS && MAX_TOKENS - used.tokens >= TURN_TOKENS;
     if (!LIVE.includes(tag) || !fits) {
       const why = !LIVE.includes(tag) ? "no live model turn allotted (shared budget)" : `budget: ${used.callsUpperBound}/${MAX_CALLS} calls, ${used.tokens}/${MAX_TOKENS} tokens`;
-      for (const n of ["conversation answered", "reply grounded in seeded contracts", "citations rendered", "no invented money in reply"]) rec(`${tag}: ${n}`, null, why);
+      for (const n of ["conversation answered", "reply grounded in seeded contracts", "new message rendered on the page", "citations rendered", "no invented money in reply"]) rec(`${tag}: ${n}`, null, why);
     } else if (await composer.count() > 0) {
       await composer.fill(ar ? "ما هي الالتزامات المتأخرة؟" : "Which obligations are overdue?");
+      const submittedAt = new Date(Date.now() - 2000).toISOString();
       await composer.locator("xpath=ancestor::form[1]").locator('button[type="submit"]').first().click();
       try {
         await page.waitForFunction(
@@ -158,15 +174,20 @@ async function suite(locale: "en" | "ar", viewport: { width: number; height: num
       // Only NEW lines = the assistant turn; page chrome (contract values etc.) excluded.
       reply = (await text(page)).split("\n").map((l) => l.trim())
         .filter((l) => l && !before.has(l)).join("\n");
+      turn = await newAssistantTurn(new URL(page.url()).searchParams.get("c"), submittedAt);
     }
     if (LIVE.includes(tag) && fits) {
-      rec(`${tag}: conversation answered`, answered && reply.length > 20,
-        answered ? `${reply.length} chars new` : "no reply within 150s");
-      rec(`${tag}: reply grounded in seeded contracts`, /FM-008|OM-014|OPS-021/.test(reply));
+      rec(`${tag}: conversation answered`, answered && !!turn && turn.content.length > 20,
+        turn ? `message ${turn.id.slice(0, 8)} · ${turn.content.length} chars` : answered ? "no new assistant message found" : "no reply within 150s");
+      // Grounding is judged on the message THIS turn created (by id).
+      rec(`${tag}: reply grounded in seeded contracts`, !!turn && /FM-008|OM-014|OPS-021/.test(turn.content),
+        turn ? `message ${turn.id.slice(0, 8)}` : "");
+      const firstLine = (turn?.content ?? "").split("\n").map((l) => l.replace(/[*_#>`]/g, "").trim()).find((l) => l.length > 8) ?? "";
+      rec(`${tag}: new message rendered on the page`, !!firstLine && (await text(page)).includes(firstLine), firstLine.slice(0, 60));
       const citeCount = (await page.locator('a[href*="/app/"]').count()) - linksBefore;
       rec(`${tag}: citations rendered`, citeCount > 0, `${citeCount} new citation links`);
       rec(`${tag}: no invented money in reply`,
-        !/(SAR|USD|ر\.س|ريال)\s?[\d٠-٩][\d٠-٩,.٬]*|[\d٠-٩][\d٠-٩,.٬]*\s?(SAR|USD|ر\.س|ريال)/i.test(reply));
+        !/(SAR|USD|ر\.س|ريال)\s?[\d٠-٩][\d٠-٩,.٬]*|[\d٠-٩][\d٠-٩,.٬]*\s?(SAR|USD|ر\.س|ريال)/i.test(turn?.content ?? reply));
     }
 
     // ---- Tasks page -------------------------------------------------------
