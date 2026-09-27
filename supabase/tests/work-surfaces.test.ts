@@ -18,6 +18,7 @@ import {
   readAgentEvents,
   readClauseList,
 } from "../../src/data/checked-reads";
+import { listContractClauses } from "../../src/data/supabase/clauses";
 import { listOfficerActions, mapOfficerActionRow } from "../../src/data/supabase/officer-queue";
 import type { DataProvider } from "../../src/data/repositories";
 
@@ -172,6 +173,71 @@ function mappingTests() {
   check("rejected state preserved", rejected.status === "rejected" && rejected.rejectedBy === "u9");
 }
 
+/* ---------- clause basis: approved vs pending-review ---------- */
+
+const CLAUSE = { id: "cl-1", clause_number: "14.2", heading: "Payment", text: "…", page_number: 4, sequence_number: 1 };
+
+async function clauseBasisTests() {
+  // Approved baseline only → basis approved.
+  {
+    const client = stubClient({
+      contract_ingestion_runs: OK([{ id: "r1", status: "approved" }]),
+      contract_clauses: OK([CLAUSE]),
+    });
+    const r = await listContractClauses(client as never, "org", "c1");
+    check("clauses approved-only run → basis approved", r.ok && r.basis === "approved" && r.clauses.length === 1);
+  }
+  // Approved baseline + NEWER pending-review run → approved stays the baseline.
+  {
+    const client = stubClient({
+      contract_ingestion_runs: OK([
+        { id: "r-new", status: "ready_for_review" },
+        { id: "r-old", status: "approved" },
+      ]),
+      contract_clauses: OK([CLAUSE]),
+    });
+    const r = await listContractClauses(client as never, "org", "c1");
+    check("clauses approved+newer pending → basis stays approved",
+      r.ok && r.basis === "approved" && client.calls.some((c) => c.method === "eq" && c.args[0] === "ingestion_run_id" && c.args[1] === "r-old"));
+  }
+  // Pending-review only → flagged unapproved, never presented as baseline.
+  {
+    const client = stubClient({
+      contract_ingestion_runs: OK([{ id: "r1", status: "ready_for_review" }]),
+      contract_clauses: OK([CLAUSE]),
+    });
+    const r = await listContractClauses(client as never, "org", "c1");
+    check("clauses pending-only → basis ready_for_review (label required)", r.ok && r.basis === "ready_for_review");
+  }
+  // Failed baseline read → ok:false — NO silent fallback to unapproved rows.
+  {
+    const r = await listContractClauses(stubClient({ contract_ingestion_runs: ERR() }) as never, "org", "c1");
+    check("clauses failed run read → ok:false (no silent unapproved fallback)", !r.ok);
+  }
+  {
+    const r = await listContractClauses(stubClient({
+      contract_ingestion_runs: OK([{ id: "r1", status: "approved" }]),
+      contract_clauses: ERR(),
+    }) as never, "org", "c1");
+    check("clauses failed clause read → ok:false", !r.ok);
+  }
+  {
+    const r = await listContractClauses(stubClient({ contract_ingestion_runs: OK([]) }) as never, "org", "c1");
+    check("clauses no operative run → ok + empty + no basis", r.ok && r.basis === null && r.clauses.length === 0);
+  }
+  {
+    // Draft/superseded runs are never selected.
+    const client = stubClient({
+      contract_ingestion_runs: OK([]), // filter excludes them at query level
+      contract_clauses: OK([CLAUSE]),
+    });
+    const r = await listContractClauses(client as never, "org", "c1");
+    check("clauses query restricts to approved|ready_for_review",
+      r.ok && client.calls.some((c) => c.method === "in" && c.args[0] === "status"
+        && JSON.stringify(c.args[1]) === JSON.stringify(["approved", "ready_for_review"])));
+  }
+}
+
 /* ---------- checked-read helpers: demo/live/failure ---------- */
 
 function fakeDb(overrides: Record<string, unknown>) {
@@ -304,8 +370,13 @@ function wiringTests() {
   check("activity page truncation note", activity.includes("truncated"));
   check("activity page no unchecked db.activity.list", !activity.includes("db.activity.list("));
 
+  const card = src("src/components/app/officer/action-card.tsx");
+  check("badge reflects the row's actual status key", card.includes("t(`status.${action.status}`)"));
+  check("held note only on approved-and-never-executed", card.includes('action.status === "approved" && !action.executedAt'));
+
   const overview = src("src/app/[locale]/app/contracts/[id]/page.tsx");
   check("overview uses readClauseList", overview.includes("readClauseList("));
+  check("overview labels unapproved clause extraction", overview.includes('clauseBasis === "ready_for_review"') && overview.includes("unapprovedClauses"));
   check("overview uses checked events + activity", overview.includes("readAgentEvents(") && overview.includes("readActivityList("));
   check("overview reads live officer actions", overview.includes("listOfficerActions("));
   check("overview clause trace gates on clause read", overview.includes("!clauses"));
@@ -318,11 +389,14 @@ function wiringTests() {
   check("provider activity reads activity_log", provider.includes('from("activity_log")'));
   check("provider activity resolves contract via entity tables", provider.includes('eq("contract_id", contractId).in("id"'));
   check("provider activity honors metadata contract linkage", provider.includes("metadata") && provider.includes('contract_id'));
-  check("provider clauses read operative run only",
-    provider.includes('"approved", "ready_for_review"') && provider.includes('eq("ingestion_run_id", run.id)'));
-  check("provider clauses deterministic order", provider.includes('order("sequence_number"') && provider.includes('order("id"'));
   check("provider obligations join clause source refs", provider.includes("obligation_source_refs(clause_id)"));
   check("provider exposes checked variants", provider.includes("listEventsChecked") && provider.includes("listChecked") && provider.includes("listClausesChecked"));
+  check("provider clauses delegate to the operative-run reader", provider.includes("listContractClauses"));
+
+  const clauses = src("src/data/supabase/clauses.ts");
+  check("clauses approved baseline beats newer pending run", clauses.includes('runs.find((r) => r.status === "approved")'));
+  check("clauses failed run read → ok:false, no unapproved fallback", clauses.includes("if (runError || !Array.isArray(runs)) return { ok: false }"));
+  check("clauses deterministic order", clauses.includes('order("sequence_number"') && clauses.includes('order("id"'));
 
   // i18n — every new key exists in both locales.
   const en = JSON.parse(src("src/messages/en.json"));
@@ -335,12 +409,16 @@ function wiringTests() {
     ["contractActions", "noContractActions", "askOpen", "askDemo"].every((k) => en.app.officer[k] && ar.app.officer[k]));
   check("activity truncated + contract.noActions en+ar",
     !!en.app.activity.truncated && !!ar.app.activity.truncated && !!en.app.contract.noActions && !!ar.app.contract.noActions);
-  check("held label is honest (approved, not executing)", en.app.tasks.groups.held.includes("not executed"));
+  check("held group label is honest (approved, not completed)", en.app.tasks.groups.held.includes("not completed"));
+  check("unapproved-clause label exists en+ar",
+    !!en.app.contract.unapprovedClauses && !!ar.app.contract.unapprovedClauses
+    && en.app.contract.unapprovedClauses.toLowerCase().includes("unapproved"));
 }
 
 async function main() {
   await queueBoundaryTests();
   mappingTests();
+  await clauseBasisTests();
   await helperTests();
   wiringTests();
 
