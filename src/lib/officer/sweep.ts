@@ -88,15 +88,18 @@ export async function runContractSweep(opts: {
   const finish = async (status: "completed" | "partial" | "failed", counts = { created: 0, updated: 0, resolved: 0 }) => {
     // The run is only published (completed/partial) if this write succeeds;
     // otherwise it stays "running"/"failed" and no consumer treats it as fresh.
-    const { error: finErr } = await ctx.supabase.from("officer_sweep_runs")
+    const { data: pub, error: finErr } = await ctx.supabase.from("officer_sweep_runs")
       .update({
         status, completed_at: new Date().toISOString(), duration_ms: Date.now() - t0,
         observations_created: counts.created, observations_updated: counts.updated, observations_resolved: counts.resolved,
         failures,
       })
-      .eq("id", sweepRunId).eq("organization_id", ctx.organizationId);
-    const published = !finErr ? status : "failed";
-    if (finErr) failures.push({ contract_id: "organization", error: "sweep_run_publish_failed" });
+      .eq("id", sweepRunId).eq("organization_id", ctx.organizationId)
+      .select("id, status");
+    // Published only with persisted evidence: exactly this run, in this status.
+    const persisted = !finErr && Array.isArray(pub) && pub.length === 1 && pub[0].status === status;
+    const published = persisted ? status : "failed";
+    if (!persisted) failures.push({ contract_id: "organization", error: "sweep_run_publish_failed" });
     await log(ctx, "officer.sweep_completed", sweepRunId, {
       status: published, contracts_total: contractRows.length, contracts_done: contractsDone,
       ...counts, failures: failures.length,
@@ -385,7 +388,7 @@ async function reconcileObservations(
   for (const [key, f] of byKey) {
     const open = activeByKey.get(key);
     if (open) {
-      const { error } = await ctx.supabase.from("officer_observations")
+      const { data, error } = await ctx.supabase.from("officer_observations")
         .update({
           last_seen_at: now, severity: f.severity, time_bucket: f.timeBucket,
           priority: f.priority, priority_reason: f.priorityReason,
@@ -393,8 +396,10 @@ async function reconcileObservations(
           supporting_facts: f.supportingFacts, recommended_action_type: f.recommendedActionType,
           sweep_run_id: sweepRunId,
         })
-        .eq("id", open.id).eq("organization_id", ctx.organizationId);
-      if (error) writeFailures.add(scopeOf(f.contractId, f.kind)); else updated++;
+        .eq("id", open.id).eq("organization_id", ctx.organizationId)
+        .select("id");
+      // "No error" is not success: the targeted row must actually change.
+      if (error || !Array.isArray(data) || data.length !== 1) writeFailures.add(scopeOf(f.contractId, f.kind)); else updated++;
       continue;
     }
 
@@ -450,14 +455,24 @@ async function reconcileObservations(
     }
     return scope.scanned.has(sc);
   };
+  // Staged per scope: each contract's resolutions are applied in ONE
+  // all-or-nothing call (migration 0014), after all of its other writes
+  // succeeded. A failure leaves every previous observation of that contract
+  // active; other contracts are unaffected.
+  const toResolve = new Map<string, { id: string; key: string }[]>();
   for (const [key, row] of activeByKey) {
     if (byKey.has(key) || !mayResolve(row)) continue;
-    const { error } = await ctx.supabase.from("officer_observations")
-      .update({ status: "resolved", resolved_at: now, time_bucket: "resolved", last_seen_at: now })
-      .eq("id", row.id).eq("organization_id", ctx.organizationId);
-    if (error) { writeFailures.add(scopeOf(row.contract_id, row.kind)); continue; }
-    resolved++;
-    await log(ctx, "officer.observation_resolved", row.id as string, { dedupe_key: key });
+    const sc = scopeOf(row.contract_id, row.kind);
+    toResolve.set(sc, [...(toResolve.get(sc) ?? []), { id: row.id as string, key }]);
+  }
+  for (const [sc, items] of toResolve) {
+    if (writeFailures.has(sc)) continue;
+    const { data: n, error } = await ctx.supabase.rpc("officer_resolve_observations", {
+      p_organization_id: ctx.organizationId, p_ids: items.map((i) => i.id), p_resolved_at: now,
+    });
+    if (error || n !== items.length) { writeFailures.add(sc); continue; }
+    resolved += items.length;
+    for (const i of items) await log(ctx, "officer.observation_resolved", i.id, { dedupe_key: i.key });
   }
 
   return { created, updated, resolved, writeFailures: [...writeFailures] };
