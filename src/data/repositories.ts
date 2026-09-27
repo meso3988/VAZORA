@@ -44,11 +44,19 @@ export interface ContractRepository {
 
 export interface ObligationRepository {
   list(organizationId: string, filter?: { contractId?: string }): Promise<Obligation[]>;
+  /** Like list(), but a failed read is reported instead of returning []. */
+  listChecked?(organizationId: string, filter?: { contractId?: string }): Promise<{ ok: true; obligations: Obligation[] } | { ok: false }>;
   getById(organizationId: string, id: string): Promise<Obligation | null>;
+  /** Like getById(), but a failed read reports "unavailable" instead of null. */
+  getByIdChecked?(organizationId: string, id: string): Promise<
+    { status: "found"; obligation: Obligation } | { status: "not_found" } | { status: "unavailable" }
+  >;
 }
 
 export interface EvidenceRepository {
   list(organizationId: string, filter?: { contractId?: string; obligationId?: string }): Promise<Evidence[]>;
+  /** Like list(), but a failed read is reported instead of returning []. */
+  listChecked?(organizationId: string, filter?: { contractId?: string; obligationId?: string }): Promise<{ ok: true; evidence: Evidence[] } | { ok: false }>;
 }
 
 export interface RiskRepository {

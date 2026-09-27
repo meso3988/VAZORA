@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
-import { ContractLoadFailed } from "@/components/app/contract-unavailable";
+import { ContractLoadFailed, DataLoadFailed } from "@/components/app/contract-unavailable";
 import { PageHeader } from "@/components/app/primitives";
 import { ReviewBoard } from "@/components/app/review-board";
 import { auth } from "@/data/auth/provider";
@@ -32,7 +32,7 @@ export default async function ReviewPage(props: PageProps<"/[locale]/app/contrac
 
   const supabase = await createSupabaseServer();
 
-  const [{ data: obligations }, { data: suggestions }] = await Promise.all([
+  const results = await Promise.all([
     supabase
       .from("contract_obligations")
       .select(`
@@ -55,9 +55,29 @@ export default async function ReviewPage(props: PageProps<"/[locale]/app/contrac
       .select("id, obligation_id, suggestion_kind, suggested_role, suggested_person_name, confidence, reason, approved")
       .eq("organization_id", orgId)
       .is("approved", null),
-  ]);
+  ]).catch(() => null);
+  const [obResult, suggResult] = results ?? [];
 
-  const rows = obligations ?? [];
+  // A failed read must never reach the board as an empty queue — that would
+  // report zero unresolved obligations and enable the activation control.
+  if (!obResult || obResult.error || !Array.isArray(obResult.data) || !suggResult || suggResult.error || !Array.isArray(suggResult.data)) {
+    return (
+      <>
+        <PageHeader
+          title={t("review.title")}
+          actions={
+            <Link href={`/app/contracts/${id}`} className="text-xs text-muted underline underline-offset-4">
+              {t("review.back")}
+            </Link>
+          }
+        />
+        <DataLoadFailed message="reviewDataLoadFailed" />
+      </>
+    );
+  }
+
+  const rows = obResult.data;
+  const suggestions = suggResult.data;
   const approved = rows.filter((o) => o.review_status === "approved").length;
   const rejected = rows.filter((o) => o.review_status === "rejected").length;
   const unresolved = rows.length - approved - rejected;
@@ -93,7 +113,7 @@ export default async function ReviewPage(props: PageProps<"/[locale]/app/contrac
         locale={locale}
         contractId={id}
         obligations={rows as never}
-        suggestions={(suggestions ?? []) as never}
+        suggestions={suggestions as never}
         counts={{ approved, rejected, unresolved, missingSource, conflicts }}
         labels={{
           categories: {

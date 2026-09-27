@@ -21,6 +21,23 @@ type Supa = Awaited<ReturnType<typeof createSupabaseServer>>;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+/** Thrown when any dependent evidence read reports a database error. */
+class EvidenceReadError extends Error {}
+
+/** Await a postgrest query; throw unless it returned without error. */
+async function must<T>(q: PromiseLike<{ data: T; error: { message?: string } | null }>): Promise<T> {
+  const { data, error } = await q;
+  if (error) throw new EvidenceReadError(error.message ?? "evidence read failed");
+  return data;
+}
+
+export type EvidenceRowsRead<T> = { ok: true; rows: T[] } | { ok: false };
+
+export type EvidenceItemDetailRead =
+  | { status: "found"; detail: EvidenceItemDetail }
+  | { status: "not_found" }
+  | { status: "unavailable" };
+
 function mapCheck(row: any): VerificationCheckView {
   return {
     id: row.id,
@@ -100,32 +117,32 @@ async function obligationContext(
   orgId: string,
   obligationId: string,
 ): Promise<ObligationContext | null> {
-  const { data: ob } = await supabase
+  const ob = await must(supabase
     .from("contract_obligations")
     .select("id, title, requirement_text, frequency, due_rule_raw, due_date_normalized, ai_payload")
     .eq("organization_id", orgId)
     .eq("id", obligationId)
-    .maybeSingle();
+    .maybeSingle());
   if (!ob) return null;
 
   // Original clause — prefer the FK'd source_ref, fall back to the extracted
   // clause number recorded during ingestion.
-  const { data: ref } = await supabase
+  const ref = await must(supabase
     .from("obligation_source_refs")
     .select("clause_id, page_number, document_id, source_snippet")
     .eq("organization_id", orgId)
     .eq("obligation_id", obligationId)
     .limit(1)
-    .maybeSingle();
+    .maybeSingle());
   let clauseText: string | null = null;
   let clausePage: number | null = (ref?.page_number as number | null) ?? null;
   if (ref?.clause_id) {
-    const { data: clause } = await supabase
+    const clause = await must(supabase
       .from("contract_clauses")
       .select("text, page_number")
       .eq("organization_id", orgId)
       .eq("id", ref.clause_id)
-      .maybeSingle();
+      .maybeSingle());
     clauseText = (clause?.text as string | null) ?? null;
     clausePage = (clause?.page_number as number | null) ?? clausePage;
   }
@@ -151,22 +168,24 @@ async function fetchRunsAndChecks(
   itemIds: string[],
 ): Promise<VerificationRunView[]> {
   if (!itemIds.length) return [];
-  const { data: runRows } = await supabase
+  // A failed run/check read throws — callers must not render it as
+  // "no verification" or "no checks".
+  const runRows = await must(supabase
     .from("evidence_verification_runs")
     .select("*")
     .eq("organization_id", orgId)
     .in("evidence_item_id", itemIds)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }));
   const runs = runRows ?? [];
   const runIds = runs.map((r) => r.id as string);
-  const { data: checkRows } = runIds.length
-    ? await supabase
+  const checkRows: any[] = runIds.length
+    ? (await must(supabase
         .from("evidence_verification_checks")
         .select("*")
         .eq("organization_id", orgId)
         .in("verification_run_id", runIds)
-        .order("created_at", { ascending: true })
-    : { data: [] as any[] };
+        .order("created_at", { ascending: true }))) ?? []
+    : [];
   const byRun = new Map<string, VerificationCheckView[]>();
   for (const c of checkRows ?? []) {
     const list = byRun.get(c.verification_run_id) ?? [];
@@ -184,129 +203,138 @@ async function fetchRunsAndChecks(
 export async function getEvidenceItemDetail(
   orgId: string,
   itemId: string,
-): Promise<EvidenceItemDetail | null> {
-  const supabase = await createSupabaseServer();
+  client?: Supa,
+): Promise<EvidenceItemDetailRead> {
+  try {
+    const supabase = client ?? (await createSupabaseServer());
 
-  const { data: item } = await supabase
-    .from("evidence_items")
-    .select("id, contract_id, obligation_id, title, evidence_type, status, created_by, created_at")
-    .eq("organization_id", orgId)
-    .eq("id", itemId)
-    .maybeSingle();
-  if (!item) return null;
+    const { data: item, error: itemError } = await supabase
+      .from("evidence_items")
+      .select("id, contract_id, obligation_id, title, evidence_type, status, created_by, created_at")
+      .eq("organization_id", orgId)
+      .eq("id", itemId)
+      .maybeSingle();
+    if (itemError) return { status: "unavailable" };
+    if (!item) return { status: "not_found" };
 
-  const { data: contract } = await supabase
-    .from("contracts")
-    .select("title")
-    .eq("organization_id", orgId)
-    .eq("id", item.contract_id)
-    .maybeSingle();
+    const contract = await must(supabase
+      .from("contracts")
+      .select("title")
+      .eq("organization_id", orgId)
+      .eq("id", item.contract_id)
+      .maybeSingle());
 
-  const [{ data: versionRows }, { data: linkRows }, runs] = await Promise.all([
-    supabase
-      .from("evidence_versions")
-      .select("id, version_number, file_name, mime_type, file_size, uploaded_by, uploaded_at")
+    const [versionRows, linkRows, runs] = await Promise.all([
+      must(supabase
+        .from("evidence_versions")
+        .select("id, version_number, file_name, mime_type, file_size, uploaded_by, uploaded_at")
+        .eq("organization_id", orgId)
+        .eq("evidence_item_id", itemId)
+        .order("version_number", { ascending: false })),
+      must(supabase
+        .from("evidence_requirement_links")
+        .select("evidence_requirement_id, evidence_version_id")
+        .eq("organization_id", orgId)
+        .eq("evidence_item_id", itemId)),
+      fetchRunsAndChecks(supabase, orgId, [itemId]),
+    ]);
+
+    const reqIds = [...new Set((linkRows ?? []).map((l) => l.evidence_requirement_id as string))];
+    const reqRows: any[] = reqIds.length
+      ? (await must(supabase
+          .from("obligation_evidence_requirements")
+          .select("id, obligation_id, name, description, evidence_type, required")
+          .eq("organization_id", orgId)
+          .in("id", reqIds))) ?? []
+      : [];
+
+    const requirements: EvidenceRequirementView[] = reqRows.map((r) => ({
+      id: r.id,
+      obligationId: r.obligation_id,
+      name: r.name,
+      description: r.description,
+      evidenceType: r.evidence_type,
+      required: r.required ?? true,
+    }));
+
+    const gapRows: any[] = reqIds.length
+      ? (await must(supabase
+          .from("evidence_gaps")
+          .select("*")
+          .eq("organization_id", orgId)
+          .in("evidence_requirement_id", reqIds)
+          .order("created_at", { ascending: false }))) ?? []
+      : [];
+
+    const discrepancyRows = await must(supabase
+      .from("evidence_verification_discrepancies")
+      .select("*")
       .eq("organization_id", orgId)
       .eq("evidence_item_id", itemId)
-      .order("version_number", { ascending: false }),
-    supabase
-      .from("evidence_requirement_links")
-      .select("evidence_requirement_id, evidence_version_id")
-      .eq("organization_id", orgId)
-      .eq("evidence_item_id", itemId),
-    fetchRunsAndChecks(supabase, orgId, [itemId]),
-  ]);
+      .order("created_at", { ascending: false }));
 
-  const reqIds = [...new Set((linkRows ?? []).map((l) => l.evidence_requirement_id as string))];
-  const { data: reqRows } = reqIds.length
-    ? await supabase
-        .from("obligation_evidence_requirements")
-        .select("id, obligation_id, name, description, evidence_type, required")
-        .eq("organization_id", orgId)
-        .in("id", reqIds)
-    : { data: [] as any[] };
+    const linkVersionByRequirement: Record<string, string | null> = {};
+    for (const l of linkRows ?? []) {
+      linkVersionByRequirement[l.evidence_requirement_id as string] =
+        (l.evidence_version_id as string | null) ?? null;
+    }
 
-  const requirements: EvidenceRequirementView[] = (reqRows ?? []).map((r) => ({
-    id: r.id,
-    obligationId: r.obligation_id,
-    name: r.name,
-    description: r.description,
-    evidenceType: r.evidence_type,
-    required: r.required ?? true,
-  }));
+    const obligation = item.obligation_id
+      ? await obligationContext(supabase, orgId, item.obligation_id)
+      : null;
 
-  const { data: gapRows } = reqIds.length
-    ? await supabase
-        .from("evidence_gaps")
-        .select("*")
-        .eq("organization_id", orgId)
-        .in("evidence_requirement_id", reqIds)
-        .order("created_at", { ascending: false })
-    : { data: [] as any[] };
+    // Every requirement on the obligation — drives the linking UI and the
+    // "what was required" completeness story, linked or not.
+    const allReqRows: any[] = item.obligation_id
+      ? (await must(supabase
+          .from("obligation_evidence_requirements")
+          .select("id, obligation_id, name, description, evidence_type, required")
+          .eq("organization_id", orgId)
+          .eq("obligation_id", item.obligation_id)
+          .order("created_at", { ascending: true }))) ?? []
+      : [];
+    const obligationRequirements: EvidenceRequirementView[] = allReqRows.map((r) => ({
+      id: r.id,
+      obligationId: r.obligation_id,
+      name: r.name,
+      description: r.description,
+      evidenceType: r.evidence_type,
+      required: r.required ?? true,
+    }));
 
-  const { data: discrepancyRows } = await supabase
-    .from("evidence_verification_discrepancies")
-    .select("*")
-    .eq("organization_id", orgId)
-    .eq("evidence_item_id", itemId)
-    .order("created_at", { ascending: false });
-
-  const linkVersionByRequirement: Record<string, string | null> = {};
-  for (const l of linkRows ?? []) {
-    linkVersionByRequirement[l.evidence_requirement_id as string] =
-      (l.evidence_version_id as string | null) ?? null;
+    return {
+      status: "found",
+      detail: {
+        id: item.id,
+        contractId: item.contract_id,
+        contractTitle: (contract?.title as string) ?? "",
+        obligationId: item.obligation_id,
+        obligation,
+        title: item.title,
+        evidenceType: item.evidence_type,
+        status: item.status as EvidenceItemStatus,
+        createdBy: item.created_by,
+        createdAt: item.created_at,
+        versions: (versionRows ?? []).map((v) => ({
+          id: v.id,
+          versionNumber: v.version_number,
+          fileName: v.file_name,
+          mimeType: v.mime_type,
+          fileSize: v.file_size,
+          uploadedBy: v.uploaded_by,
+          uploadedAt: v.uploaded_at,
+        })) as EvidenceVersionView[],
+        requirements,
+        obligationRequirements,
+        linkVersionByRequirement,
+        runs,
+        gaps: gapRows.map(mapGap),
+        discrepancies: (discrepancyRows ?? []).map(mapDiscrepancy),
+      },
+    };
+  } catch {
+    return { status: "unavailable" };
   }
-
-  const obligation = item.obligation_id
-    ? await obligationContext(supabase, orgId, item.obligation_id)
-    : null;
-
-  // Every requirement on the obligation — drives the linking UI and the
-  // "what was required" completeness story, linked or not.
-  const { data: allReqRows } = item.obligation_id
-    ? await supabase
-        .from("obligation_evidence_requirements")
-        .select("id, obligation_id, name, description, evidence_type, required")
-        .eq("organization_id", orgId)
-        .eq("obligation_id", item.obligation_id)
-        .order("created_at", { ascending: true })
-    : { data: [] as any[] };
-  const obligationRequirements: EvidenceRequirementView[] = (allReqRows ?? []).map((r) => ({
-    id: r.id,
-    obligationId: r.obligation_id,
-    name: r.name,
-    description: r.description,
-    evidenceType: r.evidence_type,
-    required: r.required ?? true,
-  }));
-
-  return {
-    id: item.id,
-    contractId: item.contract_id,
-    contractTitle: (contract?.title as string) ?? "",
-    obligationId: item.obligation_id,
-    obligation,
-    title: item.title,
-    evidenceType: item.evidence_type,
-    status: item.status as EvidenceItemStatus,
-    createdBy: item.created_by,
-    createdAt: item.created_at,
-    versions: (versionRows ?? []).map((v) => ({
-      id: v.id,
-      versionNumber: v.version_number,
-      fileName: v.file_name,
-      mimeType: v.mime_type,
-      fileSize: v.file_size,
-      uploadedBy: v.uploaded_by,
-      uploadedAt: v.uploaded_at,
-    })) as EvidenceVersionView[],
-    requirements,
-    obligationRequirements,
-    linkVersionByRequirement,
-    runs,
-    gaps: (gapRows ?? []).map(mapGap),
-    discrepancies: (discrepancyRows ?? []).map(mapDiscrepancy),
-  };
 }
 
 const OPEN_GAP_STATES = ["open", "evidence_received", "reverification_pending"];
@@ -319,61 +347,63 @@ const OPEN_GAP_STATES = ["open", "evidence_received", "reverification_pending"];
 export async function getContractEvidenceMatrix(
   orgId: string,
   contractId: string,
-): Promise<EvidenceMatrixRow[]> {
-  const supabase = await createSupabaseServer();
+  client?: Supa,
+): Promise<EvidenceRowsRead<EvidenceMatrixRow>> {
+  try {
+  const supabase = client ?? (await createSupabaseServer());
 
-  const { data: obRows } = await supabase
+  const obRows = await must(supabase
     .from("contract_obligations")
     .select("id, title, requirement_text, frequency, due_rule_raw, due_date_normalized, ai_payload")
     .eq("organization_id", orgId)
     .eq("contract_id", contractId)
     .eq("review_status", "approved")
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true }));
   const obligations = obRows ?? [];
-  if (!obligations.length) return [];
+  if (!obligations.length) return { ok: true, rows: [] };
 
   const obIds = obligations.map((o) => o.id as string);
-  const { data: reqRows } = await supabase
+  const reqRows = await must(supabase
     .from("obligation_evidence_requirements")
     .select("id, obligation_id, name, description, evidence_type, required")
     .eq("organization_id", orgId)
     .in("obligation_id", obIds)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true }));
   const requirements = (reqRows ?? []) as any[];
-  if (!requirements.length) return [];
+  if (!requirements.length) return { ok: true, rows: [] };
 
   const reqIds = requirements.map((r) => r.id as string);
-  const [{ data: linkRows }, { data: gapRows }, { data: checkRows }, { data: itemRows }, { data: discRows }] = await Promise.all([
-    supabase
+  const [linkRows, gapRows, checkRows, itemRows, discRows] = await Promise.all([
+    must(supabase
       .from("evidence_requirement_links")
       .select("evidence_requirement_id, evidence_item_id")
       .eq("organization_id", orgId)
-      .in("evidence_requirement_id", reqIds),
-    supabase
+      .in("evidence_requirement_id", reqIds)),
+    must(supabase
       .from("evidence_gaps")
       .select("*")
       .eq("organization_id", orgId)
       .in("evidence_requirement_id", reqIds)
       .in("status", OPEN_GAP_STATES)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })),
     // Latest criterion check per requirement — completed runs only, newest wins.
-    supabase
+    must(supabase
       .from("evidence_verification_checks")
       .select("evidence_requirement_id, result, human_result, created_at, verification_run_id")
       .eq("organization_id", orgId)
       .in("evidence_requirement_id", reqIds)
-      .order("created_at", { ascending: false }),
-    supabase
+      .order("created_at", { ascending: false })),
+    must(supabase
       .from("evidence_items")
       .select("id, status")
       .eq("organization_id", orgId)
-      .eq("contract_id", contractId),
-    supabase
+      .eq("contract_id", contractId)),
+    must(supabase
       .from("evidence_verification_discrepancies")
       .select("*")
       .eq("organization_id", orgId)
       .in("evidence_requirement_id", reqIds)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })),
   ]);
 
   // Version the newest run examined per requirement — effective status is
@@ -381,13 +411,13 @@ export async function getContractEvidenceMatrix(
   const latestRunIds = [
     ...new Set((checkRows ?? []).map((c) => c.verification_run_id as string).filter(Boolean)),
   ];
-  const { data: runVersionRows } = latestRunIds.length
-    ? await supabase
+  const runVersionRows: any[] = latestRunIds.length
+    ? (await must(supabase
         .from("evidence_verification_runs")
         .select("id, evidence_version_id")
         .eq("organization_id", orgId)
-        .in("id", latestRunIds)
-    : { data: [] as any[] };
+        .in("id", latestRunIds))) ?? []
+    : [];
   const versionByRun = new Map<string, string>(
     (runVersionRows ?? []).map((r: any) => [r.id as string, r.evidence_version_id as string]),
   );
@@ -446,7 +476,7 @@ export async function getContractEvidenceMatrix(
     });
   }
 
-  return requirements.map((r) => {
+  return { ok: true, rows: requirements.map((r) => {
     const latest = latestCheckByReq.get(r.id);
     const latestResult = (latest?.human ?? latest?.result) ?? null;
     return {
@@ -473,7 +503,10 @@ export async function getContractEvidenceMatrix(
         discrepancies,
       }),
     };
-  });
+  }) };
+  } catch {
+    return { ok: false };
+  }
 }
 
 /**
@@ -481,51 +514,55 @@ export async function getContractEvidenceMatrix(
  * enough context to answer: what is this, for which obligation, what is
  * wrong, what should happen next.
  */
-export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow[]> {
-  const supabase = await createSupabaseServer();
+export async function listEvidenceInbox(
+  orgId: string,
+  client?: Supa,
+): Promise<EvidenceRowsRead<EvidenceInboxRow>> {
+  try {
+  const supabase = client ?? (await createSupabaseServer());
 
-  const { data: items } = await supabase
+  const items = await must(supabase
     .from("evidence_items")
     .select("id, contract_id, obligation_id, title, status, created_at")
     .eq("organization_id", orgId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }));
   const rows = (items ?? []) as any[];
-  if (!rows.length) return [];
+  if (!rows.length) return { ok: true, rows: [] };
 
   const itemIds = rows.map((r) => r.id as string);
   const contractIds = [...new Set(rows.map((r) => r.contract_id as string))];
   const obligationIds = [...new Set(rows.map((r) => r.obligation_id).filter(Boolean))] as string[];
 
-  const [{ data: versionRows }, { data: linkRows }, { data: contractRows }, { data: obRows }, { data: gapRows }, { data: pendingDiscRows }] =
+  const [versionRows, linkRows, contractRows, obRows, gapRows, pendingDiscRows] =
     await Promise.all([
-      supabase
+      must(supabase
         .from("evidence_versions")
         .select("evidence_item_id, version_number, file_name, uploaded_by, uploaded_at")
         .eq("organization_id", orgId)
         .in("evidence_item_id", itemIds)
-        .order("version_number", { ascending: false }),
-      supabase
+        .order("version_number", { ascending: false })),
+      must(supabase
         .from("evidence_requirement_links")
         .select("evidence_item_id, evidence_requirement_id")
         .eq("organization_id", orgId)
-        .in("evidence_item_id", itemIds),
-      supabase.from("contracts").select("id, title").eq("organization_id", orgId).in("id", contractIds),
+        .in("evidence_item_id", itemIds)),
+      must(supabase.from("contracts").select("id, title").eq("organization_id", orgId).in("id", contractIds)),
       obligationIds.length
-        ? supabase.from("contract_obligations").select("id, title").eq("organization_id", orgId).in("id", obligationIds)
-        : Promise.resolve({ data: [] as any[] }),
-      supabase
+        ? must(supabase.from("contract_obligations").select("id, title").eq("organization_id", orgId).in("id", obligationIds))
+        : Promise.resolve([] as any[]),
+      must(supabase
         .from("evidence_gaps")
         .select("evidence_requirement_id, status")
         .eq("organization_id", orgId)
-        .in("status", OPEN_GAP_STATES),
+        .in("status", OPEN_GAP_STATES)),
       // pending = awaiting review; kept_prior = retained by a human. Both
       // still hold the previously accepted operational state in force.
-      supabase
+      must(supabase
         .from("evidence_verification_discrepancies")
         .select("evidence_item_id, status")
         .eq("organization_id", orgId)
         .in("status", ["pending", "kept_prior"])
-        .in("evidence_item_id", itemIds),
+        .in("evidence_item_id", itemIds)),
     ]);
 
   const pendingDiscByItem = new Map<string, number>();
@@ -563,7 +600,7 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
     }
   }
 
-  return rows.map((r) => {
+  return { ok: true, rows: rows.map((r) => {
     const v = latestVersion.get(r.id);
     const linked = linksByItem.get(r.id)?.size ?? 0;
     const openGapCount = openGapsByItem.get(r.id) ?? 0;
@@ -591,5 +628,8 @@ export async function listEvidenceInbox(orgId: string): Promise<EvidenceInboxRow
         openGapCount,
       }),
     };
-  });
+  }) };
+  } catch {
+    return { ok: false };
+  }
 }

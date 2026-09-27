@@ -10,6 +10,7 @@ import {
   resolveEvidenceDiscrepancy,
   uploadEvidenceVersion,
 } from "@/app/[locale]/app/evidence/actions";
+import { DataLoadFailed } from "@/components/app/contract-unavailable";
 import { CheckCard } from "@/components/app/evidence/check-card";
 import { DiscrepancyList } from "@/components/app/evidence/discrepancy-list";
 import { GapList } from "@/components/app/evidence/gap-list";
@@ -43,8 +44,11 @@ export default async function EvidenceInspector(props: PageProps<"/[locale]/app/
   const orgId = session?.organizationId;
   if (!orgId) notFound();
 
-  const detail = await getEvidenceItemDetail(orgId, id);
-  if (!detail) notFound();
+  const detailRead = await getEvidenceItemDetail(orgId, id);
+  // A failed composed read renders unavailable — never "not found".
+  if (detailRead.status === "unavailable") return <DataLoadFailed message="dataLoadFailed" />;
+  if (detailRead.status === "not_found") notFound();
+  const detail = detailRead.detail;
 
   const f = await getFormatter();
   const latestVersion = detail.versions[0] ?? null;

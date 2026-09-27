@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ClauseTrace } from "@/components/app/clause-trace";
-import { ContractLoadFailed } from "@/components/app/contract-unavailable";
+import { ContractLoadFailed, DataLoadFailed } from "@/components/app/contract-unavailable";
 import { ContractLifecycle } from "@/components/app/contract-lifecycle";
 import { IngestionControls } from "@/components/app/ingestion-controls";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
@@ -11,7 +11,7 @@ import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { readContract, requireTenant } from "@/data/context";
+import { readContract, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
@@ -20,43 +20,59 @@ import { asLocale } from "@/i18n/params";
 
 const STATUS_ORDER: ObligationStatus[] = ["verified", "partial", "missing", "overdue", "at_risk", "pending"];
 
+// A failed ingestion read reports ok:false — zeroed stats or a "no run yet"
+// state must never be derived from a dropped query.
 async function getLatestIngestionRun(orgId: string, contractId: string) {
-  const { createSupabaseServer } = await import("@/lib/supabase/server");
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase
-    .from("contract_ingestion_runs")
-    .select("id, status, error_code")
-    .eq("organization_id", orgId)
-    .eq("contract_id", contractId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (!data) return null;
-  const { count } = await supabase
-    .from("contract_obligations")
-    .select("id", { count: "exact", head: true })
-    .eq("ingestion_run_id", data.id);
-  return { id: data.id as string, status: data.status as string, error_code: data.error_code as string | null, obligations: count ?? 0 };
+  try {
+    const { createSupabaseServer } = await import("@/lib/supabase/server");
+    const supabase = await createSupabaseServer();
+    const { data, error } = await supabase
+      .from("contract_ingestion_runs")
+      .select("id, status, error_code")
+      .eq("organization_id", orgId)
+      .eq("contract_id", contractId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) return { ok: false as const };
+    if (!data) return { ok: true as const, run: null };
+    const { count, error: countError } = await supabase
+      .from("contract_obligations")
+      .select("id", { count: "exact", head: true })
+      .eq("ingestion_run_id", data.id);
+    if (countError) return { ok: false as const };
+    return { ok: true as const, run: { id: data.id as string, status: data.status as string, error_code: data.error_code as string | null, obligations: count ?? 0 } };
+  } catch {
+    return { ok: false as const };
+  }
 }
 
 async function getIngestionSummary(orgId: string, contractId: string) {
-  const { createSupabaseServer } = await import("@/lib/supabase/server");
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase
-    .from("contract_obligations")
-    .select("review_status, payment_linked, financial_condition, external_dependency, frequency")
-    .eq("organization_id", orgId)
-    .eq("contract_id", contractId);
-  const rows = data ?? [];
-  return {
-    obligations: rows.length,
-    needsReview: rows.filter((o) => o.review_status === "needs_review" || o.review_status === "conflict_requires_review").length,
-    conflictCount: rows.filter((o) => o.review_status === "conflict_requires_review").length,
-    paymentLinked: rows.filter((o) => o.payment_linked === true).length,
-    financial: rows.filter((o) => o.financial_condition !== null).length,
-    externalDeps: rows.filter((o) => o.external_dependency !== null).length,
-    recurring: rows.filter((o) => o.frequency !== null).length,
-  };
+  try {
+    const { createSupabaseServer } = await import("@/lib/supabase/server");
+    const supabase = await createSupabaseServer();
+    const { data, error } = await supabase
+      .from("contract_obligations")
+      .select("review_status, payment_linked, financial_condition, external_dependency, frequency")
+      .eq("organization_id", orgId)
+      .eq("contract_id", contractId);
+    if (error || !Array.isArray(data)) return { ok: false as const };
+    const rows = data;
+    return {
+      ok: true as const,
+      summary: {
+        obligations: rows.length,
+        needsReview: rows.filter((o) => o.review_status === "needs_review" || o.review_status === "conflict_requires_review").length,
+        conflictCount: rows.filter((o) => o.review_status === "conflict_requires_review").length,
+        paymentLinked: rows.filter((o) => o.payment_linked === true).length,
+        financial: rows.filter((o) => o.financial_condition !== null).length,
+        externalDeps: rows.filter((o) => o.external_dependency !== null).length,
+        recurring: rows.filter((o) => o.frequency !== null).length,
+      },
+    };
+  } catch {
+    return { ok: false as const };
+  }
 }
 
 export default async function ContractOverview(props: PageProps<"/[locale]/app/contracts/[id]">) {
@@ -80,31 +96,34 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   if (read.status === "not_found") notFound();
   const contract = read.contract;
 
-  const [obligations, clauses, evidence, risks, claims, actions, events, activity, documents, latestRun, obligationStats] = await Promise.all([
-    db.obligations.list(orgId, { contractId: id }),
+  const [obligationsRead, clauses, evidenceRead, risks, claims, actions, events, activity, documents, latestRunRead, summaryRead] = await Promise.all([
+    readObligationList(db, orgId, session?.mode === "demo", { contractId: id }),
     db.contracts.listClauses(orgId, id),
-    db.evidence.list(orgId, { contractId: id }),
+    readEvidenceList(db, orgId, session?.mode === "demo", { contractId: id }),
     db.risks.list(orgId, { contractId: id }),
     db.claims.list(orgId, { contractId: id }),
     db.actions.list(orgId, { contractId: id }),
     db.agent.listEvents(orgId, { contractId: id, limit: 5 }),
     db.activity.list(orgId, { contractId: id, limit: 6 }),
     db.documents.list(orgId, id),
-    isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve(null),
-    isLive ? getIngestionSummary(orgId, id) : Promise.resolve(null),
+    isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve({ ok: true as const, run: null }),
+    isLive ? getIngestionSummary(orgId, id) : Promise.resolve({ ok: true as const, summary: null }),
   ]);
+  const obligations = obligationsRead.ok ? obligationsRead.obligations : null;
+  const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
 
   const h = contract.health;
   const pipeline = DEMO_PIPELINE.find((run) => run.contractId === id);
-  const byStatus = countBy(obligations, (o) => o.status);
+  const byStatus = countBy(obligations ?? [], (o) => o.status);
   const nextClaim = claims
     .filter((c) => c.status === "preparing" || c.status === "ready")
     .sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0];
   const openRisks = risks.filter((r) => r.status !== "closed").sort((a, b) => b.exposure - a.exposure);
 
   // Trace the obligation the Officer is most concerned about (missing first, then partial).
-  const traced =
-    obligations.find((o) => o.status === "missing") ?? obligations.find((o) => o.status === "partial") ?? obligations[0];
+  const traced = obligations
+    ? obligations.find((o) => o.status === "missing") ?? obligations.find((o) => o.status === "partial") ?? obligations[0]
+    : undefined;
   const tracedClause = traced ? clauses.find((c) => c.id === traced.clauseId) : undefined;
 
   return (
@@ -122,7 +141,9 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
       <Panel title={t("contract.clauseTrace")} tone="sky" hint={t("contract.clauseTraceHint")}>
         <div className="p-4">
-          {traced && tracedClause ? (
+          {!obligations || !evidence ? (
+            <DataLoadFailed message="dataLoadFailed" />
+          ) : traced && tracedClause ? (
             <ClauseTrace clause={tracedClause} obligation={traced} evidence={evidence.filter((e) => e.obligationId === traced.id)} />
           ) : null}
         </div>
@@ -165,14 +186,18 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
         </p>
       )}
 
-      {isLive && (
+      {isLive && (!latestRunRead.ok || !summaryRead.ok ? (
+        <Panel tone="emerald" title={t("ingestion.title")}>
+          <div className="px-5 py-4"><DataLoadFailed message="dataLoadFailed" /></div>
+        </Panel>
+      ) : (
         <IngestionControls
           contractId={id}
           locale={locale}
           hasDocuments={documents.length > 0}
           canRun={isLive}
-          currentRun={latestRun}
-          analysis={obligationStats}
+          currentRun={latestRunRead.run}
+          analysis={summaryRead.summary}
           labels={{
             title: t("ingestion.title"),
             unavailable: t("ingestion.unavailable"),
@@ -191,21 +216,25 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
             readyHint: t("ingestion.readyHint"),
           }}
         />
-      )}
+      ))}
 
       {pipeline && <IntakeTimeline pipeline={pipeline} />}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Panel title={t("contract.obligationsByStatus")} tone="emerald" hint={t("contract.healthHint")}>
           <div className="p-5">
-            <StackedBar
-              segments={STATUS_ORDER.filter((s) => byStatus[s]).map((s) => ({
-                key: s,
-                value: byStatus[s] ?? 0,
-                className: toneDot[statusTone[s]],
-                label: st(s),
-              }))}
-            />
+            {obligations === null ? (
+              <DataLoadFailed message="dataLoadFailed" />
+            ) : (
+              <StackedBar
+                segments={STATUS_ORDER.filter((s) => byStatus[s]).map((s) => ({
+                  key: s,
+                  value: byStatus[s] ?? 0,
+                  className: toneDot[statusTone[s]],
+                  label: st(s),
+                }))}
+              />
+            )}
           </div>
         </Panel>
 

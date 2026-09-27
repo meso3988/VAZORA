@@ -23,3 +23,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - The Phase 1 demo form validates and acknowledges only. It does not persist requests, send email or arrange bookings.
 - If installed Next.js documentation is blocked by ignore rules, use official documentation matching the installed version. Do not change ignore files or permissions to expose it.
 - Test browser interactions at the actual viewing URL. The local browser-preview proxy has returned 502 for HMR, preventing dev-mode React hydration, and mismatched forwarded-host/origin headers for Server Actions. Use direct localhost URLs instead; do not weaken origin checks or change locale routing to compensate for proxy failures. Port 3000 serves live development; a production server on port 3001 needs a rebuild/restart after code changes.
+
+## Read-state and capability map (checked-read conventions)
+
+Page reads must preserve three outcomes — populated, a genuine empty/not-found, and an explicit unavailable — via the shared helpers in `src/data/checked-reads.ts` (`readContractList`, `readContract`, `readObligationList`, `readObligation`, `readEvidenceList`). Live providers must implement the `*Checked` variants; a live provider without them resolves to explicit unavailable, never a silent legacy fallback. Demo sessions keep fixture reads (`list`/`getById`) — fixtures are never a failure fallback, and demo ids are not UUIDs (the format check is live-only). Composed evidence reads (`getEvidenceItemDetail`, `getContractEvidenceMatrix`, `listEvidenceInbox` in `src/data/supabase/evidence-detail.ts`) fail closed: any dependent query error yields `unavailable`/`ok:false`, never "no verification"/"no gaps". They accept an optional injected client for tests.
+
+Unimplemented repositories (fixed empty results — capabilities, not completed features):
+
+- `ActionRepository` (`actions.list` → `[]`): consumers `/app/tasks`, `/app/contracts/[id]` overview, `/app/contracts/[id]/activity`.
+- `ClaimRepository` (`claims.list` → `[]`): `/app/claims`, `/app/contracts/[id]/claims`, overview "next claim" panel.
+- `RiskRepository` (`risks.list` → `[]`): `/app/contracts/[id]/risks`, overview open-risks panel.
+- `AgentRepository` (`agent.listEvents` → `[]`): `/app/agent`, `/app/contracts/[id]/officer`, overview officer feed.
+
+These are distinct from the working Officer proposal/action path (`officer_actions` via `runOfficerTool`/`requestHumanApproval`), which is live and separately tested.
+
+Known read paths not yet error-preserving: `contracts.listClauses`, `documents.list`, `activity.list`, and `review-actions.ts` mutation-internal reads (the activation write gate itself already refuses on read error).

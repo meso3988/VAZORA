@@ -7,7 +7,8 @@ import { EVIDENCE_TYPES } from "@/components/app/evidence-upload";
 import { PageHeader, Panel, StackedBar } from "@/components/app/primitives";
 import { statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { readContractList, requireTenant } from "@/data/context";
+import { DataLoadFailed } from "@/components/app/contract-unavailable";
+import { readContractList, readEvidenceList, requireTenant } from "@/data/context";
 import { listEvidenceInbox } from "@/data/supabase/evidence-detail";
 import type { InboxCategory } from "@/domain/evidence";
 import { countBy, type EvidenceStatus } from "@/domain/types";
@@ -36,13 +37,14 @@ export default async function EvidencePage(props: PageProps<"/[locale]/app/evide
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
   const { orgId, db } = await requireTenant();
-  const [evidence, inbox, read] = await Promise.all([
-    db.evidence.list(orgId),
-    isLive ? listEvidenceInbox(orgId) : Promise.resolve([]),
+  const [evidenceRead, inboxRead, read] = await Promise.all([
+    readEvidenceList(db, orgId, session?.mode === "demo"),
+    isLive ? listEvidenceInbox(orgId) : Promise.resolve({ ok: true as const, rows: [] }),
     isLive ? readContractList(db, orgId, false) : Promise.resolve({ ok: true as const, contracts: [] }),
   ]);
   const contracts = read.contracts;
-  const by = countBy(evidence, (e) => e.status);
+  const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
+  const by = countBy(evidence ?? [], (e) => e.status);
   const active: InboxCategory = INBOX_CATEGORIES.includes(c as InboxCategory) ? (c as InboxCategory) : "all";
   const contractParam = typeof contract === "string" ? contract : null;
   const activeContract = contracts.some((x) => x.id === contractParam) ? contractParam : null;
@@ -52,11 +54,15 @@ export default async function EvidencePage(props: PageProps<"/[locale]/app/evide
   return (
     <>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
-      <Panel title={t("byStatus")} tone="sky">
-        <div className="p-5">
-          <StackedBar segments={ORDER.filter((s) => by[s]).map((s) => ({ key: s, value: by[s] ?? 0, className: toneDot[statusTone[s]], label: st(s) }))} />
-        </div>
-      </Panel>
+      {evidence === null ? (
+        <DataLoadFailed message="dataLoadFailed" />
+      ) : (
+        <Panel title={t("byStatus")} tone="sky">
+          <div className="p-5">
+            <StackedBar segments={ORDER.filter((s) => by[s]).map((s) => ({ key: s, value: by[s] ?? 0, className: toneDot[statusTone[s]], label: st(s) }))} />
+          </div>
+        </Panel>
+      )}
 
       {isLive && !read.ok && (
         <p role="status" className="rounded-sm border border-line bg-bg px-4 py-3 text-sm text-muted">
@@ -90,9 +96,11 @@ export default async function EvidencePage(props: PageProps<"/[locale]/app/evide
       )}
 
       <Panel title={t("inbox.title")} hint={t("inbox.subtitle")}>
-        {isLive ? (
+        {!inboxRead.ok ? (
+          <div className="p-5"><DataLoadFailed message="dataLoadFailed" /></div>
+        ) : isLive ? (
           <EvidenceInbox
-            rows={inbox}
+            rows={inboxRead.rows}
             active={active}
             activeContract={activeContract}
             contracts={contracts.map((x) => ({ id: x.id, title: x.title[locale] ?? x.title.en }))}

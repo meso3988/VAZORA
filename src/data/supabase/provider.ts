@@ -280,6 +280,23 @@ const obligations: ObligationRepository = {
     const { data } = await q;
     return ((data ?? []) as ObligationRow[]).map(mapObligation);
   },
+  async listChecked(organizationId, filter) {
+    try {
+      const supabase = await createSupabaseServer();
+      let q = supabase
+        .from("contract_obligations")
+        .select("*, obligation_evidence_requirements(name)")
+        .eq("organization_id", organizationId)
+        .eq("review_status", "approved")
+        .order("created_at", { ascending: true });
+      if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
+      const { data, error } = await q;
+      if (error || !Array.isArray(data)) return { ok: false };
+      return { ok: true, obligations: (data as ObligationRow[]).map(mapObligation) };
+    } catch {
+      return { ok: false };
+    }
+  },
   async getById(organizationId, id) {
     const supabase = await createSupabaseServer();
     const { data } = await supabase
@@ -289,6 +306,23 @@ const obligations: ObligationRepository = {
       .eq("id", id)
       .maybeSingle();
     return data ? mapObligation(data as ObligationRow) : null;
+  },
+  async getByIdChecked(organizationId, id) {
+    try {
+      const supabase = await createSupabaseServer();
+      const { data, error } = await supabase
+        .from("contract_obligations")
+        .select("*, obligation_evidence_requirements(name)")
+        .eq("organization_id", organizationId)
+        .eq("id", id)
+        .maybeSingle();
+      if (error) return { status: "unavailable" as const };
+      return data
+        ? { status: "found" as const, obligation: mapObligation(data as ObligationRow) }
+        : { status: "not_found" as const };
+    } catch {
+      return { status: "unavailable" as const };
+    }
   },
 };
 
@@ -325,6 +359,11 @@ type CheckRow = {
 
 const evidence: EvidenceRepository = {
   async list(organizationId, filter) {
+    const read = await this.listChecked!(organizationId, filter);
+    return read.ok ? read.evidence : [];
+  },
+  async listChecked(organizationId, filter) {
+    try {
     const supabase = await createSupabaseServer();
     let q = supabase
       .from("evidence_items")
@@ -333,14 +372,16 @@ const evidence: EvidenceRepository = {
       .order("created_at", { ascending: false });
     if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
     if (filter?.obligationId) q = q.eq("obligation_id", filter.obligationId);
-    const { data } = await q;
-    const rows = (data ?? []) as EvidenceItemRow[];
+    const { data: itemData, error: itemError } = await q;
+    if (itemError || !Array.isArray(itemData)) return { ok: false };
+    const rows = itemData as EvidenceItemRow[];
 
     // Latest verification run per item → its per-criterion checks. The
     // effective result is coalesce(human_result, result): a human override
     // wins for display while the AI result stays on the row.
     const itemIds = rows.map((r) => r.id);
-    const { data: runs } = itemIds.length
+    // A failed verification-run read must not render as "no verification".
+    const runsResult = itemIds.length
       ? await supabase
           .from("evidence_verification_runs")
           .select("id, evidence_item_id, overall_result, created_at")
@@ -348,30 +389,32 @@ const evidence: EvidenceRepository = {
           .in("evidence_item_id", itemIds)
           .eq("status", "completed")
           .order("created_at", { ascending: false })
-      : { data: [] as { id: string; evidence_item_id: string; overall_result: string | null; created_at: string }[] };
+      : { data: [] as { id: string; evidence_item_id: string; overall_result: string | null; created_at: string }[], error: null };
+    if (runsResult.error) return { ok: false };
     const latestRunByItem = new Map<string, { id: string; overall_result: string | null }>();
-    for (const r of runs ?? []) {
+    for (const r of runsResult.data ?? []) {
       if (!latestRunByItem.has(r.evidence_item_id)) {
         latestRunByItem.set(r.evidence_item_id, { id: r.id, overall_result: r.overall_result });
       }
     }
     const runIds = [...latestRunByItem.values()].map((r) => r.id);
-    const { data: checkRows } = runIds.length
+    const checksResult = runIds.length
       ? await supabase
           .from("evidence_verification_checks")
           .select("verification_run_id, check_label, result, human_result")
           .eq("organization_id", organizationId)
           .in("verification_run_id", runIds)
           .not("evidence_requirement_id", "is", null)
-      : { data: [] as CheckRow[] };
+      : { data: [] as CheckRow[], error: null };
+    if (checksResult.error) return { ok: false };
     const checksByRun = new Map<string, CheckRow[]>();
-    for (const c of checkRows ?? []) {
+    for (const c of checksResult.data ?? []) {
       const list = checksByRun.get(c.verification_run_id) ?? [];
       list.push(c);
       checksByRun.set(c.verification_run_id, list);
     }
 
-    return rows.map((row) => {
+    return { ok: true, evidence: rows.map((row) => {
       const versions = row.evidence_versions ?? [];
       const latest = versions.length
         ? versions.reduce((a, v) => (v.version_number > a.version_number ? v : a))
@@ -397,7 +440,10 @@ const evidence: EvidenceRepository = {
           })),
         },
       };
-    });
+    }) };
+    } catch {
+      return { ok: false };
+    }
   },
 };
 
