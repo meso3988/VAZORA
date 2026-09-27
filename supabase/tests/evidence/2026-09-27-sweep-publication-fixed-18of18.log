@@ -1,0 +1,24 @@
+PASS  baseline sweep completed — completed
+PASS  BETA-200 has two active observations to replace — overdue,missing_required_evidence
+  [db] baseline: BETA-200 active=2 resolved=0 · EPSILON-500 active=1 resolved=0 · GAMMA-300 active=2 resolved=0
+PASS  Z1 zero-row observation UPDATE → EPSILON-500 recorded as a failed write — [{"contract_id":"354c4a08-e50e-4bf5-b52f-0db59edce33e","error":"observation_write_failed"}]
+PASS  Z1 zero-row UPDATE not counted as an update — updated=7 vs observations=8
+PASS  Z1 EPSILON-500 coverage incomplete (no false successful assessment) — sweep_failed_for_contract
+PASS  Z2 zero-row resolution → GAMMA-300 recorded as failed, resolved count not incremented — failures=[{"contract_id":"3fd457a6-2a40-418f-83fe-de20322d512c","error":"observation_write_failed"}] resolved=0
+PASS  Z2 GAMMA-300 observations still active in the database — 2 → 2
+PASS  Z2 GAMMA-300 not presented as assessed/clean
+PASS  Z3 zero-row publication → outcome not reported as published — failed
+PASS  Z3 persisted run not published (still running) — running
+  [db] before P: BETA-200 active=2 resolved=0 · EPSILON-500 active=1 resolved=0 · GAMMA-300 active=2 resolved=0
+  [db] after P: BETA-200 active=2 resolved=0 · EPSILON-500 active=0 resolved=1 · GAMMA-300 active=2 resolved=0
+PASS  P sweep reports BETA-200 failed (partial) — [{"contract_id":"489567be-fa51-4648-aab5-b30748855116","error":"observation_write_failed"}]
+PASS  P BETA-200: NO observation resolved (no partial resolution exposed) — 2 → 2 active
+PASS  P EPSILON-500 (independent) resolved successfully — 1 → 0
+PASS  P BETA-200 health: known issues + incomplete coverage
+PASS  P2 resolving [valid, missing] in one call fails as a whole — officer_resolve_observations: expected 2 rows, updated 1
+PASS  P2 …and the valid observation is still active (rolled back)
+PASS  recovery sweep completed, no duplicate active observations — []
+PASS  recovery: BETA-200 findings active again (conditions still true)
+CLEANUP ok org=361b574f-9e86-41c8-982f-ccce5706f743  leftovers=none
+
+SWEEP PUBLICATION: 18/18 pass
