@@ -1,0 +1,31 @@
+FAIL  before alpha en: server response contains no demo fixture content — 640,000, 420,000, Faisal Harbi, فيصل الحربي, ctr_rta_om_2026, ap_corrective_213, ap_owner_142
+FAIL  before alpha en: rendered page contains no demo fixture content — 640,000, 420,000, Faisal Harbi
+PASS  before alpha en: no other tenant's contract numbers (response or page)
+FAIL  before alpha en: no financial totals shown (not implemented for live tenants) — SAR 0.0, SAR 640,000., SAR 420,000
+PASS  before alpha en: own monitored contracts visible
+PASS  before alpha en: approvals count = this tenant's real open proposals — shown 1 · db 1
+FAIL  before beta en: server response contains no demo fixture content — 640,000, 420,000, Faisal Harbi, فيصل الحربي, ctr_rta_om_2026, ap_corrective_213, ap_owner_142
+FAIL  before beta en: rendered page contains no demo fixture content — 640,000, 420,000, Faisal Harbi
+PASS  before beta en: no other tenant's contract numbers (response or page)
+FAIL  before beta en: no financial totals shown (not implemented for live tenants) — SAR 0.0, SAR 640,000., SAR 420,000
+PASS  before beta en: own monitored contracts visible
+PASS  before beta en: approvals count = this tenant's real open proposals — shown 2 · db 2
+FAIL  before empty en: server response contains no demo fixture content — 640,000, 420,000, Faisal Harbi, فيصل الحربي, ctr_rta_om_2026, ap_corrective_213, ap_owner_142
+FAIL  before empty en: rendered page contains no demo fixture content — 640,000, 420,000, Faisal Harbi
+PASS  before empty en: no other tenant's contract numbers (response or page)
+FAIL  before empty en: no financial totals shown (not implemented for live tenants) — SAR 0.0, SAR 640,000., SAR 420,000
+PASS  before empty en: empty tenant — no false reassurance
+FAIL  before alpha ar: server response contains no demo fixture content — 640,000, 420,000, Faisal Harbi, فيصل الحربي, ctr_rta_om_2026, ap_corrective_213, ap_owner_142
+FAIL  before alpha ar: rendered page contains no demo fixture content — 640,000, 420,000, فيصل الحربي
+PASS  before alpha ar: no other tenant's contract numbers (response or page)
+FAIL  before alpha ar: no financial totals shown (not implemented for live tenants) — 0.0 ر.س, 640,000 ر.س, 420,000 ر.س
+PASS  before alpha ar: own monitored contracts visible
+PASS  before alpha ar: approvals count = this tenant's real open proposals — shown 1 · db 1
+page.waitForURL: Target page, context or browser has been closed
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at login (/Users/mayasahaldashsh/Documents/VAZORA/supabase/tests/e2e-dashboard-provenance.mts:33:14)
+    at async main (/Users/mayasahaldashsh/Documents/VAZORA/supabase/tests/e2e-dashboard-provenance.mts:77:7) {
+  log: []
+}
