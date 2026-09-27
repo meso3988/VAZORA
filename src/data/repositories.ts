@@ -27,6 +27,8 @@ export interface OrganizationRepository {
 
 export interface ContractRepository {
   list(organizationId: string): Promise<Contract[]>;
+  /** Like list(), but a failed read is reported instead of returning []. */
+  listChecked?(organizationId: string): Promise<{ ok: true; contracts: Contract[] } | { ok: false }>;
   getById(organizationId: string, id: string): Promise<Contract | null>;
   listClauses(organizationId: string, contractId: string): Promise<Clause[]>;
 }

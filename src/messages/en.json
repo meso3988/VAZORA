@@ -1310,7 +1310,9 @@
       "officerActivity": "Contract Officer activity",
       "inDays": "in {days} days",
       "assignments": "Assignments to review",
-      "todayProgress": "Today's activation progress"
+      "todayProgress": "Today's activation progress",
+      "liveMetricsUnavailable": "Portfolio metrics (evidence coverage, claim readiness, financial exposure, overdue and due counts) are not yet calculated for live workspaces, so none are shown. Monitored issues and approvals are in the Contract Officer summary below.",
+      "contractsUnavailable": "Your contracts could not be loaded right now, so no portfolio figures are shown. Try again shortly."
     },
     "lifecycle": {
       "title": "Contract lifecycle",

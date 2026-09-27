@@ -180,6 +180,20 @@ const contracts: ContractRepository = {
       .order("created_at", { ascending: false });
     return ((data ?? []) as ContractRow[]).map(ZERO_HEALTH_CONTRACT);
   },
+  async listChecked(organizationId) {
+    try {
+      const supabase = await createSupabaseServer();
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .order("created_at", { ascending: false });
+      if (error || !Array.isArray(data)) return { ok: false };
+      return { ok: true, contracts: (data as ContractRow[]).map(ZERO_HEALTH_CONTRACT) };
+    } catch {
+      return { ok: false };
+    }
+  },
   async getById(organizationId, id) {
     const supabase = await createSupabaseServer();
     const { data } = await supabase

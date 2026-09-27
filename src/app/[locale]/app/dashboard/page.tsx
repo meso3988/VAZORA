@@ -34,8 +34,20 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
   const f = await getFormatter();
   const { session, orgId, db } = await requireTenant();
 
-  const [contracts, claims, events] = await Promise.all([
-    db.contracts.list(orgId),
+  // Illustrative fixtures (queues, approvals, assignments, pipeline, trend,
+  // portfolio health) belong to demo sessions ONLY. A real tenant workspace
+  // never falls back to them — not on empty data and not on a failed read.
+  const isDemo = session.mode === "demo";
+  let contractsUnavailable = false;
+  let contracts: Awaited<ReturnType<typeof db.contracts.list>> = [];
+  if (!isDemo && db.contracts.listChecked) {
+    const read = await db.contracts.listChecked(orgId);
+    if (read.ok) contracts = read.contracts;
+    else contractsUnavailable = true;
+  } else {
+    contracts = await db.contracts.list(orgId);
+  }
+  const [claims, events] = await Promise.all([
     db.claims.list(orgId),
     db.agent.listEvents(orgId, { limit: 5 }),
   ]);
@@ -85,12 +97,27 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
     <>
       <PageHeader
         title={t("dashboard.greeting", { name: firstName })}
-        subtitle={t("dashboard.opsSummary", {
+        subtitle={isDemo ? t("dashboard.opsSummary", {
           count: DEMO_APPROVALS.length + DEMO_ACTION_QUEUE.length,
           approvals: DEMO_APPROVALS.length,
           actions: DEMO_ACTION_QUEUE.length,
-        })}
+        }) : undefined}
       />
+
+      {!isDemo && (
+        <>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <KpiHero label={t("dashboard.kpis.contracts")} display={contractsUnavailable ? "—" : active.length} tone="verified" icon={TrendingUp} />
+          </div>
+          {/* Portfolio health metrics are not computed for live tenants yet:
+              say so rather than showing zeros. */}
+          <p role="status" className="rounded-sm border border-line bg-bg px-4 py-3 text-sm text-muted">
+            {contractsUnavailable ? t("dashboard.contractsUnavailable") : t("dashboard.liveMetricsUnavailable")}
+          </p>
+        </>
+      )}
+
+      {isDemo && (<>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiGauge label={t("dashboard.kpis.coverage")} value={Math.round(coverage * 100)} display={f.number(coverage, "percent")} tone={coverage >= 0.85 ? "verified" : "partial"} icon={ShieldCheck} />
@@ -236,6 +263,8 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
           </tbody>
         </Table>
       </Panel>
+
+      </>)}
 
       <Panel title={t("dashboard.officerActivity")} tone="emerald" icon={Bot} action={<Link href="/app/agent" className="flex items-center gap-1 text-xs text-emerald-100/90 hover:text-white">{t("nav.officer")} <ArrowRight size={12} className="rtl:-scale-x-100" /></Link>}>
         {/* Live tenants get the real executive summary from monitoring;
