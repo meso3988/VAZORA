@@ -1992,6 +1992,7 @@
         "title": "Command center",
         "hint": "{count} open {count, plural, one {item} other {items}}",
         "empty": "Nothing currently requires your attention.",
+        "emptyIncomplete": "No findings are available from the data that could be read. The current assessment is incomplete, so this is not an all-clear.",
         "section": {
           "approvals": "Waiting for your approval",
           "critical": "Critical",

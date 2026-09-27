@@ -47,19 +47,22 @@ export async function CommandCenter({
   acknowledgeAction,
   explainAction,
   proposeFollowUpAction,
+  assessmentComplete = true,
 }: {
   observations: ObservationRow[];
   locale: string;
   acknowledgeAction: (formData: FormData) => void | Promise<void>;
   explainAction: (formData: FormData) => void | Promise<void>;
   proposeFollowUpAction: (formData: FormData) => void | Promise<void>;
+  /** an empty list is only reassurance when the assessment completed */
+  assessmentComplete?: boolean;
 }) {
   const t = await getTranslations("app.officer.center");
   const kt = await getTranslations("app.officer.kind");
   const f = await getFormatter();
 
   if (!observations.length) {
-    return <Empty>{t("empty")}</Empty>;
+    return <Empty>{assessmentComplete ? t("empty") : t("emptyIncomplete")}</Empty>;
   }
 
   const inSection = (key: Section["key"]) =>

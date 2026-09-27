@@ -228,6 +228,7 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
       >
         <CommandCenter
           observations={observations}
+          assessmentComplete={brief.assessment.complete}
           locale={locale}
           acknowledgeAction={acknowledgeOfficerObservation}
           explainAction={explainOfficerObservation}
