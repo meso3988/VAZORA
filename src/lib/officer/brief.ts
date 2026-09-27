@@ -110,6 +110,16 @@ export async function buildTodayBrief(ctx: OfficerContext): Promise<TodayBrief> 
     .limit(1)
     .maybeSingle();
   if (attemptErr) reasons.push("sweep_history_read_failed");
+  // "Last successful" means a run that COMPLETED — a partial run is not one.
+  const { data: lastCompleted, error: completedErr } = await ctx.supabase
+    .from("officer_sweep_runs")
+    .select("started_at, completed_at")
+    .eq("organization_id", ctx.organizationId)
+    .eq("status", "completed")
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (completedErr) reasons.push("sweep_history_read_failed");
   else if (!attempt) reasons.push("never_assessed");
   else if (attempt.status !== "completed") reasons.push(`latest_sweep_${attempt.status}`);
   // index 1 = the sweep before the most recent one
@@ -189,7 +199,7 @@ export async function buildTodayBrief(ctx: OfficerContext): Promise<TodayBrief> 
     assessment: {
       complete: reasons.length === 0,
       reasons: [...new Set(reasons)],
-      lastSuccessfulAt: (lastSweep ?? [])[0]?.completed_at ?? (lastSweep ?? [])[0]?.started_at ?? null,
+      lastSuccessfulAt: lastCompleted?.completed_at ?? lastCompleted?.started_at ?? null,
     },
   };
 }

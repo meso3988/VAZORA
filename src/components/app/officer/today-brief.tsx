@@ -60,7 +60,7 @@ export async function TodayBriefPanel({
           {brief.assessment.lastSuccessfulAt ? t("incomplete") : t("incompleteNever")}
           {brief.assessment.lastSuccessfulAt && (
             <span className="ms-1 text-[11px] text-faint">
-              {t("lastSuccessful", { at: f.dateTime(new Date(brief.assessment.lastSuccessfulAt), "short") })}
+              {t("lastSuccessful", { at: f.dateTime(new Date(brief.assessment.lastSuccessfulAt), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", numberingSystem: "latn" }) })}
             </span>
           )}
         </p>
