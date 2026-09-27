@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { OfficerFeed } from "@/components/app/officer-feed";
 import { OfficerAsk } from "@/components/app/officer-ask";
 import { Panel } from "@/components/app/primitives";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { asLocale } from "@/i18n/params";
 
 export default async function ContractOfficer(props: PageProps<"/[locale]/app/contracts/[id]/officer">) {
@@ -12,9 +14,10 @@ export default async function ContractOfficer(props: PageProps<"/[locale]/app/co
   const locale = asLocale(rawLocale);
   setRequestLocale(locale);
   const t = await getTranslations("app.officer");
-  const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContract(db, orgId, id, session.mode === "demo");
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
   const events = await db.agent.listEvents(orgId, { contractId: id });
   const open = events.filter((e) => e.kind !== "verified").length;
 

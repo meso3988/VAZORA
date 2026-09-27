@@ -30,6 +30,15 @@ export interface ContractRepository {
   /** Like list(), but a failed read is reported instead of returning []. */
   listChecked?(organizationId: string): Promise<{ ok: true; contracts: Contract[] } | { ok: false }>;
   getById(organizationId: string, id: string): Promise<Contract | null>;
+  /**
+   * Like getById(), but a failed read is reported as "unavailable" instead
+   * of collapsing into null (which callers render as "not found").
+   * not_found means the authorized query succeeded and found no row —
+   * including a foreign-tenant id, which must not be disclosed as existing.
+   */
+  getByIdChecked?(organizationId: string, id: string): Promise<
+    { status: "found"; contract: Contract } | { status: "not_found" } | { status: "unavailable" }
+  >;
   listClauses(organizationId: string, contractId: string): Promise<Clause[]>;
 }
 

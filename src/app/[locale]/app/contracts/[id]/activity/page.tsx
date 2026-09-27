@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Empty, Mono, Panel } from "@/components/app/primitives";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
@@ -12,9 +14,10 @@ export default async function ContractActivity(props: PageProps<"/[locale]/app/c
   setRequestLocale(locale);
   const t = await getTranslations("app.activity");
   const f = await getFormatter();
-  const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContract(db, orgId, id, session.mode === "demo");
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
   const activity = await db.activity.list(orgId, { contractId: id });
 
   return (

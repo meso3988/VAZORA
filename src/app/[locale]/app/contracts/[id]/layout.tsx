@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { ContractTabs } from "@/components/app/contract-tabs";
 import { Mono, PageHeader } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
@@ -16,9 +17,13 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
   const t = await getTranslations("app");
   const s = await getTranslations("sector");
   const f = await getFormatter();
-  const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContract(db, orgId, id, session.mode === "demo");
+  // A failed read is not a 404: show the localized unavailable state and
+  // drop the tabs + children, which would fail identically anyway.
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
+  const contract = read.contract;
 
   const safeDate = (iso: string) => {
     const d = new Date(iso);

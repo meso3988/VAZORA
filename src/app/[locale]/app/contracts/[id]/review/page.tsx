@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { PageHeader } from "@/components/app/primitives";
 import { ReviewBoard } from "@/components/app/review-board";
 import { auth } from "@/data/auth/provider";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { Link } from "@/i18n/navigation";
 import { lt } from "@/lib/utils";
 import { createSupabaseServer } from "@/lib/supabase/server";
@@ -24,8 +25,10 @@ export default async function ReviewPage(props: PageProps<"/[locale]/app/contrac
   if (session?.mode !== "live") notFound();
 
   const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const read = await readContract(db, orgId, id, /* live-only page */ false);
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
+  const contract = read.contract;
 
   const supabase = await createSupabaseServer();
 

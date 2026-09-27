@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { ClauseTrace } from "@/components/app/clause-trace";
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { ContractLifecycle } from "@/components/app/contract-lifecycle";
 import { IngestionControls } from "@/components/app/ingestion-controls";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
@@ -10,7 +11,7 @@ import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
@@ -71,12 +72,13 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const uploadState = typeof sp.uploaded === "string" ? "uploaded" : typeof sp.error === "string" ? sp.error : undefined;
   const analysisState = typeof sp.analysis === "string" ? sp.analysis : undefined;
   const { orgId, db } = await requireTenant();
-
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
-
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
+
+  const read = await readContract(db, orgId, id, session?.mode === "demo");
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
+  const contract = read.contract;
 
   const [obligations, clauses, evidence, risks, claims, actions, events, activity, documents, latestRun, obligationStats] = await Promise.all([
     db.obligations.list(orgId, { contractId: id }),

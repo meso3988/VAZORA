@@ -513,7 +513,8 @@
     "learnMore": "Learn more",
     "comingSoon": "Coming soon",
     "skipToContent": "Skip to content",
-    "contractsLoadFailed": "Contracts could not be loaded right now. Try again shortly — nothing was calculated from this."
+    "contractsLoadFailed": "Contracts could not be loaded right now. Try again shortly — nothing was calculated from this.",
+    "contractLoadFailed": "This contract could not be loaded right now. Try again shortly."
   },
   "status": {
     "verified": "Verified",

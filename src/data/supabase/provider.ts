@@ -204,6 +204,23 @@ const contracts: ContractRepository = {
       .maybeSingle();
     return data ? mapContract(data as ContractRow) : null;
   },
+  async getByIdChecked(organizationId, id) {
+    try {
+      const supabase = await createSupabaseServer();
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .eq("id", id)
+        .maybeSingle();
+      if (error) return { status: "unavailable" as const };
+      return data
+        ? { status: "found" as const, contract: mapContract(data as ContractRow) }
+        : { status: "not_found" as const };
+    } catch {
+      return { status: "unavailable" as const };
+    }
+  },
   async listClauses() {
     return [];
   },

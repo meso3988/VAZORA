@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { EVIDENCE_TYPES, EvidenceUpload } from "@/components/app/evidence-upload";
 import { requestEvidenceVerification } from "@/app/[locale]/app/evidence/actions";
 import { EvidenceMatrix } from "@/components/app/evidence/matrix";
@@ -8,7 +9,7 @@ import { Panel, StackedBar } from "@/components/app/primitives";
 import { EvidenceTable } from "@/components/app/tables";
 import { statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { getContractEvidenceMatrix } from "@/data/supabase/evidence-detail";
 import { countBy, type EvidenceStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
@@ -26,8 +27,9 @@ export default async function ContractEvidence(props: PageProps<"/[locale]/app/c
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
   const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const read = await readContract(db, orgId, id, session?.mode === "demo");
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
   const [evidence, obligations, matrix] = await Promise.all([
     db.evidence.list(orgId, { contractId: id }),
     db.obligations.list(orgId, { contractId: id }),
