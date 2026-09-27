@@ -1,0 +1,18 @@
+# e2e-health-states.mts, HS_STATE=never, build xFwCXKcJyOt4NaUMshQTZ (commit 9a325f0), provider disabled
+# Brief panel correctly said "I could not complete the current assessment, and there is no earlier
+# successful assessment." — but the Command center list's empty state still said
+# "Nothing currently requires your attention." (screenshot hs-never-en-command-center.png).
+FAIL  never en command-center: no false "nothing needs attention" — quiet text shown
+PASS  never en command-center: incomplete assessment is stated
+PASS  never en command-center: no history claimed when never assessed
+PASS  never en dashboard: no false "nothing needs attention"
+PASS  never en dashboard: incomplete assessment is stated
+PASS  never en: no page errors
+FAIL  never ar command-center: no false "nothing needs attention" — quiet text shown
+PASS  never ar command-center: incomplete assessment is stated
+PASS  never ar command-center: no history claimed when never assessed
+PASS  never ar dashboard: no false "nothing needs attention"
+PASS  never ar dashboard: incomplete assessment is stated
+PASS  never ar: no page errors
+
+HEALTH STATES (never): 10/12 pass

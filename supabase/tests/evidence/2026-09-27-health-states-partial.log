@@ -1,0 +1,20 @@
+PASS  partial en command-center: no false "nothing needs attention"
+PASS  partial en command-center: incomplete assessment is stated
+PASS  partial en command-center: known issues remain visible
+PASS  partial en command-center: last successful assessment shown as history
+PASS  partial en command-center: history timestamp is the completed run (03:38) — Sep 27, 03:38 AM
+PASS  partial en dashboard: no false "nothing needs attention"
+PASS  partial en dashboard: incomplete assessment is stated
+PASS  partial en dashboard: known issues remain visible
+PASS  partial en: no page errors
+PASS  partial ar command-center: no false "nothing needs attention"
+PASS  partial ar command-center: incomplete assessment is stated
+PASS  partial ar command-center: known issues remain visible
+PASS  partial ar command-center: last successful assessment shown as history
+PASS  partial ar command-center: history timestamp is the completed run (03:38) — معروض منفصلًا وقد يكون قديمًا.آخر تقييم ناجح: 27 سبتمبر، 03:38 ص
+PASS  partial ar dashboard: no false "nothing needs attention"
+PASS  partial ar dashboard: incomplete assessment is stated
+PASS  partial ar dashboard: known issues remain visible
+PASS  partial ar: no page errors
+
+HEALTH STATES (partial): 18/18 pass
