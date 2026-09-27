@@ -1,0 +1,80 @@
+PASS  detail alpha en /contracts: loads (200)
+PASS  detail alpha en /contracts: own contracts listed
+PASS  detail alpha en /contracts: no false empty state with records
+PASS  detail alpha en /contracts: no load-failure text
+PASS  detail alpha en /contracts/[id]: detail renders after click-through
+PASS  detail alpha en /contracts/[id]: no load-failure text
+PASS  detail alpha en /contracts/[id]/obligations: loads (200), no failure text
+PASS  detail alpha en /contracts/[id]/risks: loads (200), no failure text
+PASS  detail alpha en /contracts/[id]/evidence: loads (200), no failure text
+PASS  detail alpha en /contracts/[id]/activity: loads (200), no failure text
+PASS  detail alpha en /contracts/[id]/claims: loads (200), no failure text
+PASS  detail alpha en /contracts/[id]/officer: loads (200), no failure text
+PASS  detail alpha en /contracts/[random-uuid]: legitimate not-found state
+PASS  detail alpha en /tasks: loads (200)
+PASS  detail alpha en /tasks: no load-failure text
+PASS  detail alpha en /tasks: page title rendered
+PASS  detail alpha en /claims: loads (200)
+PASS  detail alpha en /claims: no load-failure text
+PASS  detail alpha en /claims: page title rendered
+PASS  detail alpha en /evidence: loads (200)
+PASS  detail alpha en /evidence: no load-failure text
+PASS  detail alpha en /evidence: page title rendered
+PASS  detail alpha en /dashboard: loads (200)
+PASS  detail alpha en /dashboard: no load-failure text
+PASS  detail empty en /contracts: loads (200)
+PASS  detail empty en /contracts: legitimate empty state shown
+PASS  detail empty en /contracts: no load-failure text
+PASS  detail empty en /tasks: loads (200)
+PASS  detail empty en /tasks: no load-failure text
+PASS  detail empty en /tasks: page title rendered
+PASS  detail empty en /claims: loads (200)
+PASS  detail empty en /claims: no load-failure text
+PASS  detail empty en /claims: page title rendered
+PASS  detail empty en /evidence: loads (200)
+PASS  detail empty en /evidence: no load-failure text
+PASS  detail empty en /evidence: page title rendered
+PASS  detail empty en /evidence: no upload contract picker for empty tenant
+PASS  detail empty en /dashboard: loads (200)
+PASS  detail empty en /dashboard: no load-failure text
+PASS  detail alpha ar /contracts: loads (200)
+PASS  detail alpha ar /contracts: own contracts listed
+PASS  detail alpha ar /contracts: no false empty state with records
+PASS  detail alpha ar /contracts: no load-failure text
+PASS  detail alpha ar /contracts/[id]: detail renders after click-through
+PASS  detail alpha ar /contracts/[id]: no load-failure text
+PASS  detail alpha ar /contracts/[id]/obligations: loads (200), no failure text
+PASS  detail alpha ar /contracts/[id]/risks: loads (200), no failure text
+PASS  detail alpha ar /contracts/[id]/evidence: loads (200), no failure text
+PASS  detail alpha ar /contracts/[id]/activity: loads (200), no failure text
+PASS  detail alpha ar /contracts/[id]/claims: loads (200), no failure text
+PASS  detail alpha ar /contracts/[id]/officer: loads (200), no failure text
+PASS  detail alpha ar /contracts/[random-uuid]: legitimate not-found state
+PASS  detail alpha ar /tasks: loads (200)
+PASS  detail alpha ar /tasks: no load-failure text
+PASS  detail alpha ar /tasks: page title rendered
+PASS  detail alpha ar /claims: loads (200)
+PASS  detail alpha ar /claims: no load-failure text
+PASS  detail alpha ar /claims: page title rendered
+PASS  detail alpha ar /evidence: loads (200)
+PASS  detail alpha ar /evidence: no load-failure text
+PASS  detail alpha ar /evidence: page title rendered
+PASS  detail alpha ar /dashboard: loads (200)
+PASS  detail alpha ar /dashboard: no load-failure text
+PASS  detail empty ar /contracts: loads (200)
+PASS  detail empty ar /contracts: legitimate empty state shown
+PASS  detail empty ar /contracts: no load-failure text
+PASS  detail empty ar /tasks: loads (200)
+PASS  detail empty ar /tasks: no load-failure text
+PASS  detail empty ar /tasks: page title rendered
+PASS  detail empty ar /claims: loads (200)
+PASS  detail empty ar /claims: no load-failure text
+PASS  detail empty ar /claims: page title rendered
+PASS  detail empty ar /evidence: loads (200)
+PASS  detail empty ar /evidence: no load-failure text
+PASS  detail empty ar /evidence: page title rendered
+PASS  detail empty ar /evidence: no upload contract picker for empty tenant
+PASS  detail empty ar /dashboard: loads (200)
+PASS  detail empty ar /dashboard: no load-failure text
+
+READ-STATE SMOKE (detail): 78/78 pass

@@ -3,7 +3,8 @@ PASS  thrown/network error → ok:false, does not propagate
 PASS  successful empty → ok:true with []
 PASS  successful populated → ok:true with both contracts
 PASS  recovery after failure → fail then populated
-PASS  provider without listChecked → falls back to list()
+PASS  live without listChecked → ok:false (no silent legacy fallback)
+PASS  demo mode → list() fixtures, ok:true
 PASS  demo mode uses fixtures via list(), not listChecked
 PASS  throwing list() fallback → ok:false
 PASS  /app/dashboard: uses readContractList
@@ -33,4 +34,4 @@ PASS  ar: legitimate empty state intact
 PASS  en/ar: dashboard unavailable key present in both locales
 PASS  en/ar failure strings differ (both localized, not copy-paste)
 
-34/34 checks passed
+35/35 checks passed

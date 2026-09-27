@@ -1,0 +1,56 @@
+PASS  found → status found with contract
+PASS  successful not-found → status not_found
+PASS  returned database error → unavailable, not not_found
+PASS  thrown/network error → unavailable, does not propagate
+PASS  recovery after failure → unavailable then found
+PASS  foreign-tenant id → not_found, no existence disclosure
+PASS  malformed id → not_found without a database query
+PASS  demo mode reads non-UUID fixtures via getById
+PASS  non-UUID id in live mode → not_found without a query
+PASS  demo not-found → not_found
+PASS  live without getByIdChecked → unavailable (no silent legacy fallback)
+PASS  live without listChecked → ok:false explicit unavailable
+PASS  demo still reads list() fixtures
+PASS  [id]/layout.tsx: uses readContract
+PASS  [id]/layout.tsx: unavailable → ContractLoadFailed
+PASS  [id]/layout.tsx: not_found → notFound()
+PASS  [id]/layout.tsx: no unchecked db.contracts.getById
+PASS  [id]/page.tsx: uses readContract
+PASS  [id]/page.tsx: unavailable → ContractLoadFailed
+PASS  [id]/page.tsx: not_found → notFound()
+PASS  [id]/page.tsx: no unchecked db.contracts.getById
+PASS  evidence/page.tsx: uses readContract
+PASS  evidence/page.tsx: unavailable → ContractLoadFailed
+PASS  evidence/page.tsx: not_found → notFound()
+PASS  evidence/page.tsx: no unchecked db.contracts.getById
+PASS  activity/page.tsx: uses readContract
+PASS  activity/page.tsx: unavailable → ContractLoadFailed
+PASS  activity/page.tsx: not_found → notFound()
+PASS  activity/page.tsx: no unchecked db.contracts.getById
+PASS  review/page.tsx: uses readContract
+PASS  review/page.tsx: unavailable → ContractLoadFailed
+PASS  review/page.tsx: not_found → notFound()
+PASS  review/page.tsx: no unchecked db.contracts.getById
+PASS  risks/page.tsx: uses readContract
+PASS  risks/page.tsx: unavailable → ContractLoadFailed
+PASS  risks/page.tsx: not_found → notFound()
+PASS  risks/page.tsx: no unchecked db.contracts.getById
+PASS  officer/page.tsx: uses readContract
+PASS  officer/page.tsx: unavailable → ContractLoadFailed
+PASS  officer/page.tsx: not_found → notFound()
+PASS  officer/page.tsx: no unchecked db.contracts.getById
+PASS  obligations/page.tsx: uses readContract
+PASS  obligations/page.tsx: unavailable → ContractLoadFailed
+PASS  obligations/page.tsx: not_found → notFound()
+PASS  obligations/page.tsx: no unchecked db.contracts.getById
+PASS  claims/page.tsx: uses readContract
+PASS  claims/page.tsx: unavailable → ContractLoadFailed
+PASS  claims/page.tsx: not_found → notFound()
+PASS  claims/page.tsx: no unchecked db.contracts.getById
+PASS  layout: failure branch precedes children render
+PASS  en: contractLoadFailed present
+PASS  ar: contractLoadFailed present
+PASS  en/ar detail failure strings differ (both localized)
+PASS  failure wording distinct from not-found semantics in both locales
+
+54/54 checks passed

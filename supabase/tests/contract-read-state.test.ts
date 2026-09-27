@@ -93,10 +93,17 @@ async function main() {
     check("recovery after failure → fail then populated", first.ok === false && second.ok === true && second.contracts.length === 1);
   }
   {
-    // Providers without listChecked (mock/demo) still read through list().
+    // Live mode without an error-preserving reader: explicit unavailable —
+    // a legacy list() that turns failure into [] is never used for tenants.
     const { db } = fakeDb([CONTRACT]);
     const read = await readContractList(db, "org-1", live);
-    check("provider without listChecked → falls back to list()", read.ok === true && read.contracts.length === 1);
+    check("live without listChecked → ok:false (no silent legacy fallback)", read.ok === false);
+  }
+  {
+    // The unchecked list() fallback still exists for demo fixtures only.
+    const { db } = fakeDb([CONTRACT]);
+    const read = await readContractList(db, "org-1", /* isDemo */ true);
+    check("demo mode → list() fixtures, ok:true", read.ok === true && read.contracts.length === 1);
   }
   {
     // Demo sessions must use list() even when listChecked exists — fixtures,
@@ -106,10 +113,10 @@ async function main() {
     check("demo mode uses fixtures via list(), not listChecked", read.ok === true && read.contracts.length === 1);
   }
   {
-    // list() itself throwing (e.g. an unchecked provider that can throw)
-    // is still an explicit failure, never a propagated crash-as-empty.
+    // list() itself throwing (demo fixtures failing) is still an explicit
+    // failure, never a propagated crash-as-empty.
     const { db } = fakeDb("throw");
-    const read = await readContractList(db, "org-1", live);
+    const read = await readContractList(db, "org-1", /* isDemo */ true);
     check("throwing list() fallback → ok:false", read.ok === false);
   }
 

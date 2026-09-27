@@ -20,6 +20,8 @@ const TAG = process.env.DP_TAG ?? "rs";
 const en = JSON.parse(readFileSync("src/messages/en.json", "utf8"));
 const ar = JSON.parse(readFileSync("src/messages/ar.json", "utf8"));
 const LOAD_FAILED = { en: en.common.contractsLoadFailed, ar: ar.common.contractsLoadFailed };
+const DETAIL_FAILED = { en: en.common.contractLoadFailed, ar: ar.common.contractLoadFailed };
+const NOT_FOUND_TEXT = { en: en.app.notFound, ar: ar.app.notFound };
 const DASH_FAILED = { en: en.app.dashboard.contractsUnavailable, ar: ar.app.dashboard.contractsUnavailable };
 const EMPTY_TITLE = { en: en.app.contracts.empty.title, ar: ar.app.contracts.empty.title };
 const TITLE = {
@@ -57,6 +59,35 @@ async function visit(page: Page, locale: "en" | "ar", name: string, who: any) {
   }
   rec(`${tag} /contracts: no load-failure text`, !failedStrings.some((s) => body.includes(s)));
 
+  // Contract detail — normal navigation via the list link, plus the
+  // real not-found branch on a random UUID (same 404 as a foreign id).
+  if (who.numbers.length) {
+    await page.goto(`${BASE}/${locale}/app/contracts`);
+    await page.locator(`tbody a[href*="/app/contracts/"]`).first().click();
+    await page.waitForURL(/\/app\/contracts\/[0-9a-f-]{36}/, { timeout: 30000 });
+    const detailUrl = page.url().split("?")[0];
+    const dbody = await page.locator("body").innerText();
+    rec(`${tag} /contracts/[id]: detail renders after click-through`, who.numbers.some((n: string) => dbody.includes(n)));
+    rec(`${tag} /contracts/[id]: no load-failure text`, !dbody.includes(DETAIL_FAILED[locale]));
+    for (const sub of ["obligations", "risks", "evidence", "activity", "claims", "officer"] as const) {
+      const r2 = await page.goto(`${detailUrl}/${sub}`);
+      const b2 = await page.locator("body").innerText();
+      rec(`${tag} /contracts/[id]/${sub}: loads (${r2?.status()}), no failure text`,
+        r2?.status() === 200 && !b2.includes(DETAIL_FAILED[locale]));
+    }
+    // notFound() thrown from a layout renders the root 404 (pre-existing
+    // Next.js behavior — a segment not-found.tsx doesn't catch it). Either
+    // the root 404 or the segment's not-found copy is correct here; the
+    // load-failure notice must never appear for an absent contract.
+    const rn = await page.goto(`${BASE}/${locale}/app/contracts/11111111-2222-3333-4444-555555555555`);
+    const nbody = await page.locator("body").innerText();
+    rec(`${tag} /contracts/[random-uuid]: legitimate not-found state`,
+      rn?.status() === 404
+      && (nbody.includes(NOT_FOUND_TEXT[locale]) || /could not be found|لم يتم العثور/.test(nbody))
+      && !nbody.includes(DETAIL_FAILED[locale]));
+    await page.screenshot({ path: `${SHOTS}/${tag}-contract-notfound.png` });
+  }
+
   // The other consumers: normal navigation, failure text absent.
   for (const route of ["tasks", "claims", "evidence", "dashboard"] as const) {
     const resp = await page.goto(`${BASE}/${locale}/app/${route}`);
@@ -79,6 +110,8 @@ async function main() {
   for (const locale of ["en", "ar"] as const) {
     for (const [name, who] of [["alpha", st.alpha], ["empty", st.empty]] as const) {
       const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, locale: locale === "ar" ? "ar-SA" : "en-US" });
+      // Loaded dev machines can exceed the 30s default navigation timeout.
+      ctx.setDefaultNavigationTimeout(120000);
       const page = await ctx.newPage();
       await login(page, locale, who);
       await visit(page, locale, name, who);
