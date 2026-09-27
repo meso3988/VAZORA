@@ -26,15 +26,20 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Read-state and capability map (checked-read conventions)
 
-Page reads must preserve three outcomes — populated, a genuine empty/not-found, and an explicit unavailable — via the shared helpers in `src/data/checked-reads.ts` (`readContractList`, `readContract`, `readObligationList`, `readObligation`, `readEvidenceList`). Live providers must implement the `*Checked` variants; a live provider without them resolves to explicit unavailable, never a silent legacy fallback. Demo sessions keep fixture reads (`list`/`getById`) — fixtures are never a failure fallback, and demo ids are not UUIDs (the format check is live-only). Composed evidence reads (`getEvidenceItemDetail`, `getContractEvidenceMatrix`, `listEvidenceInbox` in `src/data/supabase/evidence-detail.ts`) fail closed: any dependent query error yields `unavailable`/`ok:false`, never "no verification"/"no gaps". They accept an optional injected client for tests.
+Page reads must preserve three outcomes — populated, a genuine empty/not-found, and an explicit unavailable — via the shared helpers in `src/data/checked-reads.ts` (`readContractList`, `readContract`, `readObligationList`, `readObligation`, `readEvidenceList`, `readClauseList`, `readAgentEvents`, `readActivityList`). Live providers must implement the `*Checked` variants; a live provider without them resolves to explicit unavailable, never a silent legacy fallback. Demo sessions keep fixture reads (`list`/`getById`) — fixtures are never a failure fallback, and demo ids are not UUIDs (the format check is live-only). Composed evidence reads (`getEvidenceItemDetail`, `getContractEvidenceMatrix`, `listEvidenceInbox` in `src/data/supabase/evidence-detail.ts`) fail closed: any dependent query error yields `unavailable`/`ok:false`, never "no verification"/"no gaps". They accept an optional injected client for tests.
+
+Real work surfaces (implemented over live tables — the generic `ActionRepository` remains a demo-only fixture shape):
+
+- `/app/tasks` (live) reads `officer_actions` via `listOfficerActions` (`src/data/supabase/officer-queue.ts`) — org-scoped, optional contract/status filter, bounded with an explicit `truncated` flag. Approval/rejection reuse `approveOfficerActionForm`/`rejectOfficerActionForm` with an allowlisted `returnTo` (`/app/tasks`, `/app/agent`, contract officer paths); the server re-authorizes via `approveOfficerAction`/`rejectOfficerAction`.
+- `agent.listEvents` → `officer_observations` (active+acknowledged only, `listEventsChecked`); `activity.list` → `activity_log` with contract scope resolved per entity_type + `metadata->>contract_id` (`listChecked`, window-bounded, `truncated` when the window fills); `contracts.listClauses` → `contract_clauses` for the operative run (latest `approved`, else `ready_for_review` — never drafts/superseded).
+- Contract officer tab shows observations feed + contract-scoped action cards; `OfficerAsk` opens a real contract-scoped conversation via `startOfficerConversation` (demo shows an explicit preview note).
 
 Unimplemented repositories (fixed empty results — capabilities, not completed features):
 
-- `ActionRepository` (`actions.list` → `[]`): consumers `/app/tasks`, `/app/contracts/[id]` overview, `/app/contracts/[id]/activity`.
+- `ActionRepository` (`actions.list` → `[]`): demo fixtures only; live surfaces use `officer_actions` directly.
 - `ClaimRepository` (`claims.list` → `[]`): `/app/claims`, `/app/contracts/[id]/claims`, overview "next claim" panel.
 - `RiskRepository` (`risks.list` → `[]`): `/app/contracts/[id]/risks`, overview open-risks panel.
-- `AgentRepository` (`agent.listEvents` → `[]`): `/app/agent`, `/app/contracts/[id]/officer`, overview officer feed.
 
-These are distinct from the working Officer proposal/action path (`officer_actions` via `runOfficerTool`/`requestHumanApproval`), which is live and separately tested.
+The Officer proposal/action path (`officer_actions` via `runOfficerTool`/`requestHumanApproval`) executes only SAFE_INTERNAL_WRITE types; APPROVAL_REQUIRED types hold at `approved` with `held=approved_but_not_executed_in_phase_4a` — surfaces must render that as "approved — not executed", never as in-progress or done.
 
-Known read paths not yet error-preserving: `contracts.listClauses`, `documents.list`, `activity.list`, and `review-actions.ts` mutation-internal reads (the activation write gate itself already refuses on read error).
+Known read paths not yet error-preserving: `documents.list` (still error-swallowing), and `review-actions.ts` mutation-internal reads (the activation write gate itself already refuses on read error).

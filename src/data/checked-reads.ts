@@ -159,3 +159,93 @@ export async function readEvidenceList(
     return { ok: false, evidence: [] };
   }
 }
+
+export type ClauseListRead =
+  | { ok: true; clauses: Awaited<ReturnType<DataProvider["contracts"]["listClauses"]>>; truncated: false }
+  | { ok: false; clauses: [] };
+
+/**
+ * Read a contract's clause set — the operative analysis run only.
+ * Demo sessions read fixtures via listClauses(); live sessions require the
+ * checked variant, so a dropped read can never render as "no clauses".
+ */
+export async function readClauseList(
+  db: Readonly<DataProvider>,
+  orgId: string,
+  contractId: string,
+  isDemo: boolean,
+): Promise<ClauseListRead> {
+  try {
+    if (isDemo) {
+      return { ok: true, clauses: await db.contracts.listClauses(orgId, contractId), truncated: false };
+    }
+    if (db.contracts.listClausesChecked) {
+      const read = await db.contracts.listClausesChecked(orgId, contractId);
+      return read.ok ? { ok: true, clauses: read.clauses, truncated: false } : { ok: false, clauses: [] };
+    }
+    return { ok: false, clauses: [] };
+  } catch {
+    return { ok: false, clauses: [] };
+  }
+}
+
+export type AgentEventRead =
+  | { ok: true; events: Awaited<ReturnType<DataProvider["agent"]["listEvents"]>>; truncated: boolean }
+  | { ok: false; events: []; truncated: false };
+
+/**
+ * Read the Officer's current findings for a surface. Live sessions read
+ * officer_observations via listEventsChecked; demo reads fixtures.
+ */
+export async function readAgentEvents(
+  db: Readonly<DataProvider>,
+  orgId: string,
+  isDemo: boolean,
+  filter?: { contractId?: string; limit?: number },
+): Promise<AgentEventRead> {
+  try {
+    if (isDemo) {
+      return { ok: true, events: await db.agent.listEvents(orgId, filter), truncated: false };
+    }
+    if (db.agent.listEventsChecked) {
+      const read = await db.agent.listEventsChecked(orgId, filter);
+      return read.ok
+        ? { ok: true, events: read.events, truncated: read.truncated }
+        : { ok: false, events: [], truncated: false };
+    }
+    return { ok: false, events: [], truncated: false };
+  } catch {
+    return { ok: false, events: [], truncated: false };
+  }
+}
+
+export type ActivityListRead =
+  | { ok: true; activity: Awaited<ReturnType<DataProvider["activity"]["list"]>>; truncated: boolean }
+  | { ok: false; activity: []; truncated: false };
+
+/**
+ * Read the historical audit timeline. Live sessions read activity_log via
+ * listChecked — a failed read can never render as an empty timeline.
+ * truncated flags a bounded read that reached its window.
+ */
+export async function readActivityList(
+  db: Readonly<DataProvider>,
+  orgId: string,
+  isDemo: boolean,
+  filter?: { contractId?: string; limit?: number },
+): Promise<ActivityListRead> {
+  try {
+    if (isDemo) {
+      return { ok: true, activity: await db.activity.list(orgId, filter), truncated: false };
+    }
+    if (db.activity.listChecked) {
+      const read = await db.activity.listChecked(orgId, filter);
+      return read.ok
+        ? { ok: true, activity: read.activity, truncated: read.truncated }
+        : { ok: false, activity: [], truncated: false };
+    }
+    return { ok: false, activity: [], truncated: false };
+  } catch {
+    return { ok: false, activity: [], truncated: false };
+  }
+}

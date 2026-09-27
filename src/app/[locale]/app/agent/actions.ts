@@ -105,6 +105,19 @@ export async function askOfficerQuestion(formData: FormData) {
   redirect({ href: `/app/agent?c=${conversationId}`, locale });
 }
 
+/**
+ * Return surfaces an approval form may post from. Any other value falls back
+ * to the conversation — a forged returnTo can only navigate inside /app.
+ */
+const RETURN_SURFACES = new Set(["/app/tasks", "/app/agent"]);
+const CONTRACT_OFFICER_PATH = /^\/app\/contracts\/[0-9a-f-]{36}\/officer$/i;
+
+function returnTarget(formData: FormData, conversationId: string): string {
+  const to = String(formData.get("returnTo") ?? "");
+  if (RETURN_SURFACES.has(to) || CONTRACT_OFFICER_PATH.test(to)) return to;
+  return `/app/agent${conversationId ? `?c=${conversationId}` : ""}`;
+}
+
 /** Approve a proposed action — the server re-authorizes before anything runs. */
 export async function approveOfficerActionForm(formData: FormData) {
   const locale = localeOf(formData);
@@ -113,10 +126,10 @@ export async function approveOfficerActionForm(formData: FormData) {
   const conversationId = String(formData.get("conversationId") ?? "").slice(0, 64);
 
   const result = await approveOfficerAction(ctx, actionId);
-  const back = `/app/agent${conversationId ? `?c=${conversationId}` : ""}`;
+  const back = returnTarget(formData, conversationId);
   redirect({
-    href: result.ok ? `${back}${conversationId ? "&" : "?"}approved=${actionId}`
-                    : `${back}${conversationId ? "&" : "?"}error=${encodeURIComponent(result.error)}`,
+    href: result.ok ? `${back}${back.includes("?") ? "&" : "?"}approved=${actionId}`
+                    : `${back}${back.includes("?") ? "&" : "?"}error=${encodeURIComponent(result.error)}`,
     locale,
   });
 }
@@ -129,10 +142,10 @@ export async function rejectOfficerActionForm(formData: FormData) {
   const reason = String(formData.get("reason") ?? "").trim().slice(0, 1000) || "rejected by reviewer";
 
   const result = await rejectOfficerAction(ctx, actionId, reason);
-  const back = `/app/agent${conversationId ? `?c=${conversationId}` : ""}`;
+  const back = returnTarget(formData, conversationId);
   redirect({
-    href: result.ok ? `${back}${conversationId ? "&" : "?"}rejected=${actionId}`
-                    : `${back}${conversationId ? "&" : "?"}error=${encodeURIComponent(result.error)}`,
+    href: result.ok ? `${back}${back.includes("?") ? "&" : "?"}rejected=${actionId}`
+                    : `${back}${back.includes("?") ? "&" : "?"}error=${encodeURIComponent(result.error)}`,
     locale,
   });
 }

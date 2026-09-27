@@ -40,6 +40,8 @@ export interface ContractRepository {
     { status: "found"; contract: Contract } | { status: "not_found" } | { status: "unavailable" }
   >;
   listClauses(organizationId: string, contractId: string): Promise<Clause[]>;
+  /** Like listClauses(), but a failed read is reported instead of returning []. */
+  listClausesChecked?(organizationId: string, contractId: string): Promise<{ ok: true; clauses: Clause[] } | { ok: false }>;
 }
 
 export interface ObligationRepository {
@@ -74,10 +76,26 @@ export interface ClaimRepository {
 
 export interface AgentRepository {
   listEvents(organizationId: string, filter?: { contractId?: string; limit?: number }): Promise<AgentEvent[]>;
+  /**
+   * Like listEvents(), but a failed read is reported instead of returning [].
+   * truncated means the bounded read hit its limit — the shown events are
+   * real and complete for the window, but not necessarily all that exist.
+   */
+  listEventsChecked?(organizationId: string, filter?: { contractId?: string; limit?: number }): Promise<
+    { ok: true; events: AgentEvent[]; truncated: boolean } | { ok: false }
+  >;
 }
 
 export interface ActivityRepository {
   list(organizationId: string, filter?: { contractId?: string; limit?: number }): Promise<ActivityEntry[]>;
+  /**
+   * Like list(), but a failed read is reported instead of returning [].
+   * truncated means the bounded window was filled — entries shown are real,
+   * but older contract events may exist beyond the window.
+   */
+  listChecked?(organizationId: string, filter?: { contractId?: string; limit?: number }): Promise<
+    { ok: true; activity: ActivityEntry[]; truncated: boolean } | { ok: false }
+  >;
 }
 
 export interface DocumentRepository {

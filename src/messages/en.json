@@ -1403,7 +1403,8 @@
       "clauseTraceHint": "Original clause → requirement → evidence → verification",
       "actions": "Actions",
       "sections": "Contract sections",
-      "dateUnknown": "Not recorded"
+      "dateUnknown": "Not recorded",
+      "noActions": "No officer actions for this contract yet."
     },
     "documents": {
       "title": "Contract documents",
@@ -1874,7 +1875,8 @@
       }
     },
     "activity": {
-      "title": "Activity"
+      "title": "Activity",
+      "truncated": "Showing the most recent events — older contract activity exists beyond this list."
     },
     "tasks": {
       "title": "Tasks",
@@ -1884,8 +1886,14 @@
         "mine": "My tasks",
         "overdue": "Due soon or overdue",
         "waitingOnClient": "Waiting on client",
-        "done": "Completed"
-      }
+        "done": "Completed",
+        "waiting": "Waiting for approval",
+        "held": "Approved — not executed",
+        "completed": "Completed",
+        "closed": "Rejected / failed / cancelled",
+        "suggested": "Proposed"
+      },
+      "truncated": "Showing the most recent actions — older records exist beyond this list."
     },
     "notFound": "This contract is not available in your organization.",
     "officer": {
@@ -2043,7 +2051,11 @@
         "contract_expiry_approaching": "Contract ending",
         "recently_resolved": "Resolved",
         "action_waiting_for_approval": "Awaiting approval"
-      }
+      },
+      "contractActions": "Officer actions on this contract",
+      "noContractActions": "No actions recorded for this contract yet.",
+      "askOpen": "Open a contract conversation",
+      "askDemo": "Conversation preview — demo sessions are read-only. The live workspace opens a real contract-scoped conversation."
     }
   }
 }

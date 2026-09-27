@@ -18,6 +18,7 @@ export async function OfficerActionCard({
   rejectAction,
   locale,
   canApprove,
+  returnTo,
 }: {
   action: OfficerActionView;
   conversationId: string;
@@ -25,6 +26,7 @@ export async function OfficerActionCard({
   rejectAction?: (formData: FormData) => void | Promise<void>;
   locale: string;
   canApprove: boolean;
+  returnTo?: string;
 }) {
   const t = await getTranslations("app.officer.action");
   const f = await getFormatter();
@@ -41,8 +43,8 @@ export async function OfficerActionCard({
           <ShieldCheck size={13} strokeWidth={1.75} aria-hidden />
           {t("recommends")}
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[11px] text-faint">
-          <Mono>{action.actionType}</Mono>
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5 text-[11px] text-faint">
+          <Mono className="break-all">{action.actionType}</Mono>
           {action.requiresApproval && <span className="rounded-sm bg-fg/10 px-1.5 py-0.5 text-fg">{t("approvalRequired")}</span>}
           <span className="rounded-sm bg-fg/5 px-1.5 py-0.5">{t(`status.${action.status}`)}</span>
         </span>
@@ -102,6 +104,7 @@ export async function OfficerActionCard({
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="actionId" value={action.id} />
               <input type="hidden" name="conversationId" value={conversationId} />
+              {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
               <button type="submit" className="inline-flex h-7 items-center gap-1 rounded-sm border border-line bg-fg px-2.5 text-xs font-medium text-bg transition-colors hover:bg-fg/90">
                 <Check size={12} strokeWidth={2} aria-hidden />
                 {t("approve")}
@@ -111,6 +114,7 @@ export async function OfficerActionCard({
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="actionId" value={action.id} />
               <input type="hidden" name="conversationId" value={conversationId} />
+              {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
               <input
                 name="reason"
                 maxLength={1000}

@@ -11,7 +11,9 @@ import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { readContract, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
+import { readActivityList, readAgentEvents, readClauseList, readContract, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
+import { listOfficerActions } from "@/data/supabase/officer-queue";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { claimReadiness, countBy, type ObligationStatus } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
@@ -80,6 +82,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const locale = asLocale(rawLocale);
   setRequestLocale(locale);
   const t = await getTranslations("app");
+  const oa = await getTranslations("app.officer.action");
   const st = await getTranslations("status");
   const c = await getTranslations("common");
   const sev = await getTranslations("severity");
@@ -96,21 +99,28 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   if (read.status === "not_found") notFound();
   const contract = read.contract;
 
-  const [obligationsRead, clauses, evidenceRead, risks, claims, actions, events, activity, documents, latestRunRead, summaryRead] = await Promise.all([
-    readObligationList(db, orgId, session?.mode === "demo", { contractId: id }),
-    db.contracts.listClauses(orgId, id),
-    readEvidenceList(db, orgId, session?.mode === "demo", { contractId: id }),
+  const isDemo = session?.mode === "demo";
+  const liveQueue = isLive ? createSupabaseServer().then((s) => listOfficerActions(s, orgId, { contractId: id, limit: 6 })) : null;
+  const [obligationsRead, clausesRead, evidenceRead, risks, claims, demoActions, eventsRead, activityRead, documents, latestRunRead, summaryRead, actionsRead] = await Promise.all([
+    readObligationList(db, orgId, isDemo, { contractId: id }),
+    readClauseList(db, orgId, id, isDemo),
+    readEvidenceList(db, orgId, isDemo, { contractId: id }),
     db.risks.list(orgId, { contractId: id }),
     db.claims.list(orgId, { contractId: id }),
-    db.actions.list(orgId, { contractId: id }),
-    db.agent.listEvents(orgId, { contractId: id, limit: 5 }),
-    db.activity.list(orgId, { contractId: id, limit: 6 }),
+    isDemo ? db.actions.list(orgId, { contractId: id }) : Promise.resolve(null),
+    readAgentEvents(db, orgId, isDemo, { contractId: id, limit: 5 }),
+    readActivityList(db, orgId, isDemo, { contractId: id, limit: 6 }),
     db.documents.list(orgId, id),
     isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve({ ok: true as const, run: null }),
     isLive ? getIngestionSummary(orgId, id) : Promise.resolve({ ok: true as const, summary: null }),
+    liveQueue ?? Promise.resolve(null),
   ]);
   const obligations = obligationsRead.ok ? obligationsRead.obligations : null;
   const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
+  const clauses = clausesRead.ok ? clausesRead.clauses : null;
+  const events = eventsRead.ok ? eventsRead.events : null;
+  const activity = activityRead.ok ? activityRead.activity : null;
+  const officerActions = actionsRead?.ok ? actionsRead.actions : null;
 
   const h = contract.health;
   const pipeline = DEMO_PIPELINE.find((run) => run.contractId === id);
@@ -124,7 +134,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const traced = obligations
     ? obligations.find((o) => o.status === "missing") ?? obligations.find((o) => o.status === "partial") ?? obligations[0]
     : undefined;
-  const tracedClause = traced ? clauses.find((c) => c.id === traced.clauseId) : undefined;
+  const tracedClause = traced && clauses ? clauses.find((c) => c.id === traced.clauseId) : undefined;
 
   return (
     <>
@@ -141,7 +151,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
       <Panel title={t("contract.clauseTrace")} tone="sky" hint={t("contract.clauseTraceHint")}>
         <div className="p-4">
-          {!obligations || !evidence ? (
+          {!obligations || !evidence || !clauses ? (
             <DataLoadFailed message="dataLoadFailed" />
           ) : traced && tracedClause ? (
             <ClauseTrace clause={tracedClause} obligation={traced} evidence={evidence.filter((e) => e.obligationId === traced.id)} />
@@ -286,35 +296,70 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Panel title={t("contract.officerFeed")} tone="emerald" action={<Link href={`/app/contracts/${id}/officer`} className="text-xs text-emerald-100/90 hover:text-white">{c("viewAll")}</Link>}>
-          <OfficerFeed events={events} showContract={false} />
+          {events === null ? (
+            <div className="p-4"><DataLoadFailed message="dataLoadFailed" /></div>
+          ) : (
+            <OfficerFeed events={events} showContract={false} />
+          )}
         </Panel>
         <div className="flex flex-col gap-4">
-          <Panel title={t("contract.actions")} tone="amber">
-            <ul className="divide-y divide-line">
-              {actions.map((a) => (
-                <li key={a.id} className="flex items-center gap-3 px-5 py-3">
-                  <StatusDot tone={a.status === "done" ? "verified" : a.status === "in_progress" ? "partial" : "pending"} />
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm">{lt(a.title, locale)}</span>
-                    <span className="text-xs text-muted">{a.ownerName}</span>
-                  </div>
-                  <Mono className="text-muted">{validDate(a.dueDate) ? f.dateTime(validDate(a.dueDate)!, "short") : "—"}</Mono>
-                </li>
-              ))}
-            </ul>
+          <Panel title={t("contract.actions")} tone="amber" action={<Link href="/app/tasks" className="text-xs text-amber-100/90 hover:text-white">{c("viewAll")}</Link>}>
+            {isDemo ? (
+              <ul className="divide-y divide-line">
+                {(demoActions ?? []).map((a) => (
+                  <li key={a.id} className="flex items-center gap-3 px-5 py-3">
+                    <StatusDot tone={a.status === "done" ? "verified" : a.status === "in_progress" ? "partial" : "pending"} />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-sm">{lt(a.title, locale)}</span>
+                      <span className="text-xs text-muted">{a.ownerName}</span>
+                    </div>
+                    <Mono className="text-muted">{validDate(a.dueDate) ? f.dateTime(validDate(a.dueDate)!, "short") : "—"}</Mono>
+                  </li>
+                ))}
+              </ul>
+            ) : officerActions === null ? (
+              <div className="p-4"><DataLoadFailed message="dataLoadFailed" /></div>
+            ) : officerActions.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-muted">{t("contract.noActions")}</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {officerActions.map((a) => (
+                  <li key={a.id} className="flex items-center gap-3 px-5 py-3">
+                    <StatusDot tone={a.status === "completed" ? "verified" : a.status === "rejected" || a.status === "failed" || a.status === "cancelled" ? "missing" : a.status === "approved" ? "partial" : "pending"} />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-sm">
+                        {typeof a.arguments?.summary === "string" && a.arguments.summary ? a.arguments.summary
+                          : typeof a.arguments?.title === "string" && a.arguments.title ? a.arguments.title
+                          : a.actionType}
+                      </span>
+                      <span className="text-xs text-muted">
+                        {oa.has(`status.${a.status}`) ? oa(`status.${a.status}`) : a.status}
+                      </span>
+                    </div>
+                    <Mono className="text-muted">{validDate(a.createdAt) ? f.dateTime(validDate(a.createdAt)!, "short") : "—"}</Mono>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Panel>
           <Panel title={t("contract.recentActivity")} tone="graphite" action={<Link href={`/app/contracts/${id}/activity`} className="text-xs text-neutral-200/90 hover:text-white">{c("viewAll")}</Link>}>
-            <ul className="divide-y divide-line">
-              {activity.map((a) => (
-                <li key={a.id} className="flex flex-col gap-0.5 px-5 py-3">
-                  <span className="text-sm">
-                    <span className="font-medium">{a.actor}</span> {lt(a.action, locale)}
-                    {a.target && <> <Mono>{a.target}</Mono></>}
-                  </span>
-                  <span className="text-xs text-muted">{validDate(a.at) ? f.dateTime(validDate(a.at)!, "medium") : "—"}</span>
-                </li>
-              ))}
-            </ul>
+            {activity === null ? (
+              <div className="p-4"><DataLoadFailed message="dataLoadFailed" /></div>
+            ) : activity.length === 0 ? (
+              <p className="px-5 py-6 text-sm text-muted">—</p>
+            ) : (
+              <ul className="divide-y divide-line">
+                {activity.map((a) => (
+                  <li key={a.id} className="flex flex-col gap-0.5 px-5 py-3">
+                    <span className="text-sm">
+                      <span className="font-medium">{a.actor}</span> {lt(a.action, locale)}
+                      {a.target && <> <Mono>{a.target}</Mono></>}
+                    </span>
+                    <span className="text-xs text-muted">{validDate(a.at) ? f.dateTime(validDate(a.at)!, "medium") : "—"}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Panel>
         </div>
       </div>

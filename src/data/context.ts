@@ -32,6 +32,9 @@ export async function requireTenant(): Promise<TenantContext> {
 }
 
 export {
+  readActivityList,
+  readAgentEvents,
+  readClauseList,
   readContract,
   readContractList,
   readEvidenceList,

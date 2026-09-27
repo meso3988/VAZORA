@@ -1,6 +1,8 @@
 import "server-only";
 
 import type {
+  ActivityEntry,
+  AgentEventKind,
   Contract,
   ContractDocument,
   Evidence,
@@ -55,6 +57,14 @@ type DocRow = {
   document_type: ContractDocument["documentType"];
   uploaded_by: string | null;
   created_at: string;
+};
+type ClauseRow = {
+  id: string;
+  clause_number: string | null;
+  heading: string | null;
+  text: string;
+  page_number: number | null;
+  sequence_number: number;
 };
 
 function toText(value: string | null | undefined) {
@@ -221,8 +231,52 @@ const contracts: ContractRepository = {
       return { status: "unavailable" as const };
     }
   },
-  async listClauses() {
-    return [];
+  async listClauses(organizationId, contractId) {
+    const read = await this.listClausesChecked!(organizationId, contractId);
+    return read.ok ? read.clauses : [];
+  },
+  async listClausesChecked(organizationId, contractId) {
+    try {
+      const supabase = await createSupabaseServer();
+      // The operational basis is the operative analysis: the activated
+      // ("approved") run, else the newest run awaiting review. Drafts and
+      // superseded runs are never surfaced as the working clause set.
+      const { data: runs, error: runError } = await supabase
+        .from("contract_ingestion_runs")
+        .select("id, status")
+        .eq("organization_id", organizationId)
+        .eq("contract_id", contractId)
+        .in("status", ["approved", "ready_for_review"])
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (runError || !Array.isArray(runs)) return { ok: false };
+      const run =
+        runs.find((r) => r.status === "approved") ??
+        runs.find((r) => r.status === "ready_for_review");
+      if (!run) return { ok: true, clauses: [] };
+      const { data, error } = await supabase
+        .from("contract_clauses")
+        .select("id, clause_number, heading, text, page_number, sequence_number")
+        .eq("organization_id", organizationId)
+        .eq("contract_id", contractId)
+        .eq("ingestion_run_id", run.id)
+        .order("sequence_number", { ascending: true })
+        .order("id", { ascending: true });
+      if (error || !Array.isArray(data)) return { ok: false };
+      return {
+        ok: true,
+        clauses: (data as ClauseRow[]).map((c) => ({
+          id: c.id,
+          contractId,
+          ref: c.clause_number ?? "",
+          heading: toText(c.heading ?? ""),
+          excerpt: toText(c.text),
+          page: c.page_number ?? 0,
+        })),
+      };
+    } catch {
+      return { ok: false };
+    }
   },
 };
 
@@ -239,6 +293,7 @@ type ObligationRow = {
   ai_payload: { source_clause_number?: string | null } | null;
   created_at: string;
   obligation_evidence_requirements?: { name: string }[];
+  obligation_source_refs?: { clause_id: string | null }[];
 };
 
 const CADENCE_MAP: Record<string, Obligation["cadence"]> = {
@@ -252,7 +307,7 @@ function mapObligation(row: ObligationRow): Obligation {
     id: row.id,
     organizationId: row.organization_id,
     contractId: row.contract_id,
-    clauseId: "",
+    clauseId: row.obligation_source_refs?.find((r) => r.clause_id)?.clause_id ?? "",
     clauseRef: row.ai_payload?.source_clause_number ?? "",
     requirement: { en: row.requirement_text, ar: row.requirement_text },
     ownerId: "",
@@ -272,7 +327,7 @@ const obligations: ObligationRepository = {
     const supabase = await createSupabaseServer();
     let q = supabase
       .from("contract_obligations")
-      .select("*, obligation_evidence_requirements(name)")
+      .select("*, obligation_evidence_requirements(name), obligation_source_refs(clause_id)")
       .eq("organization_id", organizationId)
       .eq("review_status", "approved")
       .order("created_at", { ascending: true });
@@ -285,7 +340,7 @@ const obligations: ObligationRepository = {
       const supabase = await createSupabaseServer();
       let q = supabase
         .from("contract_obligations")
-        .select("*, obligation_evidence_requirements(name)")
+        .select("*, obligation_evidence_requirements(name), obligation_source_refs(clause_id)")
         .eq("organization_id", organizationId)
         .eq("review_status", "approved")
         .order("created_at", { ascending: true });
@@ -301,7 +356,7 @@ const obligations: ObligationRepository = {
     const supabase = await createSupabaseServer();
     const { data } = await supabase
       .from("contract_obligations")
-      .select("*, obligation_evidence_requirements(name)")
+      .select("*, obligation_evidence_requirements(name), obligation_source_refs(clause_id)")
       .eq("organization_id", organizationId)
       .eq("id", id)
       .maybeSingle();
@@ -312,7 +367,7 @@ const obligations: ObligationRepository = {
       const supabase = await createSupabaseServer();
       const { data, error } = await supabase
         .from("contract_obligations")
-        .select("*, obligation_evidence_requirements(name)")
+        .select("*, obligation_evidence_requirements(name), obligation_source_refs(clause_id)")
         .eq("organization_id", organizationId)
         .eq("id", id)
         .maybeSingle();
@@ -468,15 +523,244 @@ const claims: ClaimRepository = {
   },
 };
 
+/**
+ * Officer observations ARE the agent event feed for live tenants: a current
+ * operational finding (its own record, deduplicated by the sweep) — never a
+ * synthesized historical entry.
+ */
+const OBSERVATION_KIND: Record<string, AgentEventKind> = {
+  overdue: "attention",
+  due_today: "due_soon",
+  due_soon: "due_soon",
+  external_dependency_pending: "attention",
+  missing_required_evidence: "evidence_gap",
+  partial_evidence: "evidence_gap",
+  reverification_pending: "evidence_gap",
+  verification_discrepancy: "evidence_gap",
+  unassigned_obligation: "attention",
+  contract_expiry_approaching: "due_soon",
+  action_waiting_for_approval: "attention",
+};
+
+const OBSERVATION_EVENT_LIMIT = 200;
+
+type ObservationEventRow = {
+  id: string;
+  contract_id: string | null;
+  obligation_id: string | null;
+  kind: string;
+  priority: number;
+  title: string;
+  detail: string | null;
+  last_seen_at: string;
+};
+
 const agent: AgentRepository = {
-  async listEvents() {
-    return [];
+  async listEvents(organizationId, filter) {
+    const read = await this.listEventsChecked!(organizationId, filter);
+    return read.ok ? read.events : [];
+  },
+  async listEventsChecked(organizationId, filter) {
+    try {
+      const supabase = await createSupabaseServer();
+      const limit = Math.min(filter?.limit ?? 50, OBSERVATION_EVENT_LIMIT);
+      let q = supabase
+        .from("officer_observations")
+        .select("id, contract_id, obligation_id, kind, priority, title, detail, last_seen_at")
+        .eq("organization_id", organizationId)
+        .in("status", ["active", "acknowledged"])
+        .order("priority", { ascending: true })
+        .order("last_seen_at", { ascending: false })
+        .limit(limit + 1);
+      if (filter?.contractId) q = q.eq("contract_id", filter.contractId);
+      const { data, error } = await q;
+      if (error || !Array.isArray(data)) return { ok: false };
+      const truncated = data.length > limit;
+      return {
+        ok: true,
+        truncated,
+        events: (truncated ? data.slice(0, limit) : data).map((o: ObservationEventRow) => ({
+          id: o.id,
+          organizationId,
+          contractId: o.contract_id ?? undefined,
+          obligationId: o.obligation_id ?? undefined,
+          kind: OBSERVATION_KIND[o.kind] ?? "attention",
+          message: toText(o.title),
+          detail: o.detail ? toText(o.detail) : undefined,
+          createdAt: o.last_seen_at,
+          priority: Math.min(3, Math.max(1, Number(o.priority) || 3)) as 1 | 2 | 3,
+        })),
+      };
+    } catch {
+      return { ok: false };
+    }
   },
 };
 
+/**
+ * activity_log labels. Rows written by the engine/sweep carry an officer
+ * actor; rows written by a human click carry a member actor. The raw
+ * event_type is kept as the action when no label exists — never invented.
+ */
+const ACTIVITY_LABELS: Record<string, { en: string; ar: string }> = {
+  "contract.created": { en: "created the contract", ar: "أنشأ العقد" },
+  "contract.activated": { en: "activated the contract", ar: "فعّل العقد" },
+  "contract.analysis_started": { en: "started contract analysis", ar: "بدأ تحليل العقد" },
+  "contract.analysis_completed": { en: "completed contract analysis", ar: "أكمل تحليل العقد" },
+  "document.uploaded": { en: "uploaded a document", ar: "رفع مستندًا" },
+  "obligation.approved": { en: "approved an obligation", ar: "اعتمد التزامًا" },
+  "obligation.edited": { en: "edited an obligation", ar: "عدّل التزامًا" },
+  "obligation.rejected": { en: "rejected an obligation", ar: "رفض التزامًا" },
+  "assignment.approved": { en: "approved an assignment", ar: "اعتمد إسنادًا" },
+  "evidence.created": { en: "created an evidence item", ar: "أنشأ عنصر دليل" },
+  "evidence.linked": { en: "linked evidence", ar: "ربط دليلًا" },
+  "evidence.version_uploaded": { en: "uploaded evidence", ar: "رفع دليلًا" },
+  "evidence.human_override": { en: "recorded a human override", ar: "سجّل تجاوزًا بشريًا" },
+  "evidence.verification_started": { en: "started verification", ar: "بدأ التحقق" },
+  "evidence.verification_completed": { en: "completed verification", ar: "أكمل التحقق" },
+  "evidence.reverification_started": { en: "started re-verification", ar: "بدأ إعادة التحقق" },
+  "evidence.reverification_completed": { en: "completed re-verification", ar: "أكمل إعادة التحقق" },
+  "evidence.gap_opened": { en: "opened an evidence gap", ar: "فتح فجوة دليل" },
+  "evidence.gap_updated": { en: "updated an evidence gap", ar: "حدّث فجوة دليل" },
+  "evidence.gap_closed": { en: "closed an evidence gap", ar: "أغلق فجوة دليل" },
+  "evidence.verification_discrepancy_detected": { en: "detected a verification discrepancy", ar: "رصد تعارض تحقق" },
+  "evidence.verification_previous_state_retained": { en: "retained the previous verification state", ar: "أبقى حالة التحقق السابقة" },
+  "evidence.verification_regression_confirmed": { en: "confirmed a verification regression", ar: "أكد تراجعًا في التحقق" },
+  "officer.brief_generated": { en: "generated the daily brief", ar: "أنشأ الموجز اليومي" },
+  "officer.sweep_started": { en: "started a monitoring sweep", ar: "بدأ جولة رصد" },
+  "officer.sweep_completed": { en: "completed a monitoring sweep", ar: "أكمل جولة رصد" },
+  "officer.observation_created": { en: "recorded a monitoring finding", ar: "سجّل ملاحظة رصد" },
+  "officer.observation_resolved": { en: "closed a monitoring finding", ar: "أغلق ملاحظة رصد" },
+  "officer.observation_acknowledged": { en: "acknowledged a monitoring finding", ar: "أقرّ بملاحظة رصد" },
+  "officer.action_proposed": { en: "proposed an action", ar: "اقترح إجراءً" },
+  "officer.action_approved": { en: "approved an action", ar: "اعتمد إجراءً" },
+  "officer.action_rejected": { en: "rejected an action", ar: "رفض إجراءً" },
+  "officer.action_executed": { en: "executed an action", ar: "نفّذ إجراءً" },
+  "organization.created": { en: "created the workspace", ar: "أنشأ مساحة العمل" },
+};
+
+/** Events produced by the engine itself, not a human click. */
+const SYSTEM_ACTOR_EVENTS = new Set([
+  "contract.analysis_started", "contract.analysis_completed",
+  "evidence.verification_started", "evidence.verification_completed",
+  "evidence.reverification_started", "evidence.reverification_completed",
+  "evidence.gap_opened", "evidence.gap_updated", "evidence.gap_closed",
+  "evidence.verification_discrepancy_detected",
+  "evidence.verification_previous_state_retained",
+  "evidence.verification_regression_confirmed",
+  "officer.brief_generated", "officer.sweep_started", "officer.sweep_completed",
+  "officer.observation_created", "officer.observation_resolved",
+  "officer.action_proposed", "officer.action_executed",
+]);
+
+const OFFICER_ACTOR = "VAZORA Officer";
+const MEMBER_ACTOR = "Team member";
+
+type ActivityRow = {
+  id: string;
+  entity_type: string | null;
+  entity_id: string | null;
+  event_type: string;
+  actor_user_id: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+};
+
+/** entity_type → the table whose rows carry contract_id. */
+const ENTITY_TABLE: Record<string, string> = {
+  contract_document: "contract_documents",
+  contract_obligation: "contract_obligations",
+  contract_ingestion_run: "contract_ingestion_runs",
+  contract_clause: "contract_clauses",
+  evidence_item: "evidence_items",
+  evidence_gap: "evidence_gaps",
+  officer_action: "officer_actions",
+  officer_observation: "officer_observations",
+};
+
+const ACTIVITY_LOG_WINDOW = 400;
+
+function mapActivityRow(row: ActivityRow, organizationId: string, contractId: string): ActivityEntry {
+  const meta = row.metadata ?? {};
+  return {
+    id: row.id,
+    organizationId,
+    contractId,
+    actor: SYSTEM_ACTOR_EVENTS.has(row.event_type) ? OFFICER_ACTOR : MEMBER_ACTOR,
+    action: ACTIVITY_LABELS[row.event_type] ?? { en: row.event_type, ar: row.event_type },
+    target: typeof meta.file_name === "string" ? meta.file_name : undefined,
+    at: row.created_at,
+  };
+}
+
 const activity: ActivityRepository = {
-  async list() {
-    return [];
+  async list(organizationId, filter) {
+    const read = await this.listChecked!(organizationId, filter);
+    return read.ok ? read.activity : [];
+  },
+  async listChecked(organizationId, filter) {
+    try {
+      const supabase = await createSupabaseServer();
+      const limit = Math.min(filter?.limit ?? 50, 100);
+      const contractId = filter?.contractId;
+
+      // Read a bounded newest-first window of the organization's audit log.
+      const { data, error } = await supabase
+        .from("activity_log")
+        .select("id, entity_type, entity_id, event_type, actor_user_id, metadata, created_at")
+        .eq("organization_id", organizationId)
+        .order("created_at", { ascending: false })
+        .limit(contractId ? ACTIVITY_LOG_WINDOW : limit + 1);
+      if (error || !Array.isArray(data)) return { ok: false };
+      let rows = data as ActivityRow[];
+      let truncated = rows.length > (contractId ? ACTIVITY_LOG_WINDOW : limit);
+
+      if (contractId) {
+        // Contract membership is resolved per entity_type — the log itself
+        // does not denormalize contract_id and an unrelated org event must
+        // never appear on a contract timeline.
+        const idsByType = new Map<string, string[]>();
+        for (const r of rows) {
+          if (!r.entity_type || !r.entity_id) continue;
+          const list = idsByType.get(r.entity_type) ?? [];
+          list.push(r.entity_id);
+          idsByType.set(r.entity_type, list);
+        }
+        const belongs = new Set<string>([contractId]);
+        const resolve = async (entityType: string, ids: string[]) => {
+          if (entityType === "contract") {
+            ids.forEach((i) => { if (i === contractId) belongs.add(i); });
+            return true;
+          }
+          const table = ENTITY_TABLE[entityType];
+          if (!table || !ids.length) return true;
+          const { data: owned, error: e } = await supabase
+            .from(table).select("id").eq("organization_id", organizationId)
+            .eq("contract_id", contractId).in("id", [...new Set(ids)]);
+          if (e || !Array.isArray(owned)) return false;
+          for (const o of owned) belongs.add(o.id as string);
+          return true;
+        };
+        for (const [entityType, ids] of idsByType) {
+          if (!(await resolve(entityType, ids))) return { ok: false };
+        }
+        rows = rows.filter(
+          (r) =>
+            (r.entity_id && belongs.has(r.entity_id)) ||
+            (r.metadata as Record<string, unknown> | null)?.contract_id === contractId,
+        );
+        if (rows.length > limit) {
+          rows = rows.slice(0, limit);
+          truncated = true;
+        }
+      } else if (truncated) {
+        rows = rows.slice(0, limit);
+      }
+
+      return { ok: true, truncated, activity: rows.map((r) => mapActivityRow(r, organizationId, contractId ?? "")) };
+    } catch {
+      return { ok: false };
+    }
   },
 };
 

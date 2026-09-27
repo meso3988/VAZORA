@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
+import { DataLoadFailed } from "@/components/app/contract-unavailable";
 import { Empty, Mono, Panel } from "@/components/app/primitives";
-import { readContract, requireTenant } from "@/data/context";
+import { readActivityList, readContract, requireTenant } from "@/data/context";
 import { lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
@@ -18,15 +19,17 @@ export default async function ContractActivity(props: PageProps<"/[locale]/app/c
   const read = await readContract(db, orgId, id, session.mode === "demo");
   if (read.status === "unavailable") return <ContractLoadFailed />;
   if (read.status === "not_found") notFound();
-  const activity = await db.activity.list(orgId, { contractId: id });
+  const activityRead = await readActivityList(db, orgId, session.mode === "demo", { contractId: id });
 
   return (
     <Panel title={t("title")} tone="graphite">
-      {activity.length === 0 ? (
+      {!activityRead.ok ? (
+        <div className="p-4"><DataLoadFailed message="dataLoadFailed" /></div>
+      ) : activityRead.activity.length === 0 ? (
         <Empty>—</Empty>
       ) : (
         <ol className="relative ms-5 border-s border-line py-2">
-          {activity.map((a) => (
+          {activityRead.activity.map((a) => (
             <li key={a.id} className="relative flex flex-col gap-0.5 py-3 ps-6 pe-5">
               <span aria-hidden className="absolute top-[1.15rem] -start-[5px] size-2.5 rounded-full border-2 border-bg bg-line-strong" />
               <span className="text-sm">
@@ -37,6 +40,9 @@ export default async function ContractActivity(props: PageProps<"/[locale]/app/c
             </li>
           ))}
         </ol>
+      )}
+      {activityRead.ok && activityRead.truncated && (
+        <p className="border-t border-line px-5 py-3 text-xs text-muted">{t("truncated")}</p>
       )}
     </Panel>
   );
