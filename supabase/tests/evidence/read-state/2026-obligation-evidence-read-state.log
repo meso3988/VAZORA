@@ -1,0 +1,73 @@
+PASS  obligations.list populated → ok + rows
+PASS  obligations.list populated used listChecked
+PASS  obligations.list successful-empty → ok:true + []
+PASS  obligations.list returned error → ok:false
+PASS  obligations.list thrown error → ok:false
+PASS  obligations.list recovery after failure
+PASS  obligations live without listChecked → ok:false (no silent fallback)
+PASS  obligations demo → fixtures via list()
+PASS  obligations.getById found
+PASS  obligations.getById not_found
+PASS  obligations.getById returned error → unavailable
+PASS  obligations.getById thrown error → unavailable
+PASS  obligations.getById recovery
+PASS  obligations foreign-tenant id → not_found
+PASS  obligations live non-UUID → not_found, no query
+PASS  obligations demo non-UUID fixture id queried
+PASS  obligations demo fixture found via getById
+PASS  obligations live without getByIdChecked → unavailable
+PASS  evidence.list populated → ok + rows
+PASS  evidence.list successful-empty → ok:true + []
+PASS  evidence.list returned error → ok:false
+PASS  evidence.list thrown error → ok:false
+PASS  evidence.list recovery after failure
+PASS  evidence live without listChecked → ok:false (no silent fallback)
+PASS  evidence demo → fixtures via list()
+PASS  matrix empty contract → ok:true + []
+PASS  matrix populated → ok:true + row
+PASS  matrix dependent checks failure → ok:false (not zero checks)
+PASS  matrix dependent gaps failure → ok:false (not zero gaps)
+PASS  matrix dependent discrepancies failure → ok:false
+PASS  matrix thrown error → ok:false
+PASS  inbox empty → ok:true + []
+PASS  inbox populated → row with effectiveStatus
+PASS  inbox dependent gaps failure → ok:false
+PASS  inbox dependent discrepancies failure → ok:false
+PASS  inbox thrown error → ok:false
+PASS  detail missing item → not_found
+PASS  detail item read error → unavailable
+PASS  detail found → status:found with detail
+PASS  detail dependent versions failure → unavailable
+PASS  detail dependent runs failure → unavailable
+PASS  detail dependent discrepancies failure → unavailable
+PASS  detail thrown error → unavailable
+PASS  obligations page uses readObligationList
+PASS  obligations page renders failure notice
+PASS  obligations page has no unchecked db.obligations.list
+PASS  contract evidence uses readEvidenceList + readObligationList
+PASS  contract evidence gates sections on read failure
+PASS  contract evidence matrix failure renders notice
+PASS  contract evidence no unchecked db.obligations/evidence.list
+PASS  overview uses readObligationList + readEvidenceList
+PASS  overview ingestion reads check errors
+PASS  overview hides IngestionControls on failed reads
+PASS  overview no unchecked db.obligations/evidence.list
+PASS  global evidence uses readEvidenceList
+PASS  global evidence inbox failure renders notice
+PASS  global evidence no unchecked db.evidence.list
+PASS  inspector handles unavailable before notFound
+PASS  inspector renders DataLoadFailed on unavailable
+PASS  review checks both query errors
+PASS  review failure returns before ReviewBoard (no false all-reviewed)
+PASS  review failure path does not render ReviewBoard conditionally
+PASS  review catches thrown query errors
+PASS  activateContract refuses on read error (err=read)
+PASS  activateContract requires approved.length && unresolved===0
+PASS  en dataLoadFailed + reviewDataLoadFailed exist
+PASS  ar dataLoadFailed + reviewDataLoadFailed exist
+PASS  en/ar failure notices differ
+PASS  failure notice differs from empty-state semantics
+
+69/69 checks passed
+(node:15231) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)

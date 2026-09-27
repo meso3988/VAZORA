@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { readContractList } from "../../src/data/read-contract-list";
+import { readContractList } from "../../src/data/checked-reads";
 import type { DataProvider } from "../../src/data/repositories";
 import type { Contract } from "../../src/domain/types";
 
