@@ -54,12 +54,13 @@ export async function readContract(
   id: string,
   isDemo: boolean,
 ): Promise<ContractRead> {
-  if (!UUID.test(id)) return { status: "not_found" };
   try {
     if (isDemo) {
+      // Demo fixture ids are not UUIDs — the format check is for live ids only.
       const contract = await db.contracts.getById(orgId, id);
       return contract ? { status: "found", contract } : { status: "not_found" };
     }
+    if (!UUID.test(id)) return { status: "not_found" };
     if (db.contracts.getByIdChecked) return await db.contracts.getByIdChecked(orgId, id);
     // Live mode without an error-preserving reader: explicit unavailable,
     // not a silent fall back to a reader that turns failure into null.
