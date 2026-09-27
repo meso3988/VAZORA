@@ -161,8 +161,13 @@ export async function readEvidenceList(
 }
 
 export type ClauseListRead =
-  | { ok: true; clauses: Awaited<ReturnType<DataProvider["contracts"]["listClauses"]>>; truncated: false }
-  | { ok: false; clauses: [] };
+  | {
+      ok: true;
+      clauses: Awaited<ReturnType<DataProvider["contracts"]["listClauses"]>>;
+      /** Which run the clauses came from — "ready_for_review" must be labeled an unapproved extraction. */
+      basis: "approved" | "ready_for_review" | null;
+    }
+  | { ok: false; clauses: []; basis: null };
 
 /**
  * Read a contract's clause set — the operative analysis run only.
@@ -177,15 +182,17 @@ export async function readClauseList(
 ): Promise<ClauseListRead> {
   try {
     if (isDemo) {
-      return { ok: true, clauses: await db.contracts.listClauses(orgId, contractId), truncated: false };
+      return { ok: true, clauses: await db.contracts.listClauses(orgId, contractId), basis: "approved" };
     }
     if (db.contracts.listClausesChecked) {
       const read = await db.contracts.listClausesChecked(orgId, contractId);
-      return read.ok ? { ok: true, clauses: read.clauses, truncated: false } : { ok: false, clauses: [] };
+      return read.ok
+        ? { ok: true, clauses: read.clauses, basis: read.basis }
+        : { ok: false, clauses: [], basis: null };
     }
-    return { ok: false, clauses: [] };
+    return { ok: false, clauses: [], basis: null };
   } catch {
-    return { ok: false, clauses: [] };
+    return { ok: false, clauses: [], basis: null };
   }
 }
 

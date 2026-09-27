@@ -42,4 +42,12 @@ Unimplemented repositories (fixed empty results — capabilities, not completed 
 
 The Officer proposal/action path (`officer_actions` via `runOfficerTool`/`requestHumanApproval`) executes only SAFE_INTERNAL_WRITE types; APPROVAL_REQUIRED types hold at `approved` with `held=approved_but_not_executed_in_phase_4a` — surfaces must render that as "approved — not executed", never as in-progress or done.
 
+### Execution split
+
+- **The Officer can execute** (today, after human approval): `officer.note`, `officer.internal_task` — SAFE_INTERNAL_WRITE bookkeeping only.
+- **Deferred capabilities** (recorded by name; scope decided per package later — NOT all auto-assigned to Phase 4C): `officer.request_evidence_internal`, `officer.escalate`, `obligation.assign_owner`, `obligation.change_due_date`, `evidence.human_override`, `evidence.dismiss_gap`, `contract.activate_change`, `external.send_message`. Approving one holds it at `approved`, unexecuted.
+- **Humans execute** via authorized platform screens: obligation review/activation (`/review`), evidence upload (`/evidence`), overrides with approval — separate from Officer execution.
+
+Phase map: **4B** = live voice/avatar. **4C** = authorized external communication and execution. **Phase 5** = claims, submission readiness, submission packages. Risk register is an independent deferred package — not a precondition for the avatar.
+
 Known read paths not yet error-preserving: `documents.list` (still error-swallowing), and `review-actions.ts` mutation-internal reads (the activation write gate itself already refuses on read error).

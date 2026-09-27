@@ -58,14 +58,7 @@ type DocRow = {
   uploaded_by: string | null;
   created_at: string;
 };
-type ClauseRow = {
-  id: string;
-  clause_number: string | null;
-  heading: string | null;
-  text: string;
-  page_number: number | null;
-  sequence_number: number;
-};
+
 
 function toText(value: string | null | undefined) {
   const v = value ?? "";
@@ -236,47 +229,9 @@ const contracts: ContractRepository = {
     return read.ok ? read.clauses : [];
   },
   async listClausesChecked(organizationId, contractId) {
-    try {
-      const supabase = await createSupabaseServer();
-      // The operational basis is the operative analysis: the activated
-      // ("approved") run, else the newest run awaiting review. Drafts and
-      // superseded runs are never surfaced as the working clause set.
-      const { data: runs, error: runError } = await supabase
-        .from("contract_ingestion_runs")
-        .select("id, status")
-        .eq("organization_id", organizationId)
-        .eq("contract_id", contractId)
-        .in("status", ["approved", "ready_for_review"])
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (runError || !Array.isArray(runs)) return { ok: false };
-      const run =
-        runs.find((r) => r.status === "approved") ??
-        runs.find((r) => r.status === "ready_for_review");
-      if (!run) return { ok: true, clauses: [] };
-      const { data, error } = await supabase
-        .from("contract_clauses")
-        .select("id, clause_number, heading, text, page_number, sequence_number")
-        .eq("organization_id", organizationId)
-        .eq("contract_id", contractId)
-        .eq("ingestion_run_id", run.id)
-        .order("sequence_number", { ascending: true })
-        .order("id", { ascending: true });
-      if (error || !Array.isArray(data)) return { ok: false };
-      return {
-        ok: true,
-        clauses: (data as ClauseRow[]).map((c) => ({
-          id: c.id,
-          contractId,
-          ref: c.clause_number ?? "",
-          heading: toText(c.heading ?? ""),
-          excerpt: toText(c.text),
-          page: c.page_number ?? 0,
-        })),
-      };
-    } catch {
-      return { ok: false };
-    }
+    const { listContractClauses } = await import("@/data/supabase/clauses");
+    const supabase = await createSupabaseServer();
+    return listContractClauses(supabase, organizationId, contractId);
   },
 };
 

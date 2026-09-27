@@ -1404,7 +1404,8 @@
       "actions": "Actions",
       "sections": "Contract sections",
       "dateUnknown": "Not recorded",
-      "noActions": "No officer actions for this contract yet."
+      "noActions": "No officer actions for this contract yet.",
+      "unapprovedClauses": "Unapproved extraction — clauses from an analysis awaiting review."
     },
     "documents": {
       "title": "Contract documents",
@@ -1888,7 +1889,7 @@
         "waitingOnClient": "Waiting on client",
         "done": "Completed",
         "waiting": "Waiting for approval",
-        "held": "Approved — not executed",
+        "held": "Approved — not completed",
         "completed": "Completed",
         "closed": "Rejected / failed / cancelled",
         "suggested": "Proposed"

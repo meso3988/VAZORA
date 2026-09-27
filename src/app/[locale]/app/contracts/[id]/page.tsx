@@ -118,6 +118,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const obligations = obligationsRead.ok ? obligationsRead.obligations : null;
   const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
   const clauses = clausesRead.ok ? clausesRead.clauses : null;
+  const clauseBasis = clausesRead.ok ? clausesRead.basis : null;
   const events = eventsRead.ok ? eventsRead.events : null;
   const activity = activityRead.ok ? activityRead.activity : null;
   const officerActions = actionsRead?.ok ? actionsRead.actions : null;
@@ -153,9 +154,19 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
         <div className="p-4">
           {!obligations || !evidence || !clauses ? (
             <DataLoadFailed message="dataLoadFailed" />
-          ) : traced && tracedClause ? (
-            <ClauseTrace clause={tracedClause} obligation={traced} evidence={evidence.filter((e) => e.obligationId === traced.id)} />
-          ) : null}
+          ) : (
+            <>
+              {clauseBasis === "ready_for_review" && (
+                <p className="mb-3 flex items-start gap-1.5 rounded-sm border border-partial/40 bg-partial/5 p-2 text-[11px] leading-relaxed text-muted" role="status">
+                  {t("contract.unapprovedClauses")}
+                  <Link href={`/app/contracts/${id}/review`} className="shrink-0 font-medium text-fg hover:underline">{c("viewAll")}</Link>
+                </p>
+              )}
+              {traced && tracedClause && (
+                <ClauseTrace clause={tracedClause} obligation={traced} evidence={evidence.filter((e) => e.obligationId === traced.id)} />
+              )}
+            </>
+          )}
         </div>
       </Panel>
 

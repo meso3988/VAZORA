@@ -40,8 +40,15 @@ export interface ContractRepository {
     { status: "found"; contract: Contract } | { status: "not_found" } | { status: "unavailable" }
   >;
   listClauses(organizationId: string, contractId: string): Promise<Clause[]>;
-  /** Like listClauses(), but a failed read is reported instead of returning []. */
-  listClausesChecked?(organizationId: string, contractId: string): Promise<{ ok: true; clauses: Clause[] } | { ok: false }>;
+  /**
+   * Like listClauses(), but a failed read is reported instead of returning [].
+   * basis tells the caller which run the clauses came from: the approved
+   * baseline, or a pending-review extraction (which the UI must label as
+   * unapproved — it is never an operational substitute).
+   */
+  listClausesChecked?(organizationId: string, contractId: string): Promise<
+    { ok: true; clauses: Clause[]; basis: "approved" | "ready_for_review" | null } | { ok: false }
+  >;
 }
 
 export interface ObligationRepository {
