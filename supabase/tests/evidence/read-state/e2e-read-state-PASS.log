@@ -1,0 +1,62 @@
+PASS  after alpha en /contracts: loads (200)
+PASS  after alpha en /contracts: own contracts listed
+PASS  after alpha en /contracts: no false empty state with records
+PASS  after alpha en /contracts: no load-failure text
+PASS  after alpha en /tasks: loads (200)
+PASS  after alpha en /tasks: no load-failure text
+PASS  after alpha en /tasks: page title rendered
+PASS  after alpha en /claims: loads (200)
+PASS  after alpha en /claims: no load-failure text
+PASS  after alpha en /claims: page title rendered
+PASS  after alpha en /evidence: loads (200)
+PASS  after alpha en /evidence: no load-failure text
+PASS  after alpha en /evidence: page title rendered
+PASS  after alpha en /dashboard: loads (200)
+PASS  after alpha en /dashboard: no load-failure text
+PASS  after empty en /contracts: loads (200)
+PASS  after empty en /contracts: legitimate empty state shown
+PASS  after empty en /contracts: no load-failure text
+PASS  after empty en /tasks: loads (200)
+PASS  after empty en /tasks: no load-failure text
+PASS  after empty en /tasks: page title rendered
+PASS  after empty en /claims: loads (200)
+PASS  after empty en /claims: no load-failure text
+PASS  after empty en /claims: page title rendered
+PASS  after empty en /evidence: loads (200)
+PASS  after empty en /evidence: no load-failure text
+PASS  after empty en /evidence: page title rendered
+PASS  after empty en /evidence: no upload contract picker for empty tenant
+PASS  after empty en /dashboard: loads (200)
+PASS  after empty en /dashboard: no load-failure text
+PASS  after alpha ar /contracts: loads (200)
+PASS  after alpha ar /contracts: own contracts listed
+PASS  after alpha ar /contracts: no false empty state with records
+PASS  after alpha ar /contracts: no load-failure text
+PASS  after alpha ar /tasks: loads (200)
+PASS  after alpha ar /tasks: no load-failure text
+PASS  after alpha ar /tasks: page title rendered
+PASS  after alpha ar /claims: loads (200)
+PASS  after alpha ar /claims: no load-failure text
+PASS  after alpha ar /claims: page title rendered
+PASS  after alpha ar /evidence: loads (200)
+PASS  after alpha ar /evidence: no load-failure text
+PASS  after alpha ar /evidence: page title rendered
+PASS  after alpha ar /dashboard: loads (200)
+PASS  after alpha ar /dashboard: no load-failure text
+PASS  after empty ar /contracts: loads (200)
+PASS  after empty ar /contracts: legitimate empty state shown
+PASS  after empty ar /contracts: no load-failure text
+PASS  after empty ar /tasks: loads (200)
+PASS  after empty ar /tasks: no load-failure text
+PASS  after empty ar /tasks: page title rendered
+PASS  after empty ar /claims: loads (200)
+PASS  after empty ar /claims: no load-failure text
+PASS  after empty ar /claims: page title rendered
+PASS  after empty ar /evidence: loads (200)
+PASS  after empty ar /evidence: no load-failure text
+PASS  after empty ar /evidence: page title rendered
+PASS  after empty ar /evidence: no upload contract picker for empty tenant
+PASS  after empty ar /dashboard: loads (200)
+PASS  after empty ar /dashboard: no load-failure text
+
+READ-STATE SMOKE (after): 60/60 pass

@@ -1,0 +1,36 @@
+PASS  returned database error → ok:false, not []
+PASS  thrown/network error → ok:false, does not propagate
+PASS  successful empty → ok:true with []
+PASS  successful populated → ok:true with both contracts
+PASS  recovery after failure → fail then populated
+PASS  provider without listChecked → falls back to list()
+PASS  demo mode uses fixtures via list(), not listChecked
+PASS  throwing list() fallback → ok:false
+PASS  /app/dashboard: uses readContractList
+PASS  /app/dashboard: renders failure state (dashboard.contractsUnavailable)
+PASS  /app/dashboard: no unchecked db.contracts.list( for tenant data
+PASS  /app/contracts: uses readContractList
+PASS  /app/contracts: renders failure state (contractsLoadFailed)
+PASS  /app/contracts: no unchecked db.contracts.list( for tenant data
+PASS  /app/tasks: uses readContractList
+PASS  /app/tasks: renders failure state (contractsLoadFailed)
+PASS  /app/tasks: no unchecked db.contracts.list( for tenant data
+PASS  /app/claims: uses readContractList
+PASS  /app/claims: renders failure state (contractsLoadFailed)
+PASS  /app/claims: no unchecked db.contracts.list( for tenant data
+PASS  /app/evidence: uses readContractList
+PASS  /app/evidence: renders failure state (contractsLoadFailed)
+PASS  /app/evidence: no unchecked db.contracts.list( for tenant data
+PASS  dashboard: failed read → KPI shows em-dash not a count
+PASS  dashboard: failed read → unavailable notice, not live-metrics copy
+PASS  contracts page: failure branch precedes empty state
+PASS  contracts page: count subtitle suppressed on failure
+PASS  evidence: upload form requires read.ok && contracts.length > 0
+PASS  en: contractsLoadFailed exists and differs from empty title
+PASS  en: legitimate empty state intact
+PASS  ar: contractsLoadFailed exists and differs from empty title
+PASS  ar: legitimate empty state intact
+PASS  en/ar: dashboard unavailable key present in both locales
+PASS  en/ar failure strings differ (both localized, not copy-paste)
+
+34/34 checks passed
