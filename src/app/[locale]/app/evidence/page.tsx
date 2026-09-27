@@ -7,7 +7,7 @@ import { EVIDENCE_TYPES } from "@/components/app/evidence-upload";
 import { PageHeader, Panel, StackedBar } from "@/components/app/primitives";
 import { statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { requireTenant } from "@/data/context";
+import { readContractList, requireTenant } from "@/data/context";
 import { listEvidenceInbox } from "@/data/supabase/evidence-detail";
 import type { InboxCategory } from "@/domain/evidence";
 import { countBy, type EvidenceStatus } from "@/domain/types";
@@ -36,11 +36,12 @@ export default async function EvidencePage(props: PageProps<"/[locale]/app/evide
   const session = await auth.getSession();
   const isLive = session?.mode === "live";
   const { orgId, db } = await requireTenant();
-  const [evidence, inbox, contracts] = await Promise.all([
+  const [evidence, inbox, read] = await Promise.all([
     db.evidence.list(orgId),
     isLive ? listEvidenceInbox(orgId) : Promise.resolve([]),
-    isLive ? db.contracts.list(orgId) : Promise.resolve([]),
+    isLive ? readContractList(db, orgId, false) : Promise.resolve({ ok: true as const, contracts: [] }),
   ]);
+  const contracts = read.contracts;
   const by = countBy(evidence, (e) => e.status);
   const active: InboxCategory = INBOX_CATEGORIES.includes(c as InboxCategory) ? (c as InboxCategory) : "all";
   const contractParam = typeof contract === "string" ? contract : null;
@@ -57,7 +58,13 @@ export default async function EvidencePage(props: PageProps<"/[locale]/app/evide
         </div>
       </Panel>
 
-      {isLive && contracts.length > 0 && (
+      {isLive && !read.ok && (
+        <p role="status" className="rounded-sm border border-line bg-bg px-4 py-3 text-sm text-muted">
+          {(await getTranslations("common"))("contractsLoadFailed")}
+        </p>
+      )}
+
+      {isLive && read.ok && contracts.length > 0 && (
         <Panel title={t("upload.title")} hint={t("upload.globalHint")} tone="graphite">
           <form action={uploadNewEvidence} className="grid grid-cols-1 gap-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-4">
             <input type="hidden" name="locale" value={locale} />

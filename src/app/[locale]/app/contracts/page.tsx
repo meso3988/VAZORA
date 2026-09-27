@@ -5,7 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { Mono, PageHeader, Panel, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
 import { ButtonLink } from "@/components/ui/button";
-import { requireTenant } from "@/data/context";
+import { readContractList, requireTenant } from "@/data/context";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
@@ -22,21 +22,26 @@ export default async function ContractsPage(props: PageProps<"/[locale]/app/cont
   const t = await getTranslations("app.contracts");
   const s = await getTranslations("sector");
   const f = await getFormatter();
-  const { orgId, db } = await requireTenant();
-  const contracts = await db.contracts.list(orgId);
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContractList(db, orgId, session.mode === "demo");
+  const contracts = read.contracts;
 
   return (
     <>
       <PageHeader
         title={t("title")}
-        subtitle={t("count", { count: contracts.length })}
+        subtitle={read.ok ? t("count", { count: contracts.length }) : undefined}
         actions={
           <ButtonLink href="/app/contracts/new" size="sm">
             <Plus size={14} /> {t("newContract")}
           </ButtonLink>
         }
       />
-      {contracts.length === 0 ? (
+      {!read.ok ? (
+        <p role="status" className="rounded-sm border border-line bg-bg px-4 py-3 text-sm text-muted">
+          {(await getTranslations("common"))("contractsLoadFailed")}
+        </p>
+      ) : contracts.length === 0 ? (
         <Panel tone="sky" title={t("empty.title")}>
           <div className="flex flex-col items-center gap-3 px-5 py-10 text-center">
             <p className="text-sm text-muted">{t("empty.body")}</p>

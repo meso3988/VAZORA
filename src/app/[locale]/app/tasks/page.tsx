@@ -3,7 +3,7 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 
 import { Mono, PageHeader, Panel } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
-import { requireTenant } from "@/data/context";
+import { readContractList, requireTenant } from "@/data/context";
 import { daysBetween, lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 import { DEMO_TODAY } from "@/data/mock/organization";
@@ -19,9 +19,9 @@ export default async function TasksPage(props: PageProps<"/[locale]/app/tasks">)
   setRequestLocale(locale);
   const t = await getTranslations("app.tasks");
   const f = await getFormatter();
-  const { orgId, db } = await requireTenant();
-  const [actions, contracts] = await Promise.all([db.actions.list(orgId), db.contracts.list(orgId)]);
-  const titles = Object.fromEntries(contracts.map((c) => [c.id, lt(c.title, locale)]));
+  const { session, orgId, db } = await requireTenant();
+  const [actions, read] = await Promise.all([db.actions.list(orgId), readContractList(db, orgId, session.mode === "demo")]);
+  const titles = read.ok ? Object.fromEntries(read.contracts.map((c) => [c.id, lt(c.title, locale)])) : {};
 
   const mine = actions.filter((a) => a.ownerName && a.status !== "done");
   const overdue = mine.filter((a) => daysBetween(DEMO_TODAY, a.dueDate) < 0 || daysBetween(DEMO_TODAY, a.dueDate) <= 3);
@@ -37,6 +37,11 @@ export default async function TasksPage(props: PageProps<"/[locale]/app/tasks">)
   return (
     <>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      {!read.ok && (
+        <p role="status" className="rounded-sm border border-line bg-bg px-4 py-3 text-sm text-muted">
+          {(await getTranslations("common"))("contractsLoadFailed")}
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {groups.map(({ key, items }) => (
           <Panel key={key} title={t(`groups.${key}`)} tone={key === "mine" ? "amber" : key === "overdue" ? "rose" : key === "waitingOnClient" ? "sky" : "emerald"}
@@ -54,7 +59,7 @@ export default async function TasksPage(props: PageProps<"/[locale]/app/tasks">)
                       <Mono className="text-[11px] text-muted">{validDate(a.dueDate) ? f.dateTime(validDate(a.dueDate)!, "short") : "—"}</Mono>
                     </div>
                     <span className="ps-7 text-xs text-muted">
-                      {a.ownerName}{contracts.length ? <> · {titles[a.contractId ?? ""]}</> : null}
+                      {a.ownerName}{read.contracts.length ? <> · {titles[a.contractId ?? ""]}</> : null}
                     </span>
                   </li>
                 ))}

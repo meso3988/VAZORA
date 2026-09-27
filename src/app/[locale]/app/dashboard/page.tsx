@@ -13,7 +13,7 @@ import { QueueBoard } from "@/components/app/queues";
 import { AssignmentReview } from "@/components/app/assignment-review";
 import { TodayChips } from "@/components/app/today-chips";
 import { StatusPill } from "@/components/ui/status";
-import { requireTenant } from "@/data/context";
+import { readContractList, requireTenant } from "@/data/context";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
 import { DEMO_ACTION_QUEUE, DEMO_APPROVALS, DEMO_ASSIGNMENTS } from "@/data/mock/queues";
 import { claimReadiness } from "@/domain/types";
@@ -38,15 +38,9 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
   // portfolio health) belong to demo sessions ONLY. A real tenant workspace
   // never falls back to them — not on empty data and not on a failed read.
   const isDemo = session.mode === "demo";
-  let contractsUnavailable = false;
-  let contracts: Awaited<ReturnType<typeof db.contracts.list>> = [];
-  if (!isDemo && db.contracts.listChecked) {
-    const read = await db.contracts.listChecked(orgId);
-    if (read.ok) contracts = read.contracts;
-    else contractsUnavailable = true;
-  } else {
-    contracts = await db.contracts.list(orgId);
-  }
+  const read = await readContractList(db, orgId, isDemo);
+  const contractsUnavailable = !read.ok;
+  const contracts = read.contracts;
   const [claims, events] = await Promise.all([
     db.claims.list(orgId),
     db.agent.listEvents(orgId, { limit: 5 }),

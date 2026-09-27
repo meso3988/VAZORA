@@ -512,7 +512,8 @@
     "back": "Back",
     "learnMore": "Learn more",
     "comingSoon": "Coming soon",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "contractsLoadFailed": "Contracts could not be loaded right now. Try again shortly — nothing was calculated from this."
   },
   "status": {
     "verified": "Verified",

@@ -30,3 +30,5 @@ export async function requireTenant(): Promise<TenantContext> {
   const orgId = session.organizationId;
   return { session, orgId, db: getDataProvider() };
 }
+
+export { readContractList } from "@/data/read-contract-list";

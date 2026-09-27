@@ -512,7 +512,8 @@
     "back": "رجوع",
     "learnMore": "اعرف أكثر",
     "comingSoon": "قريباً",
-    "skipToContent": "الانتقال إلى المحتوى"
+    "skipToContent": "الانتقال إلى المحتوى",
+    "contractsLoadFailed": "تعذّر تحميل العقود الآن. حاول مرة أخرى بعد قليل — لم تُحتسب أي أرقام من هذا."
   },
   "status": {
     "verified": "مُتحقق منه",
