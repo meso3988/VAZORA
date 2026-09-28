@@ -107,6 +107,9 @@ export interface ActivityRepository {
 
 export interface DocumentRepository {
   list(organizationId: string, contractId: string): Promise<ContractDocument[]>;
+  listChecked?(organizationId: string, contractId: string): Promise<
+    { ok: true; documents: ContractDocument[] } | { ok: false }
+  >;
 }
 
 export interface DataProvider {

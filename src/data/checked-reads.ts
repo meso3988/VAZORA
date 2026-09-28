@@ -196,6 +196,36 @@ export async function readClauseList(
   }
 }
 
+export type DocumentListRead =
+  | { ok: true; documents: Awaited<ReturnType<DataProvider["documents"]["list"]>> }
+  | { ok: false; documents: [] };
+
+/**
+ * Read a contract's document list for the overview panel.
+ * Same three outcomes as readObligationList: records, a genuine empty
+ * list, or an explicit failure — a failed read is never rendered as
+ * "no documents". Demo sessions keep the in-memory fixtures via list().
+ */
+export async function readDocumentList(
+  db: Readonly<DataProvider>,
+  orgId: string,
+  contractId: string,
+  isDemo: boolean,
+): Promise<DocumentListRead> {
+  try {
+    if (isDemo) {
+      return { ok: true, documents: await db.documents.list(orgId, contractId) };
+    }
+    if (db.documents.listChecked) {
+      const read = await db.documents.listChecked(orgId, contractId);
+      return read.ok ? { ok: true, documents: read.documents } : { ok: false, documents: [] };
+    }
+    return { ok: false, documents: [] };
+  } catch {
+    return { ok: false, documents: [] };
+  }
+}
+
 export type AgentEventRead =
   | { ok: true; events: Awaited<ReturnType<DataProvider["agent"]["listEvents"]>>; truncated: boolean }
   | { ok: false; events: []; truncated: false };

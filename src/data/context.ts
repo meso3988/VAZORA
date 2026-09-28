@@ -37,6 +37,7 @@ export {
   readClauseList,
   readContract,
   readContractList,
+  readDocumentList,
   readEvidenceList,
   readObligation,
   readObligationList,

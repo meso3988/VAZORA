@@ -139,6 +139,21 @@ const documents: DocumentRepository = {
       .order("created_at", { ascending: false });
     return ((data ?? []) as DocRow[]).map(mapDocument);
   },
+  async listChecked(organizationId, contractId) {
+    try {
+      const supabase = await createSupabaseServer();
+      const { data, error } = await supabase
+        .from("contract_documents")
+        .select("*")
+        .eq("organization_id", organizationId)
+        .eq("contract_id", contractId)
+        .order("created_at", { ascending: false });
+      if (error || !Array.isArray(data)) return { ok: false };
+      return { ok: true, documents: (data as DocRow[]).map(mapDocument) };
+    } catch {
+      return { ok: false };
+    }
+  },
 };
 
 const organizations: OrganizationRepository = {

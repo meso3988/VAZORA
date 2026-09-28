@@ -11,7 +11,7 @@ import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
 import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
-import { readActivityList, readAgentEvents, readClauseList, readContract, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
+import { readActivityList, readAgentEvents, readClauseList, readContract, readDocumentList, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
 import { listOfficerActions } from "@/data/supabase/officer-queue";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { DEMO_PIPELINE } from "@/data/mock/pipeline";
@@ -101,7 +101,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
   const isDemo = session?.mode === "demo";
   const liveQueue = isLive ? createSupabaseServer().then((s) => listOfficerActions(s, orgId, { contractId: id, limit: 6 })) : null;
-  const [obligationsRead, clausesRead, evidenceRead, risks, claims, demoActions, eventsRead, activityRead, documents, latestRunRead, summaryRead, actionsRead] = await Promise.all([
+  const [obligationsRead, clausesRead, evidenceRead, risks, claims, demoActions, eventsRead, activityRead, documentsRead, latestRunRead, summaryRead, actionsRead] = await Promise.all([
     readObligationList(db, orgId, isDemo, { contractId: id }),
     readClauseList(db, orgId, id, isDemo),
     readEvidenceList(db, orgId, isDemo, { contractId: id }),
@@ -110,7 +110,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     isDemo ? db.actions.list(orgId, { contractId: id }) : Promise.resolve(null),
     readAgentEvents(db, orgId, isDemo, { contractId: id, limit: 5 }),
     readActivityList(db, orgId, isDemo, { contractId: id, limit: 6 }),
-    db.documents.list(orgId, id),
+    readDocumentList(db, orgId, id, isDemo),
     isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve({ ok: true as const, run: null }),
     isLive ? getIngestionSummary(orgId, id) : Promise.resolve({ ok: true as const, summary: null }),
     liveQueue ?? Promise.resolve(null),
@@ -121,6 +121,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const clauseBasis = clausesRead.ok ? clausesRead.basis : null;
   const events = eventsRead.ok ? eventsRead.events : null;
   const activity = activityRead.ok ? activityRead.activity : null;
+  const documents = documentsRead.ok ? documentsRead.documents : null;
   const officerActions = actionsRead?.ok ? actionsRead.actions : null;
 
   const h = contract.health;
@@ -215,7 +216,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
         <IngestionControls
           contractId={id}
           locale={locale}
-          hasDocuments={documents.length > 0}
+          hasDocuments={(documents ?? []).length > 0}
           canRun={isLive}
           currentRun={latestRunRead.run}
           analysis={summaryRead.summary}
