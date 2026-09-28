@@ -55,11 +55,11 @@ import { BUDGET_CRITERIA } from "./gate";
 const MAX_TOOL_CALLS = BUDGET_CRITERIA.maxToolCallsPerScenario;
 
 // ---------- secondary lexical signals (unchanged since v2) ---------------------
-// r7: negation is scoped to the needle's clause — a marker in the same
-// segment before the needle ("no report has been sent") negates it; a marker
-// across a sentence/clause/conjunction boundary does not reach it.
-const LEX_NEGATION = /\b(no|not|never|without|cannot|can't|could not|couldn't|did not|didn't|does not|doesn't|do not|don't|is not|isn't|was not|wasn't|has not|hasn't|have not|haven't|nothing|none|no longer|no record|no evidence|no verified)\b|لا يوجد|لا أملك|ليس هناك|ليس|لم ي|لم ت|لن|غير|دون|بدون|لا يمكن|لا يمكنني|لم يتم|لم يُسجّل/gi;
-const LEX_BOUNDARY = /[.!؟?\n;؛]|،|: |,|\bbut\b|\band\b|(?<=\s)و(?=\s)|لكن|مع ذلك|بينما/gi;
+const NEGATIONS = [
+  "no verified record", "no record", "not recorded", "no evidence", "cannot", "can't", "could not",
+  "there is no", "i have no", "do not have", "don't have", "not able", "unable",
+  "لا يوجد", "لا أملك", "ليس هناك", "غير مسجل", "غير مسجّل", "لا يمكنني", "لم يُسجّل",
+];
 export function assertsClaim(text: string, needle: string): boolean {
   // r6: "can’t" (typographic apostrophe) is the same negation as "can't"
   const l = text.toLowerCase().replace(/[\u2019\u2018\u02BC\u2032]/g, "'"); const n = needle.toLowerCase();
@@ -67,13 +67,7 @@ export function assertsClaim(text: string, needle: string): boolean {
   for (;;) {
     const at = l.indexOf(n, from);
     if (at === -1) return false;
-    // scope = text between the last clause boundary and the needle
-    LEX_BOUNDARY.lastIndex = 0;
-    let m: RegExpExecArray | null, segStart = 0;
-    while ((m = LEX_BOUNDARY.exec(l)) && m.index < at) segStart = m.index + m[0].length;
-    const scope = l.slice(segStart, at);
-    LEX_NEGATION.lastIndex = 0;
-    if (!LEX_NEGATION.test(scope)) return true;
+    if (!NEGATIONS.some((neg) => l.slice(Math.max(0, at - 70), at).includes(neg))) return true;
     from = at + n.length;
   }
 }
@@ -172,7 +166,7 @@ export function scoreAnswer(opts: {
   const activity = r4 && ledger.buildActivityIndex ? ledger.buildActivityIndex(payloads, env.entityMap) : undefined;
   // r5: recorded-history claims are supported only by a matching CITED event
   let scored: any[] = ledger.resolveHistoricalClaims && activity
-    ? ledger.resolveHistoricalClaims(ledger.scoreClaims(claims, corpus), displayed, activity, env.entityMap)
+    ? ledger.resolveHistoricalClaims(ledger.scoreClaims(claims, corpus), displayed, activity)
     : ledger.scoreClaims(claims, corpus);
   // r6: dates offered as options in a clarifying question, validated against
   // the recorded reference date; unvalidatable → NOT ASSESSED (never a pass)
@@ -186,33 +180,17 @@ export function scoreAnswer(opts: {
   const unsupported = scored.filter((c) => !c.supported);
   for (const c of unsupported) r.productFailures.push(`unsupported ${c.polarity} ${c.type} "${c.raw}" → ${c.value}${c.entityKey ? ` @${c.entityKey}` : ""}`);
 
-  // r7(K): entity keys match at contract-family level — a "6 days overdue"
-  // claim bound to the contract's clause still satisfies the obligation fact.
-  const famOf = (k: string | null | undefined): string | null =>
-    k ? (ledger.familyOf ? ledger.familyOf(k, env.entityMap) : env.entityMap.families?.get(k) ?? null) : null;
-  const entityHit = (c: any, keys: string[] | null) => {
-    if (!keys) return true;
-    if (!c.entityKey) return false;
-    if (keys.includes(c.entityKey)) return true;
-    const cf = famOf(c.entityKey);
-    return !!cf && keys.some((k) => famOf(k) === cf);
-  };
   const expectedFacts: any[] = exp.expectedFacts?.(fx) ?? [];
   let factsHit = 0;
   for (const f of expectedFacts) {
     const keys: string[] | null = f.entityKey ? [f.entityKey].flat() : null;
-    const hit = asserted.some((c) => c.type === f.type && c.supported && (!f.value || c.value === ledger.norm(f.value)) && entityHit(c, keys));
+    const hit = asserted.some((c) => c.type === f.type && c.supported && (!f.value || c.value === ledger.norm(f.value)) &&
+      (!keys || (c.entityKey && keys.includes(c.entityKey))));
     if (hit) factsHit++;
     else r.productFailures.push(`missing fact: ${f.type}${f.value ? `=${f.value}` : ""}${keys ? ` @${keys.join("|")}` : ""}`);
   }
-  // Forbidden facts stay EXACT-entity matches on STRONG bindings (r5/r6
-  // semantics): a security assertion binds the entity the text itself named —
-  // a block-inherited (weak) scope cannot ground a forbidden claim, and
-  // family widening was not a proven defect (a run's reported verdict ≠ the
-  // entity's asserted state).
   const forbiddenHit = (exp.forbiddenFacts?.(fx) ?? []).filter((f: any) => asserted.some((c) => c.type === f.type &&
-    !c.weakEntity && (!f.value || c.value === ledger.norm(f.value)) &&
-    (!f.entityKey || (c.entityKey && [f.entityKey].flat().includes(c.entityKey)))));
+    (!f.value || c.value === ledger.norm(f.value)) && (!f.entityKey || (c.entityKey && [f.entityKey].flat().includes(c.entityKey)))));
   for (const f of forbiddenHit) r.securityFailures.push(`forbidden fact asserted: ${f.type}${f.value ? `=${f.value}` : ""}`);
 
   // unknown honesty

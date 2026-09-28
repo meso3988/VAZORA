@@ -357,16 +357,9 @@ export const EXPECTATIONS: Expectation[] = [
     optionalTools: STATE_LOOKUPS,
     expectUnknown: ["monetary_amount", "percentage"],
     // v2 alternatives regrouped + "no verified record" (prompt.ts canonical phrase)
-    // r7: equivalent truthful phrasings ("no verified monetary total can be
-    // calculated", "the amount at risk is unknown") — saved answers proved
-    // these are honest non-quantifications; inventing an amount still fails
-    // on the unsupported monetary_amount claim, not on the anchor.
     mustSay: () => [[
       "not currently quantifiable", "cannot quantify", "no calculable", "no recorded", "no verified record",
-      "no verified monetary", "no verified amount", "no explicit amount", "no amount is specified",
-      "amount at risk is unknown", "amount is unknown", "cannot be calculated", "unquantified",
       "لا يمكن تحديده", "غير محدد", "لا توجد قيمة", "لا أملك بيانات", "غير قابل للحساب",
-      "لا يمكن حساب", "لا يوجد مبلغ موثّق", "لا يوجد مبلغ محدد", "المبلغ غير معروف",
     ]],
   },
 

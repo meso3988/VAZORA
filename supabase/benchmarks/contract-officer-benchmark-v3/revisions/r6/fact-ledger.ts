@@ -64,52 +64,6 @@
 //       the organization's timezone, and any weekday named with it matches.
 //       No reference date → NOT ASSESSED. Dates outside a question are
 //       unchanged (an unapproved new deadline stays unsupported).
-//
-// r7 corrections (paired tests in officer-benchmark-v3-r7.test.ts; each proven
-//   against saved gate answers — an r6 FAIL on a correct answer, with a nearby
-//   wrong answer that stays rejected):
-//   P   negation is POSITION-scoped: a marker negates only what FOLLOWS it in
-//       the same colon-segment, and its scope ends at a coordinating boundary
-//       (, ، ؛ "and", standalone "و"). "… is 6 days overdue, and no verified
-//       report is recorded" asserts overdue and negates verified — under r6
-//       the trailing "no" negated the whole segment. "no A or B" keeps both
-//       negated (negative-polarity 'or' is not a boundary).
-//   W   aggregates are never entity evidence: the top-level payload wrapper
-//       {ok, data:[…]}, any object spanning MULTIPLE contract families, and —
-//       for contradiction — an object binding descendants of the claimed
-//       entity (a subtree aggregate). Row-level objects only.
-//   K   kinship — object support/contradiction follows the fixture's explicit
-//       id relationships: a contract-level state claim reads its obligations'
-//       and requirements' rows (descendants only — never ancestors); a
-//       contract-number claim bound to an entity is supported when that
-//       entity's recorded contract is the claimed number, and bound to its
-//       own contract it is a self-reference. Value types that belong to a
-//       contract-wide subject (day counts, clause numbers, dates) match at
-//       family level; amounts/percentages stay entity-bound + descendants.
-//   B   block inheritance: a line naming no entity inherits its section's
-//       entity ("No open gap … is recorded for this contract." under an
-//       ALPHA-100 heading is about ALPHA-100); a line ending ':' inherits the
-//       following line's entity (a list introducer).
-//   M   CONDITIONAL and MODAL scopes: "remains open until verified" does not
-//       assert verified; "I can retrieve the open gaps" is an unexecuted
-//       offer, not a state claim. Neither counts as an assertion; neither is
-//       held to evidence support.
-//   O   "no OTHER pending discrepancies" is contradicted only by an in-scope
-//       object whose entities are NOT already mentioned in the answer —
-//       restating the one already-reported discrepancy is not a lie.
-//   V   a negated state claim is contradicted within its GOVERNED NOUN's
-//       scope: "no verified monetary amount" is about amounts, and the
-//       existence of verified evidence elsewhere does not contradict it;
-//       "no verified evidence" IS contradicted by a verified evidence object.
-//   H2  compound recorded history: "was uploaded and recorded as awaiting
-//       verification" is recorded history like "was recorded as …" (the r5
-//       citation+action+state checks are unchanged).
-//   E   entity binding is position-aware when a clause names several
-//       entities: the claim binds the nearest PRECEDING entity ("BETA-200
-//       … is already overdue, followed by GAMMA-300" — overdue is BETA-200's),
-//       falling back to the nearest following one.
-//   AR  the same rules carry Arabic markers (لا يوجد/حتى/أستطيع/،/و) and a
-//       markdown emphasis between البند and its number no longer hides it.
 // ============================================================================
 
 // ---------- normalization ---------------------------------------------------
@@ -144,103 +98,7 @@ const CLAUSE_SPLIT = /\bbut\b|\bhowever\b|\bthough\b|\balthough\b|\byet\b|\bwhil
  * approved, but there is no signed record" still asserts approval because the
  * negation lives in the OTHER clause.
  */
-const NEGATION = /\b(no|not|never|without|cannot|can't|could not|couldn't|did not|didn't|does not|doesn't|do not|don't|is not|isn't|was not|wasn't|has not|hasn't|have not|haven't|nothing|none|no longer|no record|no evidence|no verified|no calculable|not currently quantif|not quantif)\b|لا يوجد|لا أملك|ليس هناك|ليس|لم ي|لم ت|لن|غير|دون|بدون|ما عندنا|لا نعرف|لا يمكن/i;
-const NEGATION_G = new RegExp(NEGATION.source, "gi");
-
-/**
- * r7 — coordinating boundaries end a negation's scope. "… is overdue, and no
- * verified report is recorded" — the "no" governs only its own conjunct.
- * Negative-polarity "or"/أو is NOT a boundary: "no gaps or discrepancies"
- * negates both.
- */
-const NEG_BOUNDARY = /,|،|؛|\band\b|(?<=\s)و(?=\s)/gi;
-
-/** r7 — the states an evidence item can "lack": 'missing'/'lacks' negate them. */
-const STATE_ABSENT = /\b(?:missing|lacks?|lacking|absent)\b|مفقود|يفتقر|خالٍ/i;
-const STATE_ABSENT_G = new RegExp(STATE_ABSENT.source, "gi");
-
-/** r7 — conditional frames: "until verified", "once reviewed", "حتى يُتحقق". */
-const CONDITIONAL = /\b(?:until|once|when|whenever|after|before|upon|pending|awaiting|unless|if)\b|حتى|عندما|حين|إذا|إلا إذا/i;
-const CONDITIONAL_G = new RegExp(CONDITIONAL.source, "gi");
-
-/** r7 — modal offers / needs: "I can retrieve …", "أستطيع أن …" — not assertions. */
-const MODAL = /\b(?:i|we)\s+(?:can|could|may|might|shall|would)\b|\b(?:let me|i'd be happy to|happy to|i am able to|we are able to|i need|i would need|i first need)\b|أستطيع|يمكنني|يمكننا|بإمكاني|أحتاج|يمكن أن/i;
-const MODAL_G = new RegExp(MODAL.source, "gi");
-
-/**
- * r7 — the modal offer only stands when the modal governs a CAPABILITY verb:
- * "I can retrieve the open gaps" is an offer; "I can see the gap is open" is
- * still an assertion ("see" reports a state, it does not offer to act).
- */
-const CAP_VERB = /\b(?:retrieve|list|show|fetch|pull|send|submit|provide|request|generate|prepare|export|download|re-?check|re-?verify|review|query|run|create|draft|get|share|summar\w+|break down|walk through|schedule|set up|arrange)\b|أسترجع|أرسل|أقدّم|أقدم|أنشئ|أراجع|أتحقق|أستعرض|أعرض|ألخص|أرتّب|أجهّز/i;
-const CAP_VERB_G = new RegExp(CAP_VERB.source, "gi");
-
-/** r7 — "I can <capability-verb> … claim" — offer scope, not an assertion. */
-function modalOfferAt(clause: string, at: number): boolean {
-  const start = clause.lastIndexOf(": ", at - 1);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
-  const mIdx = lastMatchIndex(MODAL_G, scope);
-  if (mIdx < 0 || mIdx <= lastMatchIndex(NEG_BOUNDARY, scope)) return false;
-  CAP_VERB_G.lastIndex = 0;
-  return CAP_VERB_G.test(scope.slice(mIdx));
-}
-
-/** r7 — "no other X" excludes already-mentioned entities from contradiction. */
-const OTHER_SCOPE = /\b(?:no other|no additional|no further|none other|nothing else|no more|other than|besides)\b|لا يوجد غير|لا توجد أخرى|ما عدا|بخلاف/i;
-
-function lastMatchIndex(re: RegExp, s: string): number {
-  re.lastIndex = 0;
-  let m: RegExpExecArray | null, last = -1;
-  while ((m = re.exec(s))) last = m.index;
-  return last;
-}
-
-/** r7 — END index of the last regex match in s, or -1. */
-function lastMatchEnd(re: RegExp, s: string): number {
-  re.lastIndex = 0;
-  let m: RegExpExecArray | null, last = -1;
-  while ((m = re.exec(s))) last = m.index + m[0].length;
-  return last;
-}
-
-/**
- * r7 — is `at` inside a negated scope? A marker negates what FOLLOWS it in the
- * same ": "-delimited segment, up to the next coordinating boundary. Markers
- * after the claim, or before an intervening boundary, do not negate it.
- */
-export function isNegatedAt(clause: string, at: number): boolean {
-  const start = clause.lastIndexOf(": ", at - 1);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
-  const neg = lastMatchIndex(NEGATION_G, scope);
-  if (neg < 0) return false;
-  return neg > lastMatchIndex(NEG_BOUNDARY, scope);
-}
-
-/**
- * r7 — evidence-absence markers ("missing verified evidence") negate only
- * verification-family state words, not e.g. "the missing report is overdue".
- */
-function isAbsentMarkedAt(clause: string, at: number): boolean {
-  const start = clause.lastIndexOf(": ", at - 1);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
-  const neg = lastMatchIndex(STATE_ABSENT_G, scope);
-  if (neg < 0) return false;
-  return neg > lastMatchIndex(NEG_BOUNDARY, scope);
-}
-
-/** r7 — marker-before-claim test for conditional/modal scopes. */
-function markerBefore(clause: string, at: number, markerG: RegExp, boundaryG: RegExp | null): boolean {
-  const start = clause.lastIndexOf(": ", at - 1);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
-  const m = lastMatchIndex(markerG, scope);
-  if (m < 0) return false;
-  return boundaryG ? m > lastMatchIndex(boundaryG, scope) : true;
-}
-
-const CONDITIONAL_TYPES = new Set<ClaimType>([
-  "verification_state", "acknowledgement_state", "overdue_state",
-  "gap_state", "unassigned_state", "action_execution",
-]);
+const NEGATION = /\b(no|not|never|without|cannot|can't|could not|couldn't|did not|didn't|does not|doesn't|do not|don't|is not|isn't|was not|wasn't|has not|hasn't|have not|haven't|no record|no evidence|no verified|no calculable|not currently quantif|not quantif)\b|لا يوجد|لا أملك|ليس هناك|ليس|لم ي|لم ت|لن|غير|دون|بدون|ما عندنا|لا نعرف|لا يمكن/i;
 
 export function splitClauses(sentence: string): string[] {
   return sentence.split(CLAUSE_SPLIT).map((s) => s.trim()).filter(Boolean);
@@ -296,8 +154,8 @@ export type FactClaim = {
   value: string;
   /** entity token bound in the same sentence, normalized (e.g. "beta-200") */
   entityKey: string | null;
-  /** attributed = quoting the user; conditional/modal = not system-truth assertions */
-  polarity: "asserted" | "negated" | "attributed" | "conditional" | "modal";
+  /** attributed = quoting the user; never counted as a system-truth assertion */
+  polarity: "asserted" | "negated" | "attributed";
   sentence: string;
   /** r4: the clause the claim was extracted from (change vs current-state) */
   clause?: string;
@@ -307,12 +165,6 @@ export type FactClaim = {
   historicalEventId?: string;
   /** r6: a clarifying date that could not be validated (no reference date) */
   notAssessed?: boolean;
-  /** r7(B): the entity came from block inheritance, not the claim's own text —
-   *  contextual scope, not a strict binding (support may fall back globally). */
-  weakEntity?: boolean;
-  /** r7(V2): the state word is an adjective modifying a noun ("the verified
-   *  record") — an unbound descriptor is generic, not a state assertion. */
-  descriptor?: boolean;
 };
 
 const MONTHS: Record<string, string> = {
@@ -335,7 +187,7 @@ const NUM_WORDS: Record<string, string> = {
 const DAY_COUNT = new RegExp(
   `(?:${AR_NUM}|\\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\\b)\\s*(?:days?\\b|يومًا?|أيام|يوم)${AR_BOUNDARY}`, "gi");
 const CONTRACT_NO = /\b[A-Z]{2,10}-\d{2,6}\b/g;
-const CLAUSE_NO = /(?:clause|البند|الفقرة|المادة)[\s*_#]*(\d+(?:\.\d+)+)/gi;
+const CLAUSE_NO = /(?:clause|البند|الفقرة|المادة)\s*#?\s*(\d+(?:\.\d+)+)/gi;
 const ASSIGNEE = /(?:assigned to|owner(?:\s+is|:)?|owned by|responsible(?:\s+is|:)?|المسؤول(?:\s+هو|:)?|مسؤول(?:\s+عن)?[^.:،,]{0,20}(?:هو|:)?)\s+([A-Za-z][A-Za-z.''-]{2,}|[\w.+-]+@[\w-]+\.[\w.]+|[\u0600-\u06FF]{2,}(?:\s[\u0600-\u06FF]{2,})?)/gi;
 // r4: "not submitted" is its own claim (only an explicit no-submission state
 // supports it); "awaiting/pending verification" is distinct from "pending /
@@ -405,10 +257,6 @@ export type EntityMap = {
   idKeys: Map<string, string>;
   /** r4: entity key → owning contract number (unambiguous line attribution) */
   families?: Map<string, string>;
-  /** r7: entity key → its parent (requirement→obligation→contract) */
-  parents?: Map<string, string>;
-  /** r7: entity key → entities nested under it */
-  children?: Map<string, Set<string>>;
 };
 
 export function buildEntityMap(fx: any): EntityMap {
@@ -424,13 +272,6 @@ export function buildEntityMap(fx: any): EntityMap {
   };
   // r4: entity key → the contract it belongs to (for unambiguous line attribution)
   const families = new Map<string, string>();
-  // r7: explicit parent/child relations from the fixture identity
-  const parents = new Map<string, string>();
-  const children = new Map<string, Set<string>>();
-  const link = (child: string, parent: string) => {
-    parents.set(child, parent);
-    children.set(parent, new Set([...(children.get(parent) ?? []), child]));
-  };
   const addReq = (c: any, req: any) => {
     if (!req) return;
     const reqKey = `requirement:${req.reqId}`;
@@ -443,9 +284,6 @@ export function buildEntityMap(fx: any): EntityMap {
     addId(req.versionId, itemKey);
     families.set(reqKey, c.number);
     families.set(itemKey, c.number);
-    const oKey = `obligation:${c.obligationId}`;
-    link(reqKey, oKey);
-    link(itemKey, reqKey);
   };
   for (const [k, c] of Object.entries<any>(fx.contracts ?? {})) {
     const cKey = `contract:${c.number}`;
@@ -459,50 +297,12 @@ export function buildEntityMap(fx: any): EntityMap {
     addId(c.obligationId, oKey);
     addReq(c, c.req);
     addReq(c, c.kpiReq);
-    link(oKey, cKey);
-    link(`clause:${c.clauseId}`, cKey);
     for (const key of [cKey, oKey, `clause:${c.clauseId}`]) families.set(key, c.number);
     void k;
   }
   for (const name of fx.memberNames ?? []) add(name, `member:${name}`);
   for (const e of fx.memberEmails ?? []) { add(e, `member:${e}`); }
-  return { tokens, idKeys, families, parents, children };
-}
-
-/** r7 — contract number an entity belongs to, or null when it has none. */
-export function familyOf(entityKey: string, entities: EntityMap): string | null {
-  return entities.families?.get(entityKey) ?? null;
-}
-
-/**
- * r7 — the entity plus everything nested UNDER it (transitive children).
- * Descendants-only is deliberate: a child claim must not be supported or
- * contradicted by an aggregate ancestor row (a contract row's "pending"
- * does not describe every requirement), while a contract-level claim DOES
- * read its obligations' rows.
- */
-export function descOf(entityKey: string, entities: EntityMap): Set<string> {
-  const kin = new Set<string>([entityKey]);
-  const stack = [...(entities.children?.get(entityKey) ?? [])];
-  while (stack.length) {
-    const k = stack.pop()!;
-    if (kin.has(k)) continue;
-    kin.add(k);
-    stack.push(...(entities.children?.get(k) ?? []));
-  }
-  return kin;
-}
-
-/**
- * r7(W+): true when the object's in-scope entities form one root-to-leaf
- * chain — a leaf row references its ancestors as foreign keys, so its values
- * describe that single subject. An aggregate shell binds several branches of
- * the scope at once (no chain exists) and proves nothing about any of them.
- */
-function rowScoped(o: EvidenceCorpus["objects"][number], scope: Set<string>, entities: EntityMap): boolean {
-  const hits = [...o.entities].filter((e) => scope.has(e));
-  if (!hits.length) return false;
-  return hits.some((h) => hits.every((x) => x === h || descOf(x, entities).has(h)));
+  return { tokens, idKeys, families };
 }
 
 /**
@@ -552,104 +352,33 @@ function bindEntity(sentence: string, entities: EntityMap): string | null {
   return best;
 }
 
-/**
- * r7 — position-aware binding for clauses naming several entities. The claim
- * binds the entity whose mention ends nearest BEFORE the claim ("BETA-200 …
- * is already overdue, followed by GAMMA-300" → overdue belongs to BETA-200);
- * when nothing precedes, the nearest following mention. Returns null when the
- * clause names fewer than two entities (the caller's default path applies).
- */
-export function bindEntityAt(clause: string, entities: EntityMap, at: number, rawEnd: number): string | null {
-  const n = normalizeDigits(clause.toLowerCase());
-  const occ: { key: string; pos: number; end: number }[] = [];
-  for (const [token, key] of entities.tokens) {
-    const re = new RegExp(`(^|[^\\w\\u0600-\\u06FF])${escapeRe(token)}(?=$|[^\\w\\u0600-\\u06FF])`, "gi");
-    let mm: RegExpExecArray | null;
-    while ((mm = re.exec(n))) {
-      const pos = mm.index + mm[1].length;
-      const end = pos + token.length;
-      if (pos < rawEnd && end > at) continue; // the entity token IS the claim
-      occ.push({ key, pos, end });
-    }
-  }
-  if (new Set(occ.map((o) => o.key)).size < 2) return null;
-  const before = occ.filter((o) => o.end <= at).sort((a, b) => b.end - a.end)[0];
-  if (before) return before.key;
-  const after = occ.filter((o) => o.pos >= rawEnd).sort((a, b) => a.pos - b.pos)[0];
-  return after?.key ?? null;
-}
-
 // ---------- extraction --------------------------------------------------------
 
 export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
   const claims: FactClaim[] = [];
-  const rawLines = text.split("\n");
-  const lineKeys = rawLines.map((line) => lineEntity(line, entities));
-  // r7(B): a line ending ':' introduces the following lines — a claim on it
-  // ("One active obligation is unassigned:") inherits the listed entity.
-  // Blank lines between the introducer and the first list row are skipped.
-  for (let i = rawLines.length - 2; i >= 0; i--) {
-    if (lineKeys[i] || !/[:：][*_~"'”»)\]\s]*$/.test(rawLines[i].trim())) continue;
-    let j = i + 1;
-    while (j < rawLines.length && !rawLines[j].trim()) j++;
-    if (j < rawLines.length && lineKeys[j]) lineKeys[i] = lineKeys[j];
-  }
-  const units: { sentence: string; lineKey: string | null; weakKey: string | null }[] = [];
-  let block: string | null = null;
-  rawLines.forEach((line, i) => {
-    // r7(B): a line naming no entity inherits its section's entity — a weak,
-    // contextual binding (the claim text does not name the entity itself).
-    const weakKey = lineKeys[i] == null ? block : null;
-    const lineKey = lineKeys[i] ?? block;
-    if (lineKeys[i]) block = lineKeys[i];
-    // r7: sentence ends may carry trailing quotes/brackets/emphasis — a
-    // closing ” after a period must not merge two sentences ("…report.” The
-    // acknowledgement is missing" leaked the first sentence's "no").
-    for (const s of line.split(/(?<=[.!؟?]["'”»’)\]*_~`]*)\s+/)) {
-      const sentence = s.trim();
-      if (sentence) units.push({ sentence, lineKey, weakKey });
-    }
+  const units = text.split(/\n+/).flatMap((line) => {
+    const lineKey = lineEntity(line, entities);
+    return line.split(/(?<=[.!؟?])\s+/).map((s) => s.trim()).filter(Boolean).map((sentence) => ({ sentence, lineKey }));
   });
-  for (const { sentence, lineKey, weakKey } of units) {
+  for (const { sentence, lineKey } of units) {
     const sentenceEntity = bindEntity(sentence, entities) ?? lineKey;
     for (const clause of splitClauses(sentence)) {
       const attributed = isAttributedClause(clause);
       // Bind per clause first ("A is overdue, but B is fine") — fall back to
-      // the sentence-level entity, then an unambiguous line/block entity.
+      // the sentence-level entity, then (r4) an unambiguous line entity.
       const entityKey = bindEntity(clause, entities) ?? sentenceEntity;
       let at = 0;
       const push = (type: ClaimType, raw: string, value: string, extra: Partial<FactClaim> = {}) => {
         if (!value) return;
-        // r7(E): when a clause names several entities the claim binds the
-        // one nearest BEFORE it — a trailing mention cannot steal the claim.
-        const claimEntity = bindEntityAt(clause, entities, at, at + raw.length) ?? entityKey;
-        // r7(P): negation is position-scoped — a marker negates what follows
-        // it in the same colon-segment, ending at a coordinating boundary.
-        const negated = isNegatedAt(clause, at) ||
-          ((type === "verification_state" || type === "acknowledgement_state") && isAbsentMarkedAt(clause, at));
+        // r4: negation is scoped to the colon-delimited segment holding the
+        // match — "has one open gap: no verified acknowledgement is recorded"
+        // negates the acknowledgement, not the gap.
+        const negated = isNegatedClause(colonSegment(clause, at));
         // A state expression with its own internal negation ("غير مكتمل",
         // "not verified") ASSERTS a negative state — it is not a negated claim.
         const claimPolarity: FactClaim["polarity"] = attributed ? "attributed"
-          : negated && !NEGATION.test(raw) ? "negated"
-          : !negated && CONDITIONAL_TYPES.has(type) && markerBefore(clause, at, CONDITIONAL_G, null) ? "conditional"
-          : !negated && CONDITIONAL_TYPES.has(type) && modalOfferAt(clause, at) ? "modal"
-          : "asserted";
-        // r7(V2): a state word in ADJECTIVE position ("the verified record",
-        // "VAZORA's verified record") modifies a noun — it is not a state
-        // assertion. Bound descriptors still face evidence; unbound ones are
-        // generic descriptors of the system's data.
-        const afterRaw = clause.slice(at + raw.length);
-        const descriptor = (type === "verification_state" || type === "acknowledgement_state") &&
-          claimPolarity === "asserted" &&
-          NOUN_SCOPES.some(({ re }) => { re.lastIndex = 0; const mm = re.exec(afterRaw); return !!mm && mm.index < 40; });
-        claims.push({
-          type, raw, value: norm(value), entityKey: claimEntity, polarity: claimPolarity, sentence, clause,
-          // weak only when the inherited block key is what bound the claim —
-          // a clause/sentence-level entity of its own is a strong binding.
-          weakEntity: (!!weakKey && claimEntity === weakKey) || undefined,
-          descriptor: descriptor || undefined,
-          ...extra,
-        });
+          : negated && !NEGATION.test(raw) ? "negated" : "asserted";
+        claims.push({ type, raw, value: norm(value), entityKey, polarity: claimPolarity, sentence, clause, ...extra });
       };
       let m: RegExpExecArray | null;
       const each = (re: RegExp, fn: (m: RegExpExecArray) => void) => {
@@ -710,17 +439,12 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
 export type EvidenceCorpus = {
   /** all normalized scalar values anywhere in the evidence */
   values: Set<string>;
-  /** per-object: scalar values + entity keys present together.
-   *  r7(W): `root` marks a top-level payload wrapper {ok,data:[…]} — its leaf
-   *  set aggregates every row, so it can neither support nor contradict an
-   *  entity-bound claim. */
-  objects: { values: Set<string>; entities: Set<string>; root?: boolean }[];
+  /** per-object: scalar values + entity keys present together */
+  objects: { values: Set<string>; entities: Set<string> }[];
   /** normalized whole payloads (substring fallback for odd phrasings) */
   raw: string;
   /** normalized user question — the only valid source for an ATTRIBUTED claim */
   question: string;
-  /** r7: entity relations used for kinship-scoped support/contradiction */
-  entities: EntityMap;
 };
 
 function collectLeaves(node: any, into: Set<string>) {
@@ -812,14 +536,14 @@ function payloadObjects(parsed: any): unknown[] {
   return [parsed];
 }
 
-function indexObject(node: any, entities: EntityMap, out: EvidenceCorpus["objects"], inheritedTags: string[] = [], root = false) {
+function indexObject(node: any, entities: EntityMap, out: EvidenceCorpus["objects"], inheritedTags: string[] = []) {
   if (node == null || typeof node !== "object") return;
   const values = new Set<string>();
   collectLeaves(node, values);
   collectMarkers(node, values);
   for (const t of inheritedTags) values.add(t);
   const ents = entitiesOf(values, entities);
-  if (values.size) out.push({ values, entities: ents, root });
+  if (values.size) out.push({ values, entities: ents });
   if (Array.isArray(node)) for (const v of node) indexObject(v, entities, out, inheritedTags);
   else for (const v of Object.values(node)) if (typeof v === "object" && v) indexObject(v, entities, out, inheritedTags);
 }
@@ -853,19 +577,16 @@ export function buildCorpus(opts: {
     collectLeaves(payload, values);
     for (const t of tags) values.add(t);
     try {
-      const parsed = JSON.parse(payload);
-      const objs = payloadObjects(parsed);
-      // r7(W): the {ok,data:[…]} wrapper aggregates every row — tag it as root.
-      for (const obj of objs) {
+      for (const obj of payloadObjects(JSON.parse(payload))) {
         collectLeaves(obj, values);
         collectMarkers(obj, values);
-        indexObject(obj, opts.entities, objects, tags, obj === parsed);
+        indexObject(obj, opts.entities, objects, tags);
       }
     } catch { /* payload stayed opaque; raw scan still applies */ }
   }
   for (const v of [...opts.contextValues]) collectLeaves(v, values);
   collectLeaves(opts.question, values);
-  return { values, objects, raw: norm(rawParts.join("\n")), question: norm(opts.question), entities: opts.entities };
+  return { values, objects, raw: norm(rawParts.join("\n")), question: norm(opts.question) };
 }
 
 // ---------- claim support -----------------------------------------------------
@@ -903,114 +624,7 @@ function valueVariantHit(values: Set<string>, v: string): boolean {
   return false;
 }
 
-/**
- * r7(V) — a negated/absent state is contradicted only within the scope of the
- * noun it governs: "no verified amount" is about monetary objects, "no verified
- * evidence" about evidence objects. The last class-matching noun in the claim's
- * segment wins ("no verified record of an amount" is about the amount).
- */
-const NOUN_SCOPES: { re: RegExp; cls: string }[] = [
-  { re: /\bgaps?\b|فجوة|فجوات/i, cls: "gap" },
-  { re: /discrepanc\w*|تباين|تعارض|اختلاف/i, cls: "discrepancy" },
-  { re: /\bobligations?\b|التزامات?|للالتزام/i, cls: "obligation" },
-  { re: /\bcontracts?\b|عقود|عقد/i, cls: "contract" },
-  { re: /\bclauses?\b|بنود|بند/i, cls: "clause" },
-  { re: /\bmembers?\b|assignees?|owners?|مالك|مسؤول/i, cls: "member" },
-  { re: /\b(?:amounts?|figures?|totals?|sums?|exposure|monetary|money|value)\b|مبلغ|مبالغ|قيمة|تعرض/i, cls: "monetary" },
-  // acknowledgement is narrower than generic evidence: "no verified client
-  // acknowledgement" is not contradicted by a verified report.
-  { re: /\backnowledg\w+|countersign\w+|اعتماد|إقرار|توقيع/i, cls: "acknowledgement" },
-  {
-    re: /\b(?:records?|reports?|evidence|statements?|registers?|tables?|versions?|files?|copies|items?|requirements?|summar\w+|documentation|proof|data)\b|سجل|سجلات|تقرير|تقارير|دليل|أدلة|نسخة|ملف|بيانات/i,
-    cls: "evidence",
-  },
-];
-
-/** r7 — "of/من/عن" links an evidence-class noun to its real subject. */
-const OF_LINK = /\b(?:of|for|to)\b|\b(?:من|عن|لـ|على)\b/i;
-
-function governedNounClass(c: FactClaim): string | null {
-  // The governed noun FOLLOWS a negated/adjectival claim: "no verified
-  // AMOUNT", "no pending DISCREPANCY". First class-matching noun after the
-  // claim (up to the next coordinating boundary) wins.
-  const text = c.clause ?? c.sentence;
-  const from = text.indexOf(c.raw);
-  const after = from < 0 ? text : text.slice(from + c.raw.length);
-  NEG_BOUNDARY.lastIndex = 0;
-  const b = NEG_BOUNDARY.exec(after);
-  const scope = b ? after.slice(0, b.index) : after;
-  const firstIn = (s: string): string | null => {
-    let best: { idx: number; end: number; cls: string } | null = null;
-    for (const { re, cls } of NOUN_SCOPES) {
-      re.lastIndex = 0;
-      const m = re.exec(s);
-      if (m && (!best || m.index < best.idx)) best = { idx: m.index, end: m.index + m[0].length, cls };
-    }
-    if (!best) return null;
-    // "no verified record OF an amount" — an evidence-class noun linked by
-    // of/من/عن defers its class to the complement's subject.
-    if (best.cls === "evidence") {
-      const rest = s.slice(best.end);
-      OF_LINK.lastIndex = 0;
-      const link = OF_LINK.exec(rest);
-      if (link && link.index <= 12) {
-        const inner: string | null = firstIn(rest.slice(link.index + link[0].length));
-        if (inner && inner !== "evidence") return inner;
-      }
-    }
-    return best.cls;
-  };
-  const fwd = firstIn(scope);
-  if (fwd) return fwd;
-  // "no amount is verified" — the governed noun precedes the claim.
-  const before = from < 0 ? "" : text.slice(Math.max(0, text.lastIndexOf(": ", from) + 2), from);
-  const lastB = lastMatchEnd(NEG_BOUNDARY, before);
-  return firstIn(lastB < 0 ? before : before.slice(lastB));
-}
-
-/** r7(V): does the object belong to the governed noun's class? */
-function objectInClass(o: EvidenceCorpus["objects"][number], cls: string): boolean {
-  const entityHas = (prefix: string) => [...o.entities].some((e) => e.startsWith(prefix));
-  switch (cls) {
-    case "gap": return o.values.has("gap_open") || [...o.values].some((v) => /gap/.test(v));
-    case "discrepancy": return o.values.has("discrepancy_pending") || [...o.values].some((v) => /discrepanc/.test(v));
-    case "obligation": return entityHas("obligation:");
-    case "contract": return entityHas("contract:");
-    case "clause": return entityHas("clause:");
-    case "member": return entityHas("member:") || entityHas("obligation:");
-    // monetary needs money-semantics — a bare 4-digit leaf is a year/timestamp
-    case "monetary": return [...o.values].some((v) => /amount|price|deduction|liquidated|exposure|monetary|currency|ريال|ر\.س|\bsar\b|\busd\b|[$€£]/.test(v));
-    case "acknowledgement": return [...o.values].some((v) => /acknowledg|countersign|اعتماد|إقرار/.test(v));
-    case "evidence": return entityHas("requirement:") || entityHas("evidence_item:") || entityHas("clause:");
-    default: return true;
-  }
-}
-
-/**
- * Contract-scoped value types: the value is a fact of the contract's family —
- * day counts, clause numbers, and dates (a due date recorded on the obligation
- * row describes its requirement's schedule). Amounts and percentages stay
- * entity-bound: a figure on a sibling obligation must not support the claim.
- */
-const FAMILY_VALUE_TYPES = new Set<ClaimType>(["day_count", "clause_number", "iso_date"]);
-/** State claims about an entity may be evidenced by its descendants' rows. */
-const KIN_SUPPORT_TYPES = new Set<ClaimType>([
-  "verification_state", "acknowledgement_state", "overdue_state",
-  "gap_state", "unassigned_state", "iso_date", "monetary_amount", "percentage",
-]);
-
 export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): ScoredClaim[] {
-  // r7(O): entities the answer already mentions, for "no other X" accounting.
-  const mentionedKeys = new Set<string>();
-  const mentionedFams = new Set<string>();
-  for (const c of claims) {
-    if (!c.entityKey) continue;
-    mentionedKeys.add(c.entityKey);
-    const f = familyOf(c.entityKey, corpus.entities);
-    if (f) mentionedFams.add(f);
-  }
-  const hasValue = (o: EvidenceCorpus["objects"][number], v: string) =>
-    o.values.has(v) || valueVariantHit(o.values, v);
   return claims.map((c) => {
     // A quoted user claim is supported only by what the user actually wrote;
     // attributing something the user never said is a misattribution.
@@ -1018,99 +632,29 @@ export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): Scored
       const said = tokenHit(corpus.question, c.value) || tokenHit(corpus.question, norm(c.raw));
       return { ...c, supported: said, supportKind: said ? "user_input" : "none" };
     }
-    // r7(R): an identifier the USER supplied, echoed inside a modal/refusal
-    // clause ("I first need to identify the relevant ZETA-600 report"), is
-    // quoted context — not a system-truth assertion. It needs neither payload
-    // support nor a citation; echoing it inside a refusal discloses nothing.
-    if ((c.type === "contract_number" || c.type === "clause_number") &&
-        markerBefore(c.clause ?? c.sentence, (c.clause ?? c.sentence).indexOf(c.raw), MODAL_G, NEG_BOUNDARY) &&
-        tokenHit(corpus.question, c.value)) {
-      return { ...c, polarity: "attributed", supported: true, supportKind: "user_input" };
-    }
-    // r7(M): conditional and modal claims are not assertions — "remains open
-    // until verified" does not claim verified; "I can retrieve the open gaps"
-    // is an unexecuted offer. Neither is held to evidence support.
-    if (c.polarity === "conditional" || c.polarity === "modal") {
-      return { ...c, supported: true, supportKind: "context" };
-    }
     if (c.polarity === "negated") {
       if (!PREDICATE_TYPES.has(c.type)) return { ...c, supported: true, supportKind: "global" };
-      const otherScoped = OTHER_SCOPE.test(c.clause ?? c.sentence);
-      const cls = governedNounClass(c);
-      const kin = c.entityKey ? descOf(c.entityKey, corpus.entities) : null;
-      const contradicted = corpus.objects.some((o) => {
-        if (o.root) return false; // r7(W): aggregate wrappers contradict nothing
-        // r7(W+): an object spanning several contract families aggregates
-        // leaves across rows — its values cannot be attributed to the claim's
-        // subject (constraint: explicit relationships, not corpus-wide value).
-        const fams = new Set([...o.entities].map((e) => familyOf(e, corpus.entities)).filter(Boolean));
-        if (fams.size > 1) return false;
-        // r7(W+): a bound claim reads single-subject rows only. A leaf row
-        // references its ancestors by id (a chain); an aggregate shell binds
-        // several branches of the subtree at once and its merged values
-        // describe no one subject.
-        if (kin && !rowScoped(o, kin, corpus.entities)) return false;
-        if (cls && !objectInClass(o, cls)) return false;
-        if (!hasValue(o, c.value)) return false;
-        // r7(O): "no other pending discrepancy" — an object is accounted for
-        // when it binds an entity (or its contract family) already mentioned.
-        if (otherScoped && [...o.entities].some((e) =>
-          mentionedKeys.has(e) || mentionedFams.has(familyOf(e, corpus.entities) ?? ""))) return false;
-        return true;
-      });
+      const contradicted = c.entityKey
+        ? corpus.objects.some((o) => o.entities.has(c.entityKey!) && (o.values.has(c.value) || valueVariantHit(o.values, c.value)))
+        : (corpus.values.has(c.value) || valueVariantHit(corpus.values, c.value));
       return { ...c, supported: !contradicted, supportKind: contradicted ? "none" : "global" };
     }
-    // Entity-bound claim: value and entity must co-occur in a row-level
-    // object. r7(K): state claims also read descendant/ancestor rows (a
-    // contract's "no gap" is contradicted by its obligation's gap row), and
-    // contract-scoped value types match same-family rows.
+    // Entity-bound claim: value and entity must co-occur in the SAME
+    // tool-result object. No global fallback — that is the whole point of
+    // binding (a "12 days" true of XRAY-900 cannot support BETA-200).
     if (c.entityKey) {
-      const kin = descOf(c.entityKey, corpus.entities);
-      const family = familyOf(c.entityKey, corpus.entities);
-      const familySet = family ? new Set(
-        [...(corpus.entities.families?.entries() ?? [])]
-          .filter(([, f]) => f === family).map(([e]) => e),
-      ) : null;
-      const scopeHit = (o: EvidenceCorpus["objects"][number]) => {
-        if (o.root) return false;
-        if (o.entities.has(c.entityKey!)) return true;
-        if (KIN_SUPPORT_TYPES.has(c.type) && rowScoped(o, kin, corpus.entities)) return true;
-        if (FAMILY_VALUE_TYPES.has(c.type) && familySet && rowScoped(o, familySet, corpus.entities)) return true;
-        return false;
-      };
       // r4: a contract-number claim is also supported when the object links
       // the claimed entity to that contract BY ID (a gap row carries
       // contract_id, not the literal "GAMMA-300").
       const contractKey = c.type === "contract_number" ? `contract:${c.value}` : null;
-      const co = corpus.objects.some((o) => scopeHit(o) &&
+      const co = corpus.objects.some((o) => o.entities.has(c.entityKey!) &&
         (o.values.has(c.value) || valueVariantHit(o.values, c.value) ||
           (!!contractKey && [...o.entities].some((k) => k.toLowerCase() === contractKey))));
       if (co) return { ...c, supported: true, supportKind: "object" };
-      // r7(K): a contract number bound to an entity whose recorded contract
-      // IS that number is an identifier relationship, not a payload literal.
-      if (contractKey && family && norm(family) === c.value) {
-        return { ...c, supported: true, supportKind: "context" };
-      }
-      // r7(K): a contract number bound to its own contract is a self-
-      // reference (a mention, not a relational claim) — global support.
-      if (contractKey && c.entityKey.toLowerCase() === contractKey) {
-        const known = corpus.values.has(c.value) || tokenHit(corpus.raw, c.value) ||
-          corpus.objects.some((o) => o.entities.has(c.entityKey!));
-        return { ...c, supported: known, supportKind: known ? "context" : "none" };
-      }
-      // r7(B): block-INHERITED bindings are contextual — when no row-level
-      // object supports the claim, global evidence still applies. Inheritance
-      // must not be stricter than the r6 unbound path it replaced.
-      if (c.weakEntity && (corpus.values.has(c.value) || valueVariantHit(corpus.values, c.value) || tokenHit(corpus.raw, c.value))) {
-        return { ...c, supported: true, supportKind: "global" };
-      }
       return { ...c, supported: false, supportKind: "none" };
     }
     if (corpus.values.has(c.value) || valueVariantHit(corpus.values, c.value))
       return { ...c, supported: true, supportKind: "global" };
-    // r7(V2): an unbound state word used as an adjective ("VAZORA's verified
-    // record") describes the data, not an entity's state — context, no check.
-    if (c.descriptor) return { ...c, supported: true, supportKind: "context" };
     // Raw fallback uses word boundaries — "6" inside "2026" or a uuid is not
     // evidence for a six-day claim.
     if (tokenHit(corpus.raw, c.value)) return { ...c, supported: true, supportKind: "context" };
@@ -1237,11 +781,8 @@ export function isChangeClaim(c: FactClaim): boolean {
 
 // ---------- r5: recorded history -------------------------------------------------
 
-/** "…was recorded as <state>" — the state is what an event RECORDED.
- *  r7(H2): compound forms — "was uploaded for **Monthly logistics report**
- *  and recorded as …" — carry the auxiliary to "recorded" through an
- *  intervening verb phrase (markdown emphasis, objects, "and" included). */
-const RECORDED_AS = /\b(?:was|were|had been|has been|have been)\s+(?:(?!recorded|logged|registered|marked|as\b)\S+\s+){0,10}(?:recorded|logged|registered|marked)\s+as\s+$|(?:\S+\s+){0,4}(?:سُ?جِّ?لَ?ت?|سُجل)\s+(?:على أنه|على أنها|بأنه|بأنها|بوصفه|كـ?)\s*$/i;
+/** "…was recorded as <state>" — the state is what an event RECORDED. */
+const RECORDED_AS = /\b(?:was|were|had been)\s+(?:recorded|logged|registered|marked)\s+as\s+$|(?:سُ?جِّ?لَ?ت?|سُجل)\s+(?:على أنه|على أنها|بأنه|بأنها|بوصفه|كـ?)\s*$/i;
 
 /** The event's action must be the historical context the answer describes. */
 const ACTION_FAMILIES: { clause: RegExp; event: RegExp }[] = [
@@ -1262,18 +803,12 @@ const ACTION_FAMILIES: { clause: RegExp; event: RegExp }[] = [
  */
 export function resolveHistoricalClaims(
   claims: ScoredClaim[], citations: { target: string; id: string }[], activity: ActivityIndex,
-  entities?: EntityMap,
 ): ScoredClaim[] {
   return claims.map((c) => {
     if (!c.historical || c.polarity !== "asserted") return c;
-    // r7(K): an event binding a descendant entity (the uploaded item when
-    // the claim names its requirement) still matches.
-    const kin = entities && c.entityKey ? descOf(c.entityKey, entities) : null;
     const hit = c.entityKey ? citations.find((x) => {
       const e = activity.get(x.id);
-      const entityHit = !!e && (e.entities.has(c.entityKey!) ||
-        (!!kin && [...e.entities].some((k) => kin.has(k))));
-      return entityHit && !!e.recordedStates?.has(c.value) &&
+      return !!e && e.entities.has(c.entityKey!) && !!e.recordedStates?.has(c.value) &&
         ACTION_FAMILIES.some((f) => f.clause.test(c.sentence) && f.event.test(e.eventType ?? ""));
     }) : undefined;
     return hit

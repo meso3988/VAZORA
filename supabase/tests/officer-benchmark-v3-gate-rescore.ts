@@ -4,8 +4,8 @@
 // Extends officer-benchmark-v3-rescore.ts to every run in the report: each of
 // the 3 runs persisted its own tenant identity (fixtureIdentity), so gap rows,
 // entity citations and reference dates are reconstructed PER RUN. Every saved
-// answer is scored twice: frozen r5 modules (PARITY — must reproduce the live
-// verdicts) then frozen r6 modules (the current, unchanged revision).
+// answer is scored under frozen r5 modules (PARITY — must reproduce the live
+// verdicts), frozen r6 modules, and the live r7 modules.
 //
 // Live-only facts (DB invariants, citation re-validation, blocked citations,
 // action deltas) are carried from the saved report exactly as recorded.
@@ -24,9 +24,13 @@ import * as r5ledger from "../benchmarks/contract-officer-benchmark-v3/revisions
 import * as r5scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/scoring";
 import * as r5gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/ground-truth";
 import { scoreAnswer as scoreAnswerR5 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r5/evaluate";
-import * as r6ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
-import * as r6scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import * as r6gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
+import * as r6ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/fact-ledger";
+import * as r6scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/scoring";
+import * as r6gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/ground-truth";
+import { scoreAnswer as scoreAnswerR6 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/evaluate";
+import * as r7ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as r7scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
+import * as r7gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
 import { scoreAnswer } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
 import { buildCitationFamilies, buildEntityCitations } from "./officer-benchmark-v3-env";
 import { localDate } from "../../src/lib/officer/time";
@@ -35,13 +39,6 @@ const here = dirname(fileURLToPath(import.meta.url));
 const reportPath = process.argv[2] ?? join(here, "..", "benchmarks", "contract-officer-benchmark-v3", "reports", "2026-09-26T01-04-33-893Z-r5-gate.json");
 const outPath = process.argv[3];
 const report = JSON.parse(readFileSync(reportPath, "utf8"));
-
-function parsePayload(payload: string): any {
-  try {
-    const p = JSON.parse(payload);
-    return p?.truncated === true && typeof p.data === "string" ? { data: r5ledger.completeObjects(p.data) } : p;
-  } catch { return null; }
-}
 
 /** gap rows exactly as the model saw them in THIS run (same source the harness uses). */
 function gapRowsFor(results: any[]): any[] {
@@ -91,11 +88,12 @@ function carriedLive(s: any, orgId: string | null, refDate: string | null) {
 
 const REVS = {
   r5: { mods: { ledger: r5ledger, scoring: r5scoring, gt: r5gt }, score: scoreAnswerR5 as typeof scoreAnswer },
-  r6: { mods: { ledger: r6ledger, scoring: r6scoring, gt: r6gt }, score: scoreAnswer },
+  r6: { mods: { ledger: r6ledger, scoring: r6scoring, gt: r6gt }, score: scoreAnswerR6 as typeof scoreAnswer },
+  r7: { mods: { ledger: r7ledger, scoring: r7scoring, gt: r7gt }, score: scoreAnswer },
 };
 const expsBy = (gt: any) => new Map<string, any>(gt.EXPECTATIONS.map((e: any) => [e.id, e]));
 
-console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · r5 parity → r6`);
+console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · r5 parity → r6 frozen → r7`);
 
 const rows: any[] = [];
 let parityOk = true;
@@ -120,7 +118,7 @@ for (const run of report.runs) {
     }
     const turns = s.turns.map((t: any) => ({ ...t, citations: (t.citations ?? []).map((c: any) => ({ target: c.target, id: c.id })) }));
     const out: any = {};
-    for (const key of ["r5", "r6"] as const) {
+    for (const key of ["r5", "r6", "r7"] as const) {
       const rev = REVS[key];
       const notAssessed: string[] = [];
       const exp = restrict(expsBy(rev.mods.gt).get(s.id), fx, notAssessed);
@@ -140,16 +138,19 @@ for (const run of report.runs) {
       parityDiffs.push({ run: s.run, id: s.id, liveOnly: live.filter((f) => !off.includes(f)), offlineOnly: off.filter((f) => !live.includes(f)) });
     }
     const r6f = [...out.r6.productFailures, ...out.r6.securityFailures];
+    const r7f = [...out.r7.productFailures, ...out.r7.securityFailures];
     rows.push({
       run: s.run, id: s.id, status: "answered",
       liveR5: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
       r6: out.r6.correctnessPass ? "PASS" : `FAIL(${r6f.length})`,
-      removed: live.filter((f: string) => !r6f.includes(f)),
-      added: r6f.filter((f) => !live.includes(f)),
-      r6Failures: r6f, r6Security: out.r6.securityFailures, notAssessed: out.r6.notAssessed,
-      metrics: out.r6.metrics, referenceDate: ref.date,
+      r7: out.r7.correctnessPass ? "PASS" : `FAIL(${r7f.length})`,
+      removed: live.filter((f: string) => !r7f.includes(f)),
+      added: r7f.filter((f) => !live.includes(f)),
+      r6Failures: r6f, r7Failures: r7f, r7Security: out.r7.securityFailures,
+      notAssessed: out.r7.notAssessed,
+      metrics: out.r7.metrics, referenceDate: ref.date,
     });
-    console.log(`${tag.padEnd(8)} live r5 ${rows[rows.length - 1].liveR5.padEnd(8)} · parity ${parity ? "✓" : "✗"} · r6 ${rows[rows.length - 1].r6}`);
+    console.log(`${tag.padEnd(8)} live r5 ${rows[rows.length - 1].liveR5.padEnd(8)} · parity ${parity ? "✓" : "✗"} · r6 ${rows[rows.length - 1].r6.padEnd(8)} · r7 ${rows[rows.length - 1].r7}`);
     for (const f of rows[rows.length - 1].removed) console.log(`         − ${f}`);
     for (const f of rows[rows.length - 1].added) console.log(`         + ${f}`);
     for (const n of rows[rows.length - 1].notAssessed) console.log(`         NOT ASSESSED ${n}`);
@@ -161,18 +162,20 @@ const sum = (k: string) => answered.reduce((n, r) => n + (Number(r.metrics?.[k])
 console.log(`\nscenario-runs: ${rows.length} · answered: ${answered.length} · not answered: ${rows.length - answered.length}`);
 console.log(`parity with live r5: ${parityOk ? "ALL MATCH" : `MISMATCHES (${parityDiffs.length})`}`);
 console.log(`r5 (live)      correct ${answered.filter((r) => r.liveR5 === "PASS").length}/${answered.length}`);
-console.log(`r6 (re-scored) correct ${answered.filter((r) => r.r6 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + r.r6Security.length, 0)}`);
+console.log(`r6 (re-scored) correct ${answered.filter((r) => r.r6 === "PASS").length}/${answered.length}`);
+console.log(`r7 (re-scored) correct ${answered.filter((r) => r.r7 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + (r.r7Security?.length ?? 0), 0)}`);
 
 if (outPath) {
   writeFileSync(outPath, JSON.stringify({
     source: reportPath.split("/").pop(),
     sourceRevision: report.provenance?.manifest?.revision,
-    rescoreRevision: 6, frozenEvaluatorUnchanged: true,
+    rescoreRevisions: [5, 6, 7], frozenEvaluatorsUnchanged: true,
     sourceRanAt: report.ranAt,
     scenarioRuns: rows.length, answered: answered.length,
     parityWithLiveR5: parityOk, parityDiffs,
     r5LiveCorrect: answered.filter((r) => r.liveR5 === "PASS").length,
     r6Correct: answered.filter((r) => r.r6 === "PASS").length,
+    r7Correct: answered.filter((r) => r.r7 === "PASS").length,
     rows,
   }, null, 1));
   console.log(`\nwrote ${outPath}`);
