@@ -155,7 +155,7 @@
       "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
     },
     {
-      "file": "../../tests/officer-benchmark-v3.ts",
+      "file": "../../../tests/officer-benchmark-v3.ts",
       "bytes": 39628,
       "sha256": "27d9bc889349a32c9f661767e6ff9f96a8aca4d5cb94d5b8497c97582f16695c"
     }
