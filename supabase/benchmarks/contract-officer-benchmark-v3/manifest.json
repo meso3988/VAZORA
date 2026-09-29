@@ -16,8 +16,8 @@
     },
     {
       "file": "fact-ledger.ts",
-      "bytes": 81856,
-      "sha256": "f3ea6ca16077acf958f5493ff1c8b9f1e632906269c83b4cc60c56cc73c46c79"
+      "bytes": 81890,
+      "sha256": "3db9dddabc435aeee6e359df02b8fef64a51eb069e5e626a18cf8d60f5cdf783"
     },
     {
       "file": "scoring.ts",
