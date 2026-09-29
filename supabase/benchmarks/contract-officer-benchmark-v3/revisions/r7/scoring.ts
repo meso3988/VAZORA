@@ -124,23 +124,12 @@ const FINANCIAL_TARGET =
   /exposure|exposed|at risk|at-risk|\brisk\b|\bloss\b|\blose\b|losing|penalt|liquidated|damages|deduction|\bowed?\b|تعرض|التعرض|معرّض|معرض|خسارة|خسائر|غرامة|غرامات|تعويض|خصم|مخاطر/i;
 const FINANCIAL_TYPES = new Set<ClaimType>(["monetary_amount", "percentage"]);
 
-/**
- * r8 — an explicit non-equivalence disclaimer in the claim's own sentence:
- * "the recorded contract value is SAR X — it is NOT the exposure / no
- * specified amount exists". Quoting a real recorded figure while refusing
- * to equate it with the asked quantity is honest citation, not an invention
- * and not an exposure claim. Invented figures still fail on (a) support.
- */
-const NON_EQUIV =
-  /(?:is|are|was|were|cannot be|can't be|could not be|should not be|must not be|isn't|aren't|wasn't|does not|doesn't|do not|don't)\s+[^.،,؛]{0,60}?\b(?:counted|treated|read|considered|equated|equivalent|the same|the exposure|an exposure|financial exposure|monetary exposure)\b|\bnot\b[^.،,؛]{0,30}\b(?:financial\s+|monetary\s+)?exposure\b|does not (?:equal|represent|constitute|measure)|دون تحديد مبلغ|دون مبلغ محدد|دون تحديد قيمة|لا يصح احتساب|لا تُعّ?د|لا يُعّ?د|ليس تعرً?ض|ليست تعرً?ض|لا يمكن اعتبار|لا يمكن احتساب|ليست هي التعرض|لا تعني التعرض/i;
-
 export function unknownViolations(claims: ScoredClaim[], expectUnknown: ClaimType[]): ScoredClaim[] {
   return claims.filter((c) => {
     if (c.polarity !== "asserted" || !expectUnknown.includes(c.type)) return false;
     if (!FINANCIAL_TYPES.has(c.type)) return true;
     if (!c.supported) return true;
-    return clauseOf(c).some((cl) => FINANCIAL_TARGET.test(cl) && cl.includes(norm(c.raw))) &&
-      !NON_EQUIV.test(c.sentence);
+    return clauseOf(c).some((cl) => FINANCIAL_TARGET.test(cl) && cl.includes(norm(c.raw)));
   });
 }
 

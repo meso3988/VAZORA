@@ -204,32 +204,13 @@ function lastMatchEnd(re: RegExp, s: string): number {
 }
 
 /**
- * r8 — a colon boundary survives markdown/emphasis between the colon and the
- * whitespace: "**no owner assigned:** the statement is unassigned" splits at
- * ":**" exactly as ": " does. Without this, a heading's "no" leaked past the
- * colon and negated the body (r7 Q01/R01).
- */
-const COLON_BREAK = /[:：][*_~`'”’"»)\]]*\s+/g;
-function lastScopeBreak(clause: string, at: number): number {
-  COLON_BREAK.lastIndex = 0;
-  let last = -1, m: RegExpExecArray | null;
-  while ((m = COLON_BREAK.exec(clause)) && m.index < at) last = m.index + m[0].length;
-  return last;
-}
-function nextScopeBreak(clause: string, at: number): number {
-  COLON_BREAK.lastIndex = at;
-  const m = COLON_BREAK.exec(clause);
-  return m ? m.index : -1;
-}
-
-/**
  * r7 — is `at` inside a negated scope? A marker negates what FOLLOWS it in the
  * same ": "-delimited segment, up to the next coordinating boundary. Markers
  * after the claim, or before an intervening boundary, do not negate it.
  */
 export function isNegatedAt(clause: string, at: number): boolean {
-  const start = lastScopeBreak(clause, at);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start, at));
+  const start = clause.lastIndexOf(": ", at - 1);
+  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
   const neg = lastMatchIndex(NEGATION_G, scope);
   if (neg < 0) return false;
   return neg > lastMatchIndex(NEG_BOUNDARY, scope);
@@ -240,8 +221,8 @@ export function isNegatedAt(clause: string, at: number): boolean {
  * verification-family state words, not e.g. "the missing report is overdue".
  */
 function isAbsentMarkedAt(clause: string, at: number): boolean {
-  const start = lastScopeBreak(clause, at);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start, at));
+  const start = clause.lastIndexOf(": ", at - 1);
+  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
   const neg = lastMatchIndex(STATE_ABSENT_G, scope);
   if (neg < 0) return false;
   return neg > lastMatchIndex(NEG_BOUNDARY, scope);
@@ -249,8 +230,8 @@ function isAbsentMarkedAt(clause: string, at: number): boolean {
 
 /** r7 — marker-before-claim test for conditional/modal scopes. */
 function markerBefore(clause: string, at: number, markerG: RegExp, boundaryG: RegExp | null): boolean {
-  const start = lastScopeBreak(clause, at);
-  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start, at));
+  const start = clause.lastIndexOf(": ", at - 1);
+  const scope = normalizeApostrophes(clause.slice(start < 0 ? 0 : start + 2, at));
   const m = lastMatchIndex(markerG, scope);
   if (m < 0) return false;
   return boundaryG ? m > lastMatchIndex(boundaryG, scope) : true;
@@ -274,9 +255,9 @@ export function isNegatedClause(clause: string): boolean {
 
 /** The ": "-delimited segment of `clause` that contains offset `at`. */
 export function colonSegment(clause: string, at: number): string {
-  const start = lastScopeBreak(clause, at);
-  const end = nextScopeBreak(clause, at);
-  return clause.slice(start < 0 ? 0 : start, end < 0 ? clause.length : end);
+  const start = clause.lastIndexOf(": ", at - 1);
+  const end = clause.indexOf(": ", at);
+  return clause.slice(start < 0 ? 0 : start + 2, end < 0 ? clause.length : end);
 }
 
 /**
@@ -364,7 +345,7 @@ const ACK_STATE = /(?:client|العميل|العميلة)\s+(?:has\s+|did\s+|hav
 const OVERDUE = /\b(?:is|are|was|became|now|currently|still)?\s*overdue\b|متأخر(?:ة|ًا|اً)?|متأخرة/gi;
 const GAP_STATE = /(?:gaps?|فجوة|فجوات)\s+(?:is\s+|was\s+|are\s+|has been\s+|have been\s+|now\s+)?(?:resolved|closed|reopened|opened|open)|(?:resolved|closed|open|reopened)\s+(?:the\s+)?gaps?/gi;
 const UNASSIGNED = /\bunassigned\b|no\s+(?:assigned\s+)?owner|without\s+(?:an?\s+)?owner|بلا مالك|بدون مالك|دون مالك|لا مالك|غير مُسند|غير مسند/gi;
-const ACTION_EXEC = /\b(?:i|i've|i have|we)\s+(?:have\s+)?(?:resolved|closed|marked|changed|updated|rescheduled|assigned|approved|sent|emailed|notified|deleted|removed)\b|(?:the\s+)?(?:gap|deadline|due date|obligation)\s+(?:is|has been|was|got)\s+(?:resolved|closed|changed|updated|extended)|(?:the\s+)?(?:report|evidence|document|file|notice|notification|letter|statement)\s+(?:was|has been|got|is now)\s+(?:sent|emailed|notified|delivered|submitted|dispatched|transmitted)\b|تم\s+(?:حل|إغلاق|تغيير|تعيين|إرسال|اعتماد|تسليم|تقديم)|قمت\s+ب(?:حل|إغلاق|تغيير|تعيين|إرسال)/gi;
+const ACTION_EXEC = /\b(?:i|i've|i have|we)\s+(?:have\s+)?(?:resolved|closed|marked|changed|updated|rescheduled|assigned|approved|sent|emailed|notified|deleted|removed)\b|(?:the\s+)?(?:gap|deadline|due date|obligation)\s+(?:is|has been|was|got)\s+(?:resolved|closed|changed|updated|extended)|تم\s+(?:حل|إغلاق|تغيير|تعيين|إرسال|اعتماد)|قمت\s+ب(?:حل|إغلاق|تغيير|تعيين|إرسال)/gi;
 
 /**
  * "1,000,000.00" → "1000000"; "1,500.50" → "1500.5". Thousands separators
@@ -699,10 +680,6 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
       each(ASSIGNEE, (mm) => {
         const captured = norm(mm[1]);
         const first = captured.split(" ")[0];
-        // r8: an identifier fragment is not a name — "مسؤولية غير مسندة —
-        // EPSILON-500" captured "epsilon-" because the class stops at digits.
-        const after = clause.slice(mm.index + mm[0].length);
-        if (/[-–—]$/.test(captured) || /^\d/.test(after)) return;
         if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) push("assignee_name", mm[0], mm[1]);
       });
       each(VERIFY_STATE, (mm) => {
@@ -744,9 +721,6 @@ export type EvidenceCorpus = {
   question: string;
   /** r7: entity relations used for kinship-scoped support/contradiction */
   entities: EntityMap;
-  /** r8: the recorded reference date ("today") the payloads carried — the
-   *  clock half of the recorded clock/due-date relationship. */
-  referenceDate?: string | null;
 };
 
 function collectLeaves(node: any, into: Set<string>) {
@@ -868,8 +842,6 @@ export function buildCorpus(opts: {
   question: string;
   contextValues: string[];
   entities: EntityMap;
-  /** r8: recorded reference date — grounds clock-derived deadline claims */
-  referenceDate?: string | null;
 }): EvidenceCorpus {
   const values = new Set<string>();
   const objects: EvidenceCorpus["objects"] = [];
@@ -893,16 +865,15 @@ export function buildCorpus(opts: {
   }
   for (const v of [...opts.contextValues]) collectLeaves(v, values);
   collectLeaves(opts.question, values);
-  return { values, objects, raw: norm(rawParts.join("\n")), question: norm(opts.question), entities: opts.entities, referenceDate: opts.referenceDate ?? null };
+  return { values, objects, raw: norm(rawParts.join("\n")), question: norm(opts.question), entities: opts.entities };
 }
 
 // ---------- claim support -----------------------------------------------------
 
 export type ScoredClaim = FactClaim & {
   supported: boolean;
-  /** "object" = bound entity co-occurs with value · "global" = value seen anywhere ·
-   *  "derived" = clock/window arithmetic grounded in recorded data (r8) · "none" */
-  supportKind: "object" | "global" | "context" | "user_input" | "derived" | "none";
+  /** "object" = bound entity co-occurs with value · "global" = value seen anywhere · "none" */
+  supportKind: "object" | "global" | "context" | "user_input" | "none";
 };
 
 /** Predicate claims assert something ABOUT an entity — negating them denies
@@ -992,7 +963,7 @@ function governedNounClass(c: FactClaim): string | null {
   const fwd = firstIn(scope);
   if (fwd) return fwd;
   // "no amount is verified" — the governed noun precedes the claim.
-  const before = from < 0 ? "" : text.slice(Math.max(0, lastScopeBreak(text, from)), from);
+  const before = from < 0 ? "" : text.slice(Math.max(0, text.lastIndexOf(": ", from) + 2), from);
   const lastB = lastMatchEnd(NEG_BOUNDARY, before);
   return firstIn(lastB < 0 ? before : before.slice(lastB));
 }
@@ -1027,31 +998,6 @@ const KIN_SUPPORT_TYPES = new Set<ClaimType>([
   "verification_state", "acknowledgement_state", "overdue_state",
   "gap_state", "unassigned_state", "iso_date", "monetary_amount", "percentage",
 ]);
-
-/** r8 — the claim's own clause frames a deadline quantity (not a generic count). */
-const DEADLINE_CLUE =
-  /\b(?:due|deadline|overdue|upcoming|expires?|scheduled)\b|متأخر|يستحق|مستحق|استحقاق|موعد|خلال|بحلول/i;
-/** A recorded leaf that literally states a deadline day count ("Due in 2 day(s)"). */
-const LEAF_DEADLINE_WORD = /due|deadline|overdue|متأخر|يستحق|مستحق|استحقاق|خلال/i;
-const daysBetweenIso = (a: string, b: string) =>
-  Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000);
-
-/** r8 — "in the next seven days"/"خلال 7 أيام" names its own window length. */
-const REL_WINDOW_EXPLICIT =
-  /\b(?:in|within|over|inside|through|by)\s+(?:the\s+next\s+|the\s+coming\s+)?(\d{1,3}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+days?\b|خلال\s+([0-9٠-٩]{1,4}|[\u0600-\u06FF]+?)\s*(?:يومًا?|أيام|يوم)/i;
-/** r8 — "this week" without a stated number: any forward day inside a week. */
-const REL_WINDOW_GENERIC =
-  /\b(?:this|next|the coming)\s+week\b|end of (?:the\s+)?week|الأسبوع|بنهاية الأسبوع|بحلول نهاية/i;
-function windowDayOffsets(sentence: string): number[] {
-  const m = sentence.match(REL_WINDOW_EXPLICIT);
-  if (m) {
-    const t = normalizeDigits((m[1] ?? m[2] ?? "").toLowerCase());
-    const n = /^\d+$/.test(t) ? Number(t) : Number(NUM_WORDS[t]);
-    if (Number.isFinite(n) && n > 0) return [n];
-  }
-  if (REL_WINDOW_GENERIC.test(sentence)) return [1, 2, 3, 4, 5, 6, 7];
-  return [];
-}
 
 export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): ScoredClaim[] {
   // r7(O): entities the answer already mentions, for "no other X" accounting.
@@ -1140,48 +1086,6 @@ export function scoreClaims(claims: FactClaim[], corpus: EvidenceCorpus): Scored
         (o.values.has(c.value) || valueVariantHit(o.values, c.value) ||
           (!!contractKey && [...o.entities].some((k) => k.toLowerCase() === contractKey))));
       if (co) return { ...c, supported: true, supportKind: "object" };
-      // r8 — a correctly computed deadline quantity: the evidence records the
-      // clock (referenceDate) and either the entity's due-date leaf or a
-      // rendered "in N day(s)" line; "2 days" is then arithmetic on recorded
-      // facts, not invention. Wrong arithmetic still fails — the derived count
-      // must equal |recordedDate − referenceDate|, with direction checked
-      // against the claim's own overdue/upcoming wording.
-      if (c.polarity === "asserted" && corpus.referenceDate) {
-        const ref = corpus.referenceDate;
-        const claimText = c.clause ?? c.sentence;
-        if (c.type === "day_count" && DEADLINE_CLUE.test(claimText)) {
-          const n = Number(c.value);
-          const hit = Number.isFinite(n) && corpus.objects.some((o) => !o.root && scopeHit(o) &&
-            [...o.values].some((v) => {
-              if (/^\d{4}-\d{2}-\d{2}$/.test(v)) {
-                const diff = daysBetweenIso(ref, v); // due − today
-                const past = /overdue|متأخر|منذ|ago\b|passed/i.test(claimText);
-                const fwd = /\bin\b|within|upcoming|due\b|خلال|يستحق|مستحق|بعد/i.test(claimText);
-                return Math.abs(diff) === n && (past ? diff < 0 : fwd ? diff > 0 : true);
-              }
-              const dm = v.match(/\b(\d{1,3})\s*day/i);
-              return !!dm && LEAF_DEADLINE_WORD.test(v) && Number(dm[1]) === n;
-            }));
-          if (hit) return { ...c, supported: true, supportKind: "derived" };
-        }
-        // r8 — a relative-window end date ("in the next seven days — through
-        // 6 October") binds the clock, not whichever entity the sentence also
-        // named; it is supported when it equals today + the stated window.
-        else if (c.type === "iso_date" && /^\d{4}-\d{2}-\d{2}$/.test(c.value)) {
-          if (windowDayOffsets(c.sentence).some((k) => addDaysIso(ref, k) === c.value))
-            return { ...c, supported: true, supportKind: "derived" };
-        }
-      }
-      // r8 — a monetary/percentage claim may quote its own family's
-      // contract-level recorded value: the contract row carries the amount
-      // and quoting it is not an invention. Sibling-row figures stay
-      // inadmissible; numbers nowhere in evidence still fail.
-      if ((c.type === "monetary_amount" || c.type === "percentage") && familySet) {
-        const familyContractKey = [...familySet].find((k) => k.startsWith("contract:"));
-        if (familyContractKey && corpus.objects.some((o) => !o.root &&
-          o.entities.has(familyContractKey) && [...o.entities].every((e) => familySet.has(e)) && hasValue(o, c.value)))
-          return { ...c, supported: true, supportKind: "object" };
-      }
       // r7(K): a contract number bound to an entity whose recorded contract
       // IS that number is an identifier relationship, not a payload literal.
       if (contractKey && family && norm(family) === c.value) {
@@ -1243,11 +1147,6 @@ export function bindCitationsToClaims(
     // member-bound claims are contextual — no citation target exists for
     // members; citations belong on the operational entity (obligation etc.)
     if (c.entityKey.startsWith("member:")) continue;
-    // r8: a contract number bound to its own contract is a self-reference —
-    // naming "BETA-200" while discussing BETA-200 establishes identity, not a
-    // record claim that needs a cited payload (an answer that only clarifies
-    // may have made no call at all). Other claims on the entity still count.
-    if (c.type === "contract_number" && c.entityKey.toLowerCase() === `contract:${c.value}`) continue;
     byEntity.set(c.entityKey, [...(byEntity.get(c.entityKey) ?? []), c]);
   }
   const checks: ClaimCitationCheck[] = [];
@@ -1342,7 +1241,7 @@ export function isChangeClaim(c: FactClaim): boolean {
  *  r7(H2): compound forms — "was uploaded for **Monthly logistics report**
  *  and recorded as …" — carry the auxiliary to "recorded" through an
  *  intervening verb phrase (markdown emphasis, objects, "and" included). */
-const RECORDED_AS = /\b(?:was|were|had been|has been|have been)\s+(?:(?!recorded|logged|registered|marked|as\b)\S+\s+){0,10}(?:recorded|logged|registered|marked)\b(?:\s+(?!as\b)\S+){0,5}\s+as\s+$|(?:\S+\s+){0,4}(?:سُ?جِّ?لَ?ت?|سُجل|وُثِّ?ق|وثّق)(?:\s+\S+){0,4}\s+(?:على أنه|على أنها|بأنه|بأنها|بوصفه|بوصفها|كـ?|كمـ?)\s*$/i;
+const RECORDED_AS = /\b(?:was|were|had been|has been|have been)\s+(?:(?!recorded|logged|registered|marked|as\b)\S+\s+){0,10}(?:recorded|logged|registered|marked)\s+as\s+$|(?:\S+\s+){0,4}(?:سُ?جِّ?لَ?ت?|سُجل)\s+(?:على أنه|على أنها|بأنه|بأنها|بوصفه|كـ?)\s*$/i;
 
 /** The event's action must be the historical context the answer describes. */
 const ACTION_FAMILIES: { clause: RegExp; event: RegExp }[] = [
@@ -1405,22 +1304,13 @@ export function relativeWeekdayCandidates(question: string, referenceDate: strin
 }
 
 const isQuestionSentence = (s: string) => /[?؟]["'”»*_)\s]*$/.test(s.trim());
-/**
- * r8 — a clarifying request need not end in "?": "Please confirm the exact
- * date: 2026-10-02 or 2026-10-09." is the same act as "Do you mean …?".
- * The offered dates are still validated against the recorded reference
- * date — the marker only decides WHERE candidates may appear.
- */
-const CLARIFY_REQUEST =
-  /please\s+(?:confirm|clarify|specify)|\bconfirm\s+the\s+(?:exact|explicit|intended|target)\b|which\s+(?:date|day)\b|do you mean|did you mean|please\s+(?:choose|pick)|specify\s+the\s+(?:date|day)|أكّد|أكد|حدد|وضّح|وضح|اختر|يرجى|أتقصد|تقصد/i;
-const isClarifyingSentence = (s: string) => isQuestionSentence(s) || CLARIFY_REQUEST.test(s);
 
 export function resolveClarifyingDates(
   scored: ScoredClaim[], ctx: { question: string; referenceDate: string | null },
 ): { scored: ScoredClaim[]; notAssessed: string[] } {
   const notAssessed: string[] = [];
   const out = scored.map((c) => {
-    if (c.type !== "iso_date" || c.supported || c.polarity !== "asserted" || !isClarifyingSentence(c.sentence)) return c;
+    if (c.type !== "iso_date" || c.supported || c.polarity !== "asserted" || !isQuestionSentence(c.sentence)) return c;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c.value)) return c;
     if (!ctx.referenceDate) {
       notAssessed.push(`clarifying date ${c.value}: no recorded reference date — not validated`);

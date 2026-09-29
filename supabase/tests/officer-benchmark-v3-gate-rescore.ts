@@ -28,9 +28,14 @@ import * as r6ledger from "../benchmarks/contract-officer-benchmark-v3/revisions
 import * as r6scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/scoring";
 import * as r6gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/ground-truth";
 import { scoreAnswer as scoreAnswerR6 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/evaluate";
-import * as r7ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
-import * as r7scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import * as r7gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
+// r8: r7 modules are the frozen copies — the live tree is the r8 evaluator.
+import * as r7ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/fact-ledger";
+import * as r7scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/scoring";
+import * as r7gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/ground-truth";
+import { scoreAnswer as scoreAnswerR7 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/evaluate";
+import * as r8ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as r8scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
+import * as r8gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
 import { scoreAnswer } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
 import { buildCitationFamilies, buildEntityCitations } from "./officer-benchmark-v3-env";
 import { localDate } from "../../src/lib/officer/time";
@@ -89,11 +94,15 @@ function carriedLive(s: any, orgId: string | null, refDate: string | null) {
 const REVS = {
   r5: { mods: { ledger: r5ledger, scoring: r5scoring, gt: r5gt }, score: scoreAnswerR5 as typeof scoreAnswer },
   r6: { mods: { ledger: r6ledger, scoring: r6scoring, gt: r6gt }, score: scoreAnswerR6 as typeof scoreAnswer },
-  r7: { mods: { ledger: r7ledger, scoring: r7scoring, gt: r7gt }, score: scoreAnswer },
+  r7: { mods: { ledger: r7ledger, scoring: r7scoring, gt: r7gt }, score: scoreAnswerR7 as typeof scoreAnswer },
+  r8: { mods: { ledger: r8ledger, scoring: r8scoring, gt: r8gt }, score: scoreAnswer },
 };
 const expsBy = (gt: any) => new Map<string, any>(gt.EXPECTATIONS.map((e: any) => [e.id, e]));
+// Parity is checked against the revision the report was RECORDED under —
+// r5 reports parity against frozen r5, r7 reports against frozen r7.
+const sourceRev = `r${report.provenance?.manifest?.revision}` as keyof typeof REVS;
 
-console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · r5 parity → r6 frozen → r7`);
+console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · parity → ${sourceRev} frozen · latest = r8`);
 
 const rows: any[] = [];
 let parityOk = true;
@@ -118,7 +127,7 @@ for (const run of report.runs) {
     }
     const turns = s.turns.map((t: any) => ({ ...t, citations: (t.citations ?? []).map((c: any) => ({ target: c.target, id: c.id })) }));
     const out: any = {};
-    for (const key of ["r5", "r6", "r7"] as const) {
+    for (const key of ["r5", "r6", "r7", "r8"] as const) {
       const rev = REVS[key];
       const notAssessed: string[] = [];
       const exp = restrict(expsBy(rev.mods.gt).get(s.id), fx, notAssessed);
@@ -131,7 +140,7 @@ for (const run of report.runs) {
       out[key] = r;
     }
     const live = [...s.productFailures, ...s.securityFailures].sort();
-    const off = [...out.r5.productFailures, ...out.r5.securityFailures].sort();
+    const off = [...out[sourceRev in out ? sourceRev : "r5"].productFailures, ...out[sourceRev in out ? sourceRev : "r5"].securityFailures].sort();
     const parity = JSON.stringify(live) === JSON.stringify(off);
     if (!parity) {
       parityOk = false;
@@ -139,18 +148,21 @@ for (const run of report.runs) {
     }
     const r6f = [...out.r6.productFailures, ...out.r6.securityFailures];
     const r7f = [...out.r7.productFailures, ...out.r7.securityFailures];
+    const r8f = [...out.r8.productFailures, ...out.r8.securityFailures];
     rows.push({
       run: s.run, id: s.id, status: "answered",
-      liveR5: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
+      live: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
+      parityRev: sourceRev,
       r6: out.r6.correctnessPass ? "PASS" : `FAIL(${r6f.length})`,
       r7: out.r7.correctnessPass ? "PASS" : `FAIL(${r7f.length})`,
-      removed: live.filter((f: string) => !r7f.includes(f)),
-      added: r7f.filter((f) => !live.includes(f)),
-      r6Failures: r6f, r7Failures: r7f, r7Security: out.r7.securityFailures,
-      notAssessed: out.r7.notAssessed,
-      metrics: out.r7.metrics, referenceDate: ref.date,
+      r8: out.r8.correctnessPass ? "PASS" : `FAIL(${r8f.length})`,
+      removed: live.filter((f: string) => !r8f.includes(f)),
+      added: r8f.filter((f) => !live.includes(f)),
+      r7Failures: r7f, r8Failures: r8f, r8Security: out.r8.securityFailures,
+      notAssessed: out.r8.notAssessed,
+      metrics: out.r8.metrics, referenceDate: ref.date,
     });
-    console.log(`${tag.padEnd(8)} live r5 ${rows[rows.length - 1].liveR5.padEnd(8)} · parity ${parity ? "✓" : "✗"} · r6 ${rows[rows.length - 1].r6.padEnd(8)} · r7 ${rows[rows.length - 1].r7}`);
+    console.log(`${tag.padEnd(8)} live ${rows[rows.length - 1].live.padEnd(8)} · parity(${sourceRev}) ${parity ? "✓" : "✗"} · r7 ${rows[rows.length - 1].r7.padEnd(8)} · r8 ${rows[rows.length - 1].r8}`);
     for (const f of rows[rows.length - 1].removed) console.log(`         − ${f}`);
     for (const f of rows[rows.length - 1].added) console.log(`         + ${f}`);
     for (const n of rows[rows.length - 1].notAssessed) console.log(`         NOT ASSESSED ${n}`);
@@ -160,22 +172,24 @@ for (const run of report.runs) {
 const answered = rows.filter((r) => r.status === "answered");
 const sum = (k: string) => answered.reduce((n, r) => n + (Number(r.metrics?.[k]) || 0), 0);
 console.log(`\nscenario-runs: ${rows.length} · answered: ${answered.length} · not answered: ${rows.length - answered.length}`);
-console.log(`parity with live r5: ${parityOk ? "ALL MATCH" : `MISMATCHES (${parityDiffs.length})`}`);
-console.log(`r5 (live)      correct ${answered.filter((r) => r.liveR5 === "PASS").length}/${answered.length}`);
-console.log(`r6 (re-scored) correct ${answered.filter((r) => r.r6 === "PASS").length}/${answered.length}`);
-console.log(`r7 (re-scored) correct ${answered.filter((r) => r.r7 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + (r.r7Security?.length ?? 0), 0)}`);
+console.log(`parity with live ${sourceRev}: ${parityOk ? "ALL MATCH" : `MISMATCHES (${parityDiffs.length})`}`);
+console.log(`live         correct ${answered.filter((r) => r.live === "PASS").length}/${answered.length}`);
+console.log(`r6 (frozen)  correct ${answered.filter((r) => r.r6 === "PASS").length}/${answered.length}`);
+console.log(`r7 (frozen)  correct ${answered.filter((r) => r.r7 === "PASS").length}/${answered.length}`);
+console.log(`r8 (live)    correct ${answered.filter((r) => r.r8 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + (r.r8Security?.length ?? 0), 0)}`);
 
 if (outPath) {
   writeFileSync(outPath, JSON.stringify({
     source: reportPath.split("/").pop(),
     sourceRevision: report.provenance?.manifest?.revision,
-    rescoreRevisions: [5, 6, 7], frozenEvaluatorsUnchanged: true,
+    rescoreRevisions: [5, 6, 7, 8], frozenEvaluatorsUnchanged: true,
     sourceRanAt: report.ranAt,
     scenarioRuns: rows.length, answered: answered.length,
-    parityWithLiveR5: parityOk, parityDiffs,
-    r5LiveCorrect: answered.filter((r) => r.liveR5 === "PASS").length,
+    parityWithLive: parityOk, parityRevision: sourceRev, parityDiffs,
+    liveCorrect: answered.filter((r) => r.live === "PASS").length,
     r6Correct: answered.filter((r) => r.r6 === "PASS").length,
     r7Correct: answered.filter((r) => r.r7 === "PASS").length,
+    r8Correct: answered.filter((r) => r.r8 === "PASS").length,
     rows,
   }, null, 1));
   console.log(`\nwrote ${outPath}`);

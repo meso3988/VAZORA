@@ -167,9 +167,6 @@ export function scoreAnswer(opts: {
     toolPayloads: payloads, question,
     contextValues: [fx.today, fx.email, ...(fx.memberEmails ?? []), ...Object.values<any>(fx.contracts).flatMap((k) => [k.number, k.title])].filter(Boolean),
     entities: env.entityMap,
-    // r8: the recorded reference date grounds clock-derived deadline claims
-    // (day counts, relative-window end dates) in the saved evidence.
-    referenceDate: live.referenceDate ?? null,
   });
   const displayed = a.citations.map((c) => ({ target: c.target, id: c.id }));
   const activity = r4 && ledger.buildActivityIndex ? ledger.buildActivityIndex(payloads, env.entityMap) : undefined;
