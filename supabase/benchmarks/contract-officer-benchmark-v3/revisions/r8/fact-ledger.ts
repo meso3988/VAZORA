@@ -384,17 +384,7 @@ export function moneyValue(raw: string): string {
 const ASSIGNEE_STOP = new Set([
   "unassigned", "none", "nobody", "no one", "vacant", "tbd", "unknown", "no owner", "not assigned",
   "role", "roles", "field", "status", "assignment", "suggested", "recorded", "required", "position",
-  // r9: role/process nouns and approval wording — "an approved owner
-  // assignment" describes the missing assignment, not a person.
-  "assignments", "assignee", "assignees", "ownership", "responsibility", "owner", "owners",
-  "approval", "approvals", "approved", "approver", "pending", "review", "reviewer", "reviewers",
-  "manager", "management", "team", "department", "party", "stakeholder", "stakeholders",
-  "contact", "contacts", "lead", "officer",
   "المؤكد", "والمؤكد", "عن", "هو", "هي", "غير", "الحالي", "المقترح", "المسند", "المسجل", "المطلوب", "دور",
-  // r9: Arabic descriptive/adjectival forms — "بلا مسؤول معيّن" says the role
-  // is undesignated; معيّن is an adjective, not a name.
-  "معين", "معيّن", "المعين", "المعيّن", "مُعيَّن", "معيَّن", "مكلف", "المكلف", "مسؤول", "المسؤول",
-  "مالك", "المالك", "طرف", "الطرف", "جهة", "الجهة", "فريق", "الفريق", "قسم", "القسم", "معني", "المعني",
 ]);
 
 function normalizeState(v: string): string {
@@ -707,19 +697,13 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
       each(CONTRACT_NO, (mm) => push("contract_number", mm[0], mm[0]));
       each(CLAUSE_NO, (mm) => push("clause_number", mm[0], mm[1]));
       each(ASSIGNEE, (mm) => {
-        // r9: clean the capture BEFORE judging it — trailing sentence
-        // punctuation and markdown artifacts are not part of a name
-        // ("owner assignment." → the role noun "assignment", not a person).
-        const captured = norm(mm[1])
-          .replace(/[.!?:;،؛؟*_~'"`()[\]{}<>«»]+$/u, "")
-          .replace(/^[*_~'"`#«»]+/u, "")
-          .trim();
+        const captured = norm(mm[1]);
         const first = captured.split(" ")[0];
         // r8: an identifier fragment is not a name — "مسؤولية غير مسندة —
         // EPSILON-500" captured "epsilon-" because the class stops at digits.
         const after = clause.slice(mm.index + mm[0].length);
-        if (!captured || /[-–—]$/.test(captured) || /^\d/.test(after)) return;
-        if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) push("assignee_name", mm[0], captured);
+        if (/[-–—]$/.test(captured) || /^\d/.test(after)) return;
+        if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) push("assignee_name", mm[0], mm[1]);
       });
       each(VERIFY_STATE, (mm) => {
         // "1 pending verification discrepancy" describes a PENDING DISCREPANCY,

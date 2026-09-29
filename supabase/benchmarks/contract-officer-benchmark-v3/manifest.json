@@ -1,7 +1,7 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 8,
-  "frozenAt": "2026-09-29T16:31:35.903Z",
+  "revision": 9,
+  "frozenAt": "2026-09-29T18:32:02.768Z",
   "scenarioCount": 37,
   "files": [
     {
@@ -16,8 +16,8 @@
     },
     {
       "file": "fact-ledger.ts",
-      "bytes": 81890,
-      "sha256": "3db9dddabc435aeee6e359df02b8fef64a51eb069e5e626a18cf8d60f5cdf783"
+      "bytes": 83179,
+      "sha256": "13552d5d7145581a087d2b6dcac995daee2a4c957c5bb37b97b89236195dc676"
     },
     {
       "file": "scoring.ts",
@@ -40,9 +40,9 @@
       "sha256": "c2cbbe847867de09b560913a5fd36628668db28a8475c4228e88647680b9aa82"
     },
     {
-      "file": "revisions/r3/gate.ts",
-      "bytes": 5753,
-      "sha256": "cc3c7c7e600c50db6ea134b23d66e408e2da811de5cbce0970f04e04193b13e7"
+      "file": "revisions/r3/scoring.ts",
+      "bytes": 8946,
+      "sha256": "5f6947980a1c3967034a34ea1fc5aae8ba189e687155effa9442fafa6f61331f"
     },
     {
       "file": "revisions/r3/ground-truth.ts",
@@ -50,14 +50,9 @@
       "sha256": "fe9205d6e07f072dc673c24c46ab265282b163d7963f9c625ee600331b1e08c4"
     },
     {
-      "file": "revisions/r3/scoring.ts",
-      "bytes": 8946,
-      "sha256": "5f6947980a1c3967034a34ea1fc5aae8ba189e687155effa9442fafa6f61331f"
-    },
-    {
-      "file": "revisions/r4/evaluate.ts",
-      "bytes": 15786,
-      "sha256": "7ba8baee2fadbb05ac2979aa167e8402514878270bcec20fcb4fdffdb800dd4c"
+      "file": "revisions/r3/gate.ts",
+      "bytes": 5753,
+      "sha256": "cc3c7c7e600c50db6ea134b23d66e408e2da811de5cbce0970f04e04193b13e7"
     },
     {
       "file": "revisions/r4/fact-ledger.ts",
@@ -65,9 +60,9 @@
       "sha256": "b62c86a778c828b76fc7145bdb1b1058f8cc90173942881faa18beff257c6e66"
     },
     {
-      "file": "revisions/r4/gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+      "file": "revisions/r4/scoring.ts",
+      "bytes": 9630,
+      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
     },
     {
       "file": "revisions/r4/ground-truth.ts",
@@ -75,14 +70,14 @@
       "sha256": "105ba00fbec18ac2c48ee7b56c7bed8db0d39bd9457e5394e89061f28d8ec85f"
     },
     {
-      "file": "revisions/r4/scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
+      "file": "revisions/r4/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
     },
     {
-      "file": "revisions/r5/evaluate.ts",
-      "bytes": 16007,
-      "sha256": "36e9bcbd8aaad4a8bc6b583bb395df2e64f445f87e820d822c5ae65bf13e30d8"
+      "file": "revisions/r4/evaluate.ts",
+      "bytes": 15786,
+      "sha256": "7ba8baee2fadbb05ac2979aa167e8402514878270bcec20fcb4fdffdb800dd4c"
     },
     {
       "file": "revisions/r5/fact-ledger.ts",
@@ -90,9 +85,9 @@
       "sha256": "b6aa29cd241fe22b2c6d1035ea0c65d5c4707d204eb96949a1953263b24e0508"
     },
     {
-      "file": "revisions/r5/gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+      "file": "revisions/r5/scoring.ts",
+      "bytes": 9630,
+      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
     },
     {
       "file": "revisions/r5/ground-truth.ts",
@@ -100,14 +95,14 @@
       "sha256": "105ba00fbec18ac2c48ee7b56c7bed8db0d39bd9457e5394e89061f28d8ec85f"
     },
     {
-      "file": "revisions/r5/scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
+      "file": "revisions/r5/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
     },
     {
-      "file": "revisions/r6/evaluate.ts",
-      "bytes": 17236,
-      "sha256": "8381480c2dcd20f03accfac158254404cac981ed4ade2c37c4bc687bd9f56b08"
+      "file": "revisions/r5/evaluate.ts",
+      "bytes": 16007,
+      "sha256": "36e9bcbd8aaad4a8bc6b583bb395df2e64f445f87e820d822c5ae65bf13e30d8"
     },
     {
       "file": "revisions/r6/fact-ledger.ts",
@@ -115,9 +110,9 @@
       "sha256": "b24e5559f2924aaaf5a06195fd80dab5243b5689f3458834eebd410c7fa87a61"
     },
     {
-      "file": "revisions/r6/gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+      "file": "revisions/r6/scoring.ts",
+      "bytes": 9630,
+      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
     },
     {
       "file": "revisions/r6/ground-truth.ts",
@@ -125,14 +120,14 @@
       "sha256": "5745c16ddfc0dcc5f4f7baf5b916065b0f4b5d65a48eb63535bd0306cc4bc103"
     },
     {
-      "file": "revisions/r6/scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
+      "file": "revisions/r6/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
     },
     {
-      "file": "revisions/r7/evaluate.ts",
-      "bytes": 18819,
-      "sha256": "5722f6e009b1a0348dc377c9e4889e340671fe3e5e25149eb35ac159e1a501c2"
+      "file": "revisions/r6/evaluate.ts",
+      "bytes": 17236,
+      "sha256": "8381480c2dcd20f03accfac158254404cac981ed4ade2c37c4bc687bd9f56b08"
     },
     {
       "file": "revisions/r7/fact-ledger.ts",
@@ -140,9 +135,9 @@
       "sha256": "92c5372acb828dc740b41227e0fd119be4d46d77196e105a83a875d3367a9f86"
     },
     {
-      "file": "revisions/r7/gate.ts",
-      "bytes": 7090,
-      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+      "file": "revisions/r7/scoring.ts",
+      "bytes": 9630,
+      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
     },
     {
       "file": "revisions/r7/ground-truth.ts",
@@ -150,14 +145,44 @@
       "sha256": "c9aa010944a8d24db7bf1cef0bb996b2305455372f5af397b2b5462caebd3d51"
     },
     {
-      "file": "revisions/r7/scoring.ts",
-      "bytes": 9630,
-      "sha256": "57f79ef49127d9903db00d8a072561bdabd2d3ec93fd14580e8e6f59ddbe0f23"
+      "file": "revisions/r7/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+    },
+    {
+      "file": "revisions/r7/evaluate.ts",
+      "bytes": 18819,
+      "sha256": "5722f6e009b1a0348dc377c9e4889e340671fe3e5e25149eb35ac159e1a501c2"
+    },
+    {
+      "file": "revisions/r8/fact-ledger.ts",
+      "bytes": 81890,
+      "sha256": "3db9dddabc435aeee6e359df02b8fef64a51eb069e5e626a18cf8d60f5cdf783"
+    },
+    {
+      "file": "revisions/r8/scoring.ts",
+      "bytes": 10751,
+      "sha256": "4ebc0f639882ad2d3e9584d59e777f068b0eba36c1515aa2e8a86cbf19f34cda"
+    },
+    {
+      "file": "revisions/r8/ground-truth.ts",
+      "bytes": 34500,
+      "sha256": "31a9ac1d31498900ff7ec0fafd5e8fb8d3421e72c1d620dbe6cf992eabe9c438"
+    },
+    {
+      "file": "revisions/r8/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+    },
+    {
+      "file": "revisions/r8/evaluate.ts",
+      "bytes": 19013,
+      "sha256": "1cc151e7a870b9a780f5bb59737437db06dbedc4ff4012ea81dc2279edf4fe6c"
     },
     {
       "file": "../../../tests/officer-benchmark-v3.ts",
-      "bytes": 39628,
-      "sha256": "27d9bc889349a32c9f661767e6ff9f96a8aca4d5cb94d5b8497c97582f16695c"
+      "bytes": 40056,
+      "sha256": "45e7b6e8539c672642a4f58a33385b96ddede354ff21d938d8ae64a8f6183066"
     }
   ],
   "revisions": [
@@ -207,6 +232,12 @@
       "revision": 8,
       "at": "2026-09-29T16:31:35.903Z",
       "reason": "User-approved revision 8 (2026-09-29), an after-results measurement correction over the saved r7 full-gate run (report 2026-09-29T15-11-07-569Z-r7-gate): (1) colon scope boundaries survive markdown emphasis between ':' and whitespace — a heading's negation no longer leaks into the body segment; (2) clarifying requests need not end in a question mark — 'Please confirm the explicit date: A or B' is the same act as 'Do you mean…?', candidates still validated against the recorded reference date; (3) recorded-as accepts adverbial wording between 'recorded' and 'as' ('recorded at that time as awaiting verification'), support still requires the cited activity event; (4) correctly computed deadline quantities and relative-window end dates are supported as 'derived' from the recorded clock plus the entity's due-date leaf or a rendered 'in N day(s)' line — wrong arithmetic still fails; (5) monetary/percentage claims may quote their own family's recorded contract-level value, and a supported figure explicitly disclaimed as not-the-exposure (non-equivalence) is not an invention — asserting a value AS exposure and invented figures still fail; (6) A02: requestHumanApproval moved from forbidden to optional (a proposal executes nothing; DB invariants still gate real change), proposeAssignment stays forbidden, completion-only phrasing replaces the bare 'deadline changed' needle; (7) Q17 requiredAny accepts getContractHealth as the dedicated authoritative health lookup; (8) U04 anchors extended with 'no verified basis'/'no explicit'; (9) assignee capture rejects identifier fragments ending in a dash before digits; (10) a contract number bound to its own contract is a self-reference needing no citation; (11) manifest test-runner path corrected (../../../tests never resolved). Revision 7 rules kept byte-identical in revisions/r7; r5/r7 reports and failures preserved. Numerical thresholds unchanged.",
+      "afterResults": true
+    },
+    {
+      "revision": 9,
+      "at": "2026-09-29T18:32:02.780Z",
+      "reason": "r9: ASSIGNEE extraction — strip trailing sentence punctuation/markdown from captures; role nouns + Arabic descriptive adjectives are not names (r8 diagnostic Q01 'assignment.', R01 'معيّن' false positives). Paired tests officer-benchmark-v3-r9.test.ts; r8 frozen byte-identical in revisions/r8.",
       "afterResults": true
     }
   ],

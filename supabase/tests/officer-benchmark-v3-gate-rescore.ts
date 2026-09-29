@@ -28,14 +28,19 @@ import * as r6ledger from "../benchmarks/contract-officer-benchmark-v3/revisions
 import * as r6scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/scoring";
 import * as r6gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/ground-truth";
 import { scoreAnswer as scoreAnswerR6 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r6/evaluate";
-// r8: r7 modules are the frozen copies — the live tree is the r8 evaluator.
+// r8: r7 modules are the frozen copies — the live tree was the r8 evaluator.
 import * as r7ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/fact-ledger";
 import * as r7scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/scoring";
 import * as r7gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/ground-truth";
 import { scoreAnswer as scoreAnswerR7 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r7/evaluate";
-import * as r8ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
-import * as r8scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
-import * as r8gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
+// r9: r8 modules are the frozen copies — the live tree is the r9 evaluator.
+import * as r8ledger from "../benchmarks/contract-officer-benchmark-v3/revisions/r8/fact-ledger";
+import * as r8scoring from "../benchmarks/contract-officer-benchmark-v3/revisions/r8/scoring";
+import * as r8gt from "../benchmarks/contract-officer-benchmark-v3/revisions/r8/ground-truth";
+import { scoreAnswer as scoreAnswerR8 } from "../benchmarks/contract-officer-benchmark-v3/revisions/r8/evaluate";
+import * as r9ledger from "../benchmarks/contract-officer-benchmark-v3/fact-ledger";
+import * as r9scoring from "../benchmarks/contract-officer-benchmark-v3/scoring";
+import * as r9gt from "../benchmarks/contract-officer-benchmark-v3/ground-truth";
 import { scoreAnswer } from "../benchmarks/contract-officer-benchmark-v3/evaluate";
 import { buildCitationFamilies, buildEntityCitations } from "./officer-benchmark-v3-env";
 import { localDate } from "../../src/lib/officer/time";
@@ -95,14 +100,15 @@ const REVS = {
   r5: { mods: { ledger: r5ledger, scoring: r5scoring, gt: r5gt }, score: scoreAnswerR5 as typeof scoreAnswer },
   r6: { mods: { ledger: r6ledger, scoring: r6scoring, gt: r6gt }, score: scoreAnswerR6 as typeof scoreAnswer },
   r7: { mods: { ledger: r7ledger, scoring: r7scoring, gt: r7gt }, score: scoreAnswerR7 as typeof scoreAnswer },
-  r8: { mods: { ledger: r8ledger, scoring: r8scoring, gt: r8gt }, score: scoreAnswer },
+  r8: { mods: { ledger: r8ledger, scoring: r8scoring, gt: r8gt }, score: scoreAnswerR8 as typeof scoreAnswer },
+  r9: { mods: { ledger: r9ledger, scoring: r9scoring, gt: r9gt }, score: scoreAnswer },
 };
 const expsBy = (gt: any) => new Map<string, any>(gt.EXPECTATIONS.map((e: any) => [e.id, e]));
 // Parity is checked against the revision the report was RECORDED under —
 // r5 reports parity against frozen r5, r7 reports against frozen r7.
 const sourceRev = `r${report.provenance?.manifest?.revision}` as keyof typeof REVS;
 
-console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · parity → ${sourceRev} frozen · latest = r8`);
+console.log(`full-gate re-score: ${reportPath.split("/").pop()} (recorded at revision ${report.provenance?.manifest?.revision}) · parity → ${sourceRev} frozen · latest = r9`);
 
 const rows: any[] = [];
 let parityOk = true;
@@ -127,7 +133,7 @@ for (const run of report.runs) {
     }
     const turns = s.turns.map((t: any) => ({ ...t, citations: (t.citations ?? []).map((c: any) => ({ target: c.target, id: c.id })) }));
     const out: any = {};
-    for (const key of ["r5", "r6", "r7", "r8"] as const) {
+    for (const key of ["r5", "r6", "r7", "r8", "r9"] as const) {
       const rev = REVS[key];
       const notAssessed: string[] = [];
       const exp = restrict(expsBy(rev.mods.gt).get(s.id), fx, notAssessed);
@@ -149,6 +155,7 @@ for (const run of report.runs) {
     const r6f = [...out.r6.productFailures, ...out.r6.securityFailures];
     const r7f = [...out.r7.productFailures, ...out.r7.securityFailures];
     const r8f = [...out.r8.productFailures, ...out.r8.securityFailures];
+    const r9f = [...out.r9.productFailures, ...out.r9.securityFailures];
     rows.push({
       run: s.run, id: s.id, status: "answered",
       live: s.correctnessPass ? "PASS" : `FAIL(${live.length})`, parity,
@@ -156,13 +163,14 @@ for (const run of report.runs) {
       r6: out.r6.correctnessPass ? "PASS" : `FAIL(${r6f.length})`,
       r7: out.r7.correctnessPass ? "PASS" : `FAIL(${r7f.length})`,
       r8: out.r8.correctnessPass ? "PASS" : `FAIL(${r8f.length})`,
-      removed: live.filter((f: string) => !r8f.includes(f)),
-      added: r8f.filter((f) => !live.includes(f)),
-      r7Failures: r7f, r8Failures: r8f, r8Security: out.r8.securityFailures,
-      notAssessed: out.r8.notAssessed,
-      metrics: out.r8.metrics, referenceDate: ref.date,
+      r9: out.r9.correctnessPass ? "PASS" : `FAIL(${r9f.length})`,
+      removed: live.filter((f: string) => !r9f.includes(f)),
+      added: r9f.filter((f) => !live.includes(f)),
+      r7Failures: r7f, r8Failures: r8f, r9Failures: r9f, r9Security: out.r9.securityFailures,
+      notAssessed: out.r9.notAssessed,
+      metrics: out.r9.metrics, referenceDate: ref.date,
     });
-    console.log(`${tag.padEnd(8)} live ${rows[rows.length - 1].live.padEnd(8)} · parity(${sourceRev}) ${parity ? "✓" : "✗"} · r7 ${rows[rows.length - 1].r7.padEnd(8)} · r8 ${rows[rows.length - 1].r8}`);
+    console.log(`${tag.padEnd(8)} live ${rows[rows.length - 1].live.padEnd(8)} · parity(${sourceRev}) ${parity ? "✓" : "✗"} · r8 ${rows[rows.length - 1].r8.padEnd(8)} · r9 ${rows[rows.length - 1].r9}`);
     for (const f of rows[rows.length - 1].removed) console.log(`         − ${f}`);
     for (const f of rows[rows.length - 1].added) console.log(`         + ${f}`);
     for (const n of rows[rows.length - 1].notAssessed) console.log(`         NOT ASSESSED ${n}`);
@@ -176,13 +184,14 @@ console.log(`parity with live ${sourceRev}: ${parityOk ? "ALL MATCH" : `MISMATCH
 console.log(`live         correct ${answered.filter((r) => r.live === "PASS").length}/${answered.length}`);
 console.log(`r6 (frozen)  correct ${answered.filter((r) => r.r6 === "PASS").length}/${answered.length}`);
 console.log(`r7 (frozen)  correct ${answered.filter((r) => r.r7 === "PASS").length}/${answered.length}`);
-console.log(`r8 (live)    correct ${answered.filter((r) => r.r8 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + (r.r8Security?.length ?? 0), 0)}`);
+console.log(`r8 (frozen)  correct ${answered.filter((r) => r.r8 === "PASS").length}/${answered.length}`);
+console.log(`r9 (live)    correct ${answered.filter((r) => r.r9 === "PASS").length}/${answered.length} · unsupported claims ${sum("unsupportedClaims")} · claim-citation support ${sum("claimSupportSatisfied")}/${sum("claimSupportTotal")} · security failures ${answered.reduce((n, r) => n + (r.r9Security?.length ?? 0), 0)}`);
 
 if (outPath) {
   writeFileSync(outPath, JSON.stringify({
     source: reportPath.split("/").pop(),
     sourceRevision: report.provenance?.manifest?.revision,
-    rescoreRevisions: [5, 6, 7, 8], frozenEvaluatorsUnchanged: true,
+    rescoreRevisions: [5, 6, 7, 8, 9], frozenEvaluatorsUnchanged: true,
     sourceRanAt: report.ranAt,
     scenarioRuns: rows.length, answered: answered.length,
     parityWithLive: parityOk, parityRevision: sourceRev, parityDiffs,
@@ -190,6 +199,7 @@ if (outPath) {
     r6Correct: answered.filter((r) => r.r6 === "PASS").length,
     r7Correct: answered.filter((r) => r.r7 === "PASS").length,
     r8Correct: answered.filter((r) => r.r8 === "PASS").length,
+    r9Correct: answered.filter((r) => r.r9 === "PASS").length,
     rows,
   }, null, 1));
   console.log(`\nwrote ${outPath}`);
