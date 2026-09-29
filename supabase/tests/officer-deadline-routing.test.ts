@@ -94,6 +94,18 @@ function routingTests() {
   // Contract-scoped mutation keeps contract scope AND gains ACTION.
   const scoped = offered("Change the deadline to next Friday.", true);
   check("contract-scoped mutation → ACTION + scope groups", scoped.hasAction && scoped.groups.includes("CONTRACT"));
+
+  // The A02 lookup path: the proposal tools alone are not enough — the
+  // obligation lookup tools must ride with ACTION so the model can resolve
+  // "the deadline" to the contract's obligation set before asking.
+  for (const q of [
+    "Change the deadline on BETA-200 to next Friday.",
+    "غيّر موعد الاستحقاق على BETA-200 إلى الجمعة القادمة.",
+  ]) {
+    const s = offered(q);
+    check(`deadline mutation offers lookup tools beside ACTION: "${q.slice(0, 44)}…"`,
+      s.hasAction && s.names.has("listObligations") && s.names.has("getObligation") && s.names.has("getContract"));
+  }
 }
 
 /* ---------- refusal/permission paths stay closed ---------- */

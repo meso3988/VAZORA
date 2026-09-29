@@ -1,4 +1,5 @@
 import type { OfficerContext } from "@/lib/officer/context";
+import type { OfficerCitation } from "@/domain/officer";
 import { readObservations, type ObservationRow } from "@/lib/officer/observations";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -35,7 +36,14 @@ export type ContractHealth = {
   contractNumber: string;
   title: string;
   verdict: HealthVerdict;
-  issues: { kind: string; severity: string; title: string; detail: string | null; status: string }[];
+  issues: {
+    kind: string; severity: string; title: string; detail: string | null; status: string;
+    /** the obligation the finding is about — present when the issue is
+     *  obligation-bound; lets callers cite the record, not just the contract */
+    obligationId: string | null;
+    /** citations the detector stored on the underlying observation */
+    citations: OfficerCitation[];
+  }[];
   coverage: {
     lastSweepAt: string | null; asOfDate: string | null; gaps: string[];
     /** true only when every eligibility, freshness and read requirement held */
@@ -184,7 +192,10 @@ export async function assessContractHealth(
     const lastOk = published.find((s) => !s.failedContractIds.includes(c.id) && !s.failedContractIds.includes("organization"));
     return {
       contractId: c.id, contractNumber: c.contract_number, title: c.title, verdict,
-      issues: obs.map((o) => ({ kind: o.kind, severity: o.severity, title: o.title, detail: o.detail, status: o.status })),
+      issues: obs.map((o) => ({
+        kind: o.kind, severity: o.severity, title: o.title, detail: o.detail, status: o.status,
+        obligationId: o.obligationId ?? null, citations: o.citations ?? [],
+      })),
       coverage: {
         lastSweepAt: lastSweep?.startedAt ?? null, asOfDate: lastSweep?.asOfDate ?? null, gaps: gapsList,
         complete: gapsList.length === 0, lastSuccessfulAssessmentAt: lastOk?.startedAt ?? null,

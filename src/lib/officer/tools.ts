@@ -807,7 +807,19 @@ const getAssignments: OfficerTool = {
         unassigned: !list.some((s: any) => s.suggestion_kind === "owner" && s.approved === true),
       };
     });
-    return ok(rows, [], `${rows.filter((r) => r.unassigned).length} unassigned of ${rows.length}`);
+    // Assignment state is a claim about the obligation record — the row that
+    // states it must be citable, not only its parent contract.
+    const contractIds = [...new Set(rows.map((r: any) => r.contractId as string))];
+    const { data: contractRows } = contractIds.length
+      ? await ctx.supabase.from("contracts").select("id, contract_number")
+          .eq("organization_id", ctx.organizationId).in("id", contractIds)
+      : { data: [] as any[] };
+    const contractNumber = new Map((contractRows ?? []).map((c: any) => [c.id as string, c.contract_number as string]));
+    const citations = [
+      ...rows.map((r: any) => cite("obligation", r.obligationId, r.title, r.contractId, `/app/contracts/${r.contractId}/obligations`)),
+      ...contractIds.map((cid) => cite("contract", cid, contractNumber.get(cid) ?? "contract", cid, `/app/contracts/${cid}`)),
+    ];
+    return ok(rows, citations, `${rows.filter((r) => r.unassigned).length} unassigned of ${rows.length}`);
   },
 };
 
@@ -1062,9 +1074,25 @@ const getContractHealth: OfficerTool = {
       // Safe code only — never a raw database message.
       return { ok: false, error: `health_assessment_unavailable: ${e instanceof HealthUnavailableError ? e.code : "read_failed"}` };
     }
+    // Each recorded issue already carries the citations its detector wrote —
+    // surface them so a claim about a specific obligation cites that
+    // obligation's record, not only the contract's.
+    const issueCitations = health.flatMap((h) =>
+      h.issues.flatMap((i) =>
+        (i.citations ?? []).map((c) =>
+          cite(c.target as OfficerCitation["target"], c.id, c.label, h.contractId,
+            c.target === "obligation" ? `/app/contracts/${h.contractId}/obligations` : `/app/contracts/${h.contractId}`))));
+    const seen = new Set<string>();
+    const citations = [
+      ...health.map((h) => cite("contract", h.contractId, `${h.contractNumber} — ${h.title}`, h.contractId, `/app/contracts/${h.contractId}`)),
+      ...issueCitations,
+    ].filter((c) => {
+      const k = `${c.target}:${c.id}`;
+      return seen.has(k) ? false : (seen.add(k), true);
+    });
     return ok(
       { contracts: health },
-      health.map((h) => cite("contract", h.contractId, `${h.contractNumber} — ${h.title}`, h.contractId, `/app/contracts/${h.contractId}`)),
+      citations,
       `${health.length} contract(s): ${health.filter((h) => h.verdict === "no_actionable_issues_recorded").length} without recorded actionable issues`,
     );
   },

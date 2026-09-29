@@ -60,7 +60,7 @@ for (const [label, f] of [
 
 const H = (n: string, verdict: ContractHealth["verdict"], issues: string[] = [], gaps: string[] = []): ContractHealth => ({
   contractId: n, contractNumber: n, title: n, verdict,
-  issues: issues.map((t) => ({ kind: "k", severity: "high", title: t, detail: null, status: "active" })),
+  issues: issues.map((t) => ({ kind: "k", severity: "high", title: t, detail: null, status: "active", obligationId: null, citations: [] })),
   coverage: { lastSweepAt: null, asOfDate: null, gaps, complete: gaps.length === 0, lastSuccessfulAssessmentAt: null }, scopedStatement: verdict === "no_actionable_issues_recorded" ? SCOPED_NO_ISSUES_EN : null,
 });
 const Q17_R3 = "## Healthy contract: EPSILON-500\n\n**Security services — Western region** is currently a healthy example:\n\n- **Status:** Active, through 2027-07-23.\n- **Evidence:** The required “Security compliance statement” is operationally **verified**.\n- **Exceptions:** No open evidence gaps and no pending verification discrepancies are recorded.\n\n**Assessment:** Healthy—nothing is overdue, evidence is verified, and no immediate exception requires attention.";
