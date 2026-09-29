@@ -1147,6 +1147,29 @@ const GROUP_HINTS: Record<Exclude<ToolGroup, "ORIENTATION">, string[]> = {
 };
 
 /**
+ * Mutation intent → ACTION. A bare "change"/"تغيّر" is not enough: the
+ * English arms require the change verb in IMPERATIVE position — message
+ * start, after sentence punctuation, or after a request opener ("can you",
+ * "we need to", "please") — so an interrogative "did the vendor change the
+ * deadline?" stays a read. Temporal verbs (postpone/delay/reschedule) are
+ * self-sufficient; the rest must land within a short gap on a schedulable
+ * object ("change the deadline", "extend the delivery date"). The Arabic
+ * arm requires an imperative verb at a word boundary followed by a date
+ * noun, so "تغيّر الموعد" ("the date changed") never unlocks write tools.
+ */
+const MUTATION_INTENT = new RegExp(
+  [
+    // imperative-position temporal verb — the object needn't be a date word
+    String.raw`(?:^|[.!?;:]\s+|\b(?:please|kindly|can you|could you|would you|will you|i need to|we need to|need to|i want to|we want to|i should|we should|should|must|make sure to|remember to|don't forget to|let'?s)\s+)(?:reschedul\w*|postpon\w*|delay\w*)\b`,
+    // imperative-position change verb aimed at a schedulable object
+    String.raw`(?:^|[.!?;:]\s+|\b(?:please|kindly|can you|could you|would you|will you|i need to|we need to|need to|i want to|we want to|i should|we should|should|must|make sure to|remember to|don't forget to|let'?s)\s+)(?:change|move|shift|set|adjust|amend|update|extend|push\s+back|push|shorten|bring\s+forward)\b[\w\s]{0,56}?\b(?:deadline|due\s+date|end\s+date|expiry|expiration|deliver\w*|submission|milestone|timeline|schedule|target\s+date|date|موعد|الاستحقاق)\b`,
+    // Arabic imperative at a boundary + a date noun
+    String.raw`(?:^|[\s،؛])(?:غيّر|غيِّر|عدّل|عدِّل|أجّل|أجِّل|اجّل|أخّر|اخّر|مدّد|مدِّد|انقل|حدّث|حدِّث)\s+(?:ال)?(?:موعد|استحقاق|تاريخ|نهاية|جدول)`,
+  ].join("|"),
+  "i",
+);
+
+/**
  * Deterministic tool selection for one question.
  *
  * Contract-scoped conversations skip ORIENTATION breadth by default but keep
@@ -1162,6 +1185,7 @@ export function selectToolGroups(opts: {
   for (const [group, hints] of Object.entries(GROUP_HINTS) as [Exclude<ToolGroup, "ORIENTATION">, string[]][]) {
     if (hints.some((h) => q.includes(h))) groups.push(group);
   }
+  if (MUTATION_INTENT.test(q) && !groups.includes("ACTION")) groups.push("ACTION");
 
   // A question we cannot classify gets everything — never guess narrower.
   if (groups.length === 1) {

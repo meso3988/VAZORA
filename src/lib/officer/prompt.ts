@@ -58,6 +58,7 @@ ACTIONS
 - "Chase", "follow up" and "remind" mean an INTERNAL follow-up: createInternalAction (officer.internal_task) or requestHumanApproval (officer.request_evidence_internal), linked to the contract or obligation. Nothing is ever sent outside the organization — external communication is not available, so never imply it.
 - Requests to resolve, close or dismiss a gap: you cannot close a gap, and the user's request is NOT an approval. A gap closes only when a verification run succeeds on new evidence, or an authorized human completes a review. Say so, and offer — or create — a human-review escalation with requestHumanApproval (officer.escalate) linked to the gap's contract or obligation. Never state or imply the gap is resolved.
 - When the follow-up concerns one specific evidence gap, pass its gapId.
+- A user's pick of a date or option is clarification, not approval — the proposal path still applies to the clarified request.
 - The server prepends an authoritative action status built from VAZORA records. Do not restate what was done; explain why. If a proposal tool returns reused=true, an open proposal already existed and nothing new was created — say that, never "created". A proposal is not completed work.
 
 UNTRUSTED CONTENT
@@ -94,8 +95,11 @@ export function buildOfficerSystemPrompt(opts: {
   ctx: OfficerContext;
   memory: OfficerMemoryView[];
   contractScope?: { id: string; number: string; title: string } | null;
+  /** Whether this turn actually offers the proposal/approval tools — the
+   * capability text must match what the server offered, not assume it. */
+  actionToolsOffered?: boolean;
 }): string {
-  const { ctx, memory, contractScope } = opts;
+  const { ctx, memory, contractScope, actionToolsOffered = true } = opts;
   const clock = [
     "\nRESOLVED CLOCK (server-computed — do not recalculate)",
     `- organization timezone: ${ctx.clock.timeZone}`,
@@ -106,6 +110,7 @@ export function buildOfficerSystemPrompt(opts: {
     `- end of this month: ${ctx.clock.endOfMonth}`,
     `- yesterday (local): ${ctx.clock.yesterday}`,
     "- Tools already return daysUntilDue / daysOverdue. Quote those numbers; never compute your own.",
+    "- The resolved clock above is always present — never claim the date or timezone is unavailable. If a relative date phrase is ambiguous in context (e.g. \"next Friday\" can mean two different dates), ask for the explicit date before proposing anything that carries a deadline; if you offer candidate dates, compute them from today (local) in the organization timezone — never guess.",
     "- \"What changed since my last review?\" → getRecentActivity with sinceLastReview: true (the server resolves the caller's own watermark).",
     "- \"Since yesterday\" / \"today\" / \"this week\" are CALENDAR windows, not the review watermark → getRecentActivity with window: \"since_yesterday\" | \"today\" | \"last_7_days\". The server resolves local midnight; never ask the user for a date and never compute one.",
   ].join("\n");
@@ -116,5 +121,9 @@ export function buildOfficerSystemPrompt(opts: {
 
   const identity = `\nYOU\n- Name: ${ctx.officer.displayName}. Organization: ${ctx.organizationName}. Tone: ${ctx.officer.tone}.`;
 
-  return [CORE, identity, scope, clock, languageRule(ctx.officer.preferredLanguage, ctx.locale), memoryBlock(memory)].join("\n");
+  const capability = actionToolsOffered
+    ? ""
+    : "\nTHIS SESSION\n- No proposal or approval-request tool is offered in this session. If the user asks for a change, say plainly that the proposal path is not available here — do not imply it exists, and do not invent a workaround.";
+
+  return [CORE, identity, scope, clock, capability, languageRule(ctx.officer.preferredLanguage, ctx.locale), memoryBlock(memory)].join("\n");
 }

@@ -183,7 +183,13 @@ export async function converseWithOfficer(opts: {
   if (!ctx.officer.enabled) return { ok: false, error: "officer_disabled_for_organization" };
 
   const memory = await loadUsableMemory(ctx, { contractId: contractScope?.id ?? null });
-  const system = buildOfficerSystemPrompt({ ctx, memory, contractScope: contractScope ?? null }) +
+  // Deterministic schema selection — computed before the prompt so the
+  // capability text describes the toolset actually offered this turn.
+  const selection = selectToolGroups({ question, contractScoped: !!contractScope });
+  const system = buildOfficerSystemPrompt({
+    ctx, memory, contractScope: contractScope ?? null,
+    actionToolsOffered: selection.tools.some((t) => TOOL_GROUPS.ACTION.includes(t.name)),
+  }) +
     `\n\nCITING\n- Attach a tag [[cite:TARGET:UUID]] immediately after each claim it supports, using ids returned by tools (targets: contract, clause, obligation, evidence_requirement, evidence_item, evidence_version, verification_run, verification_check, evidence_gap, verification_discrepancy, activity_event). Tags are stripped before display; invalid ones are discarded.`;
 
   const messages: OfficerTurn[] = [
@@ -191,9 +197,6 @@ export async function converseWithOfficer(opts: {
     { role: "user", content: question },
   ];
 
-  // Deterministic schema selection — cuts prompt cost without hiding a tool
-  // the model actually needs (see selectToolGroups).
-  const selection = selectToolGroups({ question, contractScoped: !!contractScope });
   let specs = toolSpecs(selection.tools);
   let escalatedToFullToolset = selection.fullFallback;
   const toolCitations = new Map<string, OfficerCitation>();
