@@ -1,7 +1,7 @@
 {
   "benchmark": "contract-officer-benchmark-v3",
-  "revision": 9,
-  "frozenAt": "2026-09-29T18:32:02.768Z",
+  "revision": 10,
+  "frozenAt": "2026-09-30T03:34:57.717Z",
   "scenarioCount": 37,
   "files": [
     {
@@ -16,8 +16,8 @@
     },
     {
       "file": "fact-ledger.ts",
-      "bytes": 83179,
-      "sha256": "13552d5d7145581a087d2b6dcac995daee2a4c957c5bb37b97b89236195dc676"
+      "bytes": 86600,
+      "sha256": "63c2f59a932429780fbceb68093e631f6e1d6a5b7985ff21adafb56a5528624c"
     },
     {
       "file": "scoring.ts",
@@ -180,9 +180,34 @@
       "sha256": "1cc151e7a870b9a780f5bb59737437db06dbedc4ff4012ea81dc2279edf4fe6c"
     },
     {
+      "file": "revisions/r9/fact-ledger.ts",
+      "bytes": 83179,
+      "sha256": "13552d5d7145581a087d2b6dcac995daee2a4c957c5bb37b97b89236195dc676"
+    },
+    {
+      "file": "revisions/r9/scoring.ts",
+      "bytes": 10751,
+      "sha256": "4ebc0f639882ad2d3e9584d59e777f068b0eba36c1515aa2e8a86cbf19f34cda"
+    },
+    {
+      "file": "revisions/r9/ground-truth.ts",
+      "bytes": 34500,
+      "sha256": "31a9ac1d31498900ff7ec0fafd5e8fb8d3421e72c1d620dbe6cf992eabe9c438"
+    },
+    {
+      "file": "revisions/r9/gate.ts",
+      "bytes": 7090,
+      "sha256": "c3042882fb34f1e80d0acce46f4289af124dbbb23e10e426c005d9a1997fb3b7"
+    },
+    {
+      "file": "revisions/r9/evaluate.ts",
+      "bytes": 19013,
+      "sha256": "1cc151e7a870b9a780f5bb59737437db06dbedc4ff4012ea81dc2279edf4fe6c"
+    },
+    {
       "file": "../../../tests/officer-benchmark-v3.ts",
-      "bytes": 40056,
-      "sha256": "45e7b6e8539c672642a4f58a33385b96ddede354ff21d938d8ae64a8f6183066"
+      "bytes": 40271,
+      "sha256": "5b4b9a82d5d349a4e722b9172a50f204f62083d117f0023d1c12f0575aaae9b2"
     }
   ],
   "revisions": [
@@ -238,6 +263,12 @@
       "revision": 9,
       "at": "2026-09-29T18:32:02.780Z",
       "reason": "r9: ASSIGNEE extraction — strip trailing sentence punctuation/markdown from captures; role nouns + Arabic descriptive adjectives are not names (r8 diagnostic Q01 'assignment.', R01 'معيّن' false positives). Paired tests officer-benchmark-v3-r9.test.ts; r8 frozen byte-identical in revisions/r8.",
+      "afterResults": true
+    },
+    {
+      "revision": 10,
+      "at": "2026-09-30T03:34:57.753Z",
+      "reason": "r10: extraction edge from r9 diagnostic Q01 'owner missing' — (1) ASSIGNEE stop gains state words (missing/absent/person(s)/people/somebody/someone/anyone/everybody/everyone/staff/member(s)/assigned; AR: مفقود(ة)/غائب(ة)/شاغر/معلق/شخص/فرد/سجل variants); a stop-word followed by a colon-introduced name still extracts the name ('owner missing: Faisal' → Faisal), quoted titles excluded. (2) bare 'missing'/مفقود is a verification_state claim only inside an evidence-object colon-segment and never after an ownership subject. Paired tests officer-benchmark-v3-r10.test.ts (39 checks). r9 frozen byte-identical in revisions/r9; r7-r9 added to FROZEN_FILES. Thresholds unchanged.",
       "afterResults": true
     }
   ],

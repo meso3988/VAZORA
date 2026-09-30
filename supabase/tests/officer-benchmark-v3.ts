@@ -74,6 +74,8 @@ const FROZEN_FILES = [
   "revisions/r7/fact-ledger.ts", "revisions/r7/scoring.ts", "revisions/r7/ground-truth.ts", "revisions/r7/gate.ts", "revisions/r7/evaluate.ts",
   // r9: the frozen revision-8 rules and scoring core, byte-identical
   "revisions/r8/fact-ledger.ts", "revisions/r8/scoring.ts", "revisions/r8/ground-truth.ts", "revisions/r8/gate.ts", "revisions/r8/evaluate.ts",
+  // r10: the frozen revision-9 rules and scoring core, byte-identical
+  "revisions/r9/fact-ledger.ts", "revisions/r9/scoring.ts", "revisions/r9/ground-truth.ts", "revisions/r9/gate.ts", "revisions/r9/evaluate.ts",
 ];
 const RUNS = Number(process.env.BENCH_RUNS ?? 1);
 const ONLY = (process.env.BENCH_ONLY ?? "").split(",").map((s) => s.trim()).filter(Boolean);

@@ -361,12 +361,6 @@ const ASSIGNEE = /(?:assigned to|owner(?:\s+is|:)?|owned by|responsible(?:\s+is|
 // awaiting human review".
 const VERIFY_STATE = /\b(not (?:yet )?(?:been )?submitted|never (?:been )?submitted|nothing (?:has been |was )?(?:uploaded|submitted)|verified|partially[- ]verified|incomplete|missing|needs?[ _-]?(?:a )?(?:human )?review|(?:pending|awaiting)\s+(?:human\s+)?(?:review|verification)|rejected|unverified)\b|لم يُ?رفع|لم يُ?قدَّ?م|موثّق|موثق|مُثبَت|مثبت|ناقص|مفقود|غير مكتمل|قيد المراجعة|بانتظار التحقق|يحتاج مراجعة|غير موثّق/gi;
 const ACK_STATE = /(?:client|العميل|العميلة)\s+(?:has\s+|did\s+|have\s+)?(?:approved|acknowledged|accepted|signed|countersigned|rejected|اعتماد|اعتمد|أقرّ|اقرّ|وقّع|وقع|رفض)/gi;
-// r10: a bare "missing"/"مفقود" is an evidence-state claim only when its
-// colon-segment is about an evidence object — "owner missing" is an
-// assignment statement. An ownership subject right before the word rejects
-// it outright ("assignee missing", "مسؤول مفقود").
-const OWNERSHIP_TAIL = /(?:owners?|assignees?|responsible|part(?:y|ies)|persons?|people|nominee|designee|مسؤول|المسؤول|مالك|المالك|المسند|مسند|شخص|الشخص|طرف|الطرف|جهة|الجهة|معين|المعين|معيّن|المعيّن)(?:\s+(?:is|was|still|currently|now|ما))?\s*[-–—:："'`*_~]*\s*$/iu;
-const EVIDENCE_OBJECT = /evidence|documents?|docs?\b|reports?|files?|records?|submissions?|statements?|acknowledg\w*|approv\w*|signatures?|signee|signed|proof|requirements?|verif\w*|certificat\w*|letters?|deliverables?|invoices?|receipts?|registers?|kpis?|tables?|sheets?|forms?|photos?|minutes|attestation|logs?\b|agreements?|دليل|أدلة|ادلة|الأدلة|الدليل|مستندات?|وثيقة|وثائق|تقارير|تقرير|ملفات?|سجلات?|سجل|إثبات|اثبات|إقرار|اقرار|اعتماد|توقيع|شهادات?|شهادة|خطاب|متطلبات?|متطلب|جدول|نموذج|صور|صورة|سند|محضر|إيصال|ايصال|فاتورة|تسليم/i;
 const OVERDUE = /\b(?:is|are|was|became|now|currently|still)?\s*overdue\b|متأخر(?:ة|ًا|اً)?|متأخرة/gi;
 const GAP_STATE = /(?:gaps?|فجوة|فجوات)\s+(?:is\s+|was\s+|are\s+|has been\s+|have been\s+|now\s+)?(?:resolved|closed|reopened|opened|open)|(?:resolved|closed|open|reopened)\s+(?:the\s+)?gaps?/gi;
 const UNASSIGNED = /\bunassigned\b|no\s+(?:assigned\s+)?owner|without\s+(?:an?\s+)?owner|بلا مالك|بدون مالك|دون مالك|لا مالك|غير مُسند|غير مسند/gi;
@@ -396,19 +390,11 @@ const ASSIGNEE_STOP = new Set([
   "approval", "approvals", "approved", "approver", "pending", "review", "reviewer", "reviewers",
   "manager", "management", "team", "department", "party", "stakeholder", "stakeholders",
   "contact", "contacts", "lead", "officer",
-  // r10: state/descriptive words — "owner missing" describes an absent owner;
-  // "missing" is a state, not a person.
-  "missing", "absent", "person", "persons", "people", "somebody", "someone",
-  "anyone", "everybody", "everyone", "staff", "member", "members", "assigned",
   "المؤكد", "والمؤكد", "عن", "هو", "هي", "غير", "الحالي", "المقترح", "المسند", "المسجل", "المطلوب", "دور",
   // r9: Arabic descriptive/adjectival forms — "بلا مسؤول معيّن" says the role
   // is undesignated; معيّن is an adjective, not a name.
   "معين", "معيّن", "المعين", "المعيّن", "مُعيَّن", "معيَّن", "مكلف", "المكلف", "مسؤول", "المسؤول",
   "مالك", "المالك", "طرف", "الطرف", "جهة", "الجهة", "فريق", "الفريق", "قسم", "القسم", "معني", "المعني",
-  // r10: Arabic state/descriptive words — absence/occupancy of the role, not
-  // a person.
-  "مفقود", "مفقودة", "المفقود", "المفقودة", "غائب", "غائبة", "الغائب", "الغائبة",
-  "شاغر", "الشاغر", "معلق", "المعلق", "شخص", "الشخص", "فرد", "الفرد", "سجل", "السجل",
 ]);
 
 function normalizeState(v: string): string {
@@ -724,43 +710,18 @@ export function extractClaims(text: string, entities: EntityMap): FactClaim[] {
         // r9: clean the capture BEFORE judging it — trailing sentence
         // punctuation and markdown artifacts are not part of a name
         // ("owner assignment." → the role noun "assignment", not a person).
-        const clean = (raw: string) => norm(raw)
+        const captured = norm(mm[1])
           .replace(/[.!?:;،؛؟*_~'"`()[\]{}<>«»]+$/u, "")
           .replace(/^[*_~'"`#«»]+/u, "")
           .trim();
-        const captured = clean(mm[1]);
         const first = captured.split(" ")[0];
         // r8: an identifier fragment is not a name — "مسؤولية غير مسندة —
         // EPSILON-500" captured "epsilon-" because the class stops at digits.
         const after = clause.slice(mm.index + mm[0].length);
         if (!captured || /[-–—]$/.test(captured) || /^\d/.test(after)) return;
-        if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) {
-          push("assignee_name", mm[0], captured);
-          return;
-        }
-        // r10: a state word may prefix a colon-introduced name — "owner
-        // missing: Faisal" still asserts Faisal as the assignee; the stopped
-        // word is skipped, not the real name.
-        const nm = after.match(/^\s*[:：]\s*[*_~»)\]]*\s*([A-Za-z][A-Za-z.''-]{2,}|[\u0600-\u06FF]{2,}(?:\s[\u0600-\u06FF]{2,})?)/);
-        if (!nm) return;
-        const name = clean(nm[1]);
-        const nfirst = name.split(" ")[0];
-        if (!name || /[-–—]$/.test(name) || ASSIGNEE_STOP.has(name) || ASSIGNEE_STOP.has(nfirst)) return;
-        push("assignee_name", mm[0] + nm[0], name);
+        if (!ASSIGNEE_STOP.has(captured) && !ASSIGNEE_STOP.has(first)) push("assignee_name", mm[0], captured);
       });
       each(VERIFY_STATE, (mm) => {
-        // r10: bare "missing"/"مفقود" claims an evidence state only inside an
-        // evidence-object segment — an ownership subject ("owner missing",
-        // "مسؤول مفقود") or a segment with no evidence object yields no claim.
-        if (/^(?:missing|مفقودة?)$/i.test(mm[0])) {
-          const segStart = lastScopeBreak(clause, mm.index);
-          const segEnd = nextScopeBreak(clause, mm.index + mm[0].length);
-          const start = segStart < 0 ? 0 : segStart;
-          const seg = clause.slice(start, segEnd < 0 ? clause.length : segEnd);
-          if (OWNERSHIP_TAIL.test(seg.slice(0, mm.index - start))) return;
-          EVIDENCE_OBJECT.lastIndex = 0;
-          if (!EVIDENCE_OBJECT.test(seg)) return;
-        }
         // "1 pending verification discrepancy" describes a PENDING DISCREPANCY,
         // not evidence awaiting verification.
         const describesDiscrepancy = /^pending\s+verification$/i.test(mm[0]) &&
