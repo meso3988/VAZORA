@@ -318,8 +318,8 @@ const getUpcomingObligations: OfficerTool = {
   name: "getUpcomingObligations",
   toolClass: "READ_ONLY",
   description:
-    "Operational obligations due within N days (default 7), computed server-side in the organization timezone.",
-  input: z.object({ withinDays: z.number().int().min(1).max(365).optional() }).strict(),
+    "Operational obligations due within N days ahead, inclusive (default 7), computed server-side in the organization timezone. withinDays 0 = due today only, 1 = today and tomorrow.",
+  input: z.object({ withinDays: z.number().int().min(0).max(365).optional() }).strict(),
   handler: async (ctx, args) => {
     const within = args.withinDays ?? 7;
     const rows = (await loadObligations(ctx, {}))

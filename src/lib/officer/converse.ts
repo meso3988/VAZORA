@@ -60,7 +60,7 @@ function toolSpecs(tools: readonly OfficerTool[] = listOfficerTools()): OfficerT
   }));
 }
 
-function zodObjectToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
+export function zodObjectToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
   const def: any = (schema as any)._def;
   const shape: Record<string, any> = typeof def?.shape === "function" ? def.shape() : (def?.shape ?? {});
   const properties: Record<string, unknown> = {};
@@ -78,7 +78,15 @@ function zodObjectToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
         ? { type: "string", format: "uuid" }
         : { type: "string" };
     } else if (typeName === "ZodNumber") {
-      properties[key] = { type: "integer" };
+      // Numeric bounds the server already enforces are shown to the model —
+      // an invisible min() produces silent retry loops (withinDays:0→1).
+      const checks: { kind?: string; value?: number }[] = node._def.checks ?? [];
+      const prop: Record<string, unknown> = { type: checks.some((c) => c.kind === "int") ? "integer" : "number" };
+      for (const c of checks) {
+        if (c.kind === "min") prop.minimum = c.value;
+        else if (c.kind === "max") prop.maximum = c.value;
+      }
+      properties[key] = prop;
     } else if (typeName === "ZodBoolean") {
       properties[key] = { type: "boolean" };
     } else if (typeName === "ZodEnum") {
