@@ -23,6 +23,7 @@ import { fileURLToPath } from "node:url";
 
 import { allEntities, segment } from "../benchmarks/evaluator-v4-proto/segment";
 import { aggregate, claimsForUnit, RecordBag, type Claim, type Verdict } from "../benchmarks/evaluator-v4-proto/claims";
+import { claimObligation, classifyMateriality, rollUp, type ClaimObligation, type Materiality } from "../benchmarks/evaluator-v4-proto/materiality";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const set = JSON.parse(readFileSync(join(here, "..", "benchmarks", "evaluator-v4-proto", "heldout-v1.json"), "utf8"));
@@ -40,6 +41,7 @@ const cases: Case[] = set.cases;
 type Result = {
   c: Case; claims: Claim[]; verdict: Verdict; detected: boolean;
   noClaimFormed: boolean; verdictAgrees: boolean; typeHit: boolean;
+  materiality: Materiality; obligation: ClaimObligation;
 };
 
 const results: Result[] = cases.map((c) => {
@@ -49,8 +51,10 @@ const results: Result[] = cases.map((c) => {
   const scored = claims.filter((x) => x.verdict !== "OUT_OF_SCOPE");
   const verdict = aggregate(claims);
   const detected = scored.length > 0;
+  const materiality = rollUp(units.map((u) => classifyMateriality(u)));
   return {
-    c, claims, verdict, detected,
+    c, claims, verdict, detected, materiality,
+    obligation: claimObligation(materiality, scored.length),
     noClaimFormed: c.materiality === "material" && c.expectedClaimTypes.length > 0 && !detected,
     verdictAgrees: verdict === c.expectedVerdict,
     typeHit: c.expectedClaimTypes.length === 0 ? !detected : claims.some((x) => c.expectedClaimTypes.includes(x.type)),
@@ -128,4 +132,57 @@ const nmFp = nonMaterial.filter((r) => failedVerdict(r.verdict));
 if (!nmFp.length) console.log("  none");
 for (const r of nmFp) console.log(`  ${r.c.id} got ${r.verdict} claims=[${r.claims.map((c) => `${c.type}:${c.verdict}`).join(",")}]`);
 
-console.log("\nBASELINE IS IMMUTABLE EVIDENCE — the prototype was not modified for this run.");
+// ---------------------------------------------------------------------------
+// MATERIALITY DETECTOR — single frozen-heldout evaluation
+// ---------------------------------------------------------------------------
+const matExpected = results.filter((r) => r.c.materiality === "material");
+const nonExpected = results.filter((r) => r.c.materiality === "non-material");
+const isMat = (r: Result) => r.materiality === "MATERIAL_ASSERTION";
+
+console.log("\n==================== MATERIALITY DETECTOR ON FROZEN HELDOUT ====================");
+console.log(`  material recall (MATERIAL_ASSERTION) : ${matExpected.filter(isMat).length}/${matExpected.length}  ${pct(matExpected.filter(isMat).length, matExpected.length)}`);
+console.log(`  material → UNCERTAIN (safe, not success): ${matExpected.filter((r) => r.materiality === "UNCERTAIN").length}`);
+console.log(`  material → NON_MATERIAL (UNSAFE MISS)   : ${matExpected.filter((r) => r.materiality === "NON_MATERIAL").length}`);
+console.log(`  dangerous recall                        : ${dangerous.filter(isMat).length}/${dangerous.length}  ${pct(dangerous.filter(isMat).length, dangerous.length)}`);
+console.log(`  dangerous → UNCERTAIN                   : ${dangerous.filter((r) => r.materiality === "UNCERTAIN").length}`);
+console.log(`  dangerous → NON_MATERIAL (UNSAFE)       : ${dangerous.filter((r) => r.materiality === "NON_MATERIAL").length}`);
+console.log(`  non-material false alarms               : ${nonExpected.filter(isMat).length}/${nonExpected.length}  ${pct(nonExpected.filter(isMat).length, nonExpected.length)}`);
+console.log(`  total UNCERTAIN                         : ${results.filter((r) => r.materiality === "UNCERTAIN").length}`);
+
+for (const loc of ["en", "ar", "mixed"]) {
+  const m = matExpected.filter((r) => r.c.locale === loc);
+  const n = nonExpected.filter((r) => r.c.locale === loc);
+  console.log(`  ${loc.padEnd(6)} material recall ${String(m.filter(isMat).length).padStart(2)}/${String(m.length).padEnd(2)} ${pct(m.filter(isMat).length, m.length).padStart(6)} · false alarms ${n.filter(isMat).length}/${n.length}`);
+}
+
+const qc = results.filter((r) => r.c.modality === "QUESTION" || r.c.modality === "CONDITIONAL");
+console.log(`  questions + conditionals kept non-material: ${qc.filter((r) => r.materiality === "NON_MATERIAL").length}/${qc.length}`);
+
+console.log("\nCLAIM-OBLIGATION CONTRACT");
+const obl = new Map<string, number>();
+for (const r of results) obl.set(r.obligation, (obl.get(r.obligation) ?? 0) + 1);
+for (const [k, n] of [...obl.entries()].sort()) console.log(`  ${k.padEnd(24)} ${n}`);
+
+console.log("\nTHE 14 PREVIOUS DANGEROUS MISSES UNDER THE CONTRACT (must never be a silent pass)");
+for (const r of dangerMisses) {
+  console.log(`  ${r.c.id.padEnd(5)} materiality=${r.materiality.padEnd(19)} → ${r.obligation}`);
+}
+const silent = dangerMisses.filter((r) => r.obligation === "NOT_REQUIRED" || r.obligation === "OK");
+console.log(`  silent passes among them: ${silent.length}${silent.length ? " — " + silent.map((r) => r.c.id).join(",") : ""}`);
+
+console.log("\nMATERIAL CASES CLASSIFIED NON_MATERIAL (unsafe misses, if any)");
+const unsafe = matExpected.filter((r) => r.materiality === "NON_MATERIAL");
+if (!unsafe.length) console.log("  none");
+for (const r of unsafe) console.log(`  ${r.c.id} [${r.c.locale}] ${r.c.dangerous ? "DANGEROUS " : ""}${r.c.family} — ${r.c.text.slice(0, 80).replace(/\n/g, " ⏎ ")}`);
+
+console.log("\nUNCERTAIN CASES");
+const unc = results.filter((r) => r.materiality === "UNCERTAIN");
+if (!unc.length) console.log("  none");
+for (const r of unc) console.log(`  ${r.c.id} [${r.c.locale}] expected-materiality=${r.c.materiality} → ${r.obligation} — ${r.c.text.slice(0, 70).replace(/\n/g, " ⏎ ")}`);
+
+console.log("\nNON-MATERIAL FALSE ALARMS (detector said MATERIAL)");
+const fa = nonExpected.filter(isMat);
+if (!fa.length) console.log("  none");
+for (const r of fa) console.log(`  ${r.c.id} [${r.c.locale}] ${r.c.class} — ${r.c.text.slice(0, 80)}`);
+
+console.log("\nBASELINE IS IMMUTABLE EVIDENCE — the claims prototype was not modified for this run.");

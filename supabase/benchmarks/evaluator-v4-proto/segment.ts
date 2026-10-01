@@ -66,6 +66,13 @@ const SENTENCE_SPLIT = /(?<=[.!?؟])\s+/;
 const CLAUSE_SPLIT =
   /(?:\s*[;؛]\s*)|(?:,\s+but\s+)|(?:\s*،\s*لكن\s*)|(?:\s+while\s+)|(?:\s+whereas\s+)/;
 
+/**
+ * Arabic-safe word boundary. JavaScript's \b is defined over [A-Za-z0-9_], so
+ * `\bإذا\b` can never match and a bare Arabic token would otherwise match
+ * inside longer words.
+ */
+const AR = (tokens: string[]) => `(?<![\\u0621-\\u064A])(?:${tokens.join("|")})(?![\\u0621-\\u064A])`;
+
 /** Modality cues — English and Arabic are defined side by side, not mirrored. */
 const CUES: { modality: Modality; cue: string; re: RegExp }[] = [
   // direct interrogative
@@ -73,18 +80,20 @@ const CUES: { modality: Modality; cue: string; re: RegExp }[] = [
   {
     modality: "QUESTION",
     cue: "interrogative opener",
-    re: /^\s*(which|what|who|whom|when|where|do you|could you|can you|هل|ما|من|أي|أين|متى)\b/i,
+    // "ما" (also "still" in ما زال) and "من" (also the preposition "from") are
+    // too ambiguous to use as openers; genuine questions carry ؟, already a cue.
+    re: new RegExp(`^\\s*(?:(?:which|what|who|whom|when|where|do you|could you|can you|shall i)\\b|${AR(["هل", "أي", "أين", "متى", "كيف", "لماذا"])})`, "i"),
   },
   // embedded interrogative / hypothetical — not an assertion about the record
   {
     modality: "CONDITIONAL",
     cue: "embedded interrogative (whether/if)",
-    re: /\b(whether|if)\b|\bما إذا\b|\bإذا\b/i,
+    re: new RegExp(`\\b(?:whether|if)\\b|${AR(["إذا", "لو", "إن"])}`, "i"),
   },
   {
     modality: "CONDITIONAL",
     cue: "hypothetical modal",
-    re: /\b(would|were\s+\w+ed|unless)\b|\bسوف\s+لا\b|\bلو\b/i,
+    re: new RegExp(`\\b(?:would|were\\s+\\w+ed|unless)\\b|^\\s*had\\s+the\\b|${AR(["سيُغلق", "ستُغلق"])}`, "i"),
   },
   // someone/something else reported it — an attributed result, not the state
   {
