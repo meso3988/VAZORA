@@ -93,7 +93,9 @@ const CUES: { modality: Modality; cue: string; re: RegExp }[] = [
   {
     modality: "CONDITIONAL",
     cue: "hypothetical modal",
-    re: new RegExp(`\\b(?:would|were\\s+\\w+ed|unless)\\b|^\\s*had\\s+the\\b|${AR(["سيُغلق", "ستُغلق"])}`, "i"),
+    // "were uploaded" is ordinary passive past; only sentence-initial inversion
+    // ("Were the report uploaded, …") is subjunctive.
+    re: new RegExp(`\\b(?:would|unless)\\b|^\\s*were\\s+\\w+|^\\s*had\\s+the\\b`, "i"),
   },
   // someone/something else reported it — an attributed result, not the state
   {
