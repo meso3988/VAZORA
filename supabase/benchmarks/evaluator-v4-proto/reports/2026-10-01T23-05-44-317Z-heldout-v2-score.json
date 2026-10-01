@@ -1,0 +1,1556 @@
+{
+  "verdict": "FAIL",
+  "detectorCommit": "8928ced",
+  "detectorHashes": {
+    "arabic.ts": "2fae05606f507dd639a1252e05341992468cdbef69b85604eb7d96141291cc19",
+    "frames.ts": "d91a59d44908d21885a3a3d6881a98de4f20da6e5e6c2ddab8c6b17fdb2ee342",
+    "materiality.ts": "eb9b7d79cab440d2d8002b3a0cc795a8a0daafdaa686870ef78c5ee0d73e4fcb",
+    "segment.ts": "875421706e5c67258fc4671e83e697907d718aa3df26df0f16acc6cba5132756"
+  },
+  "dataset": {
+    "path": "/Users/mayasahaldashsh/heldout-v2-final.json",
+    "sha256": "0b94875366b86814cdf6f95689fe2a14d92f72d22a40a07ab268f553f81f8ac7",
+    "caseCount": 150
+  },
+  "adapter": {
+    "name": "evaluator-v4-heldout-v2-predict.ts",
+    "kind": "format-only",
+    "notes": [
+      "accepts a bare top-level JSON array of cases",
+      "projects each case to { id, text }; all label/metadata fields dropped before prediction",
+      "no locale passed: the frozen detector interface does not accept one",
+      "frozen segment() for segmentation and frozen rollUp() for aggregation",
+      "no classification logic added"
+    ]
+  },
+  "aggregationPolicy": "any unit MATERIAL_ASSERTION -> MATERIAL_ASSERTION; else any UNCERTAIN -> UNCERTAIN; else NON_MATERIAL",
+  "counts": {
+    "cases": 150,
+    "material": 90,
+    "nonMaterial": 60,
+    "dangerous": 54,
+    "dangerousMaterial": 53,
+    "dangerousUncertain": 1,
+    "dangerousNonMaterial": 0,
+    "materialDetected": 85,
+    "materialUncertain": 4,
+    "materialMissed": 1,
+    "enMaterial": [
+      37,
+      40
+    ],
+    "arMaterial": [
+      36,
+      36
+    ],
+    "mixedMaterial": [
+      12,
+      14
+    ],
+    "nonMaterialFalsePositive": 24,
+    "nonMaterialUncertain": 5,
+    "reviewBurden": 29
+  },
+  "perCase": [
+    {
+      "id": "HV2F-001",
+      "locale": "en",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-002",
+      "locale": "en",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-003",
+      "locale": "en",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-004",
+      "locale": "en",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-005",
+      "locale": "en",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-006",
+      "locale": "en",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-007",
+      "locale": "en",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-008",
+      "locale": "en",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-009",
+      "locale": "en",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-010",
+      "locale": "en",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-011",
+      "locale": "en",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-012",
+      "locale": "en",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-013",
+      "locale": "en",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-014",
+      "locale": "en",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-015",
+      "locale": "en",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-016",
+      "locale": "en",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-017",
+      "locale": "en",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-018",
+      "locale": "en",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-019",
+      "locale": "en",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-020",
+      "locale": "en",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-021",
+      "locale": "en",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-022",
+      "locale": "en",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-023",
+      "locale": "en",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-024",
+      "locale": "en",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-025",
+      "locale": "en",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-026",
+      "locale": "en",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-027",
+      "locale": "en",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-028",
+      "locale": "en",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-029",
+      "locale": "en",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-030",
+      "locale": "en",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-031",
+      "locale": "en",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-032",
+      "locale": "en",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-033",
+      "locale": "en",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-034",
+      "locale": "en",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-035",
+      "locale": "en",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-036",
+      "locale": "en",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-037",
+      "locale": "en",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-038",
+      "locale": "en",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-039",
+      "locale": "en",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-040",
+      "locale": "en",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-041",
+      "locale": "ar",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-042",
+      "locale": "ar",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-043",
+      "locale": "ar",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-044",
+      "locale": "ar",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-045",
+      "locale": "ar",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-046",
+      "locale": "ar",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-047",
+      "locale": "ar",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-048",
+      "locale": "ar",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-049",
+      "locale": "ar",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-050",
+      "locale": "ar",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-051",
+      "locale": "ar",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-052",
+      "locale": "ar",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-053",
+      "locale": "ar",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-054",
+      "locale": "ar",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 3
+    },
+    {
+      "id": "HV2F-055",
+      "locale": "ar",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-056",
+      "locale": "ar",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-057",
+      "locale": "ar",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-058",
+      "locale": "ar",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-059",
+      "locale": "ar",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-060",
+      "locale": "ar",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-061",
+      "locale": "ar",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-062",
+      "locale": "ar",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-063",
+      "locale": "ar",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-064",
+      "locale": "ar",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-065",
+      "locale": "ar",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-066",
+      "locale": "ar",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-067",
+      "locale": "ar",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-068",
+      "locale": "ar",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-069",
+      "locale": "ar",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-070",
+      "locale": "ar",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-071",
+      "locale": "ar",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-072",
+      "locale": "ar",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-073",
+      "locale": "ar",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-074",
+      "locale": "ar",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-075",
+      "locale": "ar",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-076",
+      "locale": "ar",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-077",
+      "locale": "mixed",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-078",
+      "locale": "mixed",
+      "family": "A",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-079",
+      "locale": "mixed",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-080",
+      "locale": "mixed",
+      "family": "B",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-081",
+      "locale": "mixed",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-082",
+      "locale": "mixed",
+      "family": "C",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-083",
+      "locale": "mixed",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-084",
+      "locale": "mixed",
+      "family": "D",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-085",
+      "locale": "mixed",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-086",
+      "locale": "mixed",
+      "family": "E",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-087",
+      "locale": "mixed",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-088",
+      "locale": "mixed",
+      "family": "F",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-089",
+      "locale": "mixed",
+      "family": "G",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-090",
+      "locale": "mixed",
+      "family": "H",
+      "modality": "ASSERTION",
+      "gold": "MATERIAL_ASSERTION",
+      "dangerous": true,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 3
+    },
+    {
+      "id": "HV2F-091",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-092",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-093",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-094",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-095",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-096",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-097",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-098",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-099",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-100",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-101",
+      "locale": "en",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-102",
+      "locale": "en",
+      "family": "modality",
+      "modality": "REPORTED_ATTRIBUTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-103",
+      "locale": "en",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-104",
+      "locale": "en",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-105",
+      "locale": "en",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-106",
+      "locale": "en",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-107",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-108",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-109",
+      "locale": "en",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-110",
+      "locale": "en",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-111",
+      "locale": "en",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-112",
+      "locale": "en",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-113",
+      "locale": "en",
+      "family": "modality",
+      "modality": "PROPOSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-114",
+      "locale": "en",
+      "family": "modality",
+      "modality": "PROPOSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-115",
+      "locale": "en",
+      "family": "modality",
+      "modality": "REFUSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-116",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-117",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-118",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-119",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-120",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-121",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-122",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-123",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-124",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-125",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-126",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 2
+    },
+    {
+      "id": "HV2F-127",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-128",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "REPORTED_ATTRIBUTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-129",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-130",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-131",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-132",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-133",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-134",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-135",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-136",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "UNCERTAIN",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-137",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-138",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-139",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "PROPOSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-140",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "PROPOSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-141",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "REFUSAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-142",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "REPORTED_ATTRIBUTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-143",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-144",
+      "locale": "ar",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-145",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "QUESTION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-146",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "CONDITIONAL",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-147",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "INSTRUCTION_TO_SYSTEM",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-148",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "FILLER",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-149",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "QUOTATION",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "MATERIAL_ASSERTION",
+      "unitCount": 1
+    },
+    {
+      "id": "HV2F-150",
+      "locale": "mixed",
+      "family": "modality",
+      "modality": "CAPABILITY",
+      "gold": "NON_MATERIAL",
+      "dangerous": false,
+      "predicted": "NON_MATERIAL",
+      "unitCount": 1
+    }
+  ]
+}
