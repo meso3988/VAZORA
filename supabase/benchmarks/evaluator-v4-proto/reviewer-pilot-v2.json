@@ -1,6 +1,6 @@
 {
   "pilot": "hybrid-semantic-reviewer-pilot-v2",
-  "status": "PREPARED — no generation request has been sent; max_tokens/output-token budget awaiting approval (see budget.decisionRequired)",
+  "status": "APPROVED FOR ONE RUN — option C; request bodies built and committed before the first call",
   "nature": "CALIBRATION / FEASIBILITY sample drawn from exposed evaluation evidence. NOT blind acceptance, NOT a materiality re-score, NOT evidence of production Officer accuracy.",
   "preservedResult": {
     "statement": "The frozen materiality detector's blind heldout-v2 result is FAIL and remains preserved unchanged.",
@@ -565,7 +565,7 @@
     "model": "claude-opus-5-5",
     "scope": "evaluation-only reviewer; the VAZORA Contract Officer model (gpt-5.6-sol) is not changed",
     "parameters": {
-      "max_tokens": "PENDING APPROVAL — see budget.decisionRequired",
+      "max_tokens": 4000,
       "thinking": {
         "type": "adaptive"
       },
@@ -605,9 +605,10 @@
     "approvedLimits": {
       "maxRequests": 24,
       "maxInputTokens": 100000,
-      "maxOutputTokens": 36000,
-      "maxCostUsd": 1.5,
-      "max_tokens_perRequest_asPlanned": 1500
+      "maxOutputTokensIncludingThinking": 96000,
+      "maxCostUsdTotal": 2.2,
+      "max_tokens_perRequest": 4000,
+      "approval": "option C, explicitly approved for this pilot only; the $2.20 cap is a total, not per request; these are ceilings, not targets"
     },
     "attemptsPolicy": "exactly one attempt per case; no automatic retry; no extra generation request for health checks; a transport, truncation or parse failure is E8 INCOMPLETE for that case",
     "preRequestGuard": "before EACH request: counted input tokens (x1.05 margin) + max_tokens must fit the remaining input-token, output-token and dollar budget; otherwise stop and report INCOMPLETE. After each response, reconcile with the returned usage.",
@@ -634,7 +635,7 @@
         "worstCaseCostUsd": 2.153,
         "changes": "output-token cap 36,000 -> 96,000; dollar cap $1.50 -> $2.20"
       },
-      "status": "AWAITING APPROVAL — no generation request will be sent until one option is approved; final request bodies are then built, hashed and committed before the first call"
+      "status": "RESOLVED — option C approved"
     },
     "inputCounted": {
       "source": "reports/2026-10-02T00-55-41-556Z-reviewer-pilot-v2-token-count.json",
@@ -642,7 +643,14 @@
       "inputTokensMaxSingle": 2394,
       "withMargin5pct": 58204,
       "inputCostUsdWithMargin": 0.233
-    }
+    },
+    "stopRules": [
+      "before each request: counted input x1.05 + 4000 output must fit the remaining input tokens, output tokens and dollars; if not, stop (no cap raise)",
+      "HTTP 401/403, or an error indicating insufficient credit -> BLOCKED; stop; no provider change; no top-up",
+      "HTTP 400 invalid_request_error not related to credit -> configuration fault; stop as INCOMPLETE (settings are fixed and are not changed mid-run)",
+      "HTTP 429/5xx/network failure on a case -> that case is E8; no retry; continue",
+      "stop_reason max_tokens -> saved, scored E8 INCOMPLETE, not evidence either way; not retried or continued"
+    ]
   },
   "rawResponseCapture": {
     "requestsFile": "reports/<timestamp>-reviewer-pilot-v2-requests.json — exact request bodies + sha256 + counted input tokens, committed before any generation request",
@@ -682,6 +690,13 @@
         "E7_UNCERTAIN (separate; never counted as correct)"
       ],
       "disagreements": "both sides and the reviewer reasoning are preserved; the reference is never changed after seeing a verdict"
+    },
+    "parseRules": {
+      "textSelection": "reviewer output is the concatenation of content blocks of type \"text\"; thinking blocks are ignored and selected by type, never by position",
+      "json": "the text must contain exactly one JSON object; surrounding markdown fences are tolerated and recorded as a format note, anything else unparseable is E8",
+      "schemaE8": "missing caseId/units/coverage, units not an array, or a unit without span/assertion/verdict/sourceRefs makes the response unscoreable -> E8",
+      "schemaLogged": "internal inconsistencies (e.g. NON_ASSERTION unit carrying a claim) are logged but do not by themselves make the response unscoreable",
+      "sourceRefResolution": "dotted paths resolved against the exact sources sent; array indexes accepted as .N or [N]; an unresolvable path is E6 and voids that unit verdict to REVIEWER_UNCERTAIN"
     }
   },
   "hardChecksIndependence": "The existing deterministic checks (authorization, tenant isolation, citation identity/scope, database effects, idempotency, actual action states, supported numerical calculations) are unchanged and remain authoritative. A semantic reviewer verdict can never override a deterministic security failure, its output carries no confidence score, and any source reference it cites is validated mechanically. This calibration pilot has no tool traces or database effects, so those checks are not exercised here.",
