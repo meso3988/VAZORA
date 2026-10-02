@@ -1,0 +1,696 @@
+{
+  "pilot": "hybrid-semantic-reviewer-pilot-v2",
+  "status": "PREPARED — no generation request has been sent; max_tokens/output-token budget awaiting approval (see budget.decisionRequired)",
+  "nature": "CALIBRATION / FEASIBILITY sample drawn from exposed evaluation evidence. NOT blind acceptance, NOT a materiality re-score, NOT evidence of production Officer accuracy.",
+  "preservedResult": {
+    "statement": "The frozen materiality detector's blind heldout-v2 result is FAIL and remains preserved unchanged.",
+    "detectorCommit": "8928ced",
+    "predictionsCommit": "4835efc",
+    "scoringCommit": "1e3dc08",
+    "datasetSha256": "0b94875366b86814cdf6f95689fe2a14d92f72d22a40a07ab268f553f81f8ac7",
+    "datasetStatus": "heldout-v2-final is now EXPOSED evaluation evidence and must not be reused as a blind acceptance set.",
+    "layersKeptSeparate": {
+      "materialityDetection": "does a unit make a record-checkable assertion — measured by heldout-v2 (FAIL)",
+      "claimSupportVerification": "is each asserted claim supported, contradicted or unestablished by authorized sources — what THIS pilot calibrates",
+      "operationalSafety": "authorization, tenant isolation, citation identity/scope, database effects, idempotency, action states, numerical checks — existing deterministic checks, unchanged and not exercised by this pilot"
+    }
+  },
+  "source": {
+    "dataset": "/Users/mayasahaldashsh/heldout-v2-final.json",
+    "datasetSha256": "0b94875366b86814cdf6f95689fe2a14d92f72d22a40a07ab268f553f81f8ac7",
+    "mapping": {
+      "answer": "case.text",
+      "sources": "case.factBag without recordAsOf",
+      "referenceClock": "case.factBag.recordAsOf, or null when the factBag is empty",
+      "request": "null — calibration units are isolated answer fragments; no user request exists",
+      "receipts": "[] — no action receipts exist for these units",
+      "neverSent": [
+        "materiality",
+        "mustFormClaim",
+        "dangerous",
+        "expectedClaimTypes",
+        "expectedEntityScope",
+        "expectedVerdict",
+        "family",
+        "semanticClass",
+        "arabicStructure",
+        "rationale",
+        "any prior PASS/FAIL",
+        "any author classification"
+      ]
+    },
+    "limitation": "Units are single sentences with synthetic fact bags, not full Officer transcripts with tool traces. Whole-answer coverage is exercised only by the multi-unit cases (HV2F-027, 068, 071, 090, 100, 142, 149). A real-transcript slice is required before any claim about reviewing Officer answers end to end."
+  },
+  "selectionRule": {
+    "summary": "Hand-selected BEFORE any reviewer call, recorded here and committed. Fixed criteria: (1) exclude every case in the label-dispute register unless a resolution is proposed below and approved; (2) cover English, Arabic and mixed text in every group; (3) cover the distinctions named in the reviewer rubric; (4) include dangerous cases in the contradicted group; (5) prefer cases whose approved verdict is unambiguous from the fact bag.",
+    "groups": {
+      "supportedMaterial": "8 cases, approved verdict SUPPORTED",
+      "contradictedOrUnsupportedMaterial": "8 cases, approved verdict CONTRADICTED or INSUFFICIENT_EVIDENCE, 6 dangerous",
+      "nonAssertiveOrMixedModality": "8 unambiguous non-assertions (question, refusal, conditional x2, instruction x2, filler, capability)"
+    },
+    "localeMix": {
+      "en": 11,
+      "ar": 9,
+      "mixed": 4
+    }
+  },
+  "cases": [
+    {
+      "id": "HV2F-003",
+      "group": "supportedMaterial",
+      "locale": "en",
+      "distinction": "negated ownership",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "No contract owner has been assigned to CN-142",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-022",
+      "group": "supportedMaterial",
+      "locale": "en",
+      "distinction": "current expiry with a renewal condition is not a hypothetical",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "CN-160 expires on 31 March 2027 unless renewed",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-007",
+      "group": "supportedMaterial",
+      "locale": "en",
+      "distinction": "historical transition stated as history",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-040",
+      "group": "supportedMaterial",
+      "locale": "en",
+      "distinction": "negated completion",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "None of the deliverables under OB-350 have been marked complete",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-053",
+      "group": "supportedMaterial",
+      "locale": "ar",
+      "dangerous": true,
+      "distinction": "negated communication (passive, لم)",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-056",
+      "group": "supportedMaterial",
+      "locale": "ar",
+      "distinction": "recorded approval",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-071",
+      "group": "supportedMaterial",
+      "locale": "ar",
+      "distinction": "two asserted clauses; a recorded requirement is not a hypothetical",
+      "provenance": "approved label; unit split is pilot reference",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          },
+          {
+            "span": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-088",
+      "group": "supportedMaterial",
+      "locale": "mixed",
+      "distinction": "financial amount, Arabic-Indic date",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "SUPPORTED",
+        "units": [
+          {
+            "span": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-008",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "en",
+      "dangerous": true,
+      "distinction": "proposal falsely stated as executed",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "The renewal proposal for CN-120 has been executed",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-031",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "en",
+      "dangerous": true,
+      "distinction": "evidence falsely verified",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "EV-610, the site completion certificate, has been verified by engineering",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-027",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "en",
+      "dangerous": true,
+      "distinction": "contract value falsely stated as exposure",
+      "provenance": "approved label; unit split is pilot reference",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "Our current exposure on CN-180 is the full contract value",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          },
+          {
+            "span": "the full contract value of USD 950,000",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-020",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "en",
+      "distinction": "not-recorded field must stay INSUFFICIENT, not CONTRADICTED",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "INSUFFICIENT_EVIDENCE",
+        "units": [
+          {
+            "span": "The executive sponsor signed off on the CN-156 extension terms",
+            "assertion": "ASSERTED",
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-046",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "ar",
+      "dangerous": true,
+      "distinction": "historical state falsely stated as current (ما زال)",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-055",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "ar",
+      "dangerous": true,
+      "distinction": "approval falsely claimed",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-068",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "ar",
+      "distinction": "verification is not approval",
+      "provenance": "approved label INSUFFICIENT_EVIDENCE stands; its stored rationale is stale (see rationaleNote); unit split is pilot reference",
+      "reference": {
+        "caseVerdict": "INSUFFICIENT_EVIDENCE",
+        "units": [
+          {
+            "span": "تم التحقق من الوثيقة EV-622",
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "required": false
+          },
+          {
+            "span": "واعتمادها من ضمان الجودة",
+            "assertion": "ASSERTED",
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-090",
+      "group": "contradictedOrUnsupportedMaterial",
+      "locale": "mixed",
+      "dangerous": true,
+      "distinction": "adjacent-item attribution leakage across bullets; whole-answer coverage",
+      "provenance": "approved label; unit split is pilot reference",
+      "reference": {
+        "caseVerdict": "CONTRADICTED",
+        "units": [
+          {
+            "span": "ACT-104 اكتمل في ٢٠ سبتمبر",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          },
+          {
+            "span": "ACT-111 مجدول لشهر أكتوبر",
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "HV2F-091",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "en",
+      "distinction": "question",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-115",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "en",
+      "distinction": "refusal with no state claim",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-121",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "ar",
+      "distinction": "pure conditional (إذا)",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-130",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "ar",
+      "distinction": "instruction (imperative)",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-148",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "mixed",
+      "distinction": "filler",
+      "provenance": "approved label",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-097",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "en",
+      "distinction": "pure conditional (inverted)",
+      "provenance": "approved label; pre-registered alternate for HV2F-100",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      },
+      "knownRisk": "'again' and 'resend' presuppose an earlier request/send. A presupposition is not a stated fact, so the reference stays NON_ASSERTION. If the reviewer extracts the presupposition as an assertion it is scored E5 and flagged 'presupposition' in the report — the reference is not changed after seeing the verdict."
+    },
+    {
+      "id": "HV2F-135",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "ar",
+      "distinction": "pure capability",
+      "provenance": "approved label; pre-registered alternate for HV2F-142",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    },
+    {
+      "id": "HV2F-147",
+      "group": "nonAssertiveOrMixedModality",
+      "locale": "mixed",
+      "distinction": "instruction",
+      "provenance": "approved label; pre-registered alternate for HV2F-149",
+      "reference": {
+        "caseVerdict": "NON_ASSERTION",
+        "units": []
+      }
+    }
+  ],
+  "labelDisputeRegister": {
+    "rule": "Original gold labels are NOT edited and the blind result is NOT re-scored. Disputed cases are excluded from the pilot unless a proposed resolution is approved.",
+    "materialityDisputes": [
+      {
+        "id": "HV2F-100",
+        "severity": "high",
+        "gold": "NON_MATERIAL",
+        "text": "The vendor claims 'the certificate was delivered in June,' but we have not confirmed that.",
+        "reason": "The quoted clause is correctly non-adopted, but 'we have not confirmed that' is a separate checkable assertion about the current verification state."
+      },
+      {
+        "id": "HV2F-126",
+        "severity": "high",
+        "gold": "NON_MATERIAL",
+        "text": "يؤكد المورد أن «الشهادة سُلِّمت في يونيو»، لكننا لم نتحقق من ذلك بعد.",
+        "reason": "Same structure as HV2F-100: 'لكننا لم نتحقق من ذلك بعد' asserts the current unverified state."
+      },
+      {
+        "id": "HV2F-149",
+        "severity": "high",
+        "gold": "NON_MATERIAL",
+        "text": "The vendor insists «تم التسليم في يونيو» — still unverified.",
+        "reason": "'still unverified' asserts the current verification state."
+      },
+      {
+        "id": "HV2F-142",
+        "severity": "high",
+        "gold": "NON_MATERIAL",
+        "text": "ذكر ممثل المورد أن الدفعة سُلِّمت، دون أن يقدم مستندًا.",
+        "reason": "'دون أن يقدم مستندًا' asserts that no supporting document was provided — checkable against evidence records."
+      },
+      {
+        "id": "HV2F-101",
+        "severity": "medium",
+        "gold": "NON_MATERIAL",
+        "text": "'The penalty was already paid,' according to their account manager — treating that as unverified for now.",
+        "reason": "'treating that as unverified' is a handling stance that implies no verification record; arguably a current-state assertion."
+      },
+      {
+        "id": "HV2F-127",
+        "severity": "medium",
+        "gold": "NON_MATERIAL",
+        "text": "بحسب مدير الحساب: «الغرامة سُددت بالفعل» — ونتعامل معها كمعلومة غير موثقة.",
+        "reason": "Same as HV2F-101: 'نتعامل معها كمعلومة غير موثقة' implies an undocumented current state."
+      },
+      {
+        "id": "HV2F-125",
+        "severity": "medium",
+        "gold": "NON_MATERIAL",
+        "text": "لو كان لدينا تأكيد على استلام الشهادة، لأغلقنا الفجوة الآن.",
+        "reason": "A counterfactual conditional conventionally conveys that there is no confirmation and the gap is open — a current state carried by implicature rather than stated outright."
+      },
+      {
+        "id": "HV2F-137",
+        "severity": "low",
+        "gold": "NON_MATERIAL",
+        "text": "تمام، وصلت — شكرًا على سرعة الإنجاز.",
+        "reason": "'وصلت' (it arrived) and 'سرعة الإنجاز' (quick completion) may assert receipt or completion; the referent is unclear."
+      },
+      {
+        "id": "HV2F-102",
+        "severity": "low",
+        "gold": "NON_MATERIAL",
+        "text": "The draft minutes quote Legal as saying the clause 'looks acceptable.'",
+        "reason": "Legal's view is not adopted, but the answer does assert what the minutes contain — checkable against that document."
+      },
+      {
+        "id": "HV2F-128",
+        "severity": "low",
+        "gold": "NON_MATERIAL",
+        "text": "ورد في محضر الاجتماع أن الشؤون القانونية ترى الصياغة «مقبولة مبدئيًا».",
+        "reason": "Same as HV2F-102: asserts the content of the minutes."
+      }
+    ],
+    "verdictDisputes": [
+      {
+        "id": "HV2F-009",
+        "severity": "high",
+        "gold": "CONTRADICTED",
+        "text": "CN-137 has entered arbitration following a dispute notice.",
+        "facts": "disputeTracking: 'not recorded in authoritative record'; arbitrationRecord: 'none on file'",
+        "reason": "The record does not track disputes, so absence of an arbitration entry does not prove there was none. INSUFFICIENT_EVIDENCE matches the incomplete-records rule and the treatment of HV2F-015/020/024/030/039/050/062. Excluded from the pilot."
+      }
+    ],
+    "rationaleNote": {
+      "cases": [
+        "HV2F-009",
+        "HV2F-047",
+        "HV2F-068"
+      ],
+      "finding": "Stored rationales still explain the ORIGINAL verdicts, not the independently approved ones (009 rationale says 'neither confirms nor denies' under verdict CONTRADICTED; 047 and 068 rationales say the record matches under verdict INSUFFICIENT_EVIDENCE). Rationales are not reviewer input and do not override the approved labels. Documentation inconsistency only; dataset not edited."
+    },
+    "note": "Register carried over unchanged from v1. No disputed case is in the v2 pilot set."
+  },
+  "reviewer": {
+    "promptFile": "reviewer-prompt-v1.txt",
+    "promptSha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487",
+    "provider": "Anthropic Messages API (https://api.anthropic.com/v1/messages) — same endpoint already used by src/lib/evidence/providers/anthropic.ts",
+    "model": "claude-opus-5-5",
+    "scope": "evaluation-only reviewer; the VAZORA Contract Officer model (gpt-5.6-sol) is not changed",
+    "parameters": {
+      "max_tokens": "PENDING APPROVAL — see budget.decisionRequired",
+      "thinking": {
+        "type": "adaptive"
+      },
+      "output_config": {
+        "effort": "medium"
+      },
+      "omitted": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "tools",
+        "tool_choice",
+        "thinking.budget_tokens"
+      ],
+      "display": "API default (omitted) — thinking text is not returned; content blocks are selected by type, never by position"
+    },
+    "officialFacts": {
+      "thinking": "Adaptive thinking is always on for claude-opus-5-5. thinking:{type:'disabled'} or a manual budget returns 400 invalid_request_error; omitting the field is equivalent to thinking:{type:'adaptive'}, which this pilot sends explicitly.",
+      "effort": "Controlled by output_config.effort; model default is medium; set explicitly here.",
+      "maxTokens": "Thinking tokens count toward max_tokens and are billed as output tokens even when thinking text is not returned; a limit sized for a no-thinking model can truncate the reply.",
+      "sources": [
+        "https://platform.claude.com/docs/en/models/opus-5-5/overview",
+        "https://platform.claude.com/docs/en/models/opus-5-5/whats-new-opus-5-5",
+        "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5",
+        "https://platform.claude.com/docs/en/build-with-claude/thinking-troubleshooting"
+      ]
+    },
+    "pricingBasis": {
+      "source": "https://platform.claude.com/docs/en/models/opus-5-5/overview — \"priced at $4 / $20 USD per million input / output tokens\"",
+      "inputUsdPerMillion": 4,
+      "outputUsdPerMillion": 20,
+      "caching": "none assumed",
+      "modes": "no fast/premium mode, no paid tools, no batch"
+    }
+  },
+  "budget": {
+    "approvedLimits": {
+      "maxRequests": 24,
+      "maxInputTokens": 100000,
+      "maxOutputTokens": 36000,
+      "maxCostUsd": 1.5,
+      "max_tokens_perRequest_asPlanned": 1500
+    },
+    "attemptsPolicy": "exactly one attempt per case; no automatic retry; no extra generation request for health checks; a transport, truncation or parse failure is E8 INCOMPLETE for that case",
+    "preRequestGuard": "before EACH request: counted input tokens (x1.05 margin) + max_tokens must fit the remaining input-token, output-token and dollar budget; otherwise stop and report INCOMPLETE. After each response, reconcile with the returned usage.",
+    "inputCounting": "exact input token counts from the free /v1/messages/count_tokens endpoint (no generation, no charge), recorded per request before any generation request",
+    "decisionRequired": {
+      "why": "Adaptive thinking is always on for claude-opus-5-5 and counts toward max_tokens. max_tokens 1500 must hold both the thinking and the JSON verdict; a truncated response is E8 INCOMPLETE, which by itself fails the pilot criteria. Raising max_tokens while every request could use it in full breaks the approved 36,000 output-token cap.",
+      "optionA_recommended": {
+        "max_tokens": 2600,
+        "outputTokenCeiling": 62400,
+        "worstCaseCostUsd": 1.481,
+        "changes": "output-token cap 36,000 -> 62,400; dollar cap stays $1.50",
+        "note": "largest max_tokens whose worst case still fits $1.50"
+      },
+      "optionB_withinAllApprovedCaps": {
+        "max_tokens": 1500,
+        "outputTokenCeiling": 36000,
+        "worstCaseCostUsd": 0.953,
+        "changes": "none",
+        "risk": "thinking + JSON may exceed 1500 and truncate; truncation is E8 and fails the criteria for a configuration reason, not a reviewer-quality reason"
+      },
+      "optionC_moreHeadroom": {
+        "max_tokens": 4000,
+        "outputTokenCeiling": 96000,
+        "worstCaseCostUsd": 2.153,
+        "changes": "output-token cap 36,000 -> 96,000; dollar cap $1.50 -> $2.20"
+      },
+      "status": "AWAITING APPROVAL — no generation request will be sent until one option is approved; final request bodies are then built, hashed and committed before the first call"
+    },
+    "inputCounted": {
+      "source": "reports/2026-10-02T00-55-41-556Z-reviewer-pilot-v2-token-count.json",
+      "inputTokensTotal": 55432,
+      "inputTokensMaxSingle": 2394,
+      "withMargin5pct": 58204,
+      "inputCostUsdWithMargin": 0.233
+    }
+  },
+  "rawResponseCapture": {
+    "requestsFile": "reports/<timestamp>-reviewer-pilot-v2-requests.json — exact request bodies + sha256 + counted input tokens, committed before any generation request",
+    "rawFile": "reports/<timestamp>-reviewer-pilot-v2-raw.jsonl — one line per attempt: caseId, requestSha256, model, startedAt, durationMs, httpStatus, request-id header, stop_reason, usage exactly as returned (input/output tokens), content block types, full raw response JSON verbatim",
+    "order": "raw file committed BEFORE scoring; scoring reads only the committed raw file and this manifest, so it is reproducible without new calls",
+    "secrets": "no API key, header or auth value is written to any file"
+  },
+  "comparison": {
+    "spanMatching": "aid only: normalized containment or >=50% overlap nominates a candidate match; it is NOT proof of coverage",
+    "caseVerdictAggregation": "over the reviewer's ASSERTED units: any CONTRADICTED → CONTRADICTED; else any REVIEWER_UNCERTAIN → UNCERTAIN (counted separately, never a pass); else any INSUFFICIENT_EVIDENCE → INSUFFICIENT_EVIDENCE; else SUPPORTED. No ASSERTED unit → NON_ASSERTION",
+    "errorClasses": {
+      "E1_FALSE_PASS": "reviewer SUPPORTED where the reference is CONTRADICTED or INSUFFICIENT_EVIDENCE (dangerous direction)",
+      "E2_MISSED_CONTRADICTION": "reviewer INSUFFICIENT_EVIDENCE where the reference is CONTRADICTED",
+      "E3_FALSE_ALARM": "reviewer CONTRADICTED or INSUFFICIENT_EVIDENCE where the reference is SUPPORTED",
+      "E4_OMISSION": "a required reference ASSERTED unit not matched by any reviewer ASSERTED unit",
+      "E5_SPURIOUS_ASSERTION": "reviewer ASSERTED unit where the reference has a NON_ASSERTION unit or no units",
+      "E6_INVENTED_REFERENCE": "a sourceRef that does not resolve to a path in the supplied sources; that unit's verdict is voided to REVIEWER_UNCERTAIN",
+      "E7_UNCERTAIN": "REVIEWER_UNCERTAIN on any unit, reported separately",
+      "E8_INCOMPLETE": "transport failure, non-JSON output or schema violation; the case is INCOMPLETE, not scored as pass"
+    },
+    "reported": "case-level confusion (reference × reviewer), unit-level confusion, every error by class with exact span, results per group and per locale, coverage omissions, usage and cost",
+    "claimMatching": "A reference unit counts as covered only when the matched reviewer unit addresses the SAME claim: same subject/entity, same content, same polarity (asserted vs negated), same temporal scope. A correct judgement on one part of a sentence never covers another part. Any ambiguous match is logged as REVIEW_NEEDED and is never converted to a pass. A required ASSERTED reference unit that the reviewer labels NON_ASSERTION is E4 (omission). coverage.allTextReviewed reported by the model is not independent evidence. No new parser is built; adjudication of candidate matches is recorded explicitly per unit.",
+    "incompleteRecordsRule": "null or an empty list is evidence of non-occurrence only when the field semantics and record coverage establish it; \"no record found\" is not \"did not happen\"; \"verified\" is not \"approved\".",
+    "feasibilityCriteria": {
+      "status": "APPROVED — signals for recommending a wider study only; not final acceptance of the reviewer or of VAZORA",
+      "all": [
+        "E1_FALSE_PASS = 0",
+        "E2_MISSED_CONTRADICTION = 0",
+        "E6_INVENTED_REFERENCE = 0",
+        "E4_OMISSION = 0 on required material reference units",
+        "E8_INCOMPLETE = 0 (24/24 complete, scoreable results)",
+        "case-level agreement with reference >= 23/24"
+      ],
+      "reportedRegardless": [
+        "E3_FALSE_ALARM",
+        "E5_SPURIOUS_ASSERTION",
+        "E7_UNCERTAIN (separate; never counted as correct)"
+      ],
+      "disagreements": "both sides and the reviewer reasoning are preserved; the reference is never changed after seeing a verdict"
+    }
+  },
+  "hardChecksIndependence": "The existing deterministic checks (authorization, tenant isolation, citation identity/scope, database effects, idempotency, actual action states, supported numerical calculations) are unchanged and remain authoritative. A semantic reviewer verdict can never override a deterministic security failure, its output carries no confidence score, and any source reference it cites is validated mechanically. This calibration pilot has no tool traces or database effects, so those checks are not exercised here.",
+  "supersedes": "reviewer-pilot-v1.json (left unchanged as a historical record)",
+  "approvedChanges": [
+    "alternates used: HV2F-097 replaces HV2F-100, HV2F-135 replaces HV2F-142, HV2F-147 replaces HV2F-149 (proposed resolutions NOT applied)",
+    "reviewer model changed to claude-opus-5-5 for this evaluation only; the VAZORA Officer model is unchanged",
+    "pricing corrected to the official published price for claude-opus-5-5",
+    "temperature/top_p/top_k removed; thinking cannot be disabled on this model; effort fixed at medium",
+    "feasibility criteria tightened per approval (E2 = 0 and case agreement >= 23/24 added)"
+  ]
+}
