@@ -28,11 +28,14 @@ const sha = (b: Buffer | string) => createHash("sha256").update(b).digest("hex")
 const doCount = process.argv.includes("--count");
 
 type Unit = { span: string; assertion: string; sourceRef?: string; verdict: string; required: boolean; referenceStatus: string };
-type Spec = { id: string; group: string; origin: string; report: string; run: number; scenario: string; locale: string; clock?: string; perturbation?: { find: string; replace: string; change: string }; units: Unit[] };
+type HistoricalContext = { key: string; receivedByOfficerAtAnswerTime: boolean; origin: string; content: string };
+type Spec = { id: string; group: string; origin: string; report: string; run: number; scenario: string; locale: string; clock?: string; perturbation?: { find: string; replace: string; change: string }; units: Unit[]; historicalContext?: HistoricalContext[] };
 type Trace = { tool: string; args: unknown; ok: boolean; payload: string };
 type Turn = { question: string; text: string; trace: Trace[]; citations: unknown[]; actionsDelta: number; proposedActionIds: string[]; uncertainty: unknown };
 
-const specFile = join(protoDir, "fullanswer-validation-v1.references.json");
+// --refs=v2 selects the reference version; default v1 keeps the original build reproducible
+const refsVersion = process.argv.find((a) => a.startsWith("--refs="))?.slice(7) ?? "v1";
+const specFile = join(protoDir, `fullanswer-validation-${refsVersion}.references.json`);
 const specBytes = readFileSync(specFile);
 const spec: { study: string; cases: Spec[] } = JSON.parse(specBytes.toString("utf8"));
 const frozenBytes = readFileSync(join(protoDir, "reviewer-frozen-v1.json"));
@@ -77,6 +80,10 @@ const packages = spec.cases.map((c) => {
     try { result = JSON.parse(tr.payload); } catch { result = tr.payload; }
     sources[`t${i + 1}:${tr.tool}`] = { args: tr.args, ok: tr.ok, result };
   });
+  // audit context: never a tool result; each entry states whether the Officer received it
+  for (const h of c.historicalContext ?? []) {
+    sources[`historical-context:${h.key}`] = { receivedByOfficerAtAnswerTime: h.receivedByOfficerAtAnswerTime, origin: h.origin, content: h.content };
+  }
   const receipts = [{ turn: 1, actionsDelta: t.actionsDelta, proposedActionIds: t.proposedActionIds }];
   const tz = run.fixtureIdentity?.timezone ?? "Asia/Riyadh";
   const date = c.clock ?? res.referenceDate ?? run.fixtureIdentity?.today ?? null;
@@ -110,12 +117,21 @@ const packages = spec.cases.map((c) => {
     body,
     referenceUnits: c.units.length,
     requiredAssertedUnits: c.units.filter((u) => u.required && u.assertion === "ASSERTED").length,
-    proposedReferenceUnits: c.units.filter((u) => u.referenceStatus !== "FIXED").length,
+    proposedReferenceUnits: c.units.filter((u) => u.referenceStatus.startsWith("PROPOSED")).length,
+    unitOffsets: c.units.map((u) => ({ span: u.span, answerOffset: answer.indexOf(u.span) })),
+    derivedCaseVerdict: caseVerdict(c.units),
   };
 });
 
+function caseVerdict(units: Unit[]): string {
+  const v = units.filter((u) => u.assertion === "ASSERTED").map((u) => u.verdict);
+  if (v.includes("CONTRADICTED")) return "CONTRADICTED";
+  if (v.includes("INSUFFICIENT_EVIDENCE")) return "INSUFFICIENT_EVIDENCE";
+  return v.length ? "SUPPORTED" : "NON_ASSERTION";
+}
+
 // leakage audit on what would be sent: no reference labels, no origin tag
-const leakTerms = ["CONTROLLED PERTURBATION", "referenceStatus", "\"verdict\":\"SUPPORTED\"", "expectedVerdict", "group\":"];
+const leakTerms = ["CONTROLLED PERTURBATION", "referenceStatus", "\"verdict\":\"SUPPORTED\"", "expectedVerdict", "group\":", "basisAndLimits", "correctionNote", "INDEPENDENT REVIEWER"];
 for (const p of packages) {
   const sent = p.body.messages[0].content;
   for (const term of leakTerms) if (sent.includes(term)) problems.push(`${p.id}: leakage term in request: ${term}`);
@@ -159,12 +175,12 @@ async function main() {
     inputTokensCounted: counts,
     packages: packages.map((p) => ({ ...p, countedInputTokens: counts?.[p.id] ?? null })),
   };
-  const file = join(protoDir, "reports", `${builtAt.replace(/[:.]/g, "-")}-fullanswer-v1-requests.json`);
+  const file = join(protoDir, "reports", `${builtAt.replace(/[:.]/g, "-")}-fullanswer-${refsVersion}-requests.json`);
   writeFileSync(file, JSON.stringify(out, null, 2));
-  console.log(`generation requests 0 · packages ${packages.length} · problems ${problems.length}`);
+  console.log(`generation requests 0 · references ${refsVersion} · packages ${packages.length} · problems ${problems.length}`);
   for (const pr of problems) console.log(`  PROBLEM ${pr}`);
   for (const p of out.packages) {
-    console.log(`  ${p.id} [${p.locale}/${p.group}/${p.origin === "HISTORICAL" ? "hist" : "PERTURB"}] units=${p.referenceUnits} required=${p.requiredAssertedUnits} proposed=${p.proposedReferenceUnits} in=${p.countedInputTokens ?? "-"} sha=${p.requestSha256.slice(0, 12)}`);
+    console.log(`  ${p.id} [${p.locale}/${p.group}/${p.origin === "HISTORICAL" ? "hist" : "PERTURB"}] units=${p.referenceUnits} required=${p.requiredAssertedUnits} proposed=${p.proposedReferenceUnits} case=${p.derivedCaseVerdict} in=${p.countedInputTokens ?? "-"} sha=${p.requestSha256.slice(0, 12)}`);
   }
   if (counts) console.log(`input tokens total ${Object.values(counts).reduce((a, b) => a + b, 0)} · max ${Math.max(...Object.values(counts))}`);
   console.log(`written ${file}`);
