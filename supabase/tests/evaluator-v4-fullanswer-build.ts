@@ -28,7 +28,7 @@ const sha = (b: Buffer | string) => createHash("sha256").update(b).digest("hex")
 const doCount = process.argv.includes("--count");
 
 type Unit = { span: string; assertion: string; sourceRef?: string; verdict: string; required: boolean; referenceStatus: string };
-type HistoricalContext = { key: string; receivedByOfficerAtAnswerTime: boolean; origin: string; content: string };
+type HistoricalContext = { key: string; sourceKey?: string; receivedByOfficerAtAnswerTime: boolean; origin: string; content: string };
 type Spec = { id: string; group: string; origin: string; report: string; run: number; scenario: string; locale: string; clock?: string; perturbation?: { find: string; replace: string; change: string }; units: Unit[]; historicalContext?: HistoricalContext[] };
 type Trace = { tool: string; args: unknown; ok: boolean; payload: string };
 type Turn = { question: string; text: string; trace: Trace[]; citations: unknown[]; actionsDelta: number; proposedActionIds: string[]; uncertainty: unknown };
@@ -82,7 +82,7 @@ const packages = spec.cases.map((c) => {
   });
   // audit context: never a tool result; each entry states whether the Officer received it
   for (const h of c.historicalContext ?? []) {
-    sources[`historical-context:${h.key}`] = { receivedByOfficerAtAnswerTime: h.receivedByOfficerAtAnswerTime, origin: h.origin, content: h.content };
+    sources[h.sourceKey ?? `historical-context:${h.key}`] = { receivedByOfficerAtAnswerTime: h.receivedByOfficerAtAnswerTime, origin: h.origin, content: h.content };
   }
   const receipts = [{ turn: 1, actionsDelta: t.actionsDelta, proposedActionIds: t.proposedActionIds }];
   const tz = run.fixtureIdentity?.timezone ?? "Asia/Riyadh";
@@ -125,6 +125,7 @@ const packages = spec.cases.map((c) => {
 
 function caseVerdict(units: Unit[]): string {
   const v = units.filter((u) => u.assertion === "ASSERTED").map((u) => u.verdict);
+  if (v.includes("PENDING_INDEPENDENT_DETERMINATION")) return "UNDETERMINED";
   if (v.includes("CONTRADICTED")) return "CONTRADICTED";
   if (v.includes("INSUFFICIENT_EVIDENCE")) return "INSUFFICIENT_EVIDENCE";
   return v.length ? "SUPPORTED" : "NON_ASSERTION";
