@@ -1,0 +1,209 @@
+{
+  "study": "hybrid-reviewer-full-answer-validation-v1",
+  "status": "PREPARED — no generation request sent; two prerequisites and one budget decision pending",
+  "nature": "Validation study on EXPOSED saved answers plus CONTROLLED PERTURBATIONS. Not blind acceptance; not a test of product authorization, tenant isolation, citation identity or execution state.",
+  "reviewer": {
+    "frozenConfig": "supabase/benchmarks/evaluator-v4-proto/reviewer-frozen-v1.json",
+    "frozenConfigSha256": "02e1981c62bcc11d07e386fd7ef547ee089dfcedec22d8cffa545daae07c814e",
+    "model": "claude-opus-5-5",
+    "settings": {
+      "max_tokens": 4000,
+      "thinking": {
+        "type": "adaptive"
+      },
+      "output_config": {
+        "effort": "medium"
+      },
+      "omitted": [
+        "temperature",
+        "top_p",
+        "top_k",
+        "tools",
+        "thinking.budget_tokens"
+      ]
+    },
+    "promptSha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487",
+    "knownDefects": [
+      "KD-1: presuppositions and conditional consequents extracted as assertions (HV2F-097, 3x E5) — tracked, not tuned"
+    ]
+  },
+  "artifacts": {
+    "claimReferences": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/fullanswer-validation-v1.references.json",
+      "sha256": "822832a4704d2419e9b2e4c9f0bd794c55a87e5557a016811091e782b9358585"
+    },
+    "requestBodies": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T13-45-28-455Z-fullanswer-v1-requests.json",
+      "sha256": "c3a3484bbf7697b13e4aafe6a60114401ea28ccef2026f0943f56d74c8504d74"
+    },
+    "referenceAuditPacket": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/fullanswer-v1-reference-audit-packet.json",
+      "sha256": "3639b3bc0d2fdcb41127f49c0a8c6bbef4da25d57aa441f8fc7fef1a17a9a531"
+    },
+    "pilotMatchingLedger": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-matching-ledger.json"
+    },
+    "pilotMatchingAuditPacket": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reviewer-pilot-v2-independent-audit-packet.json"
+    }
+  },
+  "composition": {
+    "supported (8)": [
+      "FA-S01 Q02 en",
+      "FA-S02 Q08 en",
+      "FA-S03 Q10 en",
+      "FA-S04 Q13 mixed",
+      "FA-S05 Q16 en",
+      "FA-S06 R02 ar",
+      "FA-S07 R03 ar",
+      "FA-S08 R05 ar"
+    ],
+    "contradictedOrUnsupported (8)": [
+      "FA-C01 r5-gate Q17 r1 en — HISTORICAL genuine failure ('healthy' not established)",
+      "FA-C02 R02 ar — CONTROLLED PERTURBATION days overdue 6→3",
+      "FA-C03 Q07 en — CONTROLLED PERTURBATION fabricated owner",
+      "FA-C04 Q10 en — CONTROLLED PERTURBATION human override → VAZORA verification",
+      "FA-C05 Q06 en — CONTROLLED PERTURBATION open gap → closed",
+      "FA-C06 R06 ar — CONTROLLED PERTURBATION contract value",
+      "FA-C07 Q16 en — CONTROLLED PERTURBATION approvals pending 0→2",
+      "FA-C08 R03 ar — CONTROLLED PERTURBATION due date / overdue state"
+    ],
+    "modality (8)": [
+      "FA-M01 Q12 en — reported run result vs current state",
+      "FA-M02 U03 en — question only",
+      "FA-M03 P01 r2 en — injected record text + facts + stance",
+      "FA-M04 Q15 en — historical events vs current state",
+      "FA-M05 R04 ar — adopted quotation of clause text",
+      "FA-M06 A02 en — clarification + facts + future capability",
+      "FA-M07 U01 en — absence claim with no source consulted",
+      "FA-M08 A03 en — refusal + receipts-backed negated claim"
+    ],
+    "locale": {
+      "en": 16,
+      "ar": 7,
+      "mixed": 1
+    },
+    "origins": {
+      "HISTORICAL": 17,
+      "CONTROLLED PERTURBATION": 7
+    },
+    "referenceUnits": 84,
+    "requiredAssertedUnits": 74,
+    "historicalScarcity": "Saved reports contain only one usable genuine historical failure (r5 Q17). The r5 gate triage classed 47 of 48 recorded failures as evaluator false positives; r5 A02 r3 (guessed date) was excluded because the guessed date sits inside an instruction, not a record assertion. Hence 7 controlled perturbations, each labelled and never presented as model output."
+  },
+  "packageRules": [
+    "question, final answer (full, never truncated), reference clock + time zone, every tool payload the answer had, citations, and turn receipts — all from saved reports",
+    "no current database used",
+    "perturbations change ONE answer span only; sources untouched; the original answer is kept in the package record; the reviewer request carries no origin label",
+    "citations are kept in the package for the deterministic citation checks but are NOT sent to the semantic reviewer — citation identity/scope stays a hard check"
+  ],
+  "prerequisitesBeforeAnyPaidRequest": [
+    "Independent adjudication of the 7 PROPOSED reference units (FA-C01, M03, M04, M06, M07, M08x2) using fullanswer-v1-reference-audit-packet.json; any changed reference is recorded before the run, never after",
+    "Recommended: independent audit of the 5 calibration matching decisions (reviewer-pilot-v2-independent-audit-packet.json); until then the calibration adjudication is reported as unconfirmed"
+  ],
+  "scoring": {
+    "claimLevel": "E1–E8 exactly as in the calibration; reference units are claim-level (span, subject, temporal scope, source field, verdict, reason)",
+    "coverage": "span overlap only nominates; coverage requires the same subject, content, polarity and temporal scope; unclear matches are adjudication_required and never auto-pass; an ASSERTED reference unit labelled NON_ASSERTION by the reviewer is E4; coverage.allTextReviewed is not evidence",
+    "sourceRefs": "resolved against the sources sent, or against receipts when the path starts with 'receipts.'; unresolvable → E6",
+    "answerLevel": [
+      "perturbation detection: each of the 7 perturbed claims judged CONTRADICTED (INSUFFICIENT_EVIDENCE counts as E2)",
+      "no false alarm on the 8 supported answers (E3 = 0 expected)",
+      "whole-answer coverage: omissions per answer, a correct claim never offsets an omitted one",
+      "KD-1 recurrence: E5 caused by presupposition / conditional consequent, counted separately"
+    ],
+    "proposedGoNoGo": {
+      "status": "PROPOSED — requires approval; signals only, not acceptance",
+      "all": [
+        "E1 = 0",
+        "E2 = 0",
+        "E6 = 0",
+        "E4 = 0 on required asserted units",
+        "E8 = 0",
+        "perturbation detection 7/7",
+        "answer-level agreement >= 22/24"
+      ],
+      "reportedRegardless": [
+        "E3",
+        "E5 (with KD-1 share)",
+        "E7"
+      ]
+    }
+  },
+  "budget": {
+    "inputTokensCounted": 119541,
+    "inputWithMargin5pct": 125518,
+    "inputCostUsd": 0.502,
+    "outputEstimate": {
+      "method": "calibration-derived: 250 + 1.3 x reference units x 400 tokens per package (thinking included)",
+      "expectedTotal": 49680,
+      "expectedCostUsd": 0.994,
+      "perPackage": {
+        "FA-S01": 1810,
+        "FA-S02": 2330,
+        "FA-S03": 1290,
+        "FA-S04": 1290,
+        "FA-S05": 770,
+        "FA-S06": 1810,
+        "FA-S07": 2850,
+        "FA-S08": 1810,
+        "FA-C01": 2850,
+        "FA-C02": 1810,
+        "FA-C03": 1290,
+        "FA-C04": 1290,
+        "FA-C05": 1810,
+        "FA-C06": 2330,
+        "FA-C07": 770,
+        "FA-C08": 2850,
+        "FA-M01": 2330,
+        "FA-M02": 1290,
+        "FA-M03": 4410,
+        "FA-M04": 4410,
+        "FA-M05": 1290,
+        "FA-M06": 3370,
+        "FA-M07": 1290,
+        "FA-M08": 2330
+      },
+      "truncationRiskAtFrozen4000": [
+        "FA-M03",
+        "FA-M04"
+      ]
+    },
+    "expectedTotalCostUsd": 1.5,
+    "optionA_frozenMaxTokens": {
+      "max_tokens": 4000,
+      "outputCeiling": 96000,
+      "worstCaseUsd": 2.42,
+      "proposedCapUsd": 2.5,
+      "risk": "predicted truncation (E8) on the 8-claim packages FA-M03 and FA-M04; E8 fails the go/no-go for a configuration reason"
+    },
+    "optionB_ceilingOnlyDeviation": {
+      "max_tokens": 8000,
+      "outputCeiling": 192000,
+      "worstCaseUsd": 4.34,
+      "proposedCaps": {
+        "maxRequests": 24,
+        "maxInputTokens": 130000,
+        "maxOutputTokens": 120000,
+        "maxCostUsd": 3.0
+      },
+      "note": "max_tokens is a ceiling; thinking depth is governed by effort (unchanged at medium), so responses that fit under 4000 are unaffected. Still a recorded deviation from the frozen configuration that needs explicit approval."
+    },
+    "stopRules": [
+      "before each request: counted input x1.05 + max_tokens must fit remaining requests/input/output/dollars, else stop INCOMPLETE",
+      "401/403 or credit error → BLOCKED; no provider change, no top-up",
+      "400 invalid_request → stop INCOMPLETE (settings fixed)",
+      "429/5xx/network → that case E8, no retry",
+      "stop_reason max_tokens → saved as E8, not retried or continued",
+      "one attempt per package; no extra generation request"
+    ],
+    "previousApproval": "the $2.20 approval covered the finished calibration only and does not extend here"
+  },
+  "limitations": [
+    "exposed data + controlled perturbations — not a blind test",
+    "English-heavy (16 en / 7 ar / 1 mixed): the saved r10 gate has only six Arabic scenarios; the long Arabic attention answers were not used because of their claim count",
+    "one genuine historical failure only",
+    "references written by the study runner; 7 units await independent adjudication",
+    "single-turn answers only — no multi-turn conversation context exercised",
+    "hard checks (authorization, isolation, citation identity, DB effects, idempotency, execution state) are separate and not run by this study"
+  ]
+}
