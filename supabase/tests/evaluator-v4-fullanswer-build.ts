@@ -125,7 +125,7 @@ const packages = spec.cases.map((c) => {
 
 function caseVerdict(units: Unit[]): string {
   const v = units.filter((u) => u.assertion === "ASSERTED").map((u) => u.verdict);
-  if (v.includes("PENDING_INDEPENDENT_DETERMINATION")) return "UNDETERMINED";
+  if (v.includes("PENDING_INDEPENDENT_DETERMINATION") || v.includes("UNDECIDABLE_IN_SCOPE")) return "UNDETERMINED";
   if (v.includes("CONTRADICTED")) return "CONTRADICTED";
   if (v.includes("INSUFFICIENT_EVIDENCE")) return "INSUFFICIENT_EVIDENCE";
   return v.length ? "SUPPORTED" : "NON_ASSERTION";
