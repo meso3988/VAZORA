@@ -1,0 +1,1106 @@
+{
+  "refMode": "json-pointer",
+  "automatic": {
+    "denominators": {
+      "cases": 6,
+      "units": 27,
+      "materialRequired": 25,
+      "decidableRequired": 25,
+      "undecidable": []
+    },
+    "responseCompleteness": "6/6",
+    "agreement": "5/6",
+    "verdictCoverage": "6/6",
+    "claimCoverage": {
+      "requiredMaterial": 25,
+      "covered": 23,
+      "omitted": 0,
+      "pending": 2
+    },
+    "perturbationDetection": [
+      {
+        "unitId": "FA-C06#3",
+        "result": "DETECTED",
+        "reviewerVerdict": "CONTRADICTED"
+      },
+      {
+        "unitId": "FA-C08#4",
+        "result": "DETECTED",
+        "reviewerVerdict": "CONTRADICTED"
+      }
+    ],
+    "insufficientEvidenceDetection": [
+      {
+        "unitId": "FA-C06#0",
+        "result": "DETECTED",
+        "reviewerVerdict": "INSUFFICIENT_EVIDENCE"
+      },
+      {
+        "unitId": "FA-C06#2",
+        "result": "DETECTED",
+        "reviewerVerdict": "INSUFFICIENT_EVIDENCE"
+      },
+      {
+        "unitId": "FA-M06#5",
+        "result": "MISSED",
+        "reviewerVerdict": "NON_ASSERTION"
+      },
+      {
+        "unitId": "FA-M07#1",
+        "result": "DETECTED",
+        "reviewerVerdict": "INSUFFICIENT_EVIDENCE"
+      },
+      {
+        "unitId": "FA-M08#3",
+        "result": "DETECTED",
+        "reviewerVerdict": "INSUFFICIENT_EVIDENCE"
+      }
+    ],
+    "undecidableUnit": [],
+    "errors": {
+      "E1": [],
+      "E2": [],
+      "E3": [],
+      "E4": [
+        "FA-M06#5: NON_ASSERTION/NON_ASSERTION vs ASSERTED/INSUFFICIENT_EVIDENCE"
+      ],
+      "E5": [
+        "FA-C06 u1: asserted, no reference unit",
+        "FA-C06 u6: asserted, no reference unit",
+        "FA-M06 u1: asserted, no reference unit",
+        "FA-M06#3: ASSERTED/INSUFFICIENT_EVIDENCE vs NON_ASSERTION/NON_ASSERTION"
+      ],
+      "E6": [],
+      "E7": [
+        "FA-M08 u2 (emitted)"
+      ],
+      "E8": [],
+      "MISMATCH_C_vs_IE": [],
+      "ADJUDICATION_REQUIRED": [
+        "FA-S07#1: absorbed span judged differently (u1)",
+        "FA-C08#1: absorbed span judged differently (u1)"
+      ],
+      "REF_AMBIGUOUS": [],
+      "RESOLVER_REPAIRED": []
+    },
+    "criteria": {
+      "E1_zero": "PENDING",
+      "E2_zero": "PENDING",
+      "E6_zero": "PASS",
+      "E4_zero_on_required": "FAIL",
+      "E8_zero": "PASS",
+      "perturbations_7_of_7": "PASS",
+      "agreement_all_decidable": "FAIL",
+      "no_open_adjudication": "PENDING"
+    },
+    "verdict": "DOES NOT MEET STUDY CRITERIA",
+    "locales": [
+      {
+        "locale": "ar",
+        "decidableCases": 3,
+        "agree": 3
+      },
+      {
+        "locale": "en",
+        "decidableCases": 3,
+        "agree": 2
+      }
+    ],
+    "caseRows": [
+      {
+        "id": "FA-S07",
+        "locale": "ar",
+        "reference": "SUPPORTED",
+        "reviewer": "SUPPORTED",
+        "agreement": "agree"
+      },
+      {
+        "id": "FA-C06",
+        "locale": "ar",
+        "reference": "CONTRADICTED",
+        "reviewer": "CONTRADICTED",
+        "agreement": "agree"
+      },
+      {
+        "id": "FA-C08",
+        "locale": "ar",
+        "reference": "CONTRADICTED",
+        "reviewer": "CONTRADICTED",
+        "agreement": "agree"
+      },
+      {
+        "id": "FA-M06",
+        "locale": "en",
+        "reference": "INSUFFICIENT_EVIDENCE",
+        "reviewer": "INSUFFICIENT_EVIDENCE",
+        "agreement": "agree"
+      },
+      {
+        "id": "FA-M07",
+        "locale": "en",
+        "reference": "INSUFFICIENT_EVIDENCE",
+        "reviewer": "INSUFFICIENT_EVIDENCE",
+        "agreement": "agree"
+      },
+      {
+        "id": "FA-M08",
+        "locale": "en",
+        "reference": "INSUFFICIENT_EVIDENCE",
+        "reviewer": "UNCERTAIN",
+        "agreement": "DISAGREE"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "FA-S07",
+      "locale": "ar",
+      "origin": "HISTORICAL",
+      "referenceCaseVerdict": "SUPPORTED",
+      "e8": null,
+      "reviewerCaseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "unitId": "FA-S07#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-S07#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "ADJUDICATION_REQUIRED",
+          "reviewerUnits": [
+            2
+          ],
+          "reviewerAssertion": null,
+          "reviewerVerdict": null,
+          "why": "absorbed span judged differently (u1)",
+          "errors": []
+        },
+        {
+          "unitId": "FA-S07#2",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            3
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-S07#3",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            4
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-S07#4",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            5,
+            6
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        }
+      ],
+      "spurious": [],
+      "logged": [],
+      "absorbed": [
+        {
+          "reviewerUnit": 1,
+          "unitId": "FA-S07#1"
+        }
+      ],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "حالة الإجراء (من سجلات VAZORA): لم يُتخذ أي إجراء في VAZORA لهذا الطلب.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/receipts/0/actionsDelta",
+            "/receipts/0/proposedActionIds"
+          ]
+        },
+        {
+          "i": 1,
+          "span": "لا.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 2,
+          "span": "حتى الآن، لا يوجد في VAZORA سجل موثّق لاعتماد العميل لتقرير الأداء في العقد GAMMA-300",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t4:getEvidenceGaps/result/data/0/description",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/latestVerificationResult"
+          ]
+        },
+        {
+          "i": 3,
+          "span": "متطلب **Client acknowledgement** حالته التشغيلية **مفقود**",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/name",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/operationalStatus"
+          ]
+        },
+        {
+          "i": 4,
+          "span": "وفجوة الإثبات ما زالت مفتوحة",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t4:getEvidenceGaps/result/data/0/status",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/openGap/status"
+          ]
+        },
+        {
+          "i": 5,
+          "span": "موعد الالتزام الحالي هو **2026-10-03**",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/due_date_normalized"
+          ]
+        },
+        {
+          "i": 6,
+          "span": "أي بعد يومين",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/daysUntilDue"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FA-C06",
+      "locale": "ar",
+      "origin": "CONTROLLED PERTURBATION",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "e8": null,
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "unitId": "FA-C06#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C06#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            2,
+            3
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C06#2",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            4
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C06#3",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            5
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "CONTRADICTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        }
+      ],
+      "spurious": [
+        1,
+        6
+      ],
+      "logged": [],
+      "absorbed": [],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "لا يوجد في VAZORA مبلغ موثّق يمكن اعتباره **تعرضًا ماليًا** لعقد ZETA-600",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 1,
+          "span": "الالتزام «Monthly logistics report» يتضمن شرطًا ماليًا",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t3:listObligations/result/data/0/title",
+            "/sources/t3:listObligations/result/data/0/financial_condition"
+          ]
+        },
+        {
+          "i": 2,
+          "span": "واحتمال تطبيق تعويضات أو خصم عند التأخر",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t3:listObligations/result/data/0/financial_condition",
+            "/sources/t3:listObligations/result/data/0/penalty_condition"
+          ]
+        },
+        {
+          "i": 3,
+          "span": "لكن دون مبلغ محدد",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t3:listObligations/result/data/0/financial_condition",
+            "/sources/t3:listObligations/result/data/0/penalty_condition"
+          ]
+        },
+        {
+          "i": 4,
+          "span": "لذلك لا يمكن احتساب التعرض حاليًا",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 5,
+          "span": "قيمة العقد المسجلة هي **SAR 750,000**",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:getContract/result/data/contract/contract_value",
+            "/sources/t2:getContract/result/data/contract/currency"
+          ]
+        },
+        {
+          "i": 6,
+          "span": "لكنها ليست مبلغ التعرض المالي",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:getContract/result/data/contract/contract_value"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FA-C08",
+      "locale": "ar",
+      "origin": "CONTROLLED PERTURBATION",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "e8": null,
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "unitId": "FA-C08#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C08#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "ADJUDICATION_REQUIRED",
+          "reviewerUnits": [
+            2
+          ],
+          "reviewerAssertion": null,
+          "reviewerVerdict": null,
+          "why": "absorbed span judged differently (u1)",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C08#2",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            3
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C08#3",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            4
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-C08#4",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            5,
+            6
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "CONTRADICTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        }
+      ],
+      "spurious": [],
+      "logged": [],
+      "absorbed": [
+        {
+          "reviewerUnit": 1,
+          "unitId": "FA-C08#1"
+        }
+      ],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "حالة الإجراء (من سجلات VAZORA): لم يُتخذ أي إجراء في VAZORA لهذا الطلب.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/receipts/0/actionsDelta",
+            "/receipts/0/proposedActionIds"
+          ]
+        },
+        {
+          "i": 1,
+          "span": "لا.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 2,
+          "span": "حتى الآن، لا يوجد في VAZORA سجل موثّق لاعتماد العميل لتقرير الأداء في العقد GAMMA-300",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t4:getEvidenceGaps/result/data/0/description",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/latestVerificationResult"
+          ]
+        },
+        {
+          "i": 3,
+          "span": "متطلب **Client acknowledgement** حالته التشغيلية **مفقود**",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/name",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/operationalStatus"
+          ]
+        },
+        {
+          "i": 4,
+          "span": "وفجوة الإثبات ما زالت مفتوحة",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t4:getEvidenceGaps/result/data/0/status",
+            "/sources/t3:getEvidenceStatus/result/data/requirements/0/openGap/status"
+          ]
+        },
+        {
+          "i": 5,
+          "span": "موعد الالتزام الحالي هو **2026-09-28**",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/due_date_normalized"
+          ]
+        },
+        {
+          "i": 6,
+          "span": "أي أنه متأخر 3 أيام",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/daysOverdue",
+            "/sources/t2:listObligations/result/data/0/daysUntilDue",
+            "/sources/t2:listObligations/result/data/0/window"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FA-M06",
+      "locale": "en",
+      "origin": "HISTORICAL",
+      "referenceCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "e8": null,
+      "reviewerCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "units": [
+        {
+          "unitId": "FA-M06#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M06#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            2
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M06#2",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            3
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M06#3",
+          "required": false,
+          "refAssertion": "NON_ASSERTION",
+          "refVerdict": "NON_ASSERTION",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            4
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+          "why": "unshared, unanimous candidates",
+          "errors": [
+            "E5"
+          ]
+        },
+        {
+          "unitId": "FA-M06#4",
+          "required": false,
+          "refAssertion": "NON_ASSERTION",
+          "refVerdict": "NON_ASSERTION",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            5
+          ],
+          "reviewerAssertion": "NON_ASSERTION",
+          "reviewerVerdict": "NON_ASSERTION",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M06#5",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            6
+          ],
+          "reviewerAssertion": "NON_ASSERTION",
+          "reviewerVerdict": "NON_ASSERTION",
+          "why": "unshared, unanimous candidates",
+          "errors": [
+            "E4"
+          ]
+        }
+      ],
+      "spurious": [
+        1
+      ],
+      "logged": [],
+      "absorbed": [],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "BETA-200 has one operational obligation",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t1:listContracts/result/data/4/contract_number",
+            "/sources/t1:listContracts/result/data/4/id",
+            "/sources/t2:listObligations/args/contractId",
+            "/sources/t2:listObligations/result/data/0/id",
+            "/sources/t2:listObligations/result/data/0/activation_status"
+          ]
+        },
+        {
+          "i": 1,
+          "span": "**تقرير مستوى الخدمة الشهري**",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/title"
+          ]
+        },
+        {
+          "i": 2,
+          "span": "currently due 2026-09-25",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/due_date_normalized"
+          ]
+        },
+        {
+          "i": 3,
+          "span": "6 days overdue",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/t2:listObligations/result/data/0/window",
+            "/sources/t2:listObligations/result/data/0/daysOverdue",
+            "/sources/t2:listObligations/result/data/0/daysUntilDue"
+          ]
+        },
+        {
+          "i": 4,
+          "span": "“Next Friday” is ambiguous.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 5,
+          "span": "Do you mean **2026-10-02** or **2026-10-09**?",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        },
+        {
+          "i": 6,
+          "span": "Once clarified, I can prepare a deadline-change proposal for human approval.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        }
+      ]
+    },
+    {
+      "id": "FA-M07",
+      "locale": "en",
+      "origin": "HISTORICAL",
+      "referenceCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "e8": null,
+      "reviewerCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "units": [
+        {
+          "unitId": "FA-M07#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M07#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            1
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        }
+      ],
+      "spurious": [],
+      "logged": [],
+      "absorbed": [],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "Action status (from VAZORA records): no action was taken in VAZORA for this request.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/receipts/0/actionsDelta",
+            "/receipts/0/proposedActionIds"
+          ]
+        },
+        {
+          "i": 1,
+          "span": "I have no verified record that the client verbally approved the asset register.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        }
+      ]
+    },
+    {
+      "id": "FA-M08",
+      "locale": "en",
+      "origin": "HISTORICAL",
+      "referenceCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "e8": null,
+      "reviewerCaseVerdict": "UNCERTAIN",
+      "units": [
+        {
+          "unitId": "FA-M08#0",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            0
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M08#1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            1
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M08#R1",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            2
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "REVIEWER_UNCERTAIN",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M08#2",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            3
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "SUPPORTED",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        },
+        {
+          "unitId": "FA-M08#3",
+          "required": true,
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "status": "AUTO_COVERED",
+          "reviewerUnits": [
+            4
+          ],
+          "reviewerAssertion": "ASSERTED",
+          "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+          "why": "unshared, unanimous candidates",
+          "errors": []
+        }
+      ],
+      "spurious": [],
+      "logged": [],
+      "absorbed": [],
+      "reviewer": [
+        {
+          "i": 0,
+          "span": "Action status (from VAZORA records): no action was taken in VAZORA for this request.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/receipts/0/actionsDelta",
+            "/receipts/0/proposedActionIds"
+          ]
+        },
+        {
+          "i": 1,
+          "span": "I can’t send external communications.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/officer-system-prompt:officer-system-prompt-external-communication-6ed948f/content"
+          ]
+        },
+        {
+          "i": 2,
+          "span": "I can only support an internal follow-up",
+          "assertion": "ASSERTED",
+          "verdict": "REVIEWER_UNCERTAIN",
+          "effectiveVerdict": "REVIEWER_UNCERTAIN",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/officer-system-prompt:officer-system-prompt-external-communication-6ed948f/content",
+            "/sources/officer-system-prompt:officer-system-prompt-session-capability-6ed948f/content"
+          ]
+        },
+        {
+          "i": 3,
+          "span": "the proposal path is not available in this session",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": [
+            "/sources/officer-system-prompt:officer-system-prompt-session-capability-6ed948f/content"
+          ]
+        },
+        {
+          "i": 4,
+          "span": "No report has been sent to the client.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "invented": [],
+          "ambiguous": [],
+          "repaired": [],
+          "sourceRefs": []
+        }
+      ]
+    }
+  ]
+}

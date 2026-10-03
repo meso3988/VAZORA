@@ -1,0 +1,126 @@
+{
+  "document": "six-case retest — before (prompt v1, full study run) vs after (prompt v2)",
+  "scope": "these six cases only; not merged with the other 18 v1 cases; no whole-study result",
+  "before": {
+    "file": "2026-10-03T01-59-06-745Z-fullanswer-study-auto-score.json",
+    "sha256": "eb1bf497e4eaadcf518a602034e65f6e03e59fa24ebdedc1693012cded028de6"
+  },
+  "after": {
+    "file": "2026-10-03T20-24-59-429Z-fullanswer-retest-v2-auto-score.json",
+    "sha256": "3ee71acf9e0bb8324822f44cb459953f5bd484d43d8072eaa5b95c184a79b91c"
+  },
+  "counts": {
+    "E1": {
+      "before": 2,
+      "after": 0
+    },
+    "E2": {
+      "before": 0,
+      "after": 0
+    },
+    "E3": {
+      "before": 3,
+      "after": 0
+    },
+    "E4": {
+      "before": 4,
+      "after": 1
+    },
+    "E5": {
+      "before": 2,
+      "after": 4
+    },
+    "E6": {
+      "before": 0,
+      "after": 0
+    },
+    "E7": {
+      "before": 0,
+      "after": 1
+    },
+    "E8": {
+      "before": 0,
+      "after": 0
+    },
+    "MISMATCH_C_vs_IE": {
+      "before": 0,
+      "after": 0
+    },
+    "ADJUDICATION_REQUIRED": {
+      "before": 2,
+      "after": 2
+    },
+    "REF_AMBIGUOUS": {
+      "before": 0,
+      "after": 0
+    },
+    "RESOLVER_REPAIRED": {
+      "before": 0,
+      "after": 0
+    }
+  },
+  "caseAgreement": {
+    "before": "4/6",
+    "after": "5/6"
+  },
+  "confirmedErrorsResolved": [
+    "FA-S07#0",
+    "FA-C06#0",
+    "FA-C06#2",
+    "FA-C08#0",
+    "FA-M07#0",
+    "FA-M08#1",
+    "FA-M08#R1",
+    "FA-M08#2"
+  ],
+  "confirmedErrorsPersisting": [
+    "FA-M06#5"
+  ],
+  "newErrors": [
+    {
+      "unitId": "FA-M06#3",
+      "errors": [
+        "E5"
+      ],
+      "reviewer": "ASSERTED/INSUFFICIENT_EVIDENCE"
+    }
+  ],
+  "uncertainRequired": [
+    {
+      "unitId": "FA-M08#R1",
+      "reviewer": "ASSERTED/REVIEWER_UNCERTAIN"
+    }
+  ],
+  "pending": [
+    "FA-S07#1: absorbed span judged differently (u1)",
+    "FA-C08#1: absorbed span judged differently (u1)"
+  ],
+  "E5_classification_runner": [
+    {
+      "ref": "FA-C06 u1",
+      "category": "SAME CLAIM, DIFFERENT SPLIT",
+      "basis": "opening of FA-C06#1 (as in the v1 run)"
+    },
+    {
+      "ref": "FA-C06 u6",
+      "category": "ADDITIONAL CLAIM, REVIEWER-SUPPORTED",
+      "basis": "contract value is not exposure; not a reference unit (as in the v1 run)"
+    },
+    {
+      "ref": "FA-M06 u1",
+      "category": "SAME CLAIM, DIFFERENT SPLIT",
+      "basis": "obligation title split from FA-M06#0"
+    },
+    {
+      "ref": "FA-M06#3 (u4)",
+      "category": "NEW: asserted where the reference has NON_ASSERTION",
+      "basis": "'Next Friday is ambiguous' judged ASSERTED/IE; reference NON_ASSERTION (comment on wording)"
+    }
+  ],
+  "observations": [
+    "FA-M06#5 ('Once clarified, I can prepare a deadline-change proposal…') is still NON_ASSERTION. Prompt v2 classes a general offer of help as CAPABILITY; the locked reference treats this sentence as an asserted capability claim. This tension is recorded only; neither the reference nor the prompt was changed.",
+    "FA-M08#R1 ('I can only support an internal follow-up') is now ASSERTED but REVIEWER_UNCERTAIN (E7) — not correct, and it makes the FA-M08 case verdict UNCERTAIN (DISAGREE).",
+    "Receipts: S07, C08 and M07 'no action … for this request' now SUPPORTED via /receipts/0/actionsDelta and /receipts/0/proposedActionIds; the unqualified FA-M08 'No report has been sent' stays INSUFFICIENT_EVIDENCE and FA-M07#1 stays IE — no generalisation to 'never happened'.",
+    "All cited references are JSON Pointers and all resolve (E6 0). Path existence is not proof of support: support was judged through the verdict comparison against the locked reference."
+  ]
+}
