@@ -1,0 +1,49 @@
+{
+  "study": "HYBRID REVIEWER — BOUNDED RETEST (proposal)",
+  "status": "PROPOSED — NOT APPROVED, NOT RUN",
+  "cases": [
+    "FA-C06",
+    "FA-M06",
+    "FA-M08",
+    "FA-S07",
+    "FA-C08",
+    "FA-M07"
+  ],
+  "why": "the six cases with confirmed reviewer errors in the full-answer validation: E1 (FA-C06), E4 (FA-M06, FA-M08), E3 (FA-S07, FA-C08, FA-M07)",
+  "reference": {
+    "file": "supabase/benchmarks/evaluator-v4-proto/fullanswer-validation-v4.references.json",
+    "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f"
+  },
+  "reviewer": {
+    "model": "claude-opus-5-5",
+    "promptFile": "supabase/benchmarks/evaluator-v4-proto/reviewer-prompt-v2.txt",
+    "promptSha256": "84646a29d4502527d2a3766837953ddf53434d3b7973123ad55c49f9094fb407",
+    "previousPrompt": {
+      "file": "supabase/benchmarks/evaluator-v4-proto/reviewer-prompt-v1.txt",
+      "sha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487"
+    },
+    "parameters": {
+      "max_tokens": 8000,
+      "thinking": {
+        "type": "adaptive"
+      },
+      "output_config": {
+        "effort": "medium"
+      }
+    },
+    "unchanged": "model, thinking, effort, max_tokens, inputs, reference and criteria"
+  },
+  "pricing": {
+    "inputUsdPerMillion": 4,
+    "outputUsdPerMillion": 20
+  },
+  "limits": {
+    "maxRequests": 6,
+    "maxInputTokens": 40000,
+    "maxOutputTokensIncludingThinking": 48000,
+    "maxCostUsdTotal": 1.2,
+    "approval": "NOT APPROVED — proposal only; the runner refuses these limits"
+  },
+  "refFormat": "json-pointer",
+  "scope": "a retest of six known-error cases measures whether those errors recur; it is not a replacement for the 24-case result and cannot produce a 24-case verdict"
+}

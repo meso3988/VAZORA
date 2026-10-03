@@ -114,6 +114,8 @@ async function run(requestsPath: string) {
   }
   const L = built.limits;
   const P = built.pricing;
+  if (/NOT APPROVED/i.test(L.approval ?? "")) { console.error("BLOCKED: limits in this requests file are not approved"); process.exit(2); }
+  if ((built.requests as Built[]).some((r) => typeof r.countedInputTokens !== "number")) { console.error("BLOCKED: input tokens not counted for every request"); process.exit(2); }
   const cost = (i: number, o: number) => (i / 1e6) * P.inputUsdPerMillion + (o / 1e6) * P.outputUsdPerMillion;
   const used = { requests: 0, input: 0, output: 0, usd: 0 };
   const rawFile = requestsPath.replace(/-requests\.json$/, "-raw.jsonl");

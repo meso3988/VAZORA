@@ -12,6 +12,8 @@
  * else is ADJUDICATION_REQUIRED and is never a pass.
  */
 
+import { resolveLegacyDotted, resolvePointer } from "./source-refs";
+
 export type RefUnit = {
   unitId: string; span: string; assertion: "ASSERTED" | "NON_ASSERTION"; required: boolean; verdict: string;
   sourceRef?: string; absorbedSpans?: { span: string }[];
@@ -75,16 +77,31 @@ type UnitResult = {
   reviewerUnits: number[]; reviewerAssertion: string | null; reviewerVerdict: string | null; why: string; errors: string[];
 };
 
-export function scoreCase(ref: RefCase, sources: Record<string, unknown>, receipts: unknown, answer: string, raw: RawRecord, adj: Adjudication = {}) {
+// dotted-v1: frozen calibration rule (default; reproduces the original score)
+// dotted-legacy-unique: addendum view of SAVED outputs — a dotted path is accepted only via a single proven grouping
+// json-pointer: format for future requests
+export type RefMode = "dotted-v1" | "dotted-legacy-unique" | "json-pointer";
+
+export function scoreCase(ref: RefCase, sources: Record<string, unknown>, receipts: unknown, answer: string, raw: RawRecord, adj: Adjudication = {}, refMode: RefMode = "dotted-v1") {
   const parsed = parseResponse(raw);
   const base = { id: ref.id, locale: ref.locale, origin: ref.origin, referenceCaseVerdict: referenceCaseVerdict(ref) };
   if (parsed.e8) return { ...base, e8: parsed.e8, reviewerCaseVerdict: null, units: [] as UnitResult[], reviewer: [], spurious: [] as number[], absorbed: [], logged: parsed.logged };
 
   const logged = [...parsed.logged];
   const rev = parsed.units.map((u, i) => {
-    const invented = (u.sourceRefs ?? []).filter((p) => !resolves(sources, receipts, p));
+    const invented: string[] = [], ambiguous: string[] = [], repaired: { ref: string; pointer: string }[] = [];
+    for (const p of u.sourceRefs ?? []) {
+      if (refMode === "json-pointer") { if (!resolvePointer({ sources, receipts }, p)) invented.push(p); continue; }
+      if (resolves(sources, receipts, p)) continue;
+      if (refMode === "dotted-v1") { invented.push(p); continue; }
+      const l = resolveLegacyDotted({ sources, receipts }, p);
+      if (l.status === "RESOLVED_UNIQUE") repaired.push({ ref: p, pointer: l.pointers[0] });
+      else if (l.status === "AMBIGUOUS") ambiguous.push(p);
+      else invented.push(p);
+    }
     if (!answer.includes(u.span ?? "")) logged.push(`u${i}: span not verbatim in answer`);
-    return { i, ...u, invented, eff: invented.length ? "REVIEWER_UNCERTAIN" : (u.verdict as string) };
+    const voided = invented.length > 0 || ambiguous.length > 0;
+    return { i, ...u, invented, ambiguous, repaired, eff: voided ? "REVIEWER_UNCERTAIN" : (u.verdict as string) };
   });
 
   // absorbed tokens (e.g. a bare "No."): attached to the absorbing unit, never a separate claim
@@ -162,7 +179,7 @@ export function scoreCase(ref: RefCase, sources: Record<string, unknown>, receip
   return {
     ...base, e8: null, reviewerCaseVerdict, units, spurious, logged,
     absorbed: [...absorbedTo].map(([i, unitId]) => ({ reviewerUnit: i, unitId })),
-    reviewer: rev.map((r) => ({ i: r.i, span: r.span, assertion: r.assertion, verdict: r.verdict, effectiveVerdict: r.eff, invented: r.invented, sourceRefs: r.sourceRefs })),
+    reviewer: rev.map((r) => ({ i: r.i, span: r.span, assertion: r.assertion, verdict: r.verdict, effectiveVerdict: r.eff, invented: r.invented, ambiguous: r.ambiguous, repaired: r.repaired, sourceRefs: r.sourceRefs })),
   };
 }
 
@@ -176,15 +193,17 @@ export function summarize(refCases: RefCase[], scores: CaseScore[]) {
     decidableRequired: req.filter((u) => u.verdict !== UNDECIDABLE).length,
     undecidable: all.filter((u) => u.verdict === UNDECIDABLE).map((u) => u.unitId),
   };
-  const E: Record<string, string[]> = { E1: [], E2: [], E3: [], E4: [], E5: [], E6: [], E7: [], E8: [], MISMATCH_C_vs_IE: [], ADJUDICATION_REQUIRED: [] };
+  const E: Record<string, string[]> = { E1: [], E2: [], E3: [], E4: [], E5: [], E6: [], E7: [], E8: [], MISMATCH_C_vs_IE: [], ADJUDICATION_REQUIRED: [], REF_AMBIGUOUS: [], RESOLVER_REPAIRED: [] };
   const undecidableRecord: unknown[] = [];
   let covered = 0, omitted = 0, pending = 0;
   for (const s of scores) {
     if (s.e8) { E.E8.push(`${s.id}: ${s.e8}`); continue; }
     for (const r of s.reviewer) {
       if (r.invented.length) E.E6.push(`${s.id} u${r.i}: ${r.invented.join(",")}`);
-      // E7 = REVIEWER_UNCERTAIN on any unit: voided by E6 or emitted by the reviewer itself
-      if (r.effectiveVerdict === "REVIEWER_UNCERTAIN") E.E7.push(`${s.id} u${r.i}${r.invented.length ? " (voided by E6)" : " (emitted)"}`);
+      if (r.ambiguous.length) E.REF_AMBIGUOUS.push(`${s.id} u${r.i}: ${r.ambiguous.join(",")}`);
+      for (const x of r.repaired) E.RESOLVER_REPAIRED.push(`${s.id} u${r.i}: ${x.ref} → ${x.pointer}`);
+      // E7 = REVIEWER_UNCERTAIN on any unit: voided by an unresolved reference or emitted by the reviewer itself
+      if (r.effectiveVerdict === "REVIEWER_UNCERTAIN") E.E7.push(`${s.id} u${r.i}${r.invented.length ? " (voided by E6)" : r.ambiguous.length ? " (voided: ambiguous reference)" : " (emitted)"}`);
     }
     for (const i of s.spurious) E.E5.push(`${s.id} u${i}: asserted, no reference unit`);
     for (const u of s.units) {

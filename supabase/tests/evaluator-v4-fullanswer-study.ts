@@ -23,7 +23,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Adjudication, type RefCase, scoreCase, summarize } from "../benchmarks/evaluator-v4-proto/fullanswer-scoring";
+import { type Adjudication, type RefCase, type RefMode, scoreCase, summarize } from "../benchmarks/evaluator-v4-proto/fullanswer-scoring";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
@@ -104,21 +104,59 @@ async function build() {
   console.log(`written ${file}`);
 }
 
-function score(rawPath: string, adjPath?: string) {
-  const refs = loadReference();
+// Builds the bounded retest bodies with reviewer prompt v2: identical inputs (messages) to the approved v3
+// build, prompt replaced, JSON-Pointer references. No API call; token counting is a separate, approved step.
+async function buildRetest() {
+  const rmFile = join(protoDir, "fullanswer-retest-v2.json");
+  const rmBytes = readFileSync(rmFile);
+  const rm = JSON.parse(rmBytes.toString("utf8"));
+  const promptText = readFileSync(at(rm.reviewer.promptFile), "utf8");
+  if (sha(promptText) !== rm.reviewer.promptSha256) throw new Error("prompt v2 hash mismatch");
+  const v3 = new Map<string, Pkg>((JSON.parse(readFileSync(at(manifest.requestSource.approvedV3Build), "utf8")).packages as Pkg[]).map((p) => [p.id, p]));
+  const leakTerms = ["UNDECIDABLE", "materialRequired", "\"verdict\":\"SUPPORTED\"", "referenceStatus", "rationale", "independentSources", "absorbedSpans", "previousSealed", "CONTROLLED PERTURBATION", "LOCKED"];
+  const problems: string[] = [];
+  const P = rm.reviewer.parameters;
+  const requests = (rm.cases as string[]).map((id) => {
+    const old = v3.get(id);
+    if (!old) throw new Error(`missing ${id}`);
+    const body = { model: rm.reviewer.model, max_tokens: P.max_tokens, thinking: P.thinking, output_config: P.output_config, system: promptText, messages: old.body.messages };
+    const sent = body.messages[0].content;
+    for (const t of leakTerms) if (sent.includes(t)) problems.push(`${id}: leakage term ${t}`);
+    if (Object.keys(JSON.parse(sent)).sort().join(",") !== "answer,caseId,receipts,referenceClock,request,sources") problems.push(`${id}: unexpected input keys`);
+    if (/"(temperature|top_p|top_k|budget_tokens)"/.test(JSON.stringify(body))) problems.push(`${id}: forbidden sampling parameter`);
+    return { caseId: id, requestSha256: sha(JSON.stringify(body)), countedInputTokens: null as number | null, body };
+  });
+  if (problems.length) { for (const pr of problems) console.log(`PROBLEM ${pr}`); console.error("BLOCKED: build checks failed"); process.exit(2); }
+  const builtAt = new Date().toISOString();
+  const out = {
+    builtAt, generationRequests: 0, apiCalls: 0,
+    manifestPath: relative(root, rmFile), manifestSha256: sha(rmBytes), referenceSha256: manifest.reference.sha256,
+    promptSha256: rm.reviewer.promptSha256, model: rm.reviewer.model, settings: P, limits: rm.limits, pricing: rm.pricing,
+    refFormat: "json-pointer", leakageFindings: 0, requests,
+  };
+  const file = join(protoDir, "reports", `${builtAt.replace(/[:.]/g, "-")}-fullanswer-retest-v2-requests.json`);
+  writeFileSync(file, JSON.stringify(out, null, 2));
+  console.log(`api calls 0 · requests ${requests.length} · leakage 0 · inputs identical to approved v3 · prompt v2 ${rm.reviewer.promptSha256}`);
+  console.log(`written ${file}`);
+}
+
+function score(rawPath: string, adjPath?: string, legacyRefs = false) {
   const built = JSON.parse(readFileSync(rawPath.replace(/-raw\.jsonl$/, "-requests.json"), "utf8"));
+  const inBuild = new Set((built.requests as { caseId: string }[]).map((r) => r.caseId));
+  const refs = loadReference().filter((c) => inBuild.has(c.id));
+  const refMode: RefMode = legacyRefs ? "dotted-legacy-unique" : built.refFormat === "json-pointer" ? "json-pointer" : "dotted-v1";
   const input = new Map<string, { answer: string; sources: Record<string, unknown>; receipts: unknown }>(
     built.requests.map((r: { caseId: string; body: { messages: { content: string }[] } }) => [r.caseId, JSON.parse(r.body.messages[0].content)]),
   );
   const raw = new Map(readFileSync(rawPath, "utf8").trim().split("\n").filter(Boolean).map((l) => { const j = JSON.parse(l); return [j.caseId, j]; }));
   const adj: Adjudication = adjPath ? JSON.parse(readFileSync(adjPath, "utf8")).units : {};
   const run = (a: Adjudication) => {
-    const scores = refs.map((c) => { const i = input.get(c.id)!; return scoreCase(c, i.sources, i.receipts, i.answer, raw.get(c.id), a); });
+    const scores = refs.map((c) => { const i = input.get(c.id)!; return scoreCase(c, i.sources, i.receipts, i.answer, raw.get(c.id), a, refMode); });
     return { scores, summary: summarize(refs, scores) };
   };
   const automatic = run({});
-  const result = adjPath ? { automatic: automatic.summary, adjudicated: run(adj).summary, adjudicationFile: adjPath, adjudicationSha256: sha(readFileSync(adjPath)), cases: run(adj).scores } : { automatic: automatic.summary, cases: automatic.scores };
-  const file = rawPath.replace(/-raw\.jsonl$/, adjPath ? "-final-score.json" : "-auto-score.json");
+  const result = adjPath ? { refMode, automatic: automatic.summary, adjudicated: run(adj).summary, adjudicationFile: adjPath, adjudicationSha256: sha(readFileSync(adjPath)), cases: run(adj).scores } : { refMode, automatic: automatic.summary, cases: automatic.scores };
+  const file = rawPath.replace(/-raw\.jsonl$/, legacyRefs ? "-legacy-refs-addendum-score.json" : adjPath ? "-final-score.json" : "-auto-score.json");
   writeFileSync(file, JSON.stringify(result, null, 2));
   const s = adjPath ? (result as { adjudicated: ReturnType<typeof summarize> }).adjudicated : automatic.summary;
   console.log(JSON.stringify({ verdict: s.verdict, agreement: s.agreement, verdictCoverage: s.verdictCoverage, responseCompleteness: s.responseCompleteness, claimCoverage: s.claimCoverage, criteria: s.criteria, errorCounts: Object.fromEntries(Object.entries(s.errors).map(([k, v]) => [k, v.length])) }, null, 2));
@@ -127,5 +165,6 @@ function score(rawPath: string, adjPath?: string) {
 
 const mode = process.argv[2];
 if (mode === "build") build().catch((e) => { console.error(e); process.exit(1); });
-else if (mode === "score" && process.argv[3]) score(process.argv[3], process.argv.includes("--adjudication") ? process.argv[process.argv.indexOf("--adjudication") + 1] : undefined);
-else { console.error("usage: build | score <raw.jsonl> [--adjudication <file>]"); process.exit(2); }
+else if (mode === "build-retest") buildRetest().catch((e) => { console.error(e); process.exit(1); });
+else if (mode === "score" && process.argv[3]) score(process.argv[3], process.argv.includes("--adjudication") ? process.argv[process.argv.indexOf("--adjudication") + 1] : undefined, process.argv.includes("--legacy-refs"));
+else { console.error("usage: build | build-retest | score <raw.jsonl> [--adjudication <file>] [--legacy-refs]"); process.exit(2); }
