@@ -90,6 +90,8 @@ check("S02 missing one unit → E4 recorded, verdict DOES NOT MEET even though t
 const s01 = ref("FA-S01");
 const inv = summarize(refs, oracleScores({ "FA-S01": oracleUnits(s01).map((u, i) => (i === 0 ? { ...u, sourceRefs: ["t1:getOverdueObligations.result.data.noSuchField"] } : u)) }));
 check("unresolvable sourceRef → E6 + E7, unit voided, criterion FAIL", inv.errors.E6.length === 1 && inv.errors.E7.length === 1 && inv.criteria.E6_zero === "FAIL" && inv.caseRows.find((r) => r.id === "FA-S01")!.agreement === "DISAGREE");
+const emitted = summarize(refs, oracleScores({ "FA-S01": oracleUnits(s01).map((u, i) => (i === 0 ? { ...u, verdict: "REVIEWER_UNCERTAIN", sourceRefs: [] } : u)) }));
+check("reviewer-emitted REVIEWER_UNCERTAIN → E7 (no E6), never correct", emitted.errors.E7.length === 1 && emitted.errors.E6.length === 0 && emitted.caseRows.find((r) => r.id === "FA-S01")!.agreement === "DISAGREE");
 const receiptRef = sc("FA-M07", oracleUnits(ref("FA-M07")));
 check("receipts.* paths resolve (not invented)", receiptRef.reviewer.every((r) => r.invented.length === 0));
 

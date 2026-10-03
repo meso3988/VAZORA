@@ -182,7 +182,9 @@ export function summarize(refCases: RefCase[], scores: CaseScore[]) {
   for (const s of scores) {
     if (s.e8) { E.E8.push(`${s.id}: ${s.e8}`); continue; }
     for (const r of s.reviewer) {
-      if (r.invented.length) { E.E6.push(`${s.id} u${r.i}: ${r.invented.join(",")}`); E.E7.push(`${s.id} u${r.i}`); }
+      if (r.invented.length) E.E6.push(`${s.id} u${r.i}: ${r.invented.join(",")}`);
+      // E7 = REVIEWER_UNCERTAIN on any unit: voided by E6 or emitted by the reviewer itself
+      if (r.effectiveVerdict === "REVIEWER_UNCERTAIN") E.E7.push(`${s.id} u${r.i}${r.invented.length ? " (voided by E6)" : " (emitted)"}`);
     }
     for (const i of s.spurious) E.E5.push(`${s.id} u${i}: asserted, no reference unit`);
     for (const u of s.units) {

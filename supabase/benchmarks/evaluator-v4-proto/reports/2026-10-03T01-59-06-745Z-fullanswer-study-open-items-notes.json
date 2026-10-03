@@ -1,0 +1,35 @@
+{
+  "document": "runner analysis of open matches — NOTES ONLY, no adjudication applied, nothing converted to PASS",
+  "status": "all 9 ADJUDICATION_REQUIRED units remain pending; E6 on FA-M04 u7 remains as computed",
+  "robustness": "The automatic FAILs (E1 x2, E4 x4, agreement 18/23) come from exact-span AUTO_COVERED matches and from case verdicts computed directly from reviewer units. Resolving pending matches can add errors but cannot remove these, so DOES NOT MEET holds however the open items resolve.",
+  "items": [
+    {
+      "unit": "FA-S01#0 / FA-S02#0",
+      "observation": "u0 = full reference span, SUPPORTED; u1 = the single word 'operational', judged INSUFFICIENT_EVIDENCE. Likely a sub-claim false alarm (reference: SUPPORTED). This u1 also makes both case verdicts IE (DISAGREE)."
+    },
+    {
+      "unit": "FA-C03#0 (perturbation)",
+      "observation": "u0 '…is assigned to' SUPPORTED (descriptor frame); u1 'Khalid Al-Harbi' CONTRADICTED — the invented owner name. Same pattern as HV2F-031: likely detected, but kept PENDING."
+    },
+    {
+      "unit": "FA-M03#4",
+      "observation": "reference span 'no amount is specified in the verified record'; reviewer split it into u5 'no amount is specified' SUPPORTED and u6 'the verified record' IE."
+    },
+    {
+      "unit": "FA-M04#R1 + FA-M04#0",
+      "observation": "one reviewer unit 'Since your last review, two changes were recorded:' judged SUPPORTED covers both. If adjudicated, FA-M04#R1 (reference IE) would be a further E1; FA-M04#0 SUPPORTED would be correct."
+    },
+    {
+      "unit": "FA-C05#0 / FA-S07#1 / FA-C08#1",
+      "observation": "the absorbed bare 'No.' / 'لا.' was judged INSUFFICIENT_EVIDENCE (reading A, which the locked reference rejected); the absorbing content unit itself was judged SUPPORTED."
+    },
+    {
+      "unit": "FA-M04 u7 (E6, E7; case DISAGREE)",
+      "observation": "cited path ends in counts.officer.sweep_completed; the key in the source is literally 'officer.sweep_completed', which dotted-path notation cannot express. The field exists, so this is a resolver/notation artifact, not an invented record. Kept as E6 automatically. If set aside, FA-M04's reviewer verdict would be IE (agree) → 19/23, still FAIL."
+    },
+    {
+      "unit": "FA-S05 u0 'No.' / FA-C07 u0 'Yes.' (E5)",
+      "observation": "bare answer tokens in cases where the locked reference records no absorbedSpans; the final independent ruling did not address them. Reported as E5 (report-only); location flagged, reference not changed."
+    }
+  ]
+}
