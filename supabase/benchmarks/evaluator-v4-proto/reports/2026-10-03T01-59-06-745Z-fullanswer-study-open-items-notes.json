@@ -31,5 +31,60 @@
       "unit": "FA-S05 u0 'No.' / FA-C07 u0 'Yes.' (E5)",
       "observation": "bare answer tokens in cases where the locked reference records no absorbedSpans; the final independent ruling did not address them. Reported as E5 (report-only); location flagged, reference not changed."
     }
-  ]
+  ],
+  "closure": {
+    "preparedAfterResults": true,
+    "independentAdjudication": {
+      "file": "remaining-study-items-independent-adjudication.json",
+      "sha256": "0f3af9e61a29cd1b1641f3fb5953b0fbb5035a4ccbc2818b4fc62e893833ae69",
+      "commitNote": "saved unchanged"
+    },
+    "scope": "original 24-case study, prompt v1 (reviewer-prompt-v1.txt fe76dad1…) — the 7 pending matches",
+    "items": [
+      {
+        "unit": "FA-S01#0",
+        "result": "CONFIRMED REVIEWER ERROR (u1): 'operational' judged IE; obligation_type is a category, while activation_status active and review_status approved establish the obligation is in force. u0 core agrees."
+      },
+      {
+        "unit": "FA-M04#R1",
+        "result": "CONFIRMED REVIEWER ERROR: the reviewer did not distinguish the requested period from the period actually returned by the server (missed INSUFFICIENT_EVIDENCE)."
+      },
+      {
+        "unit": "FA-S02#0",
+        "result": "Additional unsupported claim correctly caught by the reviewer (IE on 'operational'); the reference did not represent it adequately. Not a reviewer error."
+      },
+      {
+        "unit": "FA-M03#4",
+        "result": "Additional unsupported claim correctly caught by the reviewer; the reference did not represent it adequately. Not a reviewer error."
+      },
+      {
+        "unit": "FA-C03#0",
+        "result": "AGREEMENT under the independent matching."
+      },
+      {
+        "unit": "FA-M04#0",
+        "result": "AGREEMENT under the independent matching (shared reviewer unit)."
+      },
+      {
+        "unit": "FA-C05#0",
+        "result": "Core sentence agreed; the reading of 'No.' remains a final REFERENCE AMBIGUITY within this study's scope — not a success."
+      }
+    ],
+    "frozenVerdict": "DOES NOT MEET STUDY CRITERIA (unchanged)",
+    "notes": [
+      "Post-hoc interpretation only, prepared after the results; not a new test and not a re-score.",
+      "The frozen report verdict, raw responses, requests, locked reference, denominators, thresholds and earlier adjudication decisions are unchanged; nothing is converted to PASS.",
+      "'No item awaits further adjudication in this task' does not mean every claim is correct; confirmed reviewer errors and ambiguity remain visible.",
+      "Prompt v1 and prompt v2 results are not combined into one rate; a v1 error is not assumed fixed in v2 unless tested there."
+    ],
+    "approvalStatus": {
+      "semanticReviewer": "EXPERIMENTAL EVALUATION ASSISTANT — NOT APPROVED AS A SOLE AUTOMATED ACCEPTANCE GATE",
+      "limits": [
+        "not added to production by this closure",
+        "does not replace authorization, tenant-isolation, audit-log, execution or citation checks, or human approval",
+        "no new result for the current Contract Officer is inferred from these studies",
+        "Phase 4A is not closed; no phase4a-complete marker"
+      ]
+    }
+  }
 }

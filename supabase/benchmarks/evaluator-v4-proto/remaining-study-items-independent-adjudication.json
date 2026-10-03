@@ -1,0 +1,202 @@
+{
+ "document": "REMAINING STUDY ITEMS — INDEPENDENT ADJUDICATION",
+ "scope": "7 original-study matches + 3 retest extra outputs only. The 5 points closed at addendum 8895823 are not reopened. Reference, responses, instructions and reports are not modified; frozen report verdicts are not changed.",
+ "inputs": {
+  "originalStudy": {
+   "raw": {
+    "path": "/Users/mayasahaldashsh/Documents/VAZORA/supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T01-59-06-745Z-fullanswer-study-raw.jsonl",
+    "sha256": "d1160093fd93f00f884a32a50ea6155da5fa08511f5ee394ac676db264ff84bb"
+   },
+   "autoScore": {
+    "path": "/Users/mayasahaldashsh/Documents/VAZORA/supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T01-59-06-745Z-fullanswer-study-auto-score.json",
+    "sha256": "eb1bf497e4eaadcf518a602034e65f6e03e59fa24ebdedc1693012cded028de6"
+   },
+   "requests": {
+    "path": "/Users/mayasahaldashsh/Documents/VAZORA/supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T01-59-06-745Z-fullanswer-study-requests.json",
+    "sha256": "bcee3616fcebacc4e65a38dd01eeaa29fc9e657e7f4b24884b161160cb3e30db"
+   },
+   "reference": {
+    "path": "/Users/mayasahaldashsh/Desktop/vazora-retest-six-files/fullanswer-validation-v4.references.json",
+    "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f"
+   },
+   "promptSha256FromRequests": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487 (reviewer prompt v1, read from the request bodies)"
+  },
+  "retest": {
+   "raw": {
+    "path": "/Users/mayasahaldashsh/Desktop/vazora-retest-six-files/2026-10-03T20-24-59-429Z-fullanswer-retest-v2-raw.jsonl",
+    "sha256": "96488d7aeadf134400bf9e8b8f9da46547e2a18922f0b12dae7777a9ff2a6c6d"
+   },
+   "requests": {
+    "path": "/Users/mayasahaldashsh/Desktop/vazora-retest-six-files/2026-10-03T20-24-59-429Z-fullanswer-retest-v2-requests.json",
+    "sha256": "40b3c37808b559625484798368090c010ab14e063e6f30655d185c7dffc834c0"
+   },
+   "autoScore": {
+    "path": "/Users/mayasahaldashsh/Documents/VAZORA/supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T20-24-59-429Z-fullanswer-retest-v2-auto-score.json",
+    "sha256": "3ee71acf9e0bb8324822f44cb459953f5bd484d43d8072eaa5b95c184a79b91c"
+   },
+   "reference": {
+    "path": "/Users/mayasahaldashsh/Desktop/vazora-retest-six-files/fullanswer-validation-v4.references.json",
+    "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f"
+   },
+   "prompt": {
+    "path": "/Users/mayasahaldashsh/Desktop/vazora-retest-six-files/reviewer-prompt-v2.txt",
+    "sha256": "84646a29d4502527d2a3766837953ddf53434d3b7973123ad55c49f9094fb407"
+   }
+  }
+ },
+ "originalStudy": [
+  {
+   "item": "FA-S01#0",
+   "refVerdict": "SUPPORTED",
+   "matchedReviewerUnits": [
+    "u0 (core)",
+    "u1 \"operational\" (split)"
+   ],
+   "adjudication": "u0 agrees: exactly one overdue obligation as of 2026-10-01, SUPPORTED. u1 (IE) is a reviewer error: its reason says the record classifies the obligation as \"reporting\", not \"operational\". But obligation_type is a category, not an operational state, and the same payload carries activation_status \"active\" and review_status \"approved\", which establish that the obligation is in force.",
+   "evidence": [
+    "t1:getOverdueObligations.result.data.asOf",
+    "…obligations[0].activation_status",
+    "…obligations[0].review_status",
+    "…obligations[0].obligation_type"
+   ],
+   "classification": "SPLIT_DIFFERENCE + REVIEWER_ERROR (u1)",
+   "interpretationEffect": "The case-level disagreement for FA-S01 comes only from u1. It is a reviewer error, not a reference error."
+  },
+  {
+   "item": "FA-S02#0",
+   "refVerdict": "SUPPORTED",
+   "matchedReviewerUnits": [
+    "u0 (core)",
+    "u1 \"operational\" (split)"
+   ],
+   "adjudication": "u0 agrees: 6 assignment rows, exactly one unassigned=true, SUPPORTED. u1 (IE) is correct: the only payload in this case (t1:getAssignments) has no field establishing whether the obligation is operational (no activation or review status). The reference unit absorbed the \"operational\" descriptor without evidence, and a true count must not cover it.",
+   "evidence": [
+    "t1:getAssignments.result.data[*].unassigned",
+    "(no activation_status / review_status / operational field in this case)"
+   ],
+   "classification": "SPLIT_DIFFERENCE + EVIDENCE_GAP (descriptor not represented in the reference)",
+   "interpretationEffect": "The case-level disagreement for FA-S02 comes from a legitimate IE on a claim the reference did not represent, not from a reviewer error."
+  },
+  {
+   "item": "FA-C03#0",
+   "refVerdict": "CONTRADICTED",
+   "matchedReviewerUnits": [
+    "u1 \"Khalid Al-Harbi\""
+   ],
+   "adjudication": "u1 addresses the same claim (identity of the assigned owner), asserted, current: CONTRADICTED, which agrees. The confirmed owner 122ee4da has displayName qa-bench-v3r1-1790808323980. u0 (\"…is assigned to\", SUPPORTED) is a separate true claim (an approved assignment exists) and is not a match.",
+   "evidence": [
+    "t3:getAssignments.result.data[0].confirmedOwner.suggested_person_id",
+    "t4:getOrganizationMembers.result.data[0].displayName",
+    "…identityResolved"
+   ],
+   "classification": "SPLIT_DIFFERENCE — AGREEMENT",
+   "interpretationEffect": "The perturbation was detected through u1. u0 does not cover the identity claim."
+  },
+  {
+   "item": "FA-M03#4",
+   "refVerdict": "SUPPORTED",
+   "matchedReviewerUnits": [
+    "u5 \"no amount is specified\" (core)",
+    "u6 \"the verified record\" (split)"
+   ],
+   "adjudication": "u5 agrees: neither financial_condition nor penalty_condition states an amount, SUPPORTED. u6 (IE) is a legitimate separate claim: describing the record as \"verified\" is not established. The record shows review_status \"approved\", there is no verification field in this case, and approval is not verification. The reference unit treated \"verified record\" only as scope, and must not use u5 to cover u6.",
+   "evidence": [
+    "t3:listObligations.result.data[0].financial_condition",
+    "…penalty_condition",
+    "…review_status",
+    "(no verification field)"
+   ],
+   "classification": "SPLIT_DIFFERENCE + EVIDENCE_GAP (descriptor not represented in the reference)",
+   "interpretationEffect": "M03#4 agrees on its core. u6 is a correct extra IE, not a reviewer error. The case verdict (IE) is unchanged."
+  },
+  {
+   "item": "FA-M04#R1",
+   "refVerdict": "INSUFFICIENT_EVIDENCE",
+   "matchedReviewerUnits": [
+    "u0 \"Since your last review, two changes were recorded:\" (window part)"
+   ],
+   "adjudication": "The reviewer merged the window and the count into one SUPPORTED unit, citing args.sinceLastReview and data.since. It did not cite data.sinceSource=\"previous_sweep\". The argument records what was requested, not what the server resolved, and nothing in the payload shows that the previous sweep is the user's last review. The window claim is therefore not affirmatively established.",
+   "evidence": [
+    "t1:getRecentActivity.args.sinceLastReview",
+    "…data.since",
+    "…data.sinceSource"
+   ],
+   "classification": "SPLIT_DIFFERENCE + REVIEWER_ERROR (missed INSUFFICIENT_EVIDENCE)",
+   "interpretationEffect": "This is a missed IE on a required unit, the same SUPPORTED-vs-IE pattern as the auto-score's E1 entries (the error taxonomy is not defined in the files reviewed)."
+  },
+  {
+   "item": "FA-M04#0",
+   "refVerdict": "SUPPORTED",
+   "matchedReviewerUnits": [
+    "u0 (count part)"
+   ],
+   "adjudication": "The count content of u0 agrees: changes has 2 entries, complete=true, hasMore=false, SUPPORTED. The agreement covers the count only, not the window (see R1).",
+   "evidence": [
+    "t1:getRecentActivity.result.data.changes",
+    "…complete",
+    "…hasMore"
+   ],
+   "classification": "AGREEMENT (shared reviewer unit)",
+   "interpretationEffect": "Agrees. The shared unit does not turn R1 into an agreement."
+  },
+  {
+   "item": "FA-C05#0",
+   "refVerdict": "SUPPORTED (with \"No.\" absorbed, reading B)",
+   "matchedReviewerUnits": [
+    "u1 (core)",
+    "u0 \"No.\" (absorbed span)"
+   ],
+   "adjudication": "u1 agrees: the current record shows no verified client acknowledgement, SUPPORTED. u0 reads \"No.\" as a denial of the event (reading A, INSUFFICIENT_EVIDENCE). The reference absorbed it (reading B). In this case's text, \"No.\" is followed directly by its only stated ground, which is limited to the record, but nothing in the text excludes reading it as a denial of the event. The evidence cannot decide between the two readings, and prompt v1 has no rule for short-answer particles.",
+   "evidence": [
+    "t5:getEvidenceStatus.result.data.requirements[0].latestVerificationResult",
+    "t4:getEvidenceGaps.result.data[1].description",
+    "answer text \"No. The current VAZORA record shows…\""
+   ],
+   "classification": "REFERENCE_AMBIGUITY (final, within this study's scope) for the \"No.\" token; AGREEMENT on the core",
+   "interpretationEffect": "Count neither agreement nor disagreement on \"No.\", and do not let u1 cover it. The case verdict (CONTRADICTED, which agrees) is unaffected. Judged from this run alone; nothing carried over from the retest."
+  }
+ ],
+ "retest": [
+  {
+   "item": "FA-C06 u1",
+   "span": "الالتزام «Monthly logistics report» يتضمن شرطًا ماليًا",
+   "reviewerVerdict": "SUPPORTED",
+   "adjudication": "A different split of a claim already covered. It is the first part of reference FA-C06#1 (SUPPORTED), which the reviewer split into u1/u2/u3, all SUPPORTED. financial_condition is populated.",
+   "evidence": [
+    "/sources/t3:listObligations/result/data/0/financial_condition"
+   ],
+   "classification": "SPLIT_DIFFERENCE — duplicate of a covered claim",
+   "interpretationEffect": "Not E5. It should count toward the coverage of FA-C06#1."
+  },
+  {
+   "item": "FA-C06 u6",
+   "span": "لكنها ليست مبلغ التعرض المالي",
+   "reviewerVerdict": "SUPPORTED",
+   "adjudication": "An additional claim the reference does not represent: that the recorded contract value is not the financial-exposure amount. It is supported as a category distinction. The record labels the figure contract_value, no source designates it as exposure, and prompt v2 states \"A contract value is not a financial exposure unless the sources say so.\" It does not rescue the wrong amount in u5 (CONTRADICTED).",
+   "evidence": [
+    "/sources/t2:getContract/result/data/contract/contract_value"
+   ],
+   "classification": "ADDITIONAL SUPPORTED CLAIM (reference omission, low materiality)",
+   "interpretationEffect": "Not a reviewer E5 error. The gap is on the reference side."
+  },
+  {
+   "item": "FA-M06 u1",
+   "span": "**تقرير مستوى الخدمة الشهري**",
+   "reviewerVerdict": "SUPPORTED",
+   "adjudication": "An additional identity claim: the title matches t2 exactly. The v4 reference records it as advisory (\"Obligation identity, SUPPORTED by t2\"), not as a unit.",
+   "evidence": [
+    "/sources/t2:listObligations/result/data/0/title"
+   ],
+   "classification": "ADDITIONAL SUPPORTED CLAIM (recorded only as advisory in the reference)",
+   "interpretationEffect": "Not a reviewer E5 error."
+  }
+ ],
+ "finalAmbiguities": [
+  "FA-C05#0 — reading of \"No.\" (A: denial of the event / B: part of the record-limited answer); final within this study's scope."
+ ],
+ "frozenReportsUnchanged": {
+  "originalStudy": "DOES NOT MEET STUDY CRITERIA (as reported)",
+  "retest": "DOES NOT MEET STUDY CRITERIA (as reported)"
+ },
+ "noCombinedResult": true
+}
