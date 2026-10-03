@@ -1,0 +1,104 @@
+{
+  "document": "Six-case retest — five-item adjudication addendum",
+  "preparedAfterResults": true,
+  "statement": "Prepared after the retest results and the independent five-item adjudication were seen. It is a post-hoc methodological record, not a new success test. The original retest result (DOES NOT MEET TARGETED OBJECTIVES) stands unchanged and is not converted to PASS. No reference, prompt, scorer, request or raw-response file was modified.",
+  "unchangedInputs": {
+    "rawResponses": { "file": "2026-10-03T20-24-59-429Z-fullanswer-retest-v2-raw.jsonl", "commit": "553ebfe", "sha256": "96488d7aeadf134400bf9e8b8f9da46547e2a18922f0b12dae7777a9ff2a6c6d" },
+    "requests": { "file": "2026-10-03T20-24-59-429Z-fullanswer-retest-v2-requests.json", "commit": "47ea5da", "sha256": "40b3c37808b559625484798368090c010ab14e063e6f30655d185c7dffc834c0" },
+    "prompt": { "file": "reviewer-prompt-v2.txt", "sha256": "84646a29d4502527d2a3766837953ddf53434d3b7973123ad55c49f9094fb407" },
+    "reference": { "file": "fullanswer-validation-v4.references.json", "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f" },
+    "scorer": { "file": "fullanswer-scoring.ts", "sha256": "49f523d3fc6288c17e24d83347bd2a908522314cf4b52c6d3eaf1df17b0927e1" },
+    "autoScore": { "file": "2026-10-03T20-24-59-429Z-fullanswer-retest-v2-auto-score.json", "commit": "59f7525", "sha256": "3ee71acf9e0bb8324822f44cb459953f5bd484d43d8072eaa5b95c184a79b91c" }
+  },
+  "categories": {
+    "CONFIRMED_REVIEWER_ERROR": "reviewer output wrong under both the prompt and the reference",
+    "PROMPT_REFERENCE_CONFLICT": "the reviewer's reading is permitted by the prompt but disagrees with the locked reference",
+    "REFERENCE_AMBIGUITY": "two defensible readings of the answer lead to different verdicts; no decisive tiebreaker",
+    "MATCHING_DEFECT": "the scorer bound or withheld units contrary to its own frozen rules",
+    "UNRESOLVED": "not decided by this addendum"
+  },
+  "items": [
+    {
+      "unitId": "FA-M06#5",
+      "span": "Once clarified, I can prepare a deadline-change proposal for human approval",
+      "reference": "ASSERTED / INSUFFICIENT_EVIDENCE (required)",
+      "reviewer": "u6 NON_ASSERTION (CAPABILITY)",
+      "original": "E4",
+      "postHoc": "PROMPT_REFERENCE_CONFLICT",
+      "note": "Prompt v2 defines CAPABILITY as a general offer of what the assistant could do next that states no operational fact; this reading is permitted by v2. The locked reference treats the sentence as an asserted session-capability claim. The E4 is retained in the original score but is not recorded here as a confirmed omission. The underlying claim remains unverified (no session capability evidence in scope); it is not counted as a success."
+    },
+    {
+      "unitId": "FA-M06#3",
+      "span": "“Next Friday” is ambiguous",
+      "reference": "NON_ASSERTION, nonAssertionKind CONDITIONAL (not required)",
+      "reviewer": "u4 ASSERTED / INSUFFICIENT_EVIDENCE",
+      "original": "E5 (report-only)",
+      "postHoc": "PROMPT_GAP + REFERENCE_ERRATUM",
+      "note": "Prompt v2 has no non-assertion kind for a comment on the wording of the user's request. Reference erratum: nonAssertionKind CONDITIONAL is wrong; the sentence is not conditional or hypothetical. The locked reference is not edited; the erratum is recorded below.",
+      "referenceErratum": { "path": "cases[FA-M06].units[FA-M06#3].nonAssertionKind", "lockedValue": "CONDITIONAL", "correctedValue": "REQUEST_WORDING_COMMENT", "appliesTo": "a future reference version only; no effect on any existing score" }
+    },
+    {
+      "unitId": "FA-M08#R1",
+      "span": "I can only support an internal follow-up",
+      "reference": "ASSERTED / SUPPORTED (required; platform-level reading)",
+      "reviewer": "u2 ASSERTED / REVIEWER_UNCERTAIN",
+      "original": "E7; FA-M08 case verdict UNCERTAIN vs reference INSUFFICIENT_EVIDENCE (DISAGREE)",
+      "postHoc": "REFERENCE_AMBIGUITY",
+      "note": "A platform-level reading (internal-only follow-up policy) is SUPPORTED; a session-level reading (a follow-up can be created now) is not established. The two readings lead to different verdicts. REVIEWER_UNCERTAIN is justified and is not a false acceptance; it is also not verification of the claim and not an automatic success. The FA-M08 case remains a disagreement in the original score; it is not counted as agreement here."
+    },
+    {
+      "unitId": "FA-S07#1",
+      "span": "لا يوجد في VAZORA سجل موثّق لاعتماد العميل لتقرير الأداء في العقد GAMMA-300",
+      "reference": "ASSERTED / SUPPORTED (required); absorbs 'لا.' (reading B)",
+      "reviewer": "u2 ASSERTED / SUPPORTED (record-scoped sentence); u1 'لا.' ASSERTED / INSUFFICIENT_EVIDENCE",
+      "original": "ADJUDICATION_REQUIRED",
+      "postHoc": {
+        "recordScopedSentence": "AGREEMENT — SUPPORTED by both the reviewer (u2) and the reference (independent adjudication, post-hoc)",
+        "bareNo": "UNRESOLVED reading — the reviewer read 'لا.' as a stand-alone unqualified answer (IE); the reference read it as part of the record-scoped answer (B). Not scored as a reviewer error and not a success. Absence of a verified acknowledgement record does not establish that no acknowledgement occurred."
+      }
+    },
+    {
+      "unitId": "FA-C08#1",
+      "span": "لا يوجد في VAZORA سجل موثّق لاعتماد العميل لتقرير الأداء في العقد GAMMA-300",
+      "reference": "ASSERTED / SUPPORTED (required); absorbs 'لا.' (reading B)",
+      "reviewer": "u2 ASSERTED / SUPPORTED; u1 'لا.' ASSERTED / INSUFFICIENT_EVIDENCE",
+      "original": "ADJUDICATION_REQUIRED",
+      "postHoc": {
+        "recordScopedSentence": "AGREEMENT — SUPPORTED by both sides (post-hoc)",
+        "bareNo": "UNRESOLVED reading — same as FA-S07#1."
+      }
+    }
+  ],
+  "matchingCheck": {
+    "scope": ["FA-S07#1", "FA-C08#1"],
+    "result": "NO MATCHING DEFECT PROVEN — no code change",
+    "evidence": {
+      "boundReviewerUnit": "u2 (both cases): 'حتى الآن، لا يوجد في VAZORA سجل موثّق لاعتماد العميل لتقرير الأداء في العقد GAMMA-300'. It contains the reference span verbatim (normalized includes test), so it is the only candidate (reviewerUnits [2]).",
+      "choseBareNoInstead": false,
+      "bareNoHandling": "u1 'لا.' equals the reference absorbedSpans token of #1, so it is attached to #1 as absorbed and excluded from candidates and from E5.",
+      "otherCoveringUnit": "none — u0 (action status), u3 (requirement status), u4 (open gap) bind to #0, #2, #3 respectively, not to #1.",
+      "whyWithheld": "Frozen rule (fullanswer-scoring.ts line 155/159): if an absorbed token is judged differently from the absorbing unit's candidates, the unit goes to ADJUDICATION_REQUIRED. The rule and its test ('absorbed span judged differently → ADJUDICATION_REQUIRED', scoring test line 76) were committed in 8e443d7 before the first study call, and the scorer is byte-identical at 47ea5da (49f523d3…). The scorer behaved as specified; it did not merge the token into the sentence verdict and did not drop it from the record."
+    },
+    "correctionImpact": "none (no correction made)"
+  },
+  "denominators": {
+    "note": "Same 25 required units in the six cases as the original score; no unit removed.",
+    "original": { "autoCorrect": 21, "E4": 1, "reviewerUncertain": 1, "adjudicationRequired": 2, "caseAgreement": "5/6" },
+    "postHocClassificationOfTheFour": {
+      "CONFIRMED_REVIEWER_ERROR": 0,
+      "PROMPT_REFERENCE_CONFLICT": 1,
+      "REFERENCE_AMBIGUITY": 1,
+      "MATCHING_DEFECT": 0,
+      "postHocSentenceAgreement": 2
+    },
+    "notCountedAsSuccess": ["FA-M06#5 (conflict)", "FA-M08#R1 (ambiguity)", "the bare 'لا.' readings in FA-S07 and FA-C08"],
+    "caseAgreementPostHoc": "5/6 unchanged; FA-M08 is attributed to reference ambiguity but is not converted to agreement"
+  },
+  "outOfScope": [
+    "The three other E5 entries in the retest (FA-C06 u1, FA-C06 u6, FA-M06 u1)",
+    "The seven other pending matches in the 24-case study (FA-S01#0, FA-S02#0, FA-C03#0, FA-M03#4, FA-M04#R1, FA-M04#0, FA-C05#0)",
+    "Any new result for the 24-case study",
+    "Live testing of the clarified rules"
+  ],
+  "futureRules": "reviewer-rules-clarification-v2.1.json"
+}
