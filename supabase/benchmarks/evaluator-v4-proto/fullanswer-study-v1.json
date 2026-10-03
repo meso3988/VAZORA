@@ -1,0 +1,77 @@
+{
+  "study": "HYBRID REVIEWER — FULL-ANSWER VALIDATION v1",
+  "nature": "Study of the semantic reviewer on SAVED Officer answers (7 of the 8 contradicted cases are CONTROLLED PERTURBATIONS). Not a new measurement of the current Contract Officer.",
+  "reference": {
+    "file": "supabase/benchmarks/evaluator-v4-proto/fullanswer-validation-v4.references.json",
+    "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f"
+  },
+  "requestSource": {
+    "v4Build": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T00-07-54-994Z-fullanswer-v4-requests.json",
+    "v4BuildSha256": "96c7f107a4fb680b363c0d6364dda0396e0a1de5f3c0ce8afc6810e809391fcf",
+    "approvedV3Build": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T18-13-55-956Z-fullanswer-v3-requests.json",
+    "approvedV3BuildSha256": "e3dde8b749f8d88995adbf27061b0567296d63cf2177929e4cb6a603a060f215"
+  },
+  "reviewer": {
+    "model": "claude-opus-5-5",
+    "frozenFile": "supabase/benchmarks/evaluator-v4-proto/reviewer-frozen-v1.json",
+    "frozenSha256": "02e1981c62bcc11d07e386fd7ef547ee089dfcedec22d8cffa545daae07c814e",
+    "promptSha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487",
+    "parameters": {
+      "max_tokens": 8000,
+      "thinking": {
+        "type": "adaptive"
+      },
+      "output_config": {
+        "effort": "medium"
+      }
+    },
+    "settingsDeviationFromFrozen": "max_tokens 4000 -> 8000 only (approved for this study); prompt, schema, model, thinking and effort unchanged"
+  },
+  "pricing": {
+    "inputUsdPerMillion": 4,
+    "outputUsdPerMillion": 20,
+    "source": "reviewer-pilot-v2.json pricingBasis (claude-opus-5-5 $4/$20 per million)"
+  },
+  "limits": {
+    "maxRequests": 24,
+    "maxInputTokens": 140000,
+    "maxOutputTokensIncludingThinking": 192000,
+    "maxCostUsdTotal": 4.5,
+    "max_tokens_perRequest": 8000,
+    "approval": "user approval for this study only; total cap, no top-up, no raise; ceilings not targets"
+  },
+  "attemptsPolicy": "one attempt per case; no automatic retry; no extra generation request for health checks; no provider/model change; truncation saved and scored E8",
+  "preRequestGuard": "counted input x1.05 + max_tokens must fit remaining input, output and dollar budget at the applied price; else stop INCOMPLETE",
+  "criteria": [
+    "E1 = 0",
+    "E2 = 0",
+    "E6 = 0",
+    "E4 = 0 on required decidable units",
+    "E8 = 0 (24/24 complete responses)",
+    "7/7 controlled perturbations judged CONTRADICTED",
+    "all 23 decidable cases agree (>= 23 of 24 planned)",
+    "no open adjudication"
+  ],
+  "reportedRegardless": [
+    "E3",
+    "E5",
+    "E7",
+    "MISMATCH_C_vs_IE",
+    "8 required INSUFFICIENT_EVIDENCE units: detection"
+  ],
+  "denominators": {
+    "cases": 24,
+    "units": 88,
+    "materialRequired": 83,
+    "decidableRequired": 82,
+    "undecidable": [
+      "FA-C01#0"
+    ]
+  },
+  "display": [
+    "agreement n/23 (decidable cases)",
+    "verdict coverage 23/24",
+    "response completeness n/24"
+  ],
+  "FA-C01": "kept among the 24 requests; 5 decidable units scored; FA-C01#0 recorded (addressed? what verdict?) but never scored as correct or as an error; case verdict reference-incomplete: not a pass, not E8"
+}

@@ -106,7 +106,9 @@ async function run(requestsPath: string) {
   if (!key) { console.error("BLOCKED: VAZORA_ANTHROPIC_API_KEY not configured"); process.exit(2); }
 
   const built = JSON.parse(readFileSync(requestsPath, "utf8"));
-  if (sha(readFileSync(manifestPath)) !== built.manifestSha256) { console.error("BLOCKED: manifest changed since build"); process.exit(2); }
+  // full-answer study requests name their own manifest; pilot requests use the pilot manifest
+  const builtManifest = built.manifestPath ? join(here, "..", "..", built.manifestPath) : manifestPath;
+  if (sha(readFileSync(builtManifest)) !== built.manifestSha256) { console.error("BLOCKED: manifest changed since build"); process.exit(2); }
   for (const r of built.requests as Built[]) {
     if (sha(JSON.stringify(r.body)) !== r.requestSha256) { console.error(`BLOCKED: request body hash mismatch ${r.caseId}`); process.exit(2); }
   }
