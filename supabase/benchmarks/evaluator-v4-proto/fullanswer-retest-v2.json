@@ -1,6 +1,6 @@
 {
   "study": "HYBRID REVIEWER — BOUNDED RETEST (proposal)",
-  "status": "PROPOSED — NOT APPROVED, NOT RUN",
+  "status": "APPROVED FOR ONE RUN — user approval after 15fed5e: six cases, one attempt each",
   "cases": [
     "FA-C06",
     "FA-M06",
@@ -42,7 +42,8 @@
     "maxInputTokens": 40000,
     "maxOutputTokensIncludingThinking": 48000,
     "maxCostUsdTotal": 1.2,
-    "approval": "NOT APPROVED — proposal only; the runner refuses these limits"
+    "max_tokens_perRequest": 8000,
+    "approval": "approved for this six-case retest only; total cap $1.20, 48,000 output tokens incl. thinking; no top-up, no raise; ceilings not targets"
   },
   "refFormat": "json-pointer",
   "scope": "a retest of six known-error cases measures whether those errors recur; it is not a replacement for the 24-case result and cannot produce a 24-case verdict"
