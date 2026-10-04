@@ -50,7 +50,9 @@ export async function IndicatorValue({
   const key = state === "not_calculated" ? "notCalculated" : state;
   const full = t(key as "notCalculated" | "deferred" | "unavailable" | "incomplete");
   return (
-    <span data-indicator={name} data-state={state} title={full} className={cn(className, "text-muted")}>
+    // `relative` keeps the sr-only text inside scrolling tables instead of
+    // widening the page.
+    <span data-indicator={name} data-state={state} title={full} className={cn(className, "relative text-muted")}>
       {short ? <span className="text-[11px] font-sans">{t(`short.${key}` as "short.notCalculated")}</span> : <span aria-hidden>—</span>}
       <span className="sr-only">{full}</span>
     </span>
