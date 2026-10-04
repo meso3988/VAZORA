@@ -69,8 +69,8 @@ export function AppShell({
               className="flex h-9 cursor-default items-center gap-3 rounded-sm px-3 text-sm text-faint"
             >
               <Icon size={16} className="shrink-0" strokeWidth={1.75} />
-              <span className="truncate">{t(key)}</span>
-              <span className="ms-auto shrink-0 rounded-sm border border-line px-1 py-px text-[10px] leading-none">{d("badge")}</span>
+              <span className="shrink-0 whitespace-nowrap">{t(key)}</span>
+              <span className="ms-auto min-w-0 truncate rounded-sm border border-line px-1 py-px text-[10px] leading-none">{d("badge")}</span>
             </span>
           );
         }
