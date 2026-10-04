@@ -1,0 +1,33 @@
+PASS  transport-timeout-configured — 2500ms
+PASS  transport-retries-bounded — 1
+PASS  transport-hang-aborted — {"kind":"timeout","message":"provider request exceeded 2500ms and was aborted","retryable":true,"attempts":2,"durationMs":5516}
+PASS  transport-hang-bounded — 5516ms for 2 bounded attempts
+PASS  transport-hang-retried-once — attempts=2
+PASS  transport-429-retried — attempts=2
+PASS  transport-500-retried — attempts=2
+PASS  transport-503-retried — attempts=2
+PASS  transport-401-not-retried — attempts=1
+PASS  transport-400-not-retried — attempts=1
+PASS  transport-422-not-retried — attempts=1
+PASS  transport-connection-reset — {"kind":"network","ms":509}
+PASS  transport-no-header-leak — {"error":"invalid api key sk-secret-value-123"}
+PASS  conversation-timeout-surfaced — provider_timeout: provider request exceeded 2500ms and was a
+PASS  conversation-rate-limit-surfaced — provider HTTP 429: rate limited
+PASS  conversation-server-error-surfaced — provider HTTP 500: upstream failure
+PASS  conversation-auth-error-surfaced — provider HTTP 401: invalid key
+PASS  conversation-network-surfaced — provider network error: ECONNRESET (attempts 2)
+PASS  conversation-empty-output-safe — text="I could not complete this analysis within my lookup budget and have no"
+PASS  conversation-empty-output-no-fabrication — nothing invented from an empty model response
+PASS  conversation-loop-bounded — provider calls=6
+PASS  conversation-loop-fast — 345ms
+PASS  conversation-loop-honest — I could not complete this analysis within my lookup budget and have no confirmed
+PASS  conversation-loop-no-invented-tools — [["nonexistentTool",false],["nonexistentTool",false],["nonexistentTool",false],["nonexistentTool",false],["nonexistentTool",false]]
+PASS  failures-create-no-actions — before=0 after=0
+PASS  history-failed-ask-reports-error — {"ok":false,"error":"provider HTTP 500: upstream failure"}
+PASS  history-user-message-kept — messages=1
+PASS  history-no-fabricated-assistant-turn — a failed turn must not leave an invented answer behind
+PASS  history-recovers — {"ok":true,"answer":{"text":"BETA-200 is overdue.","actionReceipts":[]
+PASS  history-consistent-after-recovery — messages=3
+PASS  cleanup-benchmark-tenant
+
+OFFICER FAILURE: 31/31 PASS

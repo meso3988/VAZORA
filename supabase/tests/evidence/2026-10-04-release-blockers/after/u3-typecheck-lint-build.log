@@ -1,0 +1,21 @@
+commit 7e12e1c
+--- typecheck
+> vazora@0.1.0 typecheck
+> tsc --noEmit -p tsconfig.json
+
+--- lint (7 errors, all in 5 pre-existing test scripts unchanged by this work)
+supabase/tests/e2e-cp3-qa.mts
+supabase/tests/e2e-demo-detail.mts
+supabase/tests/evaluator-v4-heldout-v2-score.ts
+   38:113  error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+   39:46   error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+  147:36   error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+supabase/tests/precheck-connectivity.ts
+  23:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+supabase/tests/qa-scenarios-officer.ts
+--- build
+✓ Compiled successfully in 4.1s
+BUILD_ID -Nl6mqFscCFr0H65bzdTo

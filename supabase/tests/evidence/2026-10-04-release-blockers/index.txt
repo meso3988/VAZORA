@@ -1,0 +1,29 @@
+RELEASE BLOCKERS B1/B2 — evidence index (2026-10-04)
+
+Tenants: qa-dashboard-tenants.ts setup (Alpha = v3 fixture, Beta = officer fixture, Empty).
+Ground truth (Officer getOverdueObligations, org clock 2026-10-04 Asia/Riyadh):
+  Alpha BETA-200 overdue 6 days; ALPHA-100 and the other four not overdue.
+  Beta FM-008 overdue 6 days; OM-014, OPS-021 not overdue. Empty: no contracts.
+
+BEFORE — commit 158edcc (product code = 4277ba2), production build, VAZORA_OFFICER_PROVIDER=none
+  before/e2e-release-blockers-BEFORE.log   28/93 — B1 and B2 reproduced:
+    /app/contracts BETA-200 row "0 · 0 due · 0% · — · 0%"; overview KPIs
+    "Obligations 0 · Overdue 0 · Coverage 0% · Open risks 0 · Risk exposure SAR 0.0 · Readiness 0%"
+    while the same page's Officer feed says "Overdue: BETA-200 — 6 day(s) overdue";
+    Beta contracts without a recorded value shown as "SAR 0.0";
+    risks/claims direct links render empty lists; claims nav is an active link.
+  before/*.png
+
+AFTER — product commits 2f7a7a6, 9f24fdb, 7e12e1c; production build of 7e12e1c, VAZORA_OFFICER_PROVIDER=none
+  after/e2e-release-blockers-AFTER.log     93/93
+  after/e2e-read-state.log                 78/78  (contracts → detail → obligations/evidence/activity/officer, EN/AR, empty tenant)
+  after/e2e-dashboard-provenance.log       65/65
+  after/e2e-demo-detail.log                14/14
+  after/e2e-work-surfaces.log              31/31  (officer → tasks → approve (held vs completed) / reject → activity, isolation, mobile, demo)
+  after/release-blockers-unit.log          38/38
+  after/u3-typecheck-lint-build.log        typecheck 0 errors; lint: 7 errors only in 5 pre-existing test scripts; build OK
+  after/u5-e2e-provider-failure.log        15/15  (A: no provider; B: SIMULATED connection failure on an isolated server)
+  after/u5-officer-failure-unit.log        31/31  (scripted provider)
+  e2e-release-blockers-after-run1-TRANSPORT-ETIMEDOUT.log  — one interrupted run: Supabase read ETIMEDOUT
+    (external transport); precheck healthy afterwards; rerun 93/93.
+  after/*.png

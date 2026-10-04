@@ -1,0 +1,81 @@
+build 7e12e1c / -Nl6mqFscCFr0H65bzdTo
+PASS  rs alpha en /contracts: loads (200)
+PASS  rs alpha en /contracts: own contracts listed
+PASS  rs alpha en /contracts: no false empty state with records
+PASS  rs alpha en /contracts: no load-failure text
+PASS  rs alpha en /contracts/[id]: detail renders after click-through
+PASS  rs alpha en /contracts/[id]: no load-failure text
+PASS  rs alpha en /contracts/[id]/obligations: loads (200), no failure text
+PASS  rs alpha en /contracts/[id]/risks: loads (200), no failure text
+PASS  rs alpha en /contracts/[id]/evidence: loads (200), no failure text
+PASS  rs alpha en /contracts/[id]/activity: loads (200), no failure text
+PASS  rs alpha en /contracts/[id]/claims: loads (200), no failure text
+PASS  rs alpha en /contracts/[id]/officer: loads (200), no failure text
+PASS  rs alpha en /contracts/[random-uuid]: legitimate not-found state
+PASS  rs alpha en /tasks: loads (200)
+PASS  rs alpha en /tasks: no load-failure text
+PASS  rs alpha en /tasks: page title rendered
+PASS  rs alpha en /claims: loads (200)
+PASS  rs alpha en /claims: no load-failure text
+PASS  rs alpha en /claims: page title rendered
+PASS  rs alpha en /evidence: loads (200)
+PASS  rs alpha en /evidence: no load-failure text
+PASS  rs alpha en /evidence: page title rendered
+PASS  rs alpha en /dashboard: loads (200)
+PASS  rs alpha en /dashboard: no load-failure text
+PASS  rs empty en /contracts: loads (200)
+PASS  rs empty en /contracts: legitimate empty state shown
+PASS  rs empty en /contracts: no load-failure text
+PASS  rs empty en /tasks: loads (200)
+PASS  rs empty en /tasks: no load-failure text
+PASS  rs empty en /tasks: page title rendered
+PASS  rs empty en /claims: loads (200)
+PASS  rs empty en /claims: no load-failure text
+PASS  rs empty en /claims: page title rendered
+PASS  rs empty en /evidence: loads (200)
+PASS  rs empty en /evidence: no load-failure text
+PASS  rs empty en /evidence: page title rendered
+PASS  rs empty en /evidence: no upload contract picker for empty tenant
+PASS  rs empty en /dashboard: loads (200)
+PASS  rs empty en /dashboard: no load-failure text
+PASS  rs alpha ar /contracts: loads (200)
+PASS  rs alpha ar /contracts: own contracts listed
+PASS  rs alpha ar /contracts: no false empty state with records
+PASS  rs alpha ar /contracts: no load-failure text
+PASS  rs alpha ar /contracts/[id]: detail renders after click-through
+PASS  rs alpha ar /contracts/[id]: no load-failure text
+PASS  rs alpha ar /contracts/[id]/obligations: loads (200), no failure text
+PASS  rs alpha ar /contracts/[id]/risks: loads (200), no failure text
+PASS  rs alpha ar /contracts/[id]/evidence: loads (200), no failure text
+PASS  rs alpha ar /contracts/[id]/activity: loads (200), no failure text
+PASS  rs alpha ar /contracts/[id]/claims: loads (200), no failure text
+PASS  rs alpha ar /contracts/[id]/officer: loads (200), no failure text
+PASS  rs alpha ar /contracts/[random-uuid]: legitimate not-found state
+PASS  rs alpha ar /tasks: loads (200)
+PASS  rs alpha ar /tasks: no load-failure text
+PASS  rs alpha ar /tasks: page title rendered
+PASS  rs alpha ar /claims: loads (200)
+PASS  rs alpha ar /claims: no load-failure text
+PASS  rs alpha ar /claims: page title rendered
+PASS  rs alpha ar /evidence: loads (200)
+PASS  rs alpha ar /evidence: no load-failure text
+PASS  rs alpha ar /evidence: page title rendered
+PASS  rs alpha ar /dashboard: loads (200)
+PASS  rs alpha ar /dashboard: no load-failure text
+PASS  rs empty ar /contracts: loads (200)
+PASS  rs empty ar /contracts: legitimate empty state shown
+PASS  rs empty ar /contracts: no load-failure text
+PASS  rs empty ar /tasks: loads (200)
+PASS  rs empty ar /tasks: no load-failure text
+PASS  rs empty ar /tasks: page title rendered
+PASS  rs empty ar /claims: loads (200)
+PASS  rs empty ar /claims: no load-failure text
+PASS  rs empty ar /claims: page title rendered
+PASS  rs empty ar /evidence: loads (200)
+PASS  rs empty ar /evidence: no load-failure text
+PASS  rs empty ar /evidence: page title rendered
+PASS  rs empty ar /evidence: no upload contract picker for empty tenant
+PASS  rs empty ar /dashboard: loads (200)
+PASS  rs empty ar /dashboard: no load-failure text
+
+READ-STATE SMOKE (rs): 78/78 pass
