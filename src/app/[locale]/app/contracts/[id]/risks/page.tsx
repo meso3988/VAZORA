@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ContractLoadFailed } from "@/components/app/contract-unavailable";
+import { DeferredNotice } from "@/components/app/deferred-notice";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Mono, Panel } from "@/components/app/primitives";
@@ -18,6 +19,9 @@ export default async function ContractRisks(props: PageProps<"/[locale]/app/cont
   const read = await readContract(db, orgId, id, session.mode === "demo");
   if (read.status === "unavailable") return <ContractLoadFailed />;
   if (read.status === "not_found") notFound();
+  // The risk register is not part of this release: live tenants get the
+  // declaration, never an empty list or a zero exposure.
+  if (session.mode !== "demo") return <DeferredNotice feature="risks" />;
   const contract = read.contract;
   const risks = (await db.risks.list(orgId, { contractId: id })).sort((a, b) => b.exposure - a.exposure);
   const open = risks.filter((r) => r.status !== "closed");

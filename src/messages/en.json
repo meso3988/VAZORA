@@ -1405,7 +1405,8 @@
       "sections": "Contract sections",
       "dateUnknown": "Not recorded",
       "noActions": "No officer actions for this contract yet.",
-      "unapprovedClauses": "Unapproved extraction — clauses from an analysis awaiting review."
+      "unapprovedClauses": "Unapproved extraction — clauses from an analysis awaiting review.",
+      "valueUnknown": "Value not recorded"
     },
     "documents": {
       "title": "Contract documents",
@@ -2057,6 +2058,30 @@
       "noContractActions": "No actions recorded for this contract yet.",
       "askOpen": "Open a contract conversation",
       "askDemo": "Conversation preview — demo sessions are read-only. The live workspace opens a real contract-scoped conversation."
+    },
+    "indicator": {
+      "activeObligations": "Active obligations",
+      "notCalculated": "Not calculated in this release",
+      "deferred": "Not available in this release",
+      "unavailable": "Could not be loaded — nothing was calculated",
+      "incomplete": "Incomplete — too many records to count reliably",
+      "short": {
+        "notCalculated": "Not calculated",
+        "deferred": "Not in this release",
+        "unavailable": "Not loaded",
+        "incomplete": "Incomplete"
+      }
+    },
+    "deferred": {
+      "badge": "Not in this release",
+      "risks": {
+        "title": "Risk register — not available in this release",
+        "body": "Risks and financial exposure are not tracked in this release, so nothing is recorded or calculated here. This page does not mean the contract has no risks. For current operational issues, use Obligations, Evidence and the Contract Officer."
+      },
+      "claims": {
+        "title": "Claims — not available in this release",
+        "body": "Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page does not mean there are no claims, or that any claim is ready."
+      }
     }
   }
 }

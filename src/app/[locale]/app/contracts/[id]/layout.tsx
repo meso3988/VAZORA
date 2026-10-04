@@ -47,7 +47,9 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
             <span aria-hidden>·</span>
             <span>{s(contract.sector)}</span>
             <span aria-hidden>·</span>
-            <Mono className="text-xs">{formatMoney(contract.value, locale, contract.currency, { compact: true })}</Mono>
+            {contract.value == null
+              ? <span>{t("contract.valueUnknown")}</span>
+              : <Mono className="text-xs">{formatMoney(contract.value, locale, contract.currency, { compact: true })}</Mono>}
             <span aria-hidden>·</span>
             <span>
               {/* A real contract may have no recorded start/end date. Formatting
@@ -62,7 +64,7 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
         }
         actions={<StatusPill status={contract.status} />}
       />
-      <ContractTabs id={contract.id} />
+      <ContractTabs id={contract.id} deferred={session.mode === "live"} />
       {props.children}
     </>
   );

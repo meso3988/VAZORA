@@ -57,11 +57,14 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
   }
 
   const active = contracts.filter((c) => c.status !== "draft");
-  const due = active.reduce((a, c) => a + c.health.obligationsDueThisMonth, 0);
-  const overdue = active.reduce((a, c) => a + c.health.obligationsOverdue, 0);
-  const totalObl = active.reduce((a, c) => a + c.health.obligationsTotal, 0) || 1;
-  const coverage = active.reduce((a, c) => a + c.health.evidenceCoverage * c.health.obligationsTotal, 0) / totalObl;
-  const exposure = active.reduce((sum, c) => sum + c.health.riskExposure, 0);
+  // Portfolio figures exist only on demo fixtures (rendered in the demo
+  // block below); live contracts carry none and are never summed as zeros.
+  const illustrative = active.flatMap((c) => (c.health ? [{ ...c, health: c.health }] : []));
+  const due = illustrative.reduce((a, c) => a + c.health.obligationsDueThisMonth, 0);
+  const overdue = illustrative.reduce((a, c) => a + c.health.obligationsOverdue, 0);
+  const totalObl = illustrative.reduce((a, c) => a + c.health.obligationsTotal, 0) || 1;
+  const coverage = illustrative.reduce((a, c) => a + c.health.evidenceCoverage * c.health.obligationsTotal, 0) / totalObl;
+  const exposure = illustrative.reduce((sum, c) => sum + c.health.riskExposure, 0);
   const preparing = claims.filter((c) => c.status === "preparing" || c.status === "ready");
   const blocked = preparing.filter((c) => claimReadiness(c) < 0.95);
   const nextClaim = [...preparing].sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0];
@@ -231,7 +234,7 @@ export default async function DashboardPage(props: PageProps<"/[locale]/app/dash
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {active.map((c) => (
+            {illustrative.map((c) => (
               <tr key={c.id} className="hover:bg-fg/3">
                 <Td>
                   <Link href={`/app/contracts/${c.id}`} className="flex flex-col">

@@ -56,11 +56,13 @@ export type Contract = {
   client: LocalizedText;
   sector: Sector;
   status: ContractStatus;
-  value: number;
+  /** null when no contract value is recorded — never shown as 0 */
+  value: number | null;
   currency: string;
   startDate: ISODate;
   endDate: ISODate;
-  health: ContractHealth;
+  /** illustrative demo figures only; live indicators come from domain/indicators */
+  health?: ContractHealth;
 };
 
 /** Top-level indicators. Each is grounded in counted objects, never a synthetic score. */

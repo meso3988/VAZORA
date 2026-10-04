@@ -45,6 +45,7 @@ export function AppShell({
 }) {
   const t = useTranslations("app.nav");
   const c = useTranslations("common");
+  const d = useTranslations("app.deferred");
   const locale = useLocale();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -58,6 +59,21 @@ export function AppShell({
     <nav className="flex flex-1 flex-col gap-1">
       {NAV.map(({ href, key, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
+        // Claims are not part of this release for live tenants: declared, not linked.
+        if (!demo && key === "claims") {
+          return (
+            <span
+              key={href}
+              data-deferred="claims"
+              aria-disabled="true"
+              className="flex h-9 cursor-default items-center gap-3 rounded-sm px-3 text-sm text-faint"
+            >
+              <Icon size={16} className="shrink-0" strokeWidth={1.75} />
+              <span className="truncate">{t(key)}</span>
+              <span className="ms-auto shrink-0 rounded-sm border border-line px-1 py-px text-[10px] leading-none">{d("badge")}</span>
+            </span>
+          );
+        }
         return (
           <Link
             key={href}

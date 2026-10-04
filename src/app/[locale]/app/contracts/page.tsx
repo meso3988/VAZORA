@@ -1,11 +1,15 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
-import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { ReactNode } from "react";
 
+import { IndicatorValue, indicatorValue } from "@/components/app/indicator";
 import { Mono, PageHeader, Panel, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
 import { ButtonLink } from "@/components/ui/button";
+import { readContractIndicators } from "@/data/contract-indicators";
 import { readContractList, requireTenant } from "@/data/context";
+import type { ContractIndicators } from "@/domain/indicators";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
@@ -16,15 +20,27 @@ export async function generateMetadata(props: PageProps<"/[locale]/app/contracts
   return { title: t("title") };
 }
 
+const SLOT = "\u0000";
+/** Render a translated "{count} …" template with a node in place of the count. */
+const slot = (template: string, node: ReactNode) => {
+  const [before, after = ""] = template.split(SLOT);
+  return <>{before}{node}{after}</>;
+};
+
 export default async function ContractsPage(props: PageProps<"/[locale]/app/contracts">) {
   const locale = asLocale((await props.params).locale);
   setRequestLocale(locale);
   const t = await getTranslations("app.contracts");
+  const ti = await getTranslations("app.indicator");
+  const tc = await getTranslations("app.contract");
   const s = await getTranslations("sector");
-  const f = await getFormatter();
   const { session, orgId, db } = await requireTenant();
-  const read = await readContractList(db, orgId, session.mode === "demo");
+  const isDemo = session.mode === "demo";
+  const read = await readContractList(db, orgId, isDemo);
   const contracts = read.contracts;
+  const indicators = read.ok && contracts.length
+    ? (await readContractIndicators({ isDemo, contracts, orgId, userId: session.user.id, locale })).byContract
+    : new Map<string, ContractIndicators>();
 
   return (
     <>
@@ -59,14 +75,20 @@ export default async function ContractsPage(props: PageProps<"/[locale]/app/cont
               <Th>{t("columns.client")}</Th>
               <Th>{t("columns.status")}</Th>
               <Th>{t("columns.value")}</Th>
-              <Th>{t("columns.obligations")}</Th>
+              <Th>{isDemo ? t("columns.obligations") : ti("activeObligations")}</Th>
               <Th>{t("columns.coverage")}</Th>
               <Th>{t("columns.exposure")}</Th>
               <Th>{t("columns.readiness")}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {contracts.map((c) => (
+            {contracts.map((c) => {
+              const ind = indicators.get(c.id);
+              const due = indicatorValue(ind?.obligationsDueThisMonth);
+              const overdue = indicatorValue(ind?.obligationsOverdue);
+              const exposure = indicatorValue(ind?.riskExposure);
+              const readiness = indicatorValue(ind?.claimReadiness);
+              return (
               <tr key={c.id} className="hover:bg-fg/3">
                 <Td>
                   <Link href={`/app/contracts/${c.id}`} className="flex flex-col">
@@ -76,21 +98,38 @@ export default async function ContractsPage(props: PageProps<"/[locale]/app/cont
                 </Td>
                 <Td className="text-muted">{lt(c.client, locale)}</Td>
                 <Td><StatusPill status={c.status} subtle /></Td>
-                <Td><Mono className="text-sm">{formatMoney(c.value, locale, c.currency, { compact: true })}</Mono></Td>
+                <Td>
+                  {c.value == null
+                    ? <span className="text-xs text-muted">{tc("valueUnknown")}</span>
+                    : <Mono className="text-sm">{formatMoney(c.value, locale, c.currency, { compact: true })}</Mono>}
+                </Td>
                 <Td>
                   <span className="flex flex-col text-xs">
-                    <Mono className="text-sm text-fg">{c.health.obligationsTotal}</Mono>
+                    <Mono className="text-sm text-fg"><IndicatorValue name="obligationsTotal" indicator={ind?.obligationsTotal} short /></Mono>
                     <span className="text-muted">
-                      {t("due", { count: c.health.obligationsDueThisMonth })}
-                      {c.health.obligationsOverdue > 0 && <span className="text-missing"> · {t("overdue", { count: c.health.obligationsOverdue })}</span>}
+                      {due != null && <>{slot(t("due", { count: SLOT }), <IndicatorValue name="obligationsDueThisMonth" indicator={ind?.obligationsDueThisMonth} />)} · </>}
+                      <span className={overdue ? "text-missing" : undefined}>
+                        {overdue != null
+                          ? slot(t("overdue", { count: SLOT }), <IndicatorValue name="obligationsOverdue" indicator={ind?.obligationsOverdue} />)
+                          : <IndicatorValue name="obligationsOverdue" indicator={ind?.obligationsOverdue} short />}
+                      </span>
                     </span>
                   </span>
                 </Td>
-                <Td><Mono className="text-sm">{f.number(c.health.evidenceCoverage, "percent")}</Mono></Td>
-                <Td><Mono className={c.health.riskExposure ? "text-sm text-at-risk" : "text-sm text-faint"}>{c.health.riskExposure ? formatMoney(c.health.riskExposure, locale, c.currency, { compact: true }) : "—"}</Mono></Td>
-                <Td><Ring value={c.health.claimReadiness} size={40} stroke={3.5} /></Td>
+                <Td><Mono className="text-sm"><IndicatorValue name="evidenceCoverage" indicator={ind?.evidenceCoverage} format="percent" short /></Mono></Td>
+                <Td>
+                  <Mono className={exposure ? "text-sm text-at-risk" : "text-sm text-faint"}>
+                    <IndicatorValue name="riskExposure" indicator={ind?.riskExposure} format={{ money: c.currency }} compact short />
+                  </Mono>
+                </Td>
+                <Td>
+                  {readiness != null
+                    ? <span data-indicator="claimReadiness" data-state="value"><Ring value={readiness} size={40} stroke={3.5} /></span>
+                    : <IndicatorValue name="claimReadiness" indicator={ind?.claimReadiness} short />}
+                </Td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </Table>
         </Panel>

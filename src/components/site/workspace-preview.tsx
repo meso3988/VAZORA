@@ -15,7 +15,8 @@ export async function WorkspacePreview() {
   const db = getDataProvider();
   const contract = await db.contracts.getById(DEMO_ORGANIZATION_ID, CONTRACT_HERO_ID);
   const obligations = (await db.obligations.list(DEMO_ORGANIZATION_ID, { contractId: CONTRACT_HERO_ID })).slice(0, 5);
-  if (!contract) return null;
+  // The preview renders illustrative fixture figures only; without them, nothing.
+  if (!contract?.health) return null;
 
   const h = contract.health;
   const kpis = [

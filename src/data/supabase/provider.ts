@@ -95,23 +95,12 @@ function mapContract(row: ContractRow): Contract {
     client: toText(row.client_name),
     sector: "government",
     status: row.status === "closeout" ? "closeout" : row.status === "archived" ? "closeout" : "active",
-    value: row.contract_value ?? 0,
+    value: row.contract_value,
     currency: row.currency,
     startDate: row.start_date ?? "",
     endDate: row.end_date ?? "",
-    health: {
-      obligationsTotal: 0,
-      obligationsDueThisMonth: 0,
-      obligationsOverdue: 0,
-      evidenceCoverage: 0,
-      risksOpen: 0,
-      riskExposure: 0,
-      claimReadiness: 0,
-    },
   };
 }
-
-const ZERO_HEALTH_CONTRACT = (row: ContractRow): Contract => mapContract(row);
 
 function mapDocument(row: DocRow): ContractDocument {
   return {
@@ -196,7 +185,7 @@ const contracts: ContractRepository = {
       .select("*")
       .eq("organization_id", organizationId)
       .order("created_at", { ascending: false });
-    return ((data ?? []) as ContractRow[]).map(ZERO_HEALTH_CONTRACT);
+    return ((data ?? []) as ContractRow[]).map(mapContract);
   },
   async listChecked(organizationId) {
     try {
@@ -207,7 +196,7 @@ const contracts: ContractRepository = {
         .eq("organization_id", organizationId)
         .order("created_at", { ascending: false });
       if (error || !Array.isArray(data)) return { ok: false };
-      return { ok: true, contracts: (data as ContractRow[]).map(ZERO_HEALTH_CONTRACT) };
+      return { ok: true, contracts: (data as ContractRow[]).map(mapContract) };
     } catch {
       return { ok: false };
     }

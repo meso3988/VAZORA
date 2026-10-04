@@ -4,6 +4,9 @@ import { getFormatter, getTranslations, setRequestLocale } from "next-intl/serve
 import { ClauseTrace } from "@/components/app/clause-trace";
 import { ContractLoadFailed, DataLoadFailed } from "@/components/app/contract-unavailable";
 import { ContractLifecycle } from "@/components/app/contract-lifecycle";
+import { DeferredNotice } from "@/components/app/deferred-notice";
+import { IndicatorValue, indicatorNote, indicatorValue } from "@/components/app/indicator";
+import { readContractIndicators } from "@/data/contract-indicators";
 import { IngestionControls } from "@/components/app/ingestion-controls";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
 import { OfficerFeed } from "@/components/app/officer-feed";
@@ -101,12 +104,13 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
   const isDemo = session?.mode === "demo";
   const liveQueue = isLive ? createSupabaseServer().then((s) => listOfficerActions(s, orgId, { contractId: id, limit: 6 })) : null;
-  const [obligationsRead, clausesRead, evidenceRead, risks, claims, demoActions, eventsRead, activityRead, documentsRead, latestRunRead, summaryRead, actionsRead] = await Promise.all([
+  const [obligationsRead, clausesRead, evidenceRead, risks, claims, demoActions, eventsRead, activityRead, documentsRead, latestRunRead, summaryRead, actionsRead, indicatorsRead] = await Promise.all([
     readObligationList(db, orgId, isDemo, { contractId: id }),
     readClauseList(db, orgId, id, isDemo),
     readEvidenceList(db, orgId, isDemo, { contractId: id }),
-    db.risks.list(orgId, { contractId: id }),
-    db.claims.list(orgId, { contractId: id }),
+    // Risks and claims are deferred capabilities: only demo fixtures exist.
+    isDemo ? db.risks.list(orgId, { contractId: id }) : Promise.resolve([]),
+    isDemo ? db.claims.list(orgId, { contractId: id }) : Promise.resolve([]),
     isDemo ? db.actions.list(orgId, { contractId: id }) : Promise.resolve(null),
     readAgentEvents(db, orgId, isDemo, { contractId: id, limit: 5 }),
     readActivityList(db, orgId, isDemo, { contractId: id, limit: 6 }),
@@ -114,6 +118,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     isLive ? getLatestIngestionRun(orgId, id) : Promise.resolve({ ok: true as const, run: null }),
     isLive ? getIngestionSummary(orgId, id) : Promise.resolve({ ok: true as const, summary: null }),
     liveQueue ?? Promise.resolve(null),
+    readContractIndicators({ isDemo, contracts: [contract], orgId, userId: session?.user.id ?? "", locale }),
   ]);
   const obligations = obligationsRead.ok ? obligationsRead.obligations : null;
   const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
@@ -124,7 +129,12 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const documents = documentsRead.ok ? documentsRead.documents : null;
   const officerActions = actionsRead?.ok ? actionsRead.actions : null;
 
-  const h = contract.health;
+  const ind = indicatorsRead.byContract.get(id);
+  const due = indicatorValue(ind?.obligationsDueThisMonth);
+  const overdue = indicatorValue(ind?.obligationsOverdue);
+  const coverage = indicatorValue(ind?.evidenceCoverage);
+  const risksOpen = indicatorValue(ind?.risksOpen);
+  const readiness = indicatorValue(ind?.claimReadiness);
   const pipeline = DEMO_PIPELINE.find((run) => run.contractId === id);
   const byStatus = countBy(obligations ?? [], (o) => o.status);
   const nextClaim = claims
@@ -140,15 +150,44 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
 
   return (
     <>
-      <ContractLifecycle contract={contract} nextClaim={nextClaim} />
+      <ContractLifecycle contract={contract} nextClaim={nextClaim} indicators={ind} today={indicatorsRead.today} />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <Kpi label={t("obligations.title")} value={h.obligationsTotal} hint={t("contracts.due", { count: h.obligationsDueThisMonth })} />
-        <Kpi label={t("dashboard.kpis.overdue")} value={h.obligationsOverdue} tone={h.obligationsOverdue ? "missing" : undefined} />
-        <Kpi label={t("dashboard.kpis.coverage")} value={f.number(h.evidenceCoverage, "percent")} tone={h.evidenceCoverage >= 0.85 ? "verified" : "partial"} />
-        <Kpi label={t("contract.openRisks")} value={h.risksOpen} tone={h.risksOpen ? "at_risk" : undefined} />
-        <Kpi label={t("dashboard.kpis.exposure")} value={<Mono className="text-2xl">{formatMoney(h.riskExposure, locale, contract.currency, { compact: true })}</Mono>} tone="at_risk" />
-        <Kpi label={t("dashboard.kpis.readiness")} value={f.number(h.claimReadiness, "percent")} tone={h.claimReadiness >= 0.9 ? "verified" : "partial"} hint={nextClaim ? t("claims.claim", { number: nextClaim.number }) : undefined} />
+        <Kpi
+          label={isDemo ? t("obligations.title") : t("indicator.activeObligations")}
+          value={<IndicatorValue name="obligationsTotal" indicator={ind?.obligationsTotal} />}
+          hint={due != null ? t("contracts.due", { count: due }) : await indicatorNote(ind?.obligationsTotal)}
+        />
+        <Kpi
+          label={t("dashboard.kpis.overdue")}
+          value={<IndicatorValue name="obligationsOverdue" indicator={ind?.obligationsOverdue} />}
+          tone={overdue ? "missing" : undefined}
+          hint={await indicatorNote(ind?.obligationsOverdue)}
+        />
+        <Kpi
+          label={t("dashboard.kpis.coverage")}
+          value={<IndicatorValue name="evidenceCoverage" indicator={ind?.evidenceCoverage} format="percent" />}
+          tone={coverage == null ? undefined : coverage >= 0.85 ? "verified" : "partial"}
+          hint={await indicatorNote(ind?.evidenceCoverage)}
+        />
+        <Kpi
+          label={t("contract.openRisks")}
+          value={<IndicatorValue name="risksOpen" indicator={ind?.risksOpen} />}
+          tone={risksOpen ? "at_risk" : undefined}
+          hint={await indicatorNote(ind?.risksOpen)}
+        />
+        <Kpi
+          label={t("dashboard.kpis.exposure")}
+          value={<Mono className="text-2xl"><IndicatorValue name="riskExposure" indicator={ind?.riskExposure} format={{ money: contract.currency }} compact /></Mono>}
+          tone={indicatorValue(ind?.riskExposure) != null ? "at_risk" : undefined}
+          hint={await indicatorNote(ind?.riskExposure)}
+        />
+        <Kpi
+          label={t("dashboard.kpis.readiness")}
+          value={<IndicatorValue name="claimReadiness" indicator={ind?.claimReadiness} format="percent" />}
+          tone={readiness == null ? undefined : readiness >= 0.9 ? "verified" : "partial"}
+          hint={readiness != null && nextClaim ? t("claims.claim", { number: nextClaim.number }) : await indicatorNote(ind?.claimReadiness)}
+        />
       </div>
 
       <Panel title={t("contract.clauseTrace")} tone="sky" hint={t("contract.clauseTraceHint")}>
@@ -260,6 +299,12 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
           </div>
         </Panel>
 
+        {!isDemo ? (
+          <>
+            <Panel title={t("contract.nextClaim")}><DeferredNotice feature="claims" framed={false} /></Panel>
+            <Panel title={t("contract.openRisks")} tone="rose"><DeferredNotice feature="risks" framed={false} /></Panel>
+          </>
+        ) : (<>
         <Panel
           title={t("contract.nextClaim")}
           action={nextClaim && <Link href={`/app/contracts/${id}/claims`} className="text-xs text-muted hover:text-fg">{c("viewAll")}</Link>}
@@ -304,6 +349,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
             ))}
           </ul>
         </Panel>
+        </>)}
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

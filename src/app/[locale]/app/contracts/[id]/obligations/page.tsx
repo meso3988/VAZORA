@@ -21,8 +21,11 @@ export default async function ContractObligations(props: PageProps<"/[locale]/ap
   const obligations = await readObligationList(db, orgId, session.mode === "demo", { contractId: id });
   if (!obligations.ok) return <DataLoadFailed message="dataLoadFailed" />;
 
+  // Demo fixtures list a sample of an illustrative total; a live list is the
+  // complete read, so its own length is the only honest count.
+  const shown = obligations.obligations.length;
   return (
-    <Panel title={t("title")} tone="sky" hint={`${obligations.obligations.length} / ${contract.health.obligationsTotal}`}>
+    <Panel title={t("title")} tone="sky" hint={contract.health ? `${shown} / ${contract.health.obligationsTotal}` : String(shown)}>
       <ObligationsTable obligations={obligations.obligations} currency={contract.currency} />
     </Panel>
   );
