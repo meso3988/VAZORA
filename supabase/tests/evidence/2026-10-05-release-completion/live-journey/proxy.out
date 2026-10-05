@@ -1,0 +1,5 @@
+qa-model-proxy on 127.0.0.1:8787 → https://api.openai.com/v1 · model gpt-5.6-sol · ≤9 requests · ≤$1
+#1 200 finish=stop in=1423 out=4015 cost=$0.0860 total=$0.0860
+#2 200 finish=tool_calls in=2859 out=46 cost=$0.0124 total=$0.0983
+#3 200 finish=tool_calls in=4636 out=249 cost=$0.0235 total=$0.1219
+#4 200 finish=stop in=14776 out=843 cost=$0.0760 total=$0.1978

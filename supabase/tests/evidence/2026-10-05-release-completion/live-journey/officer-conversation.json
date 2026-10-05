@@ -1,0 +1,229 @@
+[
+  {
+    "role": "user",
+    "content": "For contract QA-SVC-001, list the active obligations with their next due date and the evidence each one requires. Cite the records.",
+    "citations": [],
+    "tool_invocations": [],
+    "provider": null,
+    "model": null,
+    "usage_tokens_input": null,
+    "usage_tokens_output": null,
+    "created_at": "2026-10-05T14:06:16.234731+00:00"
+  },
+  {
+    "role": "assistant",
+    "content": "The current VAZORA record shows six approved, active obligations for contract **QA-SVC-001**. No normalized next due date is currently recorded for any of them; where available, the contractual timing rule is shown instead.\n\n| Active obligation | Next due date / timing | Required evidence |\n|---|---|---|\n| **Submit monthly service report** | No normalized date recorded; due **by the 5th of each month**. | Monthly service report; eight KPI results; Project Manager signature; Client acknowledgement. |\n| **Submit reports through the Client portal** | No normalized date recorded; due **by the 5th of each month**. | Portal submission record showing submission to the PMO. |\n| **Attach signed preventive maintenance records to monthly invoices** | No normalized date recorded; records must accompany **each monthly invoice**. | Signed preventive maintenance records and record signatures. |\n| **Satisfy service-report conditions for monthly invoice payment** | No normalized date recorded; applies as a **monthly invoice payment condition**. | Submitted service report and written Client acknowledgement under Clause 10.4. |\n| **Obtain site-readiness certificate before Phase Two** | No calendar date recorded; required **before Phase Two commences**. | Site-readiness certificate and Client representative signature. |\n| **Liquidated damages for delayed deliverable submission** | No due date or timing rule recorded for this obligation. | No evidence requirement is recorded. |",
+    "citations": [
+      {
+        "id": "5c32a232-8bca-4375-a40a-3ec611f58892",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Submit monthly service report",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "055d4505-87a5-4f16-8c91-6d796597a6af",
+        "href": null,
+        "label": "Monthly service report",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "2b81028b-d27d-471f-8dca-eb41c9e12e39",
+        "href": null,
+        "label": "Eight KPI results",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "9099fb4e-8472-4852-b2a6-e12e607edef0",
+        "href": null,
+        "label": "Project Manager signature",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "75d0e8c3-1cf1-4d9f-a48c-1736f4afa842",
+        "href": null,
+        "label": "Client acknowledgement",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "71d43ac4-73aa-486a-b0a0-0ccbbfdc04ce",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Submit reports through the Client portal",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "87dd2ca8-e992-4e4b-b2d7-e4fb65d681ab",
+        "href": null,
+        "label": "Portal submission record",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "d71120f4-139a-4396-b301-1f230af569ee",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Attach signed preventive maintenance records to monthly invoices",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "2484a416-5a6e-4682-82e6-09ef22d4db97",
+        "href": null,
+        "label": "Signed preventive maintenance records",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "1f2e5ea4-3557-4656-83a6-4b7a6d2eb9e0",
+        "href": null,
+        "label": "Record signatures",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "ecd8e81b-6ec3-46e9-84be-4050ef4354bc",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Satisfy service-report conditions for monthly invoice payment",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "4f3685d4-aa31-4915-b337-76e5987621f4",
+        "href": null,
+        "label": "Submitted service report",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "3c19a045-9e3c-4a78-9eb4-fbd4cedb64cd",
+        "href": null,
+        "label": "Written Client acknowledgement",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "81075ab6-973c-46ef-b4ab-6c43e7861eb3",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Obtain site-readiness certificate before Phase Two",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "102b11f4-e40b-4e88-b29a-0748294f804d",
+        "href": null,
+        "label": "Site-readiness certificate",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "6371bd6e-fc3b-414f-8390-6a77316f4e99",
+        "href": null,
+        "label": "Client representative signature",
+        "target": "evidence_requirement",
+        "contractId": null
+      },
+      {
+        "id": "a0fe2cc6-059e-482a-91c2-b9f164d81fc1",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf/obligations",
+        "label": "Liquidated damages for delayed deliverable submission",
+        "target": "obligation",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "ea4ea944-561f-4e0a-8906-f4439d20a4dd",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 12",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "720b46a4-a9ac-4a79-8594-881caa6fc7d9",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 15",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "55492412-ace4-474b-8462-c2474c1c663a",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 7.2",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "4853f70b-e719-45da-a8fc-e270893db7bb",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 5.1",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "cff2cfca-7606-4e1b-92b8-49e79b7c3ead",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 10",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      },
+      {
+        "id": "b2cc34a3-03b4-457f-bca7-61e56b221207",
+        "href": "/app/contracts/8b745d79-d4bb-4409-9500-b60aadde9fcf",
+        "label": "Clause 13",
+        "target": "clause",
+        "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf"
+      }
+    ],
+    "tool_invocations": [
+      {
+        "ok": true,
+        "tool": "listObligations",
+        "summary": "6 obligations",
+        "durationMs": 1098
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Liquidated damages for delayed deliverable submission · no_due_date · clause 12",
+        "durationMs": 1187
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Submit reports through the Client portal · no_due_date · clause 15",
+        "durationMs": 1076
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Attach signed preventive maintenance records to monthly invoices · no_due_date · clause 7.2",
+        "durationMs": 894
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Submit monthly service report · no_due_date · clause 5.1",
+        "durationMs": 988
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Satisfy service-report conditions for monthly invoice payment · no_due_date · clause 10",
+        "durationMs": 910
+      },
+      {
+        "ok": true,
+        "tool": "getObligation",
+        "summary": "Obtain site-readiness certificate before Phase Two · no_due_date · clause 13",
+        "durationMs": 1003
+      }
+    ],
+    "provider": "openai-compat-officer",
+    "model": "gpt-5.6-sol",
+    "usage_tokens_input": 22271,
+    "usage_tokens_output": 1138,
+    "created_at": "2026-10-05T14:06:48.250303+00:00"
+  }
+]

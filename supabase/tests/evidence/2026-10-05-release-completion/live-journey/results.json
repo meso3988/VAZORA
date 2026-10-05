@@ -1,0 +1,94 @@
+{
+  "contractId": "8b745d79-d4bb-4409-9500-b60aadde9fcf",
+  "conversationId": "55920ac6-b098-4e67-9b40-f1f35648222e",
+  "results": [
+    {
+      "t": "contract created from the UI and opened from the list",
+      "ok": true,
+      "d": "8b745d79-d4bb-4409-9500-b60aadde9fcf (created by the first attempt)"
+    },
+    {
+      "t": "document uploaded from the UI and stored",
+      "ok": true,
+      "d": "2 stored (the extraction used the first; a second identical copy came from a test-script rerun)"
+    },
+    {
+      "t": "extraction made exactly one model request in total",
+      "ok": true,
+      "d": "proxy sent=1"
+    },
+    {
+      "t": "extraction completed (run ready for review)",
+      "ok": true,
+      "d": "run status ready_for_review"
+    },
+    {
+      "t": "review decisions persisted exactly as decided in the UI",
+      "ok": false,
+      "d": "[\"approved\",\"approved\",\"extracted\",\"approved\",\"approved\",\"approved\"]"
+    },
+    {
+      "t": "activation: approved obligations active, rejected ones not",
+      "ok": true,
+      "d": "[\"approved/active\",\"approved/active\",\"approved/active\",\"approved/active\",\"approved/active\",\"approved/active\"]"
+    },
+    {
+      "t": "en: 6 activated obligations shown with separate states",
+      "ok": true,
+      "d": "active/no_due_date/no_requirements · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing"
+    },
+    {
+      "t": "en: no \"Verified\" for obligations with no verified evidence",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "t": "ar: 6 activated obligations shown with separate states",
+      "ok": true,
+      "d": "active/no_due_date/no_requirements · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing"
+    },
+    {
+      "t": "ar: no \"مُتحقق منه\" for obligations with no verified evidence",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "t": "officer: answered without error",
+      "ok": false,
+      "d": "…"
+    },
+    {
+      "t": "officer: model requests for the turn within the ceiling",
+      "ok": true,
+      "d": "proxy sent 1 → 1"
+    },
+    {
+      "t": "officer: answer cites records of this contract",
+      "ok": false,
+      "d": "0 citations"
+    },
+    {
+      "t": "officer: a read-only question created no actions",
+      "ok": true,
+      "d": "actions=0"
+    },
+    {
+      "t": "after sign-in: activated obligations persisted",
+      "ok": true,
+      "d": ""
+    },
+    {
+      "t": "after sign-in: conversation and answer persisted",
+      "ok": false,
+      "d": ""
+    }
+  ],
+  "proxy": {
+    "sent": 4,
+    "maxRequests": 9,
+    "spentUsd": 0.197836,
+    "budgetUsd": 1,
+    "priceIn": 4,
+    "priceOut": 20
+  }
+}

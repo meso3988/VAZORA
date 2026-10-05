@@ -1,0 +1,27 @@
+=== LIVE JOURNEY 2026-10-05T14:04:44.081Z base=http://localhost:3007 tenant=4da18aa7-da70-4c80-bcbd-62a9faa04632
+PASS  contract created from the UI and opened from the list — 8b745d79-d4bb-4409-9500-b60aadde9fcf (created by the first attempt)
+PASS  document uploaded from the UI and stored — 2 stored (the extraction used the first; a second identical copy came from a test-script rerun)
+extraction already performed (runs: [{"id":"25ba1395-56f1-4baf-af5e-9bbd82c1ed1b","status":"ready_for_review"}]); not re-running
+PASS  extraction made exactly one model request in total — proxy sent=1
+PASS  extraction completed (run ready for review) — run status ready_for_review
+RAW: 6 candidates · reference matched 6/6 · unmatched candidates 0
+  ref §5.1 MATCHED 5.1: Submit monthly service report
+  ref §7.2 MATCHED 7.2: Attach signed preventive maintenance records to monthly invoices
+  ref §10 MATCHED 10: Satisfy service-report conditions for monthly invoice payment
+  ref §12 MATCHED 12: Liquidated damages for delayed deliverable submission
+  ref §13 MATCHED 13: Obtain site-readiness certificate before Phase Two
+  ref §15 MATCHED 15: Submit reports through the Client portal
+FAIL  review decisions persisted exactly as decided in the UI — ["approved","approved","extracted","approved","approved","approved"]
+PASS  activation: approved obligations active, rejected ones not — ["approved/active","approved/active","approved/active","approved/active","approved/active","approved/active"]
+PASS  en: 6 activated obligations shown with separate states — active/no_due_date/no_requirements · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing
+PASS  en: no "Verified" for obligations with no verified evidence
+PASS  ar: 6 activated obligations shown with separate states — active/no_due_date/no_requirements · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing · active/no_due_date/missing
+PASS  ar: no "مُتحقق منه" for obligations with no verified evidence
+FAIL  officer: answered without error — …
+PASS  officer: model requests for the turn within the ceiling — proxy sent 1 → 1
+FAIL  officer: answer cites records of this contract — 0 citations
+PASS  officer: a read-only question created no actions — actions=0
+PASS  after sign-in: activated obligations persisted
+FAIL  after sign-in: conversation and answer persisted
+
+12/16 passed · proxy {"sent":4,"maxRequests":9,"spentUsd":0.197836,"budgetUsd":1,"priceIn":4,"priceOut":20}

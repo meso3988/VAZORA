@@ -1,0 +1,265 @@
+{
+  "reference": "supabase/tests/fixtures/bench-en-svc.ground-truth.json (frozen)",
+  "candidates": 6,
+  "matchedReference": 6,
+  "of": 6,
+  "unmatchedCandidates": [],
+  "comparison": [
+    {
+      "referenceClause": "5.1",
+      "reference": "Monthly service report with eight KPIs, acknowledged by the Client",
+      "matched": true,
+      "candidates": [
+        "5.1: Submit monthly service report"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": "monthly",
+          "got": "monthly",
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": true,
+          "got": null,
+          "agree": false
+        },
+        "financial": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": "Client acknowledgement",
+          "got": "Written acknowledgement by the Client",
+          "agree": true
+        },
+        "evidence": {
+          "ref": [
+            "Monthly service report",
+            "Eight KPI results",
+            "Project Manager signature"
+          ],
+          "got": [
+            "Monthly service report",
+            "Eight KPI results",
+            "Project Manager signature",
+            "Client acknowledgement"
+          ]
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "The Contractor shall submit a monthly service report by the 5th of each month covering the preceding month, including eight KPI results. The report is signed by the Project Manager and acknowledged by the Client."
+        }
+      }
+    },
+    {
+      "referenceClause": "7.2",
+      "reference": "Signed preventive maintenance records with each invoice",
+      "matched": true,
+      "candidates": [
+        "7.2: Attach signed preventive maintenance records to monthly invoices"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": "monthly",
+          "got": "monthly",
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": true,
+          "got": true,
+          "agree": true
+        },
+        "financial": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "evidence": {
+          "ref": [
+            "Signed maintenance records"
+          ],
+          "got": [
+            "Signed preventive maintenance records",
+            "Record signatures"
+          ]
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "Signed preventive maintenance records shall accompany each monthly invoice as a condition of payment."
+        }
+      }
+    },
+    {
+      "referenceClause": "10",
+      "reference": "10.4 — invoice only after service report acknowledgement",
+      "matched": true,
+      "candidates": [
+        "10: Satisfy service-report conditions for monthly invoice payment"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": "monthly",
+          "got": "monthly",
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": true,
+          "got": true,
+          "agree": true
+        },
+        "financial": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": "Client written acknowledgement",
+          "got": "Written acknowledgement by the Client under 10.4",
+          "agree": true
+        },
+        "evidence": {
+          "ref": [
+            "Service report acknowledgment"
+          ],
+          "got": [
+            "Submitted service report",
+            "Written Client acknowledgement"
+          ]
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "The monthly invoice is payable only upon submission of the service report and written acknowledgement by the Client under 10.4."
+        }
+      }
+    },
+    {
+      "referenceClause": "12",
+      "reference": "Liquidated damages of 0.5% per week of delay",
+      "matched": true,
+      "candidates": [
+        "12: Liquidated damages for delayed deliverable submission"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": null,
+          "got": false,
+          "agree": true
+        },
+        "financial": {
+          "ref": "penalty",
+          "got": "0.5% of the line value per week of delay",
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "evidence": {
+          "ref": [],
+          "got": []
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "Delay in deliverable submission incurs liquidated damages of 0.5% of the line value per week of delay."
+        }
+      }
+    },
+    {
+      "referenceClause": "13",
+      "reference": "Client site-readiness certificate before Phase Two",
+      "matched": true,
+      "candidates": [
+        "13: Obtain site-readiness certificate before Phase Two"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "financial": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": "Client representative signature",
+          "got": "Client's site-readiness certificate signed by the Client representative",
+          "agree": true
+        },
+        "evidence": {
+          "ref": [
+            "Site readiness certificate"
+          ],
+          "got": [
+            "Site-readiness certificate",
+            "Client representative signature"
+          ]
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "Phase Two commencement requires the Client's site-readiness certificate signed by the Client representative."
+        }
+      }
+    },
+    {
+      "referenceClause": "15",
+      "reference": "Submit reports via Client portal to PMO by day 5",
+      "matched": true,
+      "candidates": [
+        "15: Submit reports through the Client portal"
+      ],
+      "fields": {
+        "frequency": {
+          "ref": "monthly",
+          "got": "monthly",
+          "agree": true
+        },
+        "payment_linked": {
+          "ref": false,
+          "got": null,
+          "agree": false
+        },
+        "financial": {
+          "ref": null,
+          "got": null,
+          "agree": true
+        },
+        "external_dependency": {
+          "ref": null,
+          "got": "Availability of the Client portal",
+          "agree": false
+        },
+        "evidence": {
+          "ref": [
+            "Monthly service report"
+          ],
+          "got": [
+            "Portal submission record"
+          ]
+        },
+        "source": {
+          "clauseRecorded": true,
+          "snippet": "All reports shall be submitted via the Client portal to the PMO by the 5th of each month."
+        }
+      }
+    }
+  ]
+}

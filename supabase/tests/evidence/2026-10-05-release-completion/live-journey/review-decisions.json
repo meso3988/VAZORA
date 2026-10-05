@@ -1,0 +1,38 @@
+[
+  {
+    "id": "5c32a232-8bca-4375-a40a-3ec611f58892",
+    "title": "Submit monthly service report",
+    "clause": "5.1",
+    "decision": "approve"
+  },
+  {
+    "id": "d71120f4-139a-4396-b301-1f230af569ee",
+    "title": "Attach signed preventive maintenance records to monthly invoices",
+    "clause": "7.2",
+    "decision": "approve"
+  },
+  {
+    "id": "ecd8e81b-6ec3-46e9-84be-4050ef4354bc",
+    "title": "Satisfy service-report conditions for monthly invoice payment",
+    "clause": "10",
+    "decision": "approve"
+  },
+  {
+    "id": "a0fe2cc6-059e-482a-91c2-b9f164d81fc1",
+    "title": "Liquidated damages for delayed deliverable submission",
+    "clause": "12",
+    "decision": "approve"
+  },
+  {
+    "id": "81075ab6-973c-46ef-b4ab-6c43e7861eb3",
+    "title": "Obtain site-readiness certificate before Phase Two",
+    "clause": "13",
+    "decision": "approve"
+  },
+  {
+    "id": "71d43ac4-73aa-486a-b0a0-0ccbbfdc04ce",
+    "title": "Submit reports through the Client portal",
+    "clause": "15",
+    "decision": "approve"
+  }
+]

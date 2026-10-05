@@ -1,0 +1,34 @@
+RELEASE COMPLETION CHECK — evidence index (2026-10-05)
+
+OBLIGATION STATE FIX (product 41cec29)
+  obligation-state-before/  build of a41c904 (product 7e12e1c): 2/51 — every active obligation read
+    "Verified"/"مُتحقق منه", incl. BETA-200 (6 days overdue, required evidence missing, gap open)
+    and FM-008/OPS-021 (no evidence requirements recorded).
+  after/  build of 0115193: e2e-obligation-state 51/51 (EN/AR: lifecycle Active; deadline window;
+    evidence missing / verified / verified-with-prior-in-force / no requirements); unit 25/25.
+    Affected suites on the same build: release blockers 93/93, read state 78/78, dashboard 65/65,
+    demo 14/14, work surfaces 31/31; unit: release-blockers 38, extraction cap 9.
+  QA data: EPSILON-500 due date moved to 2026-09-30 in the QA tenant (overdue + verified case).
+
+U3  after/u3-typecheck-lint-build.log — typecheck 0 errors; build OK; lint: 3 errors remain, all in
+    supabase/tests/evaluator-v4-heldout-v2-score.ts (frozen evaluator scorer — not modified).
+
+LIVE JOURNEY (build 0115193, :3007, model calls through supabase/tests/qa-model-proxy.mts)
+  plan.json            pre-run plan: ≤9 requests, worst case $0.6863 ≤ $1.00 (gpt-5.6-sol $4 / $20 per 1M)
+  proxy-log.jsonl      every request body + full raw response (no auth header); usage and cost
+  proxy-state.json     4 requests, $0.197836
+  ingestion-run.json   1 extraction run, ready_for_review, 83.8 s
+  raw-extraction-obligations.json  raw extracted obligations (before review)
+  raw-vs-reference.json            6/6 reference obligations matched, 0 extra candidates
+  review-decisions.json            pre-declared rule: approve reference-matched, reject others, no edits
+  officer-conversation.json        question + grounded answer (7 lookups, 23 citations)
+  persistence-check.log            fresh sign-in EN/AR: 6 active obligations and the conversation persisted
+  journey*.log / results.json      attempts:
+    1: contract created from the UI; script expected a detail redirect (list redirect) — 0 model calls
+    2: upload + the one extraction (request #1) — browser did not observe the analysis redirect
+       within 300 s although the run completed in 84 s (server: "destination stream closed early")
+    3: re-used the run (no second extraction); a duplicate upload of the same file came from the
+       rerun; review selector failed — 0 model calls
+    4: review, activation, obligation states EN/AR, the one Officer turn (requests #2–#4);
+       the script read the conversation before the answer was written (timing in the script),
+       verified directly afterwards.

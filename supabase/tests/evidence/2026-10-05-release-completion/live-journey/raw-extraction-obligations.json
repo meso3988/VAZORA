@@ -1,0 +1,526 @@
+[
+  {
+    "id": "5c32a232-8bca-4375-a40a-3ec611f58892",
+    "title": "Submit monthly service report",
+    "requirement_text": "The Contractor must submit a monthly service report covering the preceding month, including eight KPI results, signed by the Project Manager and acknowledged by the Client.",
+    "obligation_type": "reporting",
+    "frequency": "monthly",
+    "due_rule_raw": "by the 5th of each month",
+    "due_date_normalized": null,
+    "due_rule_normalized": "monthly_day_5",
+    "financial_condition": null,
+    "penalty_condition": null,
+    "payment_linked": null,
+    "external_dependency": "Written acknowledgement by the Client",
+    "owner_role_suggested": "Contractor",
+    "ai_confidence": 0.99,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Submit monthly service report",
+      "frequency": "monthly",
+      "risk_note": null,
+      "due_rule_raw": "by the 5th of each month",
+      "ai_confidence": 0.99,
+      "review_reason": null,
+      "payment_linked": null,
+      "source_snippet": "The Contractor shall submit a monthly service report by the 5th of each month covering the preceding month, including eight KPI results. The report is signed by the Project Manager and acknowledged by the Client.",
+      "obligation_type": "reporting",
+      "field_provenance": {
+        "due": "explicit",
+        "title": "inferred",
+        "frequency": "explicit",
+        "due_rule_raw": "explicit",
+        "ai_confidence": "inferred",
+        "obligation_type": "inferred",
+        "requirement_text": "explicit",
+        "due_rule_normalized": "inferred",
+        "external_dependency": "explicit",
+        "submission_required": "explicit",
+        "owner_role_suggested": "explicit",
+        "approver_role_suggested": "explicit",
+        "submission_deadline_rule": "explicit",
+        "requires_external_acknowledgement": "explicit"
+      },
+      "requirement_text": "The Contractor must submit a monthly service report covering the preceding month, including eight KPI results, signed by the Project Manager and acknowledged by the Client.",
+      "payment_link_note": null,
+      "penalty_condition": null,
+      "submission_channel": null,
+      "due_rule_normalized": "monthly_day_5",
+      "external_dependency": "Written acknowledgement by the Client",
+      "financial_condition": null,
+      "submission_required": true,
+      "owner_role_suggested": "Contractor",
+      "source_clause_number": "5.1",
+      "evidence_requirements": [
+        {
+          "name": "Monthly service report",
+          "required": true,
+          "description": "Report covering the preceding month.",
+          "evidence_type": "report"
+        },
+        {
+          "name": "Eight KPI results",
+          "required": true,
+          "description": "The report must include eight KPI results.",
+          "evidence_type": "kpi"
+        },
+        {
+          "name": "Project Manager signature",
+          "required": true,
+          "description": "The report must be signed by the Project Manager.",
+          "evidence_type": "signature"
+        },
+        {
+          "name": "Client acknowledgement",
+          "required": true,
+          "description": "The report must be acknowledged by the Client.",
+          "evidence_type": "acknowledgement"
+        }
+      ],
+      "submission_destination": null,
+      "approver_role_suggested": "Client",
+      "submission_deadline_rule": "by the 5th of each month",
+      "requires_external_acknowledgement": true
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "4853f70b-e719-45da-a8fc-e270893db7bb",
+        "page_number": null,
+        "source_snippet": "The Contractor shall submit a monthly service report by the 5th of each month covering the preceding month, including eight KPI results. The report is signed by the Project Manager and acknowledged by the Client."
+      }
+    ],
+    "obligation_evidence_requirements": [
+      {
+        "name": "Monthly service report",
+        "required": true
+      },
+      {
+        "name": "Eight KPI results",
+        "required": true
+      },
+      {
+        "name": "Project Manager signature",
+        "required": true
+      },
+      {
+        "name": "Client acknowledgement",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "d71120f4-139a-4396-b301-1f230af569ee",
+    "title": "Attach signed preventive maintenance records to monthly invoices",
+    "requirement_text": "Signed preventive maintenance records must accompany each monthly invoice as a condition of payment.",
+    "obligation_type": "documentation",
+    "frequency": "monthly",
+    "due_rule_raw": "shall accompany each monthly invoice",
+    "due_date_normalized": null,
+    "due_rule_normalized": "Submit with each monthly invoice.",
+    "financial_condition": null,
+    "penalty_condition": null,
+    "payment_linked": true,
+    "external_dependency": null,
+    "owner_role_suggested": "Contractor",
+    "ai_confidence": 0.96,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Attach signed preventive maintenance records to monthly invoices",
+      "frequency": "monthly",
+      "risk_note": null,
+      "due_rule_raw": "shall accompany each monthly invoice",
+      "ai_confidence": 0.96,
+      "review_reason": null,
+      "payment_linked": true,
+      "source_snippet": "Signed preventive maintenance records shall accompany each monthly invoice as a condition of payment.",
+      "obligation_type": "documentation",
+      "field_provenance": {
+        "due": "inferred",
+        "title": "inferred",
+        "frequency": "explicit",
+        "due_rule_raw": "explicit",
+        "ai_confidence": "inferred",
+        "payment_linked": "explicit",
+        "obligation_type": "inferred",
+        "requirement_text": "explicit",
+        "payment_link_note": "explicit",
+        "due_rule_normalized": "inferred",
+        "financial_condition": "inferred",
+        "submission_required": "explicit",
+        "owner_role_suggested": "inferred",
+        "submission_deadline_rule": "explicit"
+      },
+      "requirement_text": "Signed preventive maintenance records must accompany each monthly invoice as a condition of payment.",
+      "payment_link_note": "Payment is conditional upon signed preventive maintenance records accompanying the monthly invoice.",
+      "penalty_condition": null,
+      "submission_channel": null,
+      "due_rule_normalized": "Submit with each monthly invoice.",
+      "external_dependency": null,
+      "financial_condition": null,
+      "submission_required": true,
+      "owner_role_suggested": "Contractor",
+      "source_clause_number": "7.2",
+      "evidence_requirements": [
+        {
+          "name": "Signed preventive maintenance records",
+          "required": true,
+          "description": "Signed records must accompany the monthly invoice.",
+          "evidence_type": "record"
+        },
+        {
+          "name": "Record signatures",
+          "required": true,
+          "description": "The preventive maintenance records must be signed.",
+          "evidence_type": "signature"
+        }
+      ],
+      "submission_destination": null,
+      "approver_role_suggested": null,
+      "submission_deadline_rule": "shall accompany each monthly invoice",
+      "requires_external_acknowledgement": null
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "55492412-ace4-474b-8462-c2474c1c663a",
+        "page_number": null,
+        "source_snippet": "Signed preventive maintenance records shall accompany each monthly invoice as a condition of payment."
+      }
+    ],
+    "obligation_evidence_requirements": [
+      {
+        "name": "Signed preventive maintenance records",
+        "required": true
+      },
+      {
+        "name": "Record signatures",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "ecd8e81b-6ec3-46e9-84be-4050ef4354bc",
+    "title": "Satisfy service-report conditions for monthly invoice payment",
+    "requirement_text": "To make the monthly invoice payable, the service report must be submitted and written acknowledgement must be obtained from the Client under clause 10.4.",
+    "obligation_type": "payment",
+    "frequency": "monthly",
+    "due_rule_raw": null,
+    "due_date_normalized": null,
+    "due_rule_normalized": null,
+    "financial_condition": null,
+    "penalty_condition": null,
+    "payment_linked": true,
+    "external_dependency": "Written acknowledgement by the Client under 10.4",
+    "owner_role_suggested": "Contractor",
+    "ai_confidence": 0.96,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Satisfy service-report conditions for monthly invoice payment",
+      "frequency": "monthly",
+      "risk_note": null,
+      "due_rule_raw": null,
+      "ai_confidence": 0.96,
+      "review_reason": null,
+      "payment_linked": true,
+      "source_snippet": "The monthly invoice is payable only upon submission of the service report and written acknowledgement by the Client under 10.4.",
+      "obligation_type": "payment",
+      "field_provenance": {
+        "due": "inferred",
+        "title": "inferred",
+        "frequency": "explicit",
+        "ai_confidence": "inferred",
+        "payment_linked": "explicit",
+        "obligation_type": "inferred",
+        "requirement_text": "explicit",
+        "payment_link_note": "explicit",
+        "external_dependency": "explicit",
+        "financial_condition": "inferred",
+        "submission_required": "explicit",
+        "owner_role_suggested": "inferred",
+        "submission_destination": "inferred",
+        "approver_role_suggested": "explicit",
+        "requires_external_acknowledgement": "explicit"
+      },
+      "requirement_text": "To make the monthly invoice payable, the service report must be submitted and written acknowledgement must be obtained from the Client under clause 10.4.",
+      "payment_link_note": "The monthly invoice is payable only upon submission of the service report and written Client acknowledgement.",
+      "penalty_condition": null,
+      "submission_channel": null,
+      "due_rule_normalized": null,
+      "external_dependency": "Written acknowledgement by the Client under 10.4",
+      "financial_condition": null,
+      "submission_required": true,
+      "owner_role_suggested": "Contractor",
+      "source_clause_number": "10",
+      "evidence_requirements": [
+        {
+          "name": "Submitted service report",
+          "required": true,
+          "description": "Evidence that the service report was submitted.",
+          "evidence_type": "report"
+        },
+        {
+          "name": "Written Client acknowledgement",
+          "required": true,
+          "description": "Written acknowledgement by the Client under clause 10.4.",
+          "evidence_type": "acknowledgement"
+        }
+      ],
+      "submission_destination": "Client",
+      "approver_role_suggested": "Client",
+      "submission_deadline_rule": null,
+      "requires_external_acknowledgement": true
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "cff2cfca-7606-4e1b-92b8-49e79b7c3ead",
+        "page_number": null,
+        "source_snippet": "The monthly invoice is payable only upon submission of the service report and written acknowledgement by the Client under 10.4."
+      }
+    ],
+    "obligation_evidence_requirements": [
+      {
+        "name": "Submitted service report",
+        "required": true
+      },
+      {
+        "name": "Written Client acknowledgement",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "a0fe2cc6-059e-482a-91c2-b9f164d81fc1",
+    "title": "Liquidated damages for delayed deliverable submission",
+    "requirement_text": "Delay in deliverable submission incurs liquidated damages equal to 0.5% of the line value for each week of delay.",
+    "obligation_type": "payment",
+    "frequency": null,
+    "due_rule_raw": null,
+    "due_date_normalized": null,
+    "due_rule_normalized": null,
+    "financial_condition": "0.5% of the line value per week of delay",
+    "penalty_condition": "Delay in deliverable submission incurs liquidated damages of 0.5% of the line value per week of delay.",
+    "payment_linked": false,
+    "external_dependency": null,
+    "owner_role_suggested": null,
+    "ai_confidence": 0.98,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Liquidated damages for delayed deliverable submission",
+      "frequency": null,
+      "risk_note": "Delayed deliverable submission triggers weekly liquidated damages.",
+      "due_rule_raw": null,
+      "ai_confidence": 0.98,
+      "review_reason": null,
+      "payment_linked": false,
+      "source_snippet": "Delay in deliverable submission incurs liquidated damages of 0.5% of the line value per week of delay.",
+      "obligation_type": "payment",
+      "field_provenance": {
+        "due": "unknown",
+        "title": "inferred",
+        "frequency": "unknown",
+        "risk_note": "explicit",
+        "ai_confidence": "inferred",
+        "payment_linked": "inferred",
+        "obligation_type": "inferred",
+        "requirement_text": "explicit",
+        "penalty_condition": "explicit",
+        "financial_condition": "explicit"
+      },
+      "requirement_text": "Delay in deliverable submission incurs liquidated damages equal to 0.5% of the line value for each week of delay.",
+      "payment_link_note": null,
+      "penalty_condition": "Delay in deliverable submission incurs liquidated damages of 0.5% of the line value per week of delay.",
+      "submission_channel": null,
+      "due_rule_normalized": null,
+      "external_dependency": null,
+      "financial_condition": "0.5% of the line value per week of delay",
+      "submission_required": null,
+      "owner_role_suggested": null,
+      "source_clause_number": "12",
+      "evidence_requirements": [],
+      "submission_destination": null,
+      "approver_role_suggested": null,
+      "submission_deadline_rule": null,
+      "requires_external_acknowledgement": null
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "ea4ea944-561f-4e0a-8906-f4439d20a4dd",
+        "page_number": null,
+        "source_snippet": "Delay in deliverable submission incurs liquidated damages of 0.5% of the line value per week of delay."
+      }
+    ],
+    "obligation_evidence_requirements": []
+  },
+  {
+    "id": "81075ab6-973c-46ef-b4ab-6c43e7861eb3",
+    "title": "Obtain site-readiness certificate before Phase Two",
+    "requirement_text": "Phase Two may commence only when the Client's site-readiness certificate has been signed by the Client representative.",
+    "obligation_type": "approval",
+    "frequency": null,
+    "due_rule_raw": null,
+    "due_date_normalized": null,
+    "due_rule_normalized": null,
+    "financial_condition": null,
+    "penalty_condition": null,
+    "payment_linked": null,
+    "external_dependency": "Client's site-readiness certificate signed by the Client representative",
+    "owner_role_suggested": "Client representative",
+    "ai_confidence": 0.93,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Obtain site-readiness certificate before Phase Two",
+      "frequency": null,
+      "risk_note": null,
+      "due_rule_raw": null,
+      "ai_confidence": 0.93,
+      "review_reason": null,
+      "payment_linked": null,
+      "source_snippet": "Phase Two commencement requires the Client's site-readiness certificate signed by the Client representative.",
+      "obligation_type": "approval",
+      "field_provenance": {
+        "due": "unknown",
+        "title": "inferred",
+        "frequency": "unknown",
+        "due_rule_raw": "explicit",
+        "ai_confidence": "inferred",
+        "obligation_type": "inferred",
+        "requirement_text": "inferred",
+        "due_rule_normalized": "inferred",
+        "external_dependency": "explicit",
+        "owner_role_suggested": "inferred",
+        "approver_role_suggested": "explicit",
+        "submission_deadline_rule": "inferred",
+        "requires_external_acknowledgement": "inferred"
+      },
+      "requirement_text": "Phase Two may commence only when the Client's site-readiness certificate has been signed by the Client representative.",
+      "payment_link_note": null,
+      "penalty_condition": null,
+      "submission_channel": null,
+      "due_rule_normalized": null,
+      "external_dependency": "Client's site-readiness certificate signed by the Client representative",
+      "financial_condition": null,
+      "submission_required": null,
+      "owner_role_suggested": "Client representative",
+      "source_clause_number": "13",
+      "evidence_requirements": [
+        {
+          "name": "Site-readiness certificate",
+          "required": true,
+          "description": "The Client's site-readiness certificate is required for Phase Two commencement.",
+          "evidence_type": "certificate"
+        },
+        {
+          "name": "Client representative signature",
+          "required": true,
+          "description": "The site-readiness certificate must be signed by the Client representative.",
+          "evidence_type": "signature"
+        }
+      ],
+      "submission_destination": null,
+      "approver_role_suggested": "Client representative",
+      "submission_deadline_rule": "Before Phase Two commencement",
+      "requires_external_acknowledgement": false
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "b2cc34a3-03b4-457f-bca7-61e56b221207",
+        "page_number": null,
+        "source_snippet": "Phase Two commencement requires the Client's site-readiness certificate signed by the Client representative."
+      }
+    ],
+    "obligation_evidence_requirements": [
+      {
+        "name": "Site-readiness certificate",
+        "required": true
+      },
+      {
+        "name": "Client representative signature",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "71d43ac4-73aa-486a-b0a0-0ccbbfdc04ce",
+    "title": "Submit reports through the Client portal",
+    "requirement_text": "All reports must be submitted through the Client portal to the PMO by the 5th of each month.",
+    "obligation_type": "reporting",
+    "frequency": "monthly",
+    "due_rule_raw": "by the 5th of each month",
+    "due_date_normalized": null,
+    "due_rule_normalized": "monthly_day_5",
+    "financial_condition": null,
+    "penalty_condition": null,
+    "payment_linked": null,
+    "external_dependency": "Availability of the Client portal",
+    "owner_role_suggested": "Contractor",
+    "ai_confidence": 0.98,
+    "needs_source_review": false,
+    "review_status": "extracted",
+    "ai_payload": {
+      "title": "Submit reports through the Client portal",
+      "frequency": "monthly",
+      "risk_note": null,
+      "due_rule_raw": "by the 5th of each month",
+      "ai_confidence": 0.98,
+      "review_reason": null,
+      "payment_linked": null,
+      "source_snippet": "All reports shall be submitted via the Client portal to the PMO by the 5th of each month.",
+      "obligation_type": "reporting",
+      "field_provenance": {
+        "due": "explicit",
+        "title": "inferred",
+        "frequency": "explicit",
+        "due_rule_raw": "explicit",
+        "ai_confidence": "inferred",
+        "obligation_type": "inferred",
+        "requirement_text": "explicit",
+        "submission_channel": "explicit",
+        "due_rule_normalized": "inferred",
+        "external_dependency": "inferred",
+        "submission_required": "explicit",
+        "owner_role_suggested": "inferred",
+        "submission_destination": "explicit",
+        "submission_deadline_rule": "explicit"
+      },
+      "requirement_text": "All reports must be submitted through the Client portal to the PMO by the 5th of each month.",
+      "payment_link_note": null,
+      "penalty_condition": null,
+      "submission_channel": "portal",
+      "due_rule_normalized": "monthly_day_5",
+      "external_dependency": "Availability of the Client portal",
+      "financial_condition": null,
+      "submission_required": true,
+      "owner_role_suggested": "Contractor",
+      "source_clause_number": "15",
+      "evidence_requirements": [
+        {
+          "name": "Portal submission record",
+          "required": true,
+          "description": "Record showing submission of the reports through the Client portal to the PMO.",
+          "evidence_type": "system_record"
+        }
+      ],
+      "submission_destination": "PMO",
+      "approver_role_suggested": null,
+      "submission_deadline_rule": "by the 5th of each month",
+      "requires_external_acknowledgement": null
+    },
+    "obligation_source_refs": [
+      {
+        "clause_id": "720b46a4-a9ac-4a79-8594-881caa6fc7d9",
+        "page_number": null,
+        "source_snippet": "All reports shall be submitted via the Client portal to the PMO by the 5th of each month."
+      }
+    ],
+    "obligation_evidence_requirements": [
+      {
+        "name": "Portal submission record",
+        "required": true
+      }
+    ]
+  }
+]
