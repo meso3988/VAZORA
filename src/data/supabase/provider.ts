@@ -271,7 +271,9 @@ function mapObligation(row: ObligationRow): Obligation {
     requirement: { en: row.requirement_text, ar: row.requirement_text },
     ownerId: "",
     ownerName: "",
-    status: row.activation_status === "active" ? "verified" : row.review_status === "rejected" ? "missing" : "pending",
+    // Activation is a lifecycle fact, not verification: evidence state comes
+    // from requirements + effective verification (domain/obligation-state).
+    lifecycle: row.activation_status === "active" ? "active" : "approved_not_active",
     cadence: CADENCE_MAP[row.frequency ?? ""] ?? "one_time",
     // Only a confidently normalized date is surfaced; an unparsed due rule
     // stays empty rather than becoming a fabricated deadline.

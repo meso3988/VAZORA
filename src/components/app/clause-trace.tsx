@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { EvidenceStatePill } from "@/components/app/obligation-state";
 import { StatusDot, StatusPill, statusTone, type StatusTone } from "@/components/ui/status";
 import type { Clause, Evidence, Obligation } from "@/domain/types";
 import { cn, lt } from "@/lib/utils";
@@ -27,7 +28,11 @@ export async function ClauseTrace({
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app");
-  const tone = statusTone[obligation.status];
+  // Live: the verification slot shows effective evidence state only — never
+  // activation. Demo fixtures keep their illustrative status.
+  const tone: StatusTone = obligation.state
+    ? ({ verified: "verified", partial: "partial", missing: "missing", awaiting_verification: "partial", needs_review: "at_risk", no_requirements: "pending", unavailable: "pending" } as const)[obligation.state.evidence.state]
+    : obligation.status ? statusTone[obligation.status] : "pending";
 
   const step = "flex min-w-0 flex-1 flex-col gap-2 rounded-md border border-line bg-bg p-4";
   const label = "text-[11px] font-medium text-muted";
@@ -75,7 +80,9 @@ export async function ClauseTrace({
       <Connector />
       <div className={cn(step, "border-s-2", TONE_BORDER[tone])}>
         <span className={label}>{t("evidence.verification")}</span>
-        <StatusPill status={obligation.status} />
+        {obligation.state
+          ? <EvidenceStatePill state={obligation.state} />
+          : obligation.status && <StatusPill status={obligation.status} />}
         {evidence[0] && <p className="text-xs leading-relaxed text-muted">{lt(evidence[0].verification.summary, locale)}</p>}
       </div>
     </div>

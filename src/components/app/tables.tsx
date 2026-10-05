@@ -1,5 +1,6 @@
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
+import { ObligationStateBadges } from "@/components/app/obligation-state";
 import { Empty, Mono, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusDot, StatusPill, statusTone } from "@/components/ui/status";
 import { claimReadiness, type Claim, type Evidence, type Obligation, type Risk } from "@/domain/types";
@@ -17,6 +18,7 @@ export async function ObligationsTable({
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app.obligations");
+  const os = await getTranslations("app.obligationState");
   const cad = await getTranslations("cadence");
   const f = await getFormatter();
   if (!obligations.length) return <Empty>—</Empty>;
@@ -56,12 +58,24 @@ export async function ObligationsTable({
               {/* An obligation may have no normalized due date — show that
                   honestly instead of throwing on an Invalid Date. */}
               {validDate(o.dueDate)
-                ? <Mono className={cn("text-sm", o.status === "overdue" && "text-missing")}>{f.dateTime(validDate(o.dueDate)!, "short")}</Mono>
+                ? <Mono className={cn("text-sm", (o.state ? o.state.deadline.window === "overdue" : o.status === "overdue") && "text-missing")}>{f.dateTime(validDate(o.dueDate)!, "short")}</Mono>
                 : <span className="text-faint">—</span>}
             </Td>
-            <Td className="whitespace-nowrap text-muted">{t("evidenceCount", { count: o.evidenceIds.length })}</Td>
+            <Td className="whitespace-nowrap text-muted">
+              {/* Live: requirement coverage from the evidence matrix — the
+                  list read carries no evidence links, so never a count of 0. */}
+              {o.state
+                ? o.state.evidence.required > 0 ? os("satisfied", { satisfied: o.state.evidence.satisfied, required: o.state.evidence.required }) : "—"
+                : t("evidenceCount", { count: o.evidenceIds.length })}
+            </Td>
             <Td>{o.penaltyExposure ? <Mono className="text-sm text-at-risk">{formatMoney(o.penaltyExposure, locale, currency, { compact: true })}</Mono> : <span className="text-faint">—</span>}</Td>
-            <Td><StatusPill status={o.status} subtle /></Td>
+            <Td>
+              {o.state
+                ? <ObligationStateBadges state={o.state} />
+                : o.status
+                  ? <StatusPill status={o.status} subtle />
+                  : <span className="text-faint">—</span>}
+            </Td>
           </tr>
         ))}
       </tbody>

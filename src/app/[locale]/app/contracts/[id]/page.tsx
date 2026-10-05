@@ -7,12 +7,14 @@ import { ContractLifecycle } from "@/components/app/contract-lifecycle";
 import { DeferredNotice } from "@/components/app/deferred-notice";
 import { IndicatorValue, indicatorNote, indicatorValue } from "@/components/app/indicator";
 import { readContractIndicators } from "@/data/contract-indicators";
+import { readObligationStates, withStates } from "@/data/obligation-states";
+import type { ObligationEvidenceState } from "@/domain/obligation-state";
 import { IngestionControls } from "@/components/app/ingestion-controls";
 import { IntakeTimeline } from "@/components/app/intake-timeline";
 import { OfficerFeed } from "@/components/app/officer-feed";
 import { DocumentPanel } from "@/components/app/document-panel";
 import { Kpi, Mono, Panel, Ring, StackedBar } from "@/components/app/primitives";
-import { StatusDot, statusTone, toneDot } from "@/components/ui/status";
+import { StatusDot, statusTone, toneDot, type StatusTone } from "@/components/ui/status";
 import { auth } from "@/data/auth/provider";
 import { readActivityList, readAgentEvents, readClauseList, readContract, readDocumentList, readEvidenceList, readObligationList, requireTenant } from "@/data/context";
 import { listOfficerActions } from "@/data/supabase/officer-queue";
@@ -24,6 +26,11 @@ import { formatMoney, lt, validDate } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
 
 const STATUS_ORDER: ObligationStatus[] = ["verified", "partial", "missing", "overdue", "at_risk", "pending"];
+const EVIDENCE_ORDER: ObligationEvidenceState[] = ["verified", "partial", "awaiting_verification", "needs_review", "missing", "no_requirements", "unavailable"];
+const EVIDENCE_TONE: Record<ObligationEvidenceState, StatusTone> = {
+  verified: "verified", partial: "partial", awaiting_verification: "partial", needs_review: "at_risk",
+  missing: "missing", no_requirements: "pending", unavailable: "pending",
+};
 
 // A failed ingestion read reports ok:false — zeroed stats or a "no run yet"
 // state must never be derived from a dropped query.
@@ -120,7 +127,10 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     liveQueue ?? Promise.resolve(null),
     readContractIndicators({ isDemo, contracts: [contract], orgId, userId: session?.user.id ?? "", locale }),
   ]);
-  const obligations = obligationsRead.ok ? obligationsRead.obligations : null;
+  const obligationStatesRead = obligationsRead.ok
+    ? await readObligationStates({ isDemo, obligations: obligationsRead.obligations, orgId, contractId: id, userId: session?.user.id ?? "", locale })
+    : null;
+  const obligations = obligationsRead.ok ? withStates(obligationsRead.obligations, obligationStatesRead) : null;
   const evidence = evidenceRead.ok ? evidenceRead.evidence : null;
   const clauses = clausesRead.ok ? clausesRead.clauses : null;
   const clauseBasis = clausesRead.ok ? clausesRead.basis : null;
@@ -136,15 +146,20 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
   const risksOpen = indicatorValue(ind?.risksOpen);
   const readiness = indicatorValue(ind?.claimReadiness);
   const pipeline = DEMO_PIPELINE.find((run) => run.contractId === id);
-  const byStatus = countBy(obligations ?? [], (o) => o.status);
+  // Demo: illustrative combined status. Live: effective evidence state only —
+  // activation and deadline are shown separately, never as "verified".
+  const byStatus = countBy((obligations ?? []).filter((o) => o.status), (o) => o.status!);
+  const byEvidence = countBy((obligations ?? []).filter((o) => o.state), (o) => o.state!.evidence.state);
   const nextClaim = claims
     .filter((c) => c.status === "preparing" || c.status === "ready")
     .sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0];
   const openRisks = risks.filter((r) => r.status !== "closed").sort((a, b) => b.exposure - a.exposure);
 
   // Trace the obligation the Officer is most concerned about (missing first, then partial).
+  const evidenceIs = (o: { status?: string; state?: { evidence: { state: string } } }, s: "missing" | "partial") =>
+    o.state ? o.state.evidence.state === s : o.status === s;
   const traced = obligations
-    ? obligations.find((o) => o.status === "missing") ?? obligations.find((o) => o.status === "partial") ?? obligations[0]
+    ? obligations.find((o) => evidenceIs(o, "missing")) ?? obligations.find((o) => evidenceIs(o, "partial")) ?? obligations[0]
     : undefined;
   const tracedClause = traced && clauses ? clauses.find((c) => c.id === traced.clauseId) : undefined;
 
@@ -282,17 +297,30 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
       {pipeline && <IntakeTimeline pipeline={pipeline} />}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel title={t("contract.obligationsByStatus")} tone="emerald" hint={t("contract.healthHint")}>
-          <div className="p-5">
+        <Panel
+          title={isDemo ? t("contract.obligationsByStatus") : t("obligationState.chartTitle")}
+          tone="emerald"
+          hint={isDemo ? t("contract.healthHint") : t("obligationState.chartHint")}
+        >
+          <div className="p-5" data-section="obligation-evidence-chart">
             {obligations === null ? (
               <DataLoadFailed message="dataLoadFailed" />
-            ) : (
+            ) : isDemo ? (
               <StackedBar
                 segments={STATUS_ORDER.filter((s) => byStatus[s]).map((s) => ({
                   key: s,
                   value: byStatus[s] ?? 0,
                   className: toneDot[statusTone[s]],
                   label: st(s),
+                }))}
+              />
+            ) : (
+              <StackedBar
+                segments={EVIDENCE_ORDER.filter((s) => byEvidence[s]).map((s) => ({
+                  key: s,
+                  value: byEvidence[s] ?? 0,
+                  className: toneDot[EVIDENCE_TONE[s]],
+                  label: t(`obligationState.evidence.${s}`),
                 }))}
               />
             )}

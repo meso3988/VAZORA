@@ -8,6 +8,8 @@
  * so demo data renders natively in both English and Arabic.
  */
 
+import type { ObligationLifecycle, ObligationState } from "@/domain/obligation-state";
+
 export type LocalizedText = { en: string; ar: string };
 
 export type ISODate = string;
@@ -109,7 +111,12 @@ export type Obligation = {
   requirement: LocalizedText;
   ownerId: string;
   ownerName: string;
-  status: ObligationStatus;
+  /** illustrative demo status only — live obligations carry `lifecycle` + `state` */
+  status?: ObligationStatus;
+  /** live review/activation state (approved obligations only are listed) */
+  lifecycle?: ObligationLifecycle;
+  /** live lifecycle / deadline / effective evidence, kept separate */
+  state?: ObligationState;
   cadence: ObligationCadence;
   dueDate: ISODate;
   requiredEvidence: LocalizedText[];

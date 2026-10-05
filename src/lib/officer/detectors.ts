@@ -106,7 +106,7 @@ export type Finding = {
   priority: number;
 };
 
-const UNPROVEN: CheckResult[] = ["missing", "not_found", "unable_to_verify"];
+export const UNPROVEN: CheckResult[] = ["missing", "not_found", "unable_to_verify"];
 
 function bucketFor(window: DeadlineWindow, severity: Severity): TimeBucket {
   if (severity === "critical") return "critical";

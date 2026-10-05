@@ -2082,6 +2082,34 @@
         "title": "Claims — not available in this release",
         "body": "Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page does not mean there are no claims, or that any claim is ready."
       }
+    },
+    "obligationState": {
+      "lifecycle": {
+        "active": "Active",
+        "approved_not_active": "Approved — not active"
+      },
+      "deadline": {
+        "overdue": "Overdue {days}d",
+        "today": "Due today",
+        "next_3_days": "Due in {days}d",
+        "this_week": "Due in {days}d",
+        "monitoring": "Scheduled",
+        "no_due_date": "No due date",
+        "unknown": "Deadline not loaded"
+      },
+      "evidence": {
+        "verified": "Evidence verified",
+        "partial": "Evidence partial",
+        "missing": "Evidence missing",
+        "awaiting_verification": "Evidence received — awaiting verification",
+        "needs_review": "Evidence needs review",
+        "no_requirements": "No evidence requirements recorded",
+        "unavailable": "Evidence status not loaded"
+      },
+      "satisfied": "{satisfied}/{required} requirements met",
+      "priorInForce": "Prior verified state in force — a later run awaits human review",
+      "chartTitle": "Evidence status of obligations",
+      "chartHint": "Effective evidence verification per obligation — separate from activation and deadline."
     }
   }
 }
