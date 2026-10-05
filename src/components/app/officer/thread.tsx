@@ -2,6 +2,7 @@ import { Bot, FileSearch, SendHorizontal, User, Wrench } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 
 import { OfficerActionCard } from "@/components/app/officer/action-card";
+import { OfficerMarkdown } from "@/components/app/officer/markdown";
 import { Empty, Mono } from "@/components/app/primitives";
 import type { OfficerActionView, OfficerMessageView } from "@/domain/officer";
 import { Link } from "@/i18n/navigation";
@@ -63,7 +64,11 @@ export async function OfficerThread({
                 {m.model && <Mono className="ms-auto">{m.model}</Mono>}
               </div>
 
-              <p dir="auto" className="whitespace-pre-wrap text-sm leading-relaxed">{m.content}</p>
+              {/* Assistant answers are Markdown, rendered through an allow-list
+                  (no raw HTML, model links as text); user text stays verbatim. */}
+              {m.role === "assistant"
+                ? <OfficerMarkdown text={m.content} />
+                : <p dir="auto" className="whitespace-pre-wrap text-sm leading-relaxed">{m.content}</p>}
 
               {/* sources — validated server-side; invented ones never reach here */}
               {m.citations.length > 0 && (
