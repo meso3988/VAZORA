@@ -27,6 +27,14 @@ const API_KEY = process.env.VAZORA_AI_API_KEY;
 const TEMPERATURE = process.env.VAZORA_EXTRACTION_TEMPERATURE !== undefined
   ? Number(process.env.VAZORA_EXTRACTION_TEMPERATURE)
   : undefined;
+/**
+ * Optional hard output ceiling, sent as max_completion_tokens (on reasoning
+ * models this bounds visible output AND reasoning tokens). Read per call.
+ */
+export function extractionMaxOutputTokens(): number | undefined {
+  const raw = Number(process.env.VAZORA_EXTRACTION_MAX_OUTPUT_TOKENS);
+  return Number.isInteger(raw) && raw > 0 ? raw : undefined;
+}
 
 export const openAiCompatProvider: ContractExtractionProvider = {
   id: "openai-compat",
@@ -52,6 +60,7 @@ export const openAiCompatProvider: ContractExtractionProvider = {
     ].join("\n");
 
     const t0 = Date.now();
+    const maxOutput = extractionMaxOutputTokens();
     let res: Response;
     try {
       res = await fetch(`${BASE.replace(/\/+$/, "")}/chat/completions`, {
@@ -60,6 +69,7 @@ export const openAiCompatProvider: ContractExtractionProvider = {
         body: JSON.stringify({
           model: MODEL,
           ...(TEMPERATURE !== undefined ? { temperature: TEMPERATURE } : {}),
+          ...(maxOutput !== undefined ? { max_completion_tokens: maxOutput } : {}),
           response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM },
@@ -76,10 +86,15 @@ export const openAiCompatProvider: ContractExtractionProvider = {
     }
 
     const payload = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
+      choices?: { message?: { content?: string }; finish_reason?: string }[];
       usage?: { prompt_tokens?: number; completion_tokens?: number };
       model?: string;
     };
+    // A response cut off at the output ceiling is a visible failure, never a
+    // partial extraction: the run fails and nothing is saved or activated.
+    if (payload.choices?.[0]?.finish_reason === "length") {
+      return { ok: false, error: `provider output truncated at the output limit (max_completion_tokens=${maxOutput ?? "provider default"})` };
+    }
     const content = payload.choices?.[0]?.message?.content;
     if (!content) return { ok: false, error: "empty provider response" };
 
