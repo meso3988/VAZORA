@@ -1,0 +1,54 @@
+build: commit 0115193, BUILD_ID Ze2v4b1IQthBxnGZZ5nw9, next start :3005, VAZORA_OFFICER_PROVIDER=none
+PASS  after alpha en BETA-200: lifecycle reads Active (not Verified) — observed status cell: "Active Overdue 6d Evidence missing"
+PASS  after alpha en BETA-200: deadline window = overdue
+PASS  after alpha en BETA-200: evidence state = missing
+PASS  after alpha en BETA-200: no "Verified" anywhere in the status cell
+PASS  after alpha en GAMMA-300: lifecycle reads Active (not Verified) — observed status cell: "Active Due in 2d Evidence missing"
+PASS  after alpha en GAMMA-300: deadline window = next_3_days
+PASS  after alpha en GAMMA-300: evidence state = missing
+PASS  after alpha en GAMMA-300: no "Verified" anywhere in the status cell
+PASS  after alpha en ALPHA-100: lifecycle reads Active (not Verified) — observed status cell: "Active Scheduled Evidence verified"
+PASS  after alpha en ALPHA-100: deadline window = monitoring
+PASS  after alpha en ALPHA-100: evidence state = verified
+PASS  after alpha en EPSILON-500: lifecycle reads Active (not Verified) — observed status cell: "Active Overdue 5d Evidence verified"
+PASS  after alpha en EPSILON-500: deadline window = overdue
+PASS  after alpha en EPSILON-500: evidence state = verified
+PASS  after alpha en DELTA-400: lifecycle reads Active (not Verified) — observed status cell: "Active Scheduled Evidence verified Prior verified state in force — a later run awaits human review"
+PASS  after alpha en DELTA-400: deadline window = monitoring
+PASS  after alpha en DELTA-400: evidence state = verified
+PASS  after alpha en DELTA-400: prior verified state in force is stated
+PASS  after alpha en overview BETA-200: chart shows evidence state, not activation — observed chart: "Evidence missing 1"
+PASS  after alpha en overview BETA-200: clause-trace verification slot shows evidence state — data-ob-evidence nodes=1
+PASS  after alpha ar BETA-200: lifecycle reads Active (not Verified) — observed status cell: "نشط متأخر 6 يوم الدليل ناقص"
+PASS  after alpha ar BETA-200: deadline window = overdue
+PASS  after alpha ar BETA-200: evidence state = missing
+PASS  after alpha ar BETA-200: no "مُتحقق منه" anywhere in the status cell
+PASS  after alpha ar GAMMA-300: lifecycle reads Active (not Verified) — observed status cell: "نشط مستحق خلال 2 يوم الدليل ناقص"
+PASS  after alpha ar GAMMA-300: deadline window = next_3_days
+PASS  after alpha ar GAMMA-300: evidence state = missing
+PASS  after alpha ar GAMMA-300: no "مُتحقق منه" anywhere in the status cell
+PASS  after alpha ar ALPHA-100: lifecycle reads Active (not Verified) — observed status cell: "نشط مجدول الدليل مُتحقق منه"
+PASS  after alpha ar ALPHA-100: deadline window = monitoring
+PASS  after alpha ar ALPHA-100: evidence state = verified
+PASS  after alpha ar EPSILON-500: lifecycle reads Active (not Verified) — observed status cell: "نشط متأخر 5 يوم الدليل مُتحقق منه"
+PASS  after alpha ar EPSILON-500: deadline window = overdue
+PASS  after alpha ar EPSILON-500: evidence state = verified
+PASS  after alpha ar DELTA-400: lifecycle reads Active (not Verified) — observed status cell: "نشط مجدول الدليل مُتحقق منه الحالة المتحققة السابقة سارية — تشغيل لاحق بانتظار مراجعة بشرية"
+PASS  after alpha ar DELTA-400: deadline window = monitoring
+PASS  after alpha ar DELTA-400: evidence state = verified
+PASS  after alpha ar DELTA-400: prior verified state in force is stated
+PASS  after alpha ar overview BETA-200: chart shows evidence state, not activation — observed chart: "الدليل ناقص 1"
+PASS  after alpha ar overview BETA-200: clause-trace verification slot shows evidence state — data-ob-evidence nodes=1
+PASS  after beta en OPS-021: lifecycle reads Active (not Verified) — observed status cell: "Active Scheduled No evidence requirements recorded"
+PASS  after beta en OPS-021: deadline window = monitoring
+PASS  after beta en OPS-021: evidence state = no_requirements
+PASS  after beta en OPS-021: no "Verified" anywhere in the status cell
+PASS  after beta en FM-008: lifecycle reads Active (not Verified) — observed status cell: "Active Overdue 6d No evidence requirements recorded"
+PASS  after beta en FM-008: deadline window = overdue
+PASS  after beta en FM-008: evidence state = no_requirements
+PASS  after beta en FM-008: no "Verified" anywhere in the status cell
+PASS  after beta en overview OPS-021: chart shows evidence state, not activation — observed chart: "No evidence requirements recorded 1"
+PASS  after beta en overview OPS-021: clause-trace verification slot shows evidence state — data-ob-evidence nodes=1
+PASS  after demo: obligations keep fixture status pills, no live state badges
+
+51/51 passed

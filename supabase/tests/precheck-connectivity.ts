@@ -20,7 +20,8 @@ async function timed(label: string, fn: () => Promise<unknown>) {
     await fn();
     console.log(`OK   ${label} (${Date.now() - t0}ms)`);
     return true;
-  } catch (err: any) {
+  } catch (caught: unknown) {
+    const err = caught as { message?: string; cause?: { code?: string } } | null | undefined;
     console.log(`FAIL ${label} (${Date.now() - t0}ms): ${err?.message ?? err} ${err?.cause ? `cause=${err.cause.code ?? err.cause}` : ""}`);
     return false;
   }
@@ -30,9 +31,9 @@ async function main() {
   console.log(`precheck url=${url}`);
   const client = createClient(url, anon, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: (input: any, init?: any) =>
+    global: { fetch: (input: RequestInfo | URL, init?: RequestInit) =>
       fetch(input, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) }) },
-  }) as any;
+  });
 
   let ok = true;
   // GoTrue host/TLS path — the signUp call that timed out lives here

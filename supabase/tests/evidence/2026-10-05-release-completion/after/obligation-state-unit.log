@@ -1,0 +1,27 @@
+PASS  active + evidence missing: lifecycle active, evidence missing (never verified)
+PASS  active + verified evidence: evidence verified, deadline independent
+PASS  overdue + verified: deadline overdue AND evidence verified (lateness is not a verification failure)
+PASS  pending discrepancy: prior verified state stays in force and is flagged
+PASS  no requirements recorded: declared state, not verified
+PASS  no normalized due date → no_due_date window
+PASS  evidence read failure → every evidence state unavailable
+PASS  org clock unavailable → deadline unknown, evidence unaffected
+PASS  confirmed regression demotes the state (not held)
+PASS  retained prior (kept_prior) stays verified and in force
+PASS  upload alone (gap evidence_received) is not verified
+PASS  open gap overrides an older verified result
+PASS  needs_human_review without a holding discrepancy → needs_review
+PASS  not_applicable does not block
+PASS  optional requirement ignored for the state
+PASS  worst requirement wins (missing over partial); counts reported
+PASS  provider no longer maps activation to verified
+PASS  obligations table renders the three states for live rows
+PASS  obligations table: live evidence column from requirements, not an empty link list
+PASS  obligations tab reads states from the evidence matrix
+PASS  overview: live chart counts effective evidence states
+PASS  clause trace: live verification slot is the evidence state
+PASS  helper uses the existing evidence matrix
+PASS  en: lifecycle/deadline/evidence copy present
+PASS  ar: lifecycle/deadline/evidence copy present
+
+25/25 passed

@@ -1,0 +1,11 @@
+PASS  extraction: configured ceiling reaches the body as max_completion_tokens — {"max_completion_tokens":12000}
+PASS  extraction: model from config in the body
+PASS  extraction: complete JSON response succeeds
+PASS  extraction: finish_reason=length is a visible failure, not a partial result — provider output truncated at the output limit (max_completion_tokens=12000)
+PASS  extraction: incomplete JSON is a failure
+PASS  extraction: no ceiling configured → field absent (unchanged default behavior)
+PASS  officer: per-request ceiling reaches the body as max_completion_tokens
+PASS  ingestion run fails on a chunk error before saving obligations
+PASS  extraction prompt not changed by this work
+
+9/9 passed

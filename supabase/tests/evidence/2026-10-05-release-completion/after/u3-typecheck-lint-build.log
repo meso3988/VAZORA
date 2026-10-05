@@ -1,0 +1,10 @@
+commit 0115193
+--- typecheck: exit 0
+--- lint: 3 errors remain, all in supabase/tests/evaluator-v4-heldout-v2-score.ts (frozen evaluator scorer, not modified):
+   38:113  error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+   39:46   error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+  147:36   error    Unexpected any. Specify a different type       @typescript-eslint/no-explicit-any
+--- precheck-connectivity.ts: 4 errors fixed (types only)
+--- build
+✓ Compiled successfully in 5.2s
+BUILD_ID Ze2v4b1IQthBxnGZZ5nw9
