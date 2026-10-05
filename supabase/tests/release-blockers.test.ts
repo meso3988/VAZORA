@@ -26,6 +26,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = (rel: string) => readFileSync(join(here, "..", "..", rel), "utf8");
 
 const CLOCK = { today: "2026-10-04", endOfMonth: "2026-10-31" };
+const cs = (...ids: string[]) => ids.map((id) => ({ id }));
 const v = (i: ContractIndicators | undefined, k: keyof ContractIndicators) => (i?.[k].state === "value" ? (i[k] as { value: number }).value : i?.[k].state);
 
 /** Fake PostgREST builder: records every filter, resolves to `result`. */
@@ -52,7 +53,7 @@ async function main() {
     { contract_id: "B", due_date_normalized: "2026-10-10" },
     { contract_id: "FOREIGN", due_date_normalized: "2026-01-01" }, // not requested
   ];
-  const m = liveIndicatorsFromRows(["A", "B", "C"], rows, CLOCK);
+  const m = liveIndicatorsFromRows(cs("A", "B", "C"), rows, CLOCK);
   check("contract with an overdue obligation: overdue = 1", v(m.get("A"), "obligationsOverdue") === 1);
   check("active total counts every operational row incl. no-date", v(m.get("A"), "obligationsTotal") === 5);
   check("due this month: today and end-of-month inclusive, next month and overdue excluded", v(m.get("A"), "obligationsDueThisMonth") === 2);
@@ -65,7 +66,7 @@ async function main() {
 
   // ---------- repository boundary ----------
   const ok = fakeClient({ data: rows.slice(0, 6), error: null });
-  const r1 = await readLiveContractIndicators(ok.client, "org-alpha", ["A", "B"], CLOCK);
+  const r1 = await readLiveContractIndicators(ok.client, "org-alpha", cs("A", "B"), CLOCK);
   const f = (op: string) => ok.calls.filter((c) => c.op === op).map((c) => JSON.stringify(c.args));
   check("reads contract_obligations", f("from")[0] === JSON.stringify(["contract_obligations"]));
   check("scoped to the caller's organization", f("eq").includes(JSON.stringify(["organization_id", "org-alpha"])));
@@ -75,24 +76,24 @@ async function main() {
   check("success → counted values", v(r1.get("A"), "obligationsOverdue") === 1 && v(r1.get("B"), "obligationsTotal") === 1);
 
   const beta = fakeClient({ data: [], error: null });
-  const r2 = await readLiveContractIndicators(beta.client, "org-beta", ["X"], CLOCK);
+  const r2 = await readLiveContractIndicators(beta.client, "org-beta", cs("X"), CLOCK);
   check("Alpha vs Beta: each read is filtered by its own organization id", beta.calls.some((c) => c.op === "eq" && JSON.stringify(c.args) === JSON.stringify(["organization_id", "org-beta"])));
   check("genuine empty result → real zeros (not a failure)", v(r2.get("X"), "obligationsTotal") === 0 && v(r2.get("X"), "obligationsOverdue") === 0);
 
-  const err = await readLiveContractIndicators(fakeClient({ data: null, error: { message: "boom" } }).client, "o", ["A", "B"], CLOCK);
+  const err = await readLiveContractIndicators(fakeClient({ data: null, error: { message: "boom" } }).client, "o", cs("A", "B"), CLOCK);
   check("returned error → every count unavailable, never zero",
     ["A", "B"].every((id) => ["obligationsTotal", "obligationsDueThisMonth", "obligationsOverdue"].every((k) => err.get(id)?.[k as keyof ContractIndicators].state === "unavailable")));
-  const thrown = await readLiveContractIndicators(fakeClient("throw").client, "o", ["A"], CLOCK);
+  const thrown = await readLiveContractIndicators(fakeClient("throw").client, "o", cs("A"), CLOCK);
   check("thrown / network error → unavailable", thrown.get("A")?.obligationsOverdue.state === "unavailable");
-  const bad = await readLiveContractIndicators(fakeClient({ data: { not: "an array" }, error: null }).client, "o", ["A"], CLOCK);
+  const bad = await readLiveContractIndicators(fakeClient({ data: { not: "an array" }, error: null }).client, "o", cs("A"), CLOCK);
   check("malformed result → unavailable", bad.get("A")?.obligationsTotal.state === "unavailable");
   const many = Array.from({ length: INDICATOR_READ_LIMIT + 1 }, () => ({ contract_id: "A", due_date_normalized: "2026-09-01" }));
-  const trunc = await readLiveContractIndicators(fakeClient({ data: many, error: null }).client, "o", ["A", "B"], CLOCK);
+  const trunc = await readLiveContractIndicators(fakeClient({ data: many, error: null }).client, "o", cs("A", "B"), CLOCK);
   check("truncated read → incomplete for every contract (no understated count)",
     ["A", "B"].every((id) => trunc.get(id)?.obligationsOverdue.state === "incomplete" && trunc.get(id)?.obligationsTotal.state === "incomplete"));
   check("failure states keep coverage not_calculated and risks deferred", err.get("A")?.evidenceCoverage.state === "not_calculated" && trunc.get("A")?.riskExposure.state === "deferred");
   const none = fakeClient({ data: [], error: null });
-  const r3 = await readLiveContractIndicators(none.client, "o", [], CLOCK);
+  const r3 = await readLiveContractIndicators(none.client, "o", cs(), CLOCK);
   check("no contracts → no query, no indicators", r3.size === 0 && none.calls.length === 0);
 
   // ---------- demo stays illustrative ----------

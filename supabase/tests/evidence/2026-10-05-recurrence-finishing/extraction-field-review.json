@@ -1,0 +1,42 @@
+{
+  "document": "Review of the saved extraction field differences (live journey 2026-10-05) — saved data only, no new extraction",
+  "sources": {
+    "raw": "../2026-10-05-release-completion/live-journey/raw-extraction-obligations.json",
+    "reference": "supabase/tests/fixtures/bench-en-svc.ground-truth.json (frozen, unchanged)",
+    "contractText": "supabase/tests/fixtures/bench-en-svc.docx"
+  },
+  "note": "Matching 6/6 obligations does not prove every field correct.",
+  "differences": [
+    {
+      "clause": "5.1", "field": "payment_linked",
+      "contractText": "Clause 5.1: \"The Contractor shall submit a monthly service report by the 5th of each month covering the preceding month, including eight KPI results. The report is signed by the Project Manager and acknowledged by the Client.\" (Clause 10: \"The monthly invoice is payable only upon submission of the service report and written acknowledgement by the Client under 10.4.\")",
+      "extracted": null, "reference": true,
+      "classification": "REFERENCE_DIFFERENCE (cross-clause)",
+      "reason": "Clause 5.1 itself states no payment condition; the link is created by clause 10. The extraction recorded that link on the clause-10 obligation (payment_linked = true with the clause-10 note). The reference attributes it to 5.1 as well. Not determined (null) is not a false statement.",
+      "visibleToReviewerBeforeApproval": "Only indirectly: the review inspector shows 'Payment link' only when true, so a null value shows no field at all.",
+      "correctionInExistingPath": "None — editObligation does not edit payment_linked; the reviewer can only approve or reject.",
+      "deliveryImpact": "Low: the payment linkage is preserved on the clause-10 obligation."
+    },
+    {
+      "clause": "15", "field": "payment_linked",
+      "contractText": "Clause 15: \"All reports shall be submitted via the Client portal to the PMO by the 5th of each month.\"",
+      "extracted": null, "reference": false,
+      "classification": "REFERENCE_DIFFERENCE (not stated vs false)",
+      "reason": "The clause says nothing about payment; null (not determined) is no less accurate than the reference's explicit false.",
+      "visibleToReviewerBeforeApproval": "No field is shown for a null payment link.",
+      "correctionInExistingPath": "None needed; no field-level edit exists.",
+      "deliveryImpact": "None."
+    },
+    {
+      "clause": "15", "field": "external_dependency",
+      "contractText": "Clause 15: \"All reports shall be submitted via the Client portal to the PMO by the 5th of each month.\"",
+      "extracted": "Availability of the Client portal (provenance: inferred)", "reference": null,
+      "classification": "PROVEN_EXTRACTION_ERROR (unsupported inference)",
+      "reason": "The clause names a submission channel, not a dependency on the portal being available. The value is marked 'inferred' in field_provenance, i.e. not stated in the source.",
+      "visibleToReviewerBeforeApproval": "Yes — the inspector shows 'External dependency: Availability of the Client portal' with an 'Inferred' provenance badge. The live journey's pre-declared review rule approved by clause match and did not correct fields.",
+      "correctionInExistingPath": "None at field level — editObligation edits title, requirement text, frequency, due rule and owner only. The reviewer can reject the obligation (losing a valid obligation) or approve it with the inferred dependency.",
+      "deliveryImpact": "The external dependency is carried into the obligation and can feed the Officer's external-dependency findings for this obligation.",
+      "closureStep": "Allow the reviewer to clear or edit external_dependency (and payment_linked) in the existing review edit form, stored in reviewed_values like the other edited fields — requires approval."
+    }
+  ]
+}

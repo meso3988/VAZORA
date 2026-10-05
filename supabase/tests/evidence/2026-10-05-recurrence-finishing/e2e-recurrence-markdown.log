@@ -1,0 +1,34 @@
+build: commit de31625, BUILD_ID 4HjeVCCZnqGwhV_yAurB5, :3005, VAZORA_OFFICER_PROVIDER=none
+today 2026-10-05 (Asia/Riyadh) · GAMMA-300 start 2026-03-19 · expected {"kind":"recurring","rule":"monthly_day_5","firstUnsettled":"2026-04-05","unsettledPastCount":6,"nextDue":"2026-11-05","dueDate":"2026-04-05"}
+PASS  Officer listObligations: operational date = oldest unsettled cycle — 2026-04-05 overdue 183d
+PASS  Officer listObligations: unsettled cycles and next cycle reported
+PASS  Officer getOverdueObligations includes the unsettled recurring obligation
+PASS  Officer: event-based rule → needs_schedule
+PASS  sweep run 1: overdue finding on the same cycle date — completed · active · due 2026-04-05
+PASS  sweep run 2: overdue finding on the same cycle date — completed · active · due 2026-04-05
+PASS  en contracts list: GAMMA-300 overdue = 1
+PASS  en overview KPI: overdue = 1
+PASS  en obligations tab: due column = oldest unsettled cycle
+PASS  en obligations tab: overdue + unsettled cycles + next cycle shown
+PASS  en event-based rule: "schedule needs definition" with reason, not "no due date"
+PASS  ar contracts list: GAMMA-300 overdue = 1
+PASS  ar overview KPI: overdue = 1
+PASS  ar obligations tab: due column = oldest unsettled cycle
+PASS  ar obligations tab: overdue + unsettled cycles + next cycle shown
+PASS  ar event-based rule: "schedule needs definition" with reason, not "no due date"
+PASS  en markdown: tables rendered (stored answer + Arabic), no raw pipes or **
+PASS  en markdown: no anchors, scripts, images or javascript: in answers
+PASS  en markdown: model link text kept as plain text
+PASS  ar markdown: tables rendered (stored answer + Arabic), no raw pipes or **
+PASS  ar markdown: no anchors, scripts, images or javascript: in answers
+PASS  ar markdown: model link text kept as plain text
+PASS  en mobile markdown: tables rendered (stored answer + Arabic), no raw pipes or **
+PASS  en mobile markdown: no anchors, scripts, images or javascript: in answers
+PASS  en mobile markdown: model link text kept as plain text
+PASS  en mobile: no page-level horizontal overflow
+PASS  ar mobile markdown: tables rendered (stored answer + Arabic), no raw pipes or **
+PASS  ar mobile markdown: no anchors, scripts, images or javascript: in answers
+PASS  ar mobile markdown: model link text kept as plain text
+PASS  ar mobile: no page-level horizontal overflow
+
+30/30 passed

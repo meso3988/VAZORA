@@ -1,0 +1,17 @@
+PASS  stored answer: table rendered (no raw pipes)
+PASS  stored answer: bold rendered (no ** markers)
+PASS  stored answer: 6 obligation rows — 6 body rows
+PASS  stored text itself unchanged by rendering
+PASS  table wrapped for horizontal scroll on mobile
+PASS  Arabic: heading, list, bold, table; dir=auto for RTL
+PASS  no <script>, <iframe>, raw <img>, event handlers
+PASS  no anchors at all (model links are text, not citations)
+PASS  no javascript: URL anywhere
+PASS  link text preserved as plain text
+PASS  image reduced to alt text
+PASS  MDX/JSX not evaluated (no component element emitted)
+PASS  thread: assistant answers through OfficerMarkdown, user text verbatim
+PASS  thread: validated citations still rendered from server-checked records
+PASS  renderer: no dangerouslySetInnerHTML; skipHtml + allow-list + empty urlTransform
+
+15/15 passed

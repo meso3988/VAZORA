@@ -1,0 +1,41 @@
+PASS  pure: current full coverage + no issues → no_actionable_issues_recorded
+PASS  pure: any open issue → actionable_issues
+PASS  pure: never swept → assessment_incomplete (silence is not health)
+PASS  pure: sweep from yesterday → assessment_incomplete (silence is not health)
+PASS  pure: contract failed in sweep → assessment_incomplete (silence is not health)
+PASS  pure: contract added after sweep → assessment_incomplete (silence is not health)
+PASS  pure: data changed after sweep → assessment_incomplete (silence is not health)
+PASS  pure: no operational obligations → assessment_incomplete (silence is not health)
+PASS  pure: contract not active → assessment_incomplete (silence is not health)
+PASS  [GATE Q17 r3] 'Healthy contract: EPSILON-500' is corrected — ["## Healthy contract: EPSILON-500","**Security services — Western region** is currently a healthy example:","**Assessment:** Healthy—nothing is overdue, evidence is verified, and no immediate exception requires attention."]
+PASS  [GATE Q17 r3] the unqualified 'Assessment: Healthy…' line is removed
+PASS  [GATE Q17 r3] replacement states the recorded issue
+PASS  pure: facts that are true are kept (evidence verified line)
+PASS  pure: a no-issues contract keeps its scoped statement
+PASS  pure: 'EPSILON-500 is not healthy' is not a health claim
+PASS  pure: incomplete assessment → corrected with the coverage reason
+PASS  pure: Arabic health claim corrected
+PASS  before any sweep: every contract is assessment_incomplete (never assessed ≠ healthy) — ALPHA-100:assessment_incomplete,BETA-200:assessment_incomplete,GAMMA-300:assessment_incomplete,DELTA-400:assessment_incomplete,EPSILON-500:assessment_incomplete,ZETA-600:assessment_incomplete
+PASS  sweep completed — completed
+  health after sweep: ALPHA-100:no_actionable_issues_recorded:0 BETA-200:actionable_issues:2 GAMMA-300:actionable_issues:2 DELTA-400:actionable_issues:1 EPSILON-500:actionable_issues:1 ZETA-600:actionable_issues:2
+PASS  healthy assessed contract (ALPHA-100) → no_actionable_issues_recorded with scoped statement — {"lastSweepAt":"2026-10-05T19:50:44.491632+00:00","asOfDate":"2026-10-05","gaps":[],"complete":true,"lastSuccessfulAssessmentAt":"2026-10-05T19:50:44.491632+00:00"}
+PASS  unassigned obligation (EPSILON-500) → actionable_issues — unassigned_obligation
+PASS  overdue + missing mandatory evidence (BETA-200) → actionable_issues — missing_required_evidence,overdue
+PASS  pending discrepancy (DELTA-400) → actionable (review required)
+PASS  …effective status preserved and disclosed (remains verified until a reviewer decides) — A later verification run disagreed with a previously accepted result on the same unchanged evidence. The operational status remains verified until a reviewer decides.
+PASS  getContractHealth tool returns the same verdicts
+PASS  stale sweep (clock moved a day) → ALPHA-100 assessment_incomplete — sweep_not_current — last assessed as of 2026-10-05, today is 2026-10-07
+PASS  contract added after the sweep (authorized QA write)
+PASS  …is assessment_incomplete (added after sweep, nothing assessed) — no_operational_obligations — nothing has been assessed | contract_added_after_last_sweep
+PASS  ALPHA-100 obligation changed after the sweep → assessment_incomplete — data_changed_since_last_sweep — obligations, gaps or discrepancies changed after the assessment
+PASS  [GATE Q17 r3 replay] EPSILON-500 not presented as healthy — EPSILON-500 cannot be described as healthy: 1 actionable issue is recorded — No owner assigned: EPSILON-500 — Quarterly security compliance statement.
+
+- **Status:** Active, through 2027-07-23.
+- **Ev
+PASS  [GATE Q17 r3 replay] corrected sentences recorded
+PASS  scoped recommendation of the assessed contract passes through unchanged — **ALPHA-100 — Facilities maintenance — Northern:** No actionable issues are recorded within the checks and data available.
+PASS  health question exposes getContractHealth
+PASS  pending-discrepancy contract claimed healthy → corrected, review requirement disclosed — DELTA-400 cannot be described as healthy: 1 actionable issue is recorded — Verification discrepancy requires review: Signed asset register.
+CLEANUP ok org=8b92fcdb-f603-455b-b9bf-3115bac2bf37  leftovers=none
+
+CONTRACT HEALTH: 34/34 pass

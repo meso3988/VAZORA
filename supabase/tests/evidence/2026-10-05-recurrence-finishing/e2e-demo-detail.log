@@ -1,0 +1,17 @@
+build de31625 / 4HjeVCCZnqGwhV_yAurB5 (regression)
+PASS  demo en contracts list 200 — status=200
+PASS  demo en list has a non-UUID contract link — /en/app/contracts/ctr_rta_om_2026
+PASS  demo en navigated to non-UUID detail — http://localhost:3005/en/app/contracts/ctr_rta_om_2026
+PASS  demo en detail renders (no not-found)
+PASS  demo en detail renders (no load-failure)
+PASS  demo en obligations subpage 200 — status=200
+PASS  demo en obligations subpage no not-found/failure
+PASS  demo ar contracts list 200 — status=200
+PASS  demo ar list has a non-UUID contract link — /ar/app/contracts/ctr_rta_om_2026
+PASS  demo ar navigated to non-UUID detail — http://localhost:3005/ar/app/contracts/ctr_rta_om_2026
+PASS  demo ar detail renders (no not-found)
+PASS  demo ar detail renders (no load-failure)
+PASS  demo ar obligations subpage 200 — status=200
+PASS  demo ar obligations subpage no not-found/failure
+
+14/14 checks passed

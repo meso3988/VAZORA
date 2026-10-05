@@ -1,0 +1,8 @@
+{
+  "artifact": "evaluator-v4-heldout-v2-score.ts as committed in 1e3dc08 (the source that produced the preserved heldout-v2 FAIL)",
+  "file": "evaluator-v4-heldout-v2-score@1e3dc08.ts.txt",
+  "sha256": "d6dde0b335a609540a75beec28005bc031d9779c51e0a09ff7c85cd2c36a1f36",
+  "gitCommit": "1e3dc08",
+  "producedReport": { "file": "reports/2026-10-01T23-05-44-317Z-heldout-v2-score.json", "sha256": "07540b4ea4b9c492ae16e1205298f5a75aa61d8eccea1e211a6d9edffe621833" },
+  "note": "Stored as .ts.txt so it is retrievable byte-for-byte without being part of the active, linted code. The active maintenance copy at supabase/tests/evaluator-v4-heldout-v2-score.ts receives type-only changes; manifests and historical results are not modified."
+}

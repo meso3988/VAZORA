@@ -139,7 +139,7 @@ async function main() {
     .select("id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, due_rule_normalized, financial_condition, penalty_condition, payment_linked, external_dependency, owner_role_suggested, ai_confidence, needs_source_review, review_status, ai_payload, obligation_source_refs(clause_id, page_number, source_snippet), obligation_evidence_requirements(name, required)")
     .eq("organization_id", who.orgId).eq("contract_id", contractId).order("created_at", { ascending: true });
   save("raw-extraction-obligations.json", raw);
-  const candidates = (raw ?? []).map((o: any) => ({ id: o.id, title: o.title, clause: clauseOf(o), ref: refFor(clauseOf(o))?.clause ?? null, o }));
+  const candidates: { id: string; title: string; clause: string; ref: string | null; o: any }[] = (raw ?? []).map((o: any) => ({ id: o.id, title: o.title, clause: clauseOf(o), ref: refFor(clauseOf(o))?.clause ?? null, o }));
   const comparison = GT.obligations.map((g: any) => {
     const hits = candidates.filter((x) => x.ref === g.clause);
     const h = hits[0]?.o;
@@ -162,7 +162,7 @@ async function main() {
   for (const u of unmatched) log(`  candidate without reference: ${u}`);
 
   // 5. Human review in the UI (pre-declared rule; no edits).
-  const decisions = candidates.map((x) => ({ id: x.id, title: x.title, clause: x.clause, decision: x.ref ? "approve" : "reject" }));
+  const decisions: { id: string; title: string; clause: string; decision: "approve" | "reject" }[] = candidates.map((x) => ({ id: x.id, title: x.title, clause: x.clause, decision: x.ref ? "approve" : "reject" }));
   save("review-decisions.json", decisions);
   for (const d of decisions) {
     await page.goto(`${BASE}/en/app/contracts/${contractId}/review`);

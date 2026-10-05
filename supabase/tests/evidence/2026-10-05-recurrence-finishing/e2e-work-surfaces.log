@@ -1,0 +1,34 @@
+build de31625 / 4HjeVCCZnqGwhV_yAurB5 (regression)
+PASS  alpha tasks 200
+PASS  alpha tasks shows real queue groups
+PASS  alpha tasks shows seeded escalation summary
+PASS  alpha tasks shows seeded internal task
+PASS  alpha tasks no other-tenant content
+PASS  escalation approve redirects back to /app/tasks
+PASS  escalation approved AND HELD (not executed) — approved|exec:no|held:approved_but_not_executed_in_phase_4a
+PASS  internal task approved → executed → completed — completed|exec:yes|held:-
+PASS  tasks persisted after re-entry (held + completed groups)
+PASS  completed card shows no approve button (no duplicate path)
+PASS  contract officer page 200
+PASS  contract officer shows contract action
+PASS  contract officer has real conversation entry
+PASS  contract activity 200
+PASS  contract activity shows officer action events
+PASS  contract officer opens a real contract conversation
+PASS  proposal attached to conversation (same row, no copy)
+PASS  conversation shows the SAME proposal (by summary)
+PASS  tasks shows the SAME proposal — one record, two surfaces
+PASS  conversation reflects approved state after tasks decision
+PASS  evidence request approved AND HELD (not executed) — approved|exec:no|held:approved_but_not_executed_in_phase_4a
+PASS  alpha ar tasks renders queue groups
+PASS  alpha ar tasks no English group labels
+PASS  alpha ar officer page renders
+PASS  alpha ar activity renders
+PASS  beta tasks shows own proposals
+PASS  beta tasks shows NO alpha rows
+PASS  empty tenant: queues render empty, not failure
+PASS  mobile 390px tasks renders without horizontal overflow
+PASS  demo tasks keeps fixture groups
+PASS  beta reject from /app/tasks → rejected — rejected|exec:no|held:-
+
+31/31 passed

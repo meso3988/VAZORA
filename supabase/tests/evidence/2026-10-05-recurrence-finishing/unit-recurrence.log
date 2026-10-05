@@ -1,0 +1,26 @@
+PASS  root cause: ingestion writes due_rule_normalized and never due_date_normalized
+PASS  before the first cycle day: nothing due yet, next cycle is the 5th
+PASS  on the cycle day: due today
+PASS  after the cycle day with no recorded completion: overdue 3 days, next cycle still listed
+PASS  a month later the unsettled cycle is NOT replaced by the next one — {"kind":"recurring","rule":"monthly_day_5","firstUnsettled":"2026-09-05","unsettledPastCount":2,"nextDue":"2026-11-05","dueDate":"2026-09-05"}
+PASS  re-evaluation is stable (same inputs → same oldest unsettled cycle)
+PASS  settled cycle → the next cycle becomes the operational date
+PASS  settling an older cycle does not settle a later one
+PASS  cycle before the contract start is excluded
+PASS  after the contract end: unsettled cycles remain due, no new cycles
+PASS  day 31 clamps to the month's last day (Jan 31 overdue, next Feb 28)
+PASS  monthly_end in a leap February → Feb 29
+PASS  day bounds: monthly_day_0 / monthly_day_32 are not supported
+PASS  org time zone decides 'today': the 5th is due today in Riyadh, tomorrow in UTC — 2026-10-05 vs 2026-10-04
+PASS  no contract start → needs schedule (no_schedule_start)
+PASS  event-based rule text → needs schedule (unsupported_rule)
+PASS  relative-days rule (needs a trigger event) → unsupported_rule
+PASS  frequency without a due day → rule_without_due_day
+PASS  no temporal rule at all → none
+PASS  explicit due date wins over the rule (dated)
+PASS  list/overview state and KPI agree: overdue on the same cycle
+PASS  unsupported rule is shown as needs_schedule in the state (not 'no due date')
+PASS  Officer tools derive deadlines from the same schedule
+PASS  sweep derives deadlines from the same schedule
+
+24/24 passed

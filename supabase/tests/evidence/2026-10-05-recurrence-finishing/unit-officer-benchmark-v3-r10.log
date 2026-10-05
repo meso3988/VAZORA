@@ -1,0 +1,41 @@
+PASS  r10 assignee: "owner missing" emits no name
+PASS  r10 assignee: "assignee missing" emits no name
+PASS  r10 assignee: "owner unassigned" emits no name
+PASS  r10 assignee: "owner vacant" emits no name
+PASS  r10 assignee: "no owner assigned" emits no name
+PASS  r10 assignee: "responsible person missing" emits no name
+PASS  r10 assignee: "owner assignment pending" emits no name
+PASS  r10 assignee: "مسؤول مفقود" emits no name
+PASS  r10 assignee: "المسؤول شاغر" emits no name
+PASS  r10 assignee: "مسؤول غائب" emits no name
+PASS  r10 assignee: 'owner: Faisal' → faisal
+PASS  r10 assignee: 'assigned to Ahmed Al-Khaldi' → ahmed
+PASS  r10 assignee: 'المسؤول: أحمد الخالدي' → أحمد الخالدي
+PASS  r10 assignee: 'owner missing: Faisal' → faisal
+PASS  r10 assignee: 'owner missing: **Faisal**' → faisal
+PASS  r10 assignee: 'owner missing: "Quarterly…"' → no claim
+PASS  r10 verify_state: "owner missing" emits no evidence-state claim
+PASS  r10 verify_state: "assignee missing" emits no evidence-state claim
+PASS  r10 verify_state: "responsible party missing" emits no evidence-state claim
+PASS  r10 verify_state: "owner is missing" emits no evidence-state claim
+PASS  r10 verify_state: "مسؤول مفقود" emits no evidence-state claim
+PASS  r10 verify_state: "المالك مفقود" emits no evidence-state claim
+PASS  r10 verify_state: "evidence missing" still extracts
+PASS  r10 verify_state: "document missing" still extracts
+PASS  r10 verify_state: "verification evidence missing" still extracts
+PASS  r10 verify_state: "acknowledgement evidence missing" still extracts
+PASS  r10 verify_state: "the missing report" still extracts
+PASS  r10 verify_state: "الدليل مفقود" still extracts
+PASS  r10 verify_state: "التقرير مفقود" still extracts
+PASS  r10 combined A→B: ownership clause emits no assignee claim
+PASS  r10 combined A→B: ownership 'missing' emits no evidence claim
+PASS  r10 combined B→A: evidence claim kept, owner 'missing' suppressed
+PASS  r10: 'the evidence owner is missing' — ownership subject suppresses claim
+PASS  r9 repro: Q01 saved answer fails on assignee_name 'missing'
+PASS  r9 repro: Q01 saved answer fails on verification_state 'missing'
+PASS  r10 fixed: Q01 saved answer passes
+PASS  r10 fixed: Q01 has no unsupported claims
+PASS  r10 guard: fabricated 'Ahmed' owner still fails bound to EPSILON
+PASS  r10 guard: unsupported 'evidence is missing' on verified DELTA still extracted and fails
+
+39 passed · 0 failed

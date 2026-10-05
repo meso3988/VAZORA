@@ -35,10 +35,8 @@ const parsed = JSON.parse(goldBytes.toString("utf8"));
 const gold: Gold[] = Array.isArray(parsed) ? parsed : parsed.cases;
 const byId = new Map(gold.map((g) => [g.id, g]));
 
-type PerUnit = { unitText: string; materiality: string; reason: string };
-type Prediction = { id: string; predictedMateriality: Row["predicted"]; unitCount: number; perUnit: PerUnit[] };
-type Row = Gold & { predicted: "MATERIAL_ASSERTION" | "NON_MATERIAL" | "UNCERTAIN"; unitCount: number; perUnit: PerUnit[] };
-const rows: Row[] = pred.predictions.map((p: Prediction) => {
+type Row = Gold & { predicted: "MATERIAL_ASSERTION" | "NON_MATERIAL" | "UNCERTAIN"; unitCount: number; perUnit: any[] };
+const rows: Row[] = pred.predictions.map((p: any) => {
   const g = byId.get(p.id);
   if (!g) throw new Error(`prediction for unknown case ${p.id}`);
   return { ...g, predicted: p.predictedMateriality, unitCount: p.unitCount, perUnit: p.perUnit };
@@ -146,7 +144,7 @@ console.log("\nMULTI-UNIT CASES (aggregation transparency)");
 const multi = rows.filter((r) => r.unitCount > 1);
 console.log(`  ${multi.length} cases segmented into >1 unit`);
 for (const r of multi) {
-  const labels = r.perUnit.map((u) => u.materiality);
+  const labels = r.perUnit.map((u: any) => u.materiality);
   const mixedUnits = new Set(labels).size > 1;
   if (!mixedUnits) continue;
   console.log(`  ${r.id} gold=${r.materiality} predicted=${r.predicted} units=[${labels.join(", ")}]`);

@@ -1,0 +1,15 @@
+PASS  withinDays=0 accepted
+PASS  withinDays=0 → today only — ["o-today"]
+PASS  withinDays=1 → today + tomorrow — ["o-today","o-tomorrow"]
+PASS  withinDays=365 accepted (incl. week-out, excl. overdue) — ["o-today","o-tomorrow","o-week"]
+PASS  withinDays=-1 rejected — invalid_arguments: withinDays Number must be greater than or equal to 0
+PASS  withinDays=366 rejected — invalid_arguments: withinDays Number must be less than or equal to 365
+PASS  withinDays=1.5 (non-integer) rejected — invalid_arguments: withinDays Expected integer, received float
+PASS  withinDays omitted → default 7-day window — ["o-today","o-tomorrow","o-week"]
+PASS  model-facing schema: withinDays integer — {"type":"integer","minimum":0,"maximum":365}
+PASS  model-facing schema: withinDays minimum 0 visible — {"type":"integer","minimum":0,"maximum":365}
+PASS  model-facing schema: withinDays maximum 365 visible — {"type":"integer","minimum":0,"maximum":365}
+PASS  model-facing schema: description states 0=today — Operational obligations due within N days ahead, inclusive (default 7), computed server-side in the organization timezone. withinDays 0 = due today only, 1 = today and tomorrow.
+PASS  converter is generic: activity limit exposes min/max — {"type":"integer","minimum":1,"maximum":25}
+
+13 passed · 0 failed
