@@ -57,9 +57,14 @@ export async function ObligationsTable({
             <Td>
               {/* An obligation may have no normalized due date — show that
                   honestly instead of throwing on an Invalid Date. */}
-              {validDate(o.dueDate)
-                ? <Mono className={cn("text-sm", (o.state ? o.state.deadline.window === "overdue" : o.status === "overdue") && "text-missing")}>{f.dateTime(validDate(o.dueDate)!, "short")}</Mono>
-                : <span className="text-faint">—</span>}
+              {(() => {
+                // Live: the operational due date (explicit, or the oldest
+                // unsettled cycle of a recurring rule); demo: the fixture date.
+                const due = o.state ? ("dueDate" in o.state.deadline ? o.state.deadline.dueDate : null) : o.dueDate;
+                return validDate(due ?? "")
+                  ? <Mono data-ob-due={due} className={cn("text-sm", (o.state ? o.state.deadline.window === "overdue" : o.status === "overdue") && "text-missing")}>{f.dateTime(validDate(due!)!, "short")}</Mono>
+                  : <span className="text-faint">—</span>;
+              })()}
             </Td>
             <Td className="whitespace-nowrap text-muted">
               {/* Live: requirement coverage from the evidence matrix — the

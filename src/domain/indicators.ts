@@ -13,6 +13,7 @@
  */
 
 import type { ContractHealth } from "@/domain/types";
+import { obligationSchedule, operationalDueDate } from "@/lib/officer/schedule";
 import { classifyDeadline, type CalendarDate } from "@/lib/officer/time";
 
 export type Indicator =
@@ -56,26 +57,39 @@ export function liveIndicatorsInState(state: "unavailable" | "incomplete"): Cont
   return { obligationsTotal: s, obligationsDueThisMonth: s, obligationsOverdue: s, ...LIVE_UNCOMPUTED };
 }
 
-export type OperationalObligationRow = { contract_id: string; due_date_normalized: string | null };
+export type OperationalObligationRow = {
+  contract_id: string;
+  due_date_normalized: string | null;
+  due_rule_normalized?: string | null;
+  frequency?: string | null;
+};
+export type IndicatorContract = { id: string; startDate?: string | null; endDate?: string | null };
 
 /**
  * Count operational obligations per contract. `rows` must already be the
  * approved + active obligations of the caller's organization; contracts
- * with no rows get real zeros.
+ * with no rows get real zeros. Due dates come from the shared operational
+ * schedule (explicit date, or the oldest unsettled cycle of a recurring rule).
  */
 export function liveIndicatorsFromRows(
-  contractIds: string[],
+  contracts: IndicatorContract[],
   rows: OperationalObligationRow[],
   clock: { today: CalendarDate; endOfMonth: CalendarDate },
 ): Map<string, ContractIndicators> {
-  const counts = new Map(contractIds.map((id) => [id, { total: 0, dueThisMonth: 0, overdue: 0 }]));
+  const byId = new Map(contracts.map((c) => [c.id, c]));
+  const counts = new Map(contracts.map((c) => [c.id, { total: 0, dueThisMonth: 0, overdue: 0 }]));
   for (const r of rows) {
     const c = counts.get(r.contract_id);
     if (!c) continue;
     c.total++;
-    const d = classifyDeadline({ today: clock.today, dueDate: r.due_date_normalized });
+    const k = byId.get(r.contract_id);
+    const due = operationalDueDate(obligationSchedule({
+      dueDateNormalized: r.due_date_normalized, dueRuleNormalized: r.due_rule_normalized, frequency: r.frequency,
+      contractStart: k?.startDate ?? null, contractEnd: k?.endDate ?? null, today: clock.today,
+    }));
+    const d = classifyDeadline({ today: clock.today, dueDate: due });
     if (d.window === "overdue") c.overdue++;
-    else if (d.daysUntilDue != null && r.due_date_normalized && r.due_date_normalized <= clock.endOfMonth) c.dueThisMonth++;
+    else if (d.daysUntilDue != null && due && due <= clock.endOfMonth) c.dueThisMonth++;
   }
   return new Map([...counts].map(([id, c]) => [id, {
     obligationsTotal: value(c.total),

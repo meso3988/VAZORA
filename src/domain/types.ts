@@ -119,6 +119,9 @@ export type Obligation = {
   state?: ObligationState;
   cadence: ObligationCadence;
   dueDate: ISODate;
+  /** live: normalized recurrence rule (e.g. monthly_day_5) and raw frequency */
+  dueRuleNormalized?: string | null;
+  frequencyRaw?: string | null;
   requiredEvidence: LocalizedText[];
   evidenceIds: string[];
   claimId?: string;

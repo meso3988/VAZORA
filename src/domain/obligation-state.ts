@@ -13,12 +13,21 @@
 
 import type { EvidenceMatrixRow } from "@/domain/evidence";
 import { UNPROVEN } from "@/lib/officer/detectors";
+import { obligationSchedule, operationalDueDate, type NeedsScheduleReason } from "@/lib/officer/schedule";
 import { classifyDeadline, type CalendarDate, type DeadlineWindow } from "@/lib/officer/time";
 
 export type ObligationLifecycle = "active" | "approved_not_active";
 
 export type ObligationDeadline =
-  | { window: DeadlineWindow; daysOverdue: number | null; daysUntilDue: number | null }
+  | {
+      window: DeadlineWindow;
+      daysOverdue: number | null;
+      daysUntilDue: number | null;
+      /** operational due date: explicit, or the oldest unsettled recurring cycle */
+      dueDate: CalendarDate | null;
+      recurring?: { rule: string; unsettledPastCount: number; nextDue: CalendarDate | null };
+    }
+  | { window: "needs_schedule"; reason: NeedsScheduleReason }
   | { window: "unknown" };
 
 export type ObligationEvidenceState =
@@ -80,13 +89,32 @@ export function obligationEvidence(rows: EvidenceMatrixRow[]): ObligationEvidenc
  * could not be resolved (deadline unknown). Neither is ever a healthy state.
  */
 export function obligationStates(
-  obligations: { id: string; dueDate: string; lifecycle?: ObligationLifecycle }[],
+  obligations: { id: string; dueDate: string; lifecycle?: ObligationLifecycle; dueRuleNormalized?: string | null; frequencyRaw?: string | null }[],
   matrix: EvidenceMatrixRow[] | null,
   today: CalendarDate | null,
+  contract: { startDate?: string | null; endDate?: string | null } = {},
 ): Map<string, ObligationState> {
   return new Map(obligations.map((o) => [o.id, {
     lifecycle: o.lifecycle ?? "approved_not_active",
-    deadline: today ? classifyDeadline({ today, dueDate: o.dueDate || null }) : { window: "unknown" as const },
+    deadline: today ? obligationDeadline(o, today, contract) : { window: "unknown" as const },
     evidence: matrix ? obligationEvidence(matrix.filter((r) => r.requirement.obligationId === o.id)) : UNAVAILABLE,
   }]));
+}
+
+function obligationDeadline(
+  o: { dueDate: string; dueRuleNormalized?: string | null; frequencyRaw?: string | null },
+  today: CalendarDate,
+  contract: { startDate?: string | null; endDate?: string | null },
+): ObligationDeadline {
+  const s = obligationSchedule({
+    dueDateNormalized: o.dueDate || null, dueRuleNormalized: o.dueRuleNormalized, frequency: o.frequencyRaw,
+    contractStart: contract.startDate, contractEnd: contract.endDate, today,
+  });
+  if (s.kind === "needs_schedule") return { window: "needs_schedule", reason: s.reason };
+  const due = operationalDueDate(s);
+  return {
+    ...classifyDeadline({ today, dueDate: due }),
+    dueDate: due,
+    ...(s.kind === "recurring" ? { recurring: { rule: s.rule, unsettledPastCount: s.unsettledPastCount, nextDue: s.nextDue } } : {}),
+  };
 }

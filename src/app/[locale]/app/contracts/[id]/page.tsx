@@ -128,7 +128,7 @@ export default async function ContractOverview(props: PageProps<"/[locale]/app/c
     readContractIndicators({ isDemo, contracts: [contract], orgId, userId: session?.user.id ?? "", locale }),
   ]);
   const obligationStatesRead = obligationsRead.ok
-    ? await readObligationStates({ isDemo, obligations: obligationsRead.obligations, orgId, contractId: id, userId: session?.user.id ?? "", locale })
+    ? await readObligationStates({ isDemo, obligations: obligationsRead.obligations, orgId, contractId: id, contract: { startDate: contract.startDate, endDate: contract.endDate }, userId: session?.user.id ?? "", locale })
     : null;
   const obligations = obligationsRead.ok ? withStates(obligationsRead.obligations, obligationStatesRead) : null;
   const evidence = evidenceRead.ok ? evidenceRead.evidence : null;

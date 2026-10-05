@@ -247,6 +247,7 @@ type ObligationRow = {
   requirement_text: string;
   frequency: string | null;
   due_date_normalized: string | null;
+  due_rule_normalized?: string | null;
   activation_status: string;
   review_status: string;
   ai_payload: { source_clause_number?: string | null } | null;
@@ -278,6 +279,8 @@ function mapObligation(row: ObligationRow): Obligation {
     // Only a confidently normalized date is surfaced; an unparsed due rule
     // stays empty rather than becoming a fabricated deadline.
     dueDate: row.due_date_normalized ?? "",
+    dueRuleNormalized: row.due_rule_normalized ?? null,
+    frequencyRaw: row.frequency,
     requiredEvidence: (row.obligation_evidence_requirements ?? []).map((r) => ({ en: r.name, ar: r.name })),
     evidenceIds: [],
   };

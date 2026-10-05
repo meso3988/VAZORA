@@ -37,7 +37,7 @@ export async function readContractIndicators(opts: {
     const supabase = await createSupabaseServer();
     const ctx = await buildOfficerContext({ supabase, organizationId: opts.orgId, userId: opts.userId, locale: opts.locale });
     if (!ctx) return unavailable;
-    const byContract = await readLiveContractIndicators(supabase, opts.orgId, contracts.map((c) => c.id), ctx.clock);
+    const byContract = await readLiveContractIndicators(supabase, opts.orgId, contracts.map((c) => ({ id: c.id, startDate: c.startDate, endDate: c.endDate })), ctx.clock);
     return { today: ctx.clock.today, byContract };
   } catch {
     return unavailable;

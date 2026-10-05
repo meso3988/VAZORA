@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 
 import { StatusDot, type StatusTone } from "@/components/ui/status";
 import type { ObligationDeadline, ObligationEvidenceState, ObligationState } from "@/domain/obligation-state";
@@ -15,7 +15,7 @@ const EVIDENCE_TONE: Record<ObligationEvidenceState, StatusTone> = {
 };
 
 const deadlineTone = (d: ObligationDeadline): StatusTone =>
-  d.window === "overdue" ? "missing" : d.window === "today" || d.window === "next_3_days" ? "partial" : "pending";
+  d.window === "overdue" ? "missing" : d.window === "today" || d.window === "next_3_days" || d.window === "needs_schedule" ? "partial" : "pending";
 
 function Pill({ tone, children, data }: { tone: StatusTone; children: React.ReactNode; data: Record<string, string> }) {
   return (
@@ -30,6 +30,7 @@ function Pill({ tone, children, data }: { tone: StatusTone; children: React.Reac
 export async function deadlineLabel(d: ObligationDeadline): Promise<string> {
   const t = await getTranslations("app.obligationState.deadline");
   if (d.window === "unknown") return t("unknown");
+  if (d.window === "needs_schedule") return t("needs_schedule");
   if (d.window === "overdue") return t("overdue", { days: d.daysOverdue ?? 0 });
   if (d.window === "next_3_days" || d.window === "this_week") return t(d.window, { days: d.daysUntilDue ?? 0 });
   return t(d.window);
@@ -50,10 +51,25 @@ export async function EvidenceStatePill({ state, className }: { state: Obligatio
 /** Lifecycle, deadline and evidence as three separate facts. */
 export async function ObligationStateBadges({ state }: { state: ObligationState }) {
   const t = await getTranslations("app.obligationState");
+  const f = await getFormatter();
+  const d = state.deadline;
   return (
     <span className="flex flex-col items-start gap-1">
       <Pill tone="pending" data={{ "data-ob-lifecycle": state.lifecycle }}>{t(`lifecycle.${state.lifecycle}`)}</Pill>
-      <Pill tone={deadlineTone(state.deadline)} data={{ "data-ob-deadline": state.deadline.window }}>{await deadlineLabel(state.deadline)}</Pill>
+      <Pill tone={deadlineTone(d)} data={{ "data-ob-deadline": d.window }}>{await deadlineLabel(d)}</Pill>
+      {d.window === "needs_schedule" && (
+        <span data-ob-schedule-reason={d.reason} className="text-[11px] leading-snug text-muted">{t(`needsScheduleReason.${d.reason}`)}</span>
+      )}
+      {"recurring" in d && d.recurring && d.recurring.unsettledPastCount > 0 && (
+        <span data-ob-unsettled={d.recurring.unsettledPastCount} className="text-[11px] leading-snug text-muted">
+          {t("unsettledCycles", { count: d.recurring.unsettledPastCount })}
+        </span>
+      )}
+      {"recurring" in d && d.recurring?.nextDue && d.recurring.nextDue !== d.dueDate && (
+        <span data-ob-next-cycle={d.recurring.nextDue} className="text-[11px] leading-snug text-muted">
+          {t("nextCycle", { date: f.dateTime(new Date(`${d.recurring.nextDue}T00:00:00Z`), { day: "numeric", month: "short", timeZone: "UTC" }) })}
+        </span>
+      )}
       <EvidenceStatePill state={state} />
     </span>
   );

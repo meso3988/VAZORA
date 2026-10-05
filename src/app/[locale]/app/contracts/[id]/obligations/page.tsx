@@ -22,7 +22,7 @@ export default async function ContractObligations(props: PageProps<"/[locale]/ap
   const isDemo = session.mode === "demo";
   const obligations = await readObligationList(db, orgId, isDemo, { contractId: id });
   if (!obligations.ok) return <DataLoadFailed message="dataLoadFailed" />;
-  const states = await readObligationStates({ isDemo, obligations: obligations.obligations, orgId, contractId: id, userId: session.user.id, locale });
+  const states = await readObligationStates({ isDemo, obligations: obligations.obligations, orgId, contractId: id, contract: { startDate: contract.startDate, endDate: contract.endDate }, userId: session.user.id, locale });
 
   // Demo fixtures list a sample of an illustrative total; a live list is the
   // complete read, so its own length is the only honest count.

@@ -8,6 +8,7 @@ import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-ident
 import { assessContractHealth, HealthUnavailableError } from "@/lib/officer/health";
 import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
 import type { OfficerContext } from "@/lib/officer/context";
+import { obligationSchedule, operationalDueDate } from "@/lib/officer/schedule";
 import { classifyDeadline } from "@/lib/officer/time";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -190,7 +191,7 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
   let q = ctx.supabase
     .from("contract_obligations")
     .select(
-      "id, contract_id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, " +
+      "id, contract_id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, due_rule_normalized, " +
       "owner_role_suggested, external_dependency, financial_condition, penalty_condition, payment_linked, " +
       "review_status, activation_status",
     )
@@ -208,7 +209,7 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
   const contractIds = [...new Set(rows.map((o: any) => o.contract_id).filter(Boolean))];
   const { data: contracts } = contractIds.length
     ? await ctx.supabase
-        .from("contracts").select("id, contract_number, title")
+        .from("contracts").select("id, contract_number, title, start_date, end_date")
         .eq("organization_id", ctx.organizationId).in("id", contractIds)
     : { data: [] as any[] };
   const byId = new Map((contracts ?? []).map((c: any) => [c.id, c]));
@@ -217,15 +218,38 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
     ...o,
     contract_number: byId.get(o.contract_id)?.contract_number ?? null,
     contract_title: byId.get(o.contract_id)?.title ?? null,
-    ...classifyDeadline({ today: ctx.clock.today, dueDate: o.due_date_normalized ?? null }),
+    ...deadlineFacts(ctx, o, byId.get(o.contract_id)),
   }));
+}
+
+/**
+ * Deadline position from the operational schedule: an explicit date, or the
+ * oldest unsettled cycle of a supported recurring rule (then the next one).
+ * A schedule that cannot be derived is reported as needs_schedule.
+ */
+function deadlineFacts(ctx: OfficerContext, o: any, contract: any) {
+  const schedule = obligationSchedule({
+    dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized, frequency: o.frequency,
+    contractStart: contract?.start_date ?? null, contractEnd: contract?.end_date ?? null, today: ctx.clock.today,
+  });
+  const due = operationalDueDate(schedule);
+  const position = classifyDeadline({ today: ctx.clock.today, dueDate: due });
+  return {
+    ...position,
+    ...(schedule.kind === "needs_schedule" ? { window: "needs_schedule" as const } : {}),
+    due_date_operational: due,
+    schedule: schedule.kind === "recurring"
+      ? { kind: "recurring", rule: schedule.rule, unsettled_past_cycles: schedule.unsettledPastCount, next_cycle_due: schedule.nextDue,
+          note: "No per-cycle completion is recorded in VAZORA; every cycle due on or before today stays due." }
+      : schedule.kind === "needs_schedule" ? { kind: "needs_schedule", reason: schedule.reason } : { kind: schedule.kind },
+  };
 }
 
 const listObligations: OfficerTool = {
   name: "listObligations",
   toolClass: "READ_ONLY",
   description:
-    "Operational (approved + active) obligations with normalized due dates and deterministic deadline windows. Set includeDrafts to inspect unreviewed extraction drafts — those are NOT operational truth.",
+    "Operational (approved + active) obligations with operational due dates (an explicit date, or for a monthly rule the oldest cycle with no recorded completion, else the next cycle; needs_schedule when no schedule can be derived) and deterministic deadline windows. Set includeDrafts to inspect unreviewed extraction drafts — those are NOT operational truth.",
   input: z.object({
     contractId: z.string().uuid().optional(),
     includeDrafts: z.boolean().optional(),
@@ -266,7 +290,7 @@ const getObligation: OfficerTool = {
       ctx.supabase.from("obligation_evidence_requirements")
         .select("id, name, description, evidence_type, required")
         .eq("organization_id", ctx.organizationId).eq("obligation_id", o.id),
-      ctx.supabase.from("contracts").select("contract_number, title")
+      ctx.supabase.from("contracts").select("contract_number, title, start_date, end_date")
         .eq("organization_id", ctx.organizationId).eq("id", o.contract_id).maybeSingle(),
     ]);
 
@@ -287,7 +311,7 @@ const getObligation: OfficerTool = {
       clause_page: clauseById.get(r.clause_id)?.page_number ?? r.page_number ?? null,
     }));
 
-    const deadline = classifyDeadline({ today: ctx.clock.today, dueDate: o.due_date_normalized ?? null });
+    const deadline = deadlineFacts(ctx, o, contract);
     const citations: OfficerCitation[] = [
       cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`),
       ...sourceRefs.filter((r) => r.clause_id).map((r) =>
@@ -336,7 +360,7 @@ const getUpcomingObligations: OfficerTool = {
 const getOverdueObligations: OfficerTool = {
   name: "getOverdueObligations",
   toolClass: "READ_ONLY",
-  description: "Operational obligations whose normalized due date has passed, with exact days overdue.",
+  description: "Operational obligations whose operational due date has passed (including unsettled past cycles of recurring rules), with exact days overdue.",
   input: empty,
   handler: async (ctx) => {
     const rows = (await loadObligations(ctx, {}))

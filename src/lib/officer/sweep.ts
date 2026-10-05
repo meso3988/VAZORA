@@ -3,6 +3,7 @@ import "server-only";
 import { effectiveStatusForRequirement } from "@/domain/effective-status";
 import type { VerificationDiscrepancyView } from "@/domain/evidence";
 import type { OfficerContext } from "@/lib/officer/context";
+import { obligationSchedule, operationalDueDate } from "@/lib/officer/schedule";
 import {
   DEFAULT_THRESHOLDS,
   detectForContract,
@@ -115,7 +116,7 @@ export async function runContractSweep(opts: {
   try {
     const { data: contracts, error: cErr } = await ctx.supabase
       .from("contracts")
-      .select("id, contract_number, title, status, end_date")
+      .select("id, contract_number, title, status, start_date, end_date")
       .eq("organization_id", ctx.organizationId)
       .eq("status", "active");
     if (cErr || !Array.isArray(contracts)) throw new Error("read_failed:contracts");
@@ -218,7 +219,7 @@ async function sweepContract(
 
   const obligations = must(await ctx.supabase
     .from("contract_obligations")
-    .select("id, title, due_date_normalized, due_rule_raw, financial_condition, penalty_condition, payment_linked, external_dependency, requires_external_acknowledgement, owner_role_suggested")
+    .select("id, title, due_date_normalized, due_rule_raw, due_rule_normalized, frequency, financial_condition, penalty_condition, payment_linked, external_dependency, requires_external_acknowledgement, owner_role_suggested")
     .eq("organization_id", ctx.organizationId)
     .eq("contract_id", contractId)
     .eq("review_status", "approved")
@@ -325,7 +326,12 @@ async function sweepContract(
       contractId,
       contractNumber: contract.contract_number as string,
       title: o.title as string,
-      dueDate: (o.due_date_normalized as string | null) ?? null,
+      // Same operational schedule as every other surface: an explicit date or
+      // the oldest unsettled cycle of a supported recurring rule.
+      dueDate: operationalDueDate(obligationSchedule({
+        dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized, frequency: o.frequency,
+        contractStart: contract.start_date ?? null, contractEnd: contract.end_date ?? null, today,
+      })),
       dueRuleRaw: (o.due_rule_raw as string | null) ?? null,
       clauseId: clauseByOb.get(o.id as string) ?? null,
       hasFinancialCondition: !!(o.financial_condition || o.penalty_condition || o.payment_linked),

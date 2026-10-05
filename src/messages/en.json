@@ -2095,7 +2095,8 @@
         "this_week": "Due in {days}d",
         "monitoring": "Scheduled",
         "no_due_date": "No due date",
-        "unknown": "Deadline not loaded"
+        "unknown": "Deadline not loaded",
+        "needs_schedule": "Schedule needs definition"
       },
       "evidence": {
         "verified": "Evidence verified",
@@ -2109,7 +2110,14 @@
       "satisfied": "{satisfied}/{required} requirements met",
       "priorInForce": "Prior verified state in force — a later run awaits human review",
       "chartTitle": "Evidence status of obligations",
-      "chartHint": "Effective evidence verification per obligation — separate from activation and deadline."
+      "chartHint": "Effective evidence verification per obligation — separate from activation and deadline.",
+      "needsScheduleReason": {
+        "no_schedule_start": "No contract start date recorded to schedule the cycles from",
+        "unsupported_rule": "The due rule is not a supported calendar rule (for example event-based)",
+        "rule_without_due_day": "A frequency is recorded but no due day"
+      },
+      "unsettledCycles": "{count, plural, one {# earlier cycle} other {# earlier cycles}} with no recorded completion",
+      "nextCycle": "Next cycle {date}"
     }
   }
 }

@@ -16,6 +16,8 @@ export async function readObligationStates(opts: {
   obligations: Obligation[];
   orgId: string;
   contractId: string;
+  /** contract period: the schedule start for recurring rules */
+  contract: { startDate?: string | null; endDate?: string | null };
   userId: string;
   locale: string;
 }): Promise<Map<string, ObligationState> | null> {
@@ -33,7 +35,7 @@ export async function readObligationStates(opts: {
   } catch {
     // both stay in their failure state: deadline unknown, evidence unavailable
   }
-  return obligationStates(opts.obligations, matrix.ok ? matrix.rows : null, today);
+  return obligationStates(opts.obligations, matrix.ok ? matrix.rows : null, today, opts.contract);
 }
 
 /** Attach live states (when present) without touching demo fixtures. */

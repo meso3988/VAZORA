@@ -6,6 +6,7 @@ import {
   liveIndicatorsFromRows,
   liveIndicatorsInState,
   type ContractIndicators,
+  type IndicatorContract,
   type OperationalObligationRow,
 } from "@/domain/indicators";
 import type { CalendarDate } from "@/lib/officer/time";
@@ -21,16 +22,17 @@ export const INDICATOR_READ_LIMIT = 1000;
 export async function readLiveContractIndicators(
   supabase: SupabaseClient,
   organizationId: string,
-  contractIds: string[],
+  contracts: IndicatorContract[],
   clock: { today: CalendarDate; endOfMonth: CalendarDate },
 ): Promise<Map<string, ContractIndicators>> {
+  const contractIds = contracts.map((c) => c.id);
   const all = (state: "unavailable" | "incomplete") =>
     new Map(contractIds.map((id) => [id, liveIndicatorsInState(state)]));
   if (!contractIds.length) return new Map();
   try {
     const { data, error } = await supabase
       .from("contract_obligations")
-      .select("contract_id, due_date_normalized")
+      .select("contract_id, due_date_normalized, due_rule_normalized, frequency")
       .eq("organization_id", organizationId)
       .eq("review_status", "approved")
       .eq("activation_status", "active")
@@ -38,7 +40,7 @@ export async function readLiveContractIndicators(
       .limit(INDICATOR_READ_LIMIT + 1);
     if (error || !Array.isArray(data)) return all("unavailable");
     if (data.length > INDICATOR_READ_LIMIT) return all("incomplete");
-    return liveIndicatorsFromRows(contractIds, data as OperationalObligationRow[], clock);
+    return liveIndicatorsFromRows(contracts, data as OperationalObligationRow[], clock);
   } catch {
     return all("unavailable");
   }
