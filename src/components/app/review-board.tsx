@@ -17,7 +17,7 @@ import {
   activateContract,
 } from "@/app/[locale]/app/contracts/[id]/review-actions";
 
-type Provenance = "explicit" | "inferred" | "unknown";
+type Provenance = "explicit" | "inferred" | "unknown" | "human_confirmed" | "human_corrected";
 
 type Source = {
   source_snippet: string;
@@ -111,6 +111,8 @@ const PROV_DOT: Record<Provenance, string> = {
   explicit: "bg-verified",
   inferred: "bg-partial",
   unknown: "bg-faint",
+  human_confirmed: "bg-verified",
+  human_corrected: "bg-verified",
 };
 
 export function ReviewBoard({
@@ -388,8 +390,16 @@ function Inspector({
               <Field label={labels.fields.owner} value={o.owner_role_suggested} prov={prov.owner_role_suggested} states={labels.states} />
               <Field label={labels.fields.approver} value={o.approver_role_suggested} prov={prov.approver_role_suggested} states={labels.states} />
             </div>
-            {o.external_dependency && <Field label={labels.fields.external} value={o.external_dependency} prov={prov.external_dependency} states={labels.states} />}
-            {o.payment_linked && <Field label={labels.fields.payment} value={o.payment_link_note ?? "✓"} prov={prov.payment_linked} states={labels.states} />}
+            {(o.external_dependency || prov.external_dependency === "human_corrected") && (
+              <Field label={labels.fields.external} value={o.external_dependency ?? labels.fields.externalNone} prov={prov.external_dependency} states={labels.states} />
+            )}
+            {/* Three states, never collapsed: linked, not linked, not determined. */}
+            <Field
+              label={labels.fields.payment}
+              value={o.payment_linked === true ? (o.payment_link_note ?? labels.fields.paymentLinked) : o.payment_linked === false ? labels.fields.paymentNotLinked : labels.fields.paymentUnknown}
+              prov={prov.payment_linked}
+              states={labels.states}
+            />
             {o.financial_condition && <Field label={labels.fields.financial} value={o.financial_condition} prov={prov.financial_condition} states={labels.states} amber />}
             {o.penalty_condition && <Field label={labels.fields.penalty} value={o.penalty_condition} prov={prov.penalty_condition} states={labels.states} amber />}
             {o.risk_note && <Field label={labels.fields.risk ?? "Risk"} value={o.risk_note} prov={prov.risk_note} states={labels.states} amber />}
@@ -494,7 +504,7 @@ function Field({ label, value, prov, states, amber }: { label: string; value: st
         <p className="text-[10px] font-medium uppercase tracking-wide text-muted">{label}</p>
         {prov && (
           <span className={cn("inline-flex items-center gap-1 rounded px-1 py-px text-[9px] font-semibold",
-            prov === "explicit" ? "bg-verified/10 text-verified" : prov === "inferred" ? "bg-partial/10 text-partial" : "bg-fg/5 text-faint")}>
+            prov === "explicit" || prov === "human_confirmed" || prov === "human_corrected" ? "bg-verified/10 text-verified" : prov === "inferred" ? "bg-partial/10 text-partial" : "bg-fg/5 text-faint")}>
             {states[prov]}
           </span>
         )}
@@ -541,7 +551,7 @@ function EditForm({
   o: ReviewObligation;
   locale: string;
   contractId: string;
-  labels: { fields: Record<string, string>; actions: Record<string, string> };
+  labels: { fields: Record<string, string>; actions: Record<string, string>; states: Record<string, string> };
   onCancel: () => void;
 }) {
   const input = "w-full rounded-md border border-line bg-elevated px-2 py-1.5 text-sm";
@@ -570,6 +580,34 @@ function EditForm({
         <div>
           <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted">{labels.fields.owner}</p>
           <input name="owner_role_suggested" defaultValue={o.owner_role_suggested ?? ""} className={input} />
+        </div>
+      </div>
+      {/* Reviewer decisions on inferred fields: explicit, never implied by approval. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted">
+            {labels.fields.external}
+            {o.field_provenance?.external_dependency && <span className="ms-1 normal-case">· {labels.states[o.field_provenance.external_dependency] ?? o.field_provenance.external_dependency}</span>}
+          </p>
+          <select name="external_dependency_decision" defaultValue="unchanged" className={input}>
+            <option value="unchanged">{labels.fields.decisionKeep}</option>
+            {o.external_dependency && <option value="confirm">{labels.fields.decisionConfirm}</option>}
+            <option value="edit">{labels.fields.decisionChange}</option>
+            <option value="none">{labels.fields.decisionNone}</option>
+          </select>
+          <input name="external_dependency" defaultValue={o.external_dependency ?? ""} className={input} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted">
+            {labels.fields.payment}
+            {o.field_provenance?.payment_linked && <span className="ms-1 normal-case">· {labels.states[o.field_provenance.payment_linked] ?? o.field_provenance.payment_linked}</span>}
+          </p>
+          <select name="payment_link_decision" defaultValue="unchanged" className={input}>
+            <option value="unchanged">{labels.fields.paymentDecisionKeep}</option>
+            <option value="linked">{labels.fields.paymentLinked}</option>
+            <option value="not_linked">{labels.fields.paymentNotLinked}</option>
+            <option value="unknown">{labels.fields.paymentUnknown}</option>
+          </select>
         </div>
       </div>
       <div>

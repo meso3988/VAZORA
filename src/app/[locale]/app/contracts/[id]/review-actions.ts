@@ -96,6 +96,11 @@ export async function editObligation(formData: FormData) {
   const due = String(formData.get("due_rule_raw") ?? "").trim().slice(0, 400) || null;
   const owner = String(formData.get("owner_role_suggested") ?? "").trim().slice(0, 120) || null;
   const note = String(formData.get("note") ?? "").trim().slice(0, 300) || null;
+  // Explicit reviewer decisions on inferred fields; "unchanged" keeps the
+  // extracted value AND its provenance (an approval alone confirms nothing).
+  const extDecision = String(formData.get("external_dependency_decision") ?? "unchanged");
+  const extText = String(formData.get("external_dependency") ?? "").trim().slice(0, 300) || null;
+  const payDecision = String(formData.get("payment_link_decision") ?? "unchanged");
 
   const session = await liveSession();
   if (!session) { redirect({ href: "/login", locale }); throw new Error("s"); }
@@ -103,17 +108,39 @@ export async function editObligation(formData: FormData) {
   const supabase = await createSupabaseServer();
   const { data: original } = await supabase
     .from("contract_obligations")
-    .select("title, requirement_text, frequency, due_rule_raw, owner_role_suggested")
+    .select("title, requirement_text, frequency, due_rule_raw, owner_role_suggested, external_dependency, payment_linked")
     .eq("id", obligationId)
     .eq("organization_id", session.organizationId)
     .maybeSingle();
   if (!original) { redirect({ href: `/app/contracts/${contractId}/review`, locale }); throw new Error("s"); }
 
   const edits = { title, requirement_text: requirement, frequency, due_rule_raw: due, owner_role_suggested: owner };
-  const values: Record<string, string | null> = {};
+  const values: Record<string, string | boolean | null> = {};
   for (const [k, v] of Object.entries(edits)) {
     if (String(v ?? "") !== String((original as Record<string, unknown>)[k] ?? "")) values[k] = v;
   }
+
+  const origExt = (original.external_dependency as string | null) ?? null;
+  const origPay = (original.payment_linked as boolean | null) ?? null;
+  const fieldProv: Record<string, string> = {};
+  let externalDependency = origExt;
+  if (extDecision === "confirm" && origExt) {
+    fieldProv.external_dependency = "human_confirmed";
+  } else if (extDecision === "edit" && extText) {
+    externalDependency = extText;
+    fieldProv.external_dependency = extText === origExt ? "human_confirmed" : "human_corrected";
+  } else if (extDecision === "none" || (extDecision === "edit" && !extText)) {
+    externalDependency = null;
+    fieldProv.external_dependency = origExt === null ? "human_confirmed" : "human_corrected";
+  }
+  let paymentLinked = origPay;
+  if (payDecision === "linked" || payDecision === "not_linked" || payDecision === "unknown") {
+    // "unknown" stays null — "not determined" is never turned into false.
+    paymentLinked = payDecision === "linked" ? true : payDecision === "not_linked" ? false : null;
+    fieldProv.payment_linked = paymentLinked === origPay ? "human_confirmed" : "human_corrected";
+  }
+  if (externalDependency !== origExt) values.external_dependency = externalDependency;
+  if (paymentLinked !== origPay) values.payment_linked = paymentLinked;
 
   await supabase
     .from("contract_obligations")
@@ -129,7 +156,11 @@ export async function editObligation(formData: FormData) {
       frequency: frequency ?? (original.frequency as string | null),
       due_rule_raw: due ?? (original.due_rule_raw as string | null),
       owner_role_suggested: owner ?? (original.owner_role_suggested as string | null),
-      field_provenance: { ...(await provenanceOf(supabase, obligationId)), edited_by_human: "explicit" },
+      // Reviewed values become the operational columns (Officer and sweep read
+      // these); the original model output stays untouched in ai_payload.
+      external_dependency: externalDependency,
+      payment_linked: paymentLinked,
+      field_provenance: { ...(await provenanceOf(supabase, obligationId)), ...fieldProv, edited_by_human: "explicit" },
       needs_source_review: false,
     })
     .eq("id", obligationId)
@@ -141,7 +172,12 @@ export async function editObligation(formData: FormData) {
     event_type: "obligation.edited",
     entity_type: "obligation",
     entity_id: obligationId,
-    metadata: { original, edited: values, note },
+    metadata: {
+      original, edited: values, note,
+      decisions: { external_dependency: extDecision, payment_linked: payDecision },
+      before: { external_dependency: origExt, payment_linked: origPay },
+      after: { external_dependency: externalDependency, payment_linked: paymentLinked },
+    },
   });
 
   redirect({ href: `/app/contracts/${contractId}/review`, locale });
