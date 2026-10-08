@@ -1,0 +1,50 @@
+-- record: authorization and scope (today 2026-10-08, Asia/Riyadh)
+PASS  member (not owner/admin) is refused
+PASS  user of another organization: obligation not found
+PASS  owner cannot record on a foreign organization's obligation
+PASS  unauthenticated call refused
+PASS  anon cannot execute the function
+PASS  direct insert by an owner refused (no insert grant/policy)
+PASS  unapproved/inactive obligation refused
+PASS  note required
+-- record: the cycle must belong to the schedule
+PASS  a date that is not a cycle (6th) refused
+PASS  a cycle before the contract start refused
+PASS  a cycle more than 31 days ahead refused
+PASS  completion date in the future refused
+PASS  event-based rule has no cycles to record
+PASS  explicit-date obligation: only its date
+-- record: evidence scope
+PASS  evidence of another obligation refused
+PASS  version of another item refused
+PASS  version without item refused
+-- record: one cycle, actor and time from session/database
+PASS  admin records the Sep 5 cycle with evidence + version
+PASS  recorded_by = session user, recorded_at = database time, completed_on kept separately
+PASS  audit row written in the same transaction
+PASS  only that cycle is settled (no other cycle rows)
+PASS  same evidence version cannot settle another cycle
+PASS  repeat on the same cycle refused
+PASS  member can read the organization's records (RLS select)
+PASS  foreign-organization user reads nothing (RLS)
+PASS  due date, evidence status and gap untouched
+-- concurrency: 8 simultaneous requests for one cycle
+PASS  exactly one succeeded, the other 7 got cycle_already_settled
+PASS  exactly one active row and one audit row for the cycle
+-- correction (void with reason; nothing deleted)
+PASS  member cannot void
+PASS  outsider cannot see the record
+PASS  reason required
+PASS  direct update / delete refused
+PASS  owner voids: row kept with voided_by/at/reason
+PASS  void audited
+PASS  voiding twice refused
+PASS  cycle can be recorded again after the void; history has 2 rows (1 voided, 1 active)
+PASS  freed evidence version can be used for another cycle after the void
+-- one running sweep per organization
+PASS  a second running run for the same organization is refused (23505)
+PASS  another organization can run at the same time
+PASS  after concurrent finish/start races there is still at most one running run
+PASS  a run past its lease is reclaimable (closed as failed), then a new run can start
+
+41 passed · 0 failed
