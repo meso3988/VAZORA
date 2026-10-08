@@ -42,6 +42,7 @@ export type Capability =
   | "officer.sweep.run"       // trigger a manual contract sweep
   | "obligation.assign"       // assign an owner
   | "obligation.reschedule"   // change a due date
+  | "obligation.settle_cycle" // record / correct the completion of one cycle
   | "evidence.override"       // human override on a verification check
   | "gap.dismiss"             // dismiss a gap without a verification run
   | "contract.activate"       // activate contractual change
@@ -65,12 +66,12 @@ const READ_SET: Capability[] = [
 export const ROLE_CAPABILITIES: Record<AnyRole, readonly Capability[]> = {
   owner: [
     ...READ_SET, "officer.memory.write", "officer.action.approve",
-    "obligation.assign", "obligation.reschedule", "evidence.override",
+    "obligation.assign", "obligation.reschedule", "obligation.settle_cycle", "evidence.override",
     "gap.dismiss", "contract.activate",
   ],
   admin: [
     ...READ_SET, "officer.memory.write", "officer.action.approve",
-    "obligation.assign", "obligation.reschedule", "evidence.override",
+    "obligation.assign", "obligation.reschedule", "obligation.settle_cycle", "evidence.override",
     "gap.dismiss", "contract.activate",
   ],
   member: [...READ_SET, "officer.memory.write"],

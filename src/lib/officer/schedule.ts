@@ -34,6 +34,9 @@ export type ObligationSchedule =
       nextDue: CalendarDate | null;
       /** the operational date: the unsettled cycle, else the next one */
       dueDate: CalendarDate | null;
+      /** false when the settlement records could not be read: "no recorded
+       *  completion" must then not be claimed */
+      settlementsKnown: boolean;
     }
   | { kind: "needs_schedule"; reason: NeedsScheduleReason }
   | { kind: "none" };
@@ -69,8 +72,9 @@ export function obligationSchedule(opts: {
   contractStart: string | null | undefined;
   contractEnd: string | null | undefined;
   today: CalendarDate;
-  /** cycle due dates with a recorded settlement (none can be recorded yet) */
-  settledCycles?: readonly CalendarDate[];
+  /** cycle due dates with an ACTIVE recorded settlement; null = the
+   *  settlement read failed (cycles stay due, but completion is unknown) */
+  settledCycles?: readonly CalendarDate[] | null;
 }): ObligationSchedule {
   if (valid(opts.dueDateNormalized)) return { kind: "dated", dueDate: opts.dueDateNormalized };
 
@@ -85,6 +89,7 @@ export function obligationSchedule(opts: {
   const start = opts.contractStart;
   const end = valid(opts.contractEnd) ? opts.contractEnd : null;
   const settled = new Set(opts.settledCycles ?? []);
+  const settlementsKnown = opts.settledCycles !== null;
   let year = Number(start.slice(0, 4));
   let month = Number(start.slice(5, 7));
   let firstUnsettled: CalendarDate | null = null;
@@ -106,8 +111,41 @@ export function obligationSchedule(opts: {
     }
     if (!settled.has(occ)) { nextDue = occ; break; }
   }
-  return { kind: "recurring", rule: opts.dueRuleNormalized!.trim(), firstUnsettled, unsettledPastCount, nextDue, dueDate: firstUnsettled ?? nextDue };
+  return { kind: "recurring", rule: opts.dueRuleNormalized!.trim(), firstUnsettled, unsettledPastCount, nextDue, dueDate: firstUnsettled ?? nextDue, settlementsKnown };
 }
+
+/**
+ * Cycle dates of a supported recurring rule from the contract start up to
+ * `until` (inclusive), inside the contract period. Used to offer and to
+ * validate a specific cycle for recording completion.
+ */
+export function scheduleCycles(opts: {
+  dueRuleNormalized: string | null | undefined;
+  contractStart: string | null | undefined;
+  contractEnd: string | null | undefined;
+  until: CalendarDate;
+}): CalendarDate[] {
+  const rule = parseRecurrence(opts.dueRuleNormalized);
+  if (!rule || !valid(opts.contractStart)) return [];
+  const start = opts.contractStart;
+  const end = valid(opts.contractEnd) ? opts.contractEnd : null;
+  let year = Number(start.slice(0, 4));
+  let month = Number(start.slice(5, 7));
+  const out: CalendarDate[] = [];
+  for (let i = 0; i < 600; i++) {
+    const occ = occurrenceIn(year, month, rule);
+    month = month === 12 ? 1 : month + 1;
+    if (month === 1) year++;
+    if (daysBetween(start, occ) < 0) continue;
+    if ((end && daysBetween(occ, end) < 0) || daysBetween(occ, opts.until) < 0) break;
+    out.push(occ);
+  }
+  return out;
+}
+
+/** Whether an obligation's schedule depends on recorded cycle settlements. */
+export const usesCycleSettlements = (o: { dueDateNormalized: string | null | undefined; dueRuleNormalized: string | null | undefined }) =>
+  !valid(o.dueDateNormalized) && parseRecurrence(o.dueRuleNormalized) !== null;
 
 /** The date deadline classification runs on (null = no operational date). */
 export const operationalDueDate = (s: ObligationSchedule): CalendarDate | null =>

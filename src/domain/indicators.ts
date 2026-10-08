@@ -58,6 +58,7 @@ export function liveIndicatorsInState(state: "unavailable" | "incomplete"): Cont
 }
 
 export type OperationalObligationRow = {
+  id?: string;
   contract_id: string;
   due_date_normalized: string | null;
   due_rule_normalized?: string | null;
@@ -75,26 +76,32 @@ export function liveIndicatorsFromRows(
   contracts: IndicatorContract[],
   rows: OperationalObligationRow[],
   clock: { today: CalendarDate; endOfMonth: CalendarDate },
+  /** active settled cycles per obligation id; null = settlement read failed */
+  settled: (obligationId: string) => CalendarDate[] | null = () => [],
 ): Map<string, ContractIndicators> {
   const byId = new Map(contracts.map((c) => [c.id, c]));
-  const counts = new Map(contracts.map((c) => [c.id, { total: 0, dueThisMonth: 0, overdue: 0 }]));
+  const counts = new Map(contracts.map((c) => [c.id, { total: 0, dueThisMonth: 0, overdue: 0, unknown: false }]));
   for (const r of rows) {
     const c = counts.get(r.contract_id);
     if (!c) continue;
     c.total++;
     const k = byId.get(r.contract_id);
-    const due = operationalDueDate(obligationSchedule({
+    const schedule = obligationSchedule({
       dueDateNormalized: r.due_date_normalized, dueRuleNormalized: r.due_rule_normalized, frequency: r.frequency,
       contractStart: k?.startDate ?? null, contractEnd: k?.endDate ?? null, today: clock.today,
-    }));
+      settledCycles: r.id ? settled(r.id) : [],
+    });
+    // Completion records unreadable → this contract's deadline counts are unknown.
+    if (schedule.kind === "recurring" && !schedule.settlementsKnown) c.unknown = true;
+    const due = operationalDueDate(schedule);
     const d = classifyDeadline({ today: clock.today, dueDate: due });
     if (d.window === "overdue") c.overdue++;
     else if (d.daysUntilDue != null && due && due <= clock.endOfMonth) c.dueThisMonth++;
   }
   return new Map([...counts].map(([id, c]) => [id, {
     obligationsTotal: value(c.total),
-    obligationsDueThisMonth: value(c.dueThisMonth),
-    obligationsOverdue: value(c.overdue),
+    obligationsDueThisMonth: c.unknown ? { state: "unavailable" as const } : value(c.dueThisMonth),
+    obligationsOverdue: c.unknown ? { state: "unavailable" as const } : value(c.overdue),
     ...LIVE_UNCOMPUTED,
   }]));
 }

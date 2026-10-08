@@ -1447,7 +1447,9 @@
         "explicit": "Explicit",
         "inferred": "Inferred",
         "unknown": "Unknown",
-        "conflict": "Conflict"
+        "conflict": "Conflict",
+        "human_confirmed": "Reviewer confirmed",
+        "human_corrected": "Reviewer corrected"
       },
       "fields": {
         "requirement": "Requirement",
@@ -1469,7 +1471,16 @@
         "confidence": "Confidence",
         "aiSuggested": "AI suggested",
         "humanApproved": "Reviewer approved",
-        "risk": "Risk note"
+        "risk": "Risk note",
+        "paymentLinked": "Payment-linked",
+        "paymentNotLinked": "Not payment-linked",
+        "paymentUnknown": "Not determined",
+        "decisionKeep": "Keep as extracted (not reviewed)",
+        "decisionConfirm": "Confirm as shown",
+        "decisionChange": "Correct to the text below",
+        "decisionNone": "No external dependency",
+        "paymentDecisionKeep": "Keep as extracted (not reviewed)",
+        "externalNone": "None (reviewer decision)"
       },
       "actions": {
         "approve": "Approve",
@@ -2116,8 +2127,55 @@
         "unsupported_rule": "The due rule is not a supported calendar rule (for example event-based)",
         "rule_without_due_day": "A frequency is recorded but no due day"
       },
-      "unsettledCycles": "{count, plural, one {# earlier cycle} other {# earlier cycles}} with no recorded completion",
-      "nextCycle": "Next cycle {date}"
+      "unsettledCycles": "{count, plural, one {# earlier cycle} other {# earlier cycles}} with no completion documented in VAZORA",
+      "nextCycle": "Next cycle {date}",
+      "settlementsUnknown": "Completion records could not be loaded"
+    },
+    "cycles": {
+      "title": "Recurring cycles",
+      "hint": "Record the completion of a specific cycle. A recorded completion is not evidence verification, client acceptance, a claim or a payment.",
+      "noRecord": "No completion documented in VAZORA",
+      "recorded": "Completion recorded",
+      "completedOn": "Completed on {date}",
+      "completedOnLabel": "Completion date (optional)",
+      "recordedBy": "Recorded by {who} · {when}",
+      "byYou": "you",
+      "byMember": "a member",
+      "note": "Note (required)",
+      "evidence": "Evidence (optional)",
+      "noEvidence": "No evidence attached",
+      "record": "Record completion",
+      "voidReason": "Reason for correction (required)",
+      "void": "Void this record",
+      "voided": "Voided by {who} · {when} — {reason}",
+      "unavailable": "Completion records could not be loaded — no cycle is shown as completed or not completed.",
+      "olderCycles": "{count} earlier cycles not shown",
+      "notAuthorized": "Only an owner or admin can record or correct a completion.",
+      "recordedNotice": "Completion recorded for the cycle due {date}.",
+      "voidedNotice": "The completion record was voided; it stays in the history.",
+      "cycleDue": "Cycle due {date}",
+      "upcoming": "Upcoming",
+      "errors": {
+        "invalid": "The request was not valid.",
+        "not_authorized": "You are not allowed to record or correct cycle completions.",
+        "note_required": "A note is required.",
+        "reason_required": "A reason is required to void a record.",
+        "obligation_not_found": "Obligation not found in this organization.",
+        "obligation_not_operational": "Only an active, approved obligation can be recorded.",
+        "not_a_scheduled_cycle": "That date is not a cycle of this obligation's schedule.",
+        "schedule_not_defined": "This obligation has no supported schedule.",
+        "cycle_not_yet_due": "That cycle is not due yet.",
+        "completion_date_in_future": "The completion date cannot be in the future.",
+        "evidence_item_required": "Choose the evidence item.",
+        "evidence_out_of_scope": "That evidence does not belong to this obligation.",
+        "evidence_version_out_of_scope": "That evidence version does not belong to the item.",
+        "evidence_used_for_other_cycle": "That evidence is already recorded for another cycle.",
+        "cycle_already_settled": "This cycle already has an active completion record.",
+        "settlement_not_found": "Record not found.",
+        "settlement_not_active": "That record is already voided.",
+        "not_authenticated": "Please sign in again.",
+        "write_failed": "The record could not be saved. Nothing was recorded."
+      }
     }
   }
 }

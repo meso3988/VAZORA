@@ -8,7 +8,8 @@ import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-ident
 import { assessContractHealth, HealthUnavailableError } from "@/lib/officer/health";
 import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
 import type { OfficerContext } from "@/lib/officer/context";
-import { obligationSchedule, operationalDueDate } from "@/lib/officer/schedule";
+import { readCycleSettlements, settledCyclesOf } from "@/data/supabase/cycle-settlements";
+import { obligationSchedule, operationalDueDate, usesCycleSettlements } from "@/lib/officer/schedule";
 import { classifyDeadline } from "@/lib/officer/time";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -191,7 +192,7 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
   let q = ctx.supabase
     .from("contract_obligations")
     .select(
-      "id, contract_id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, due_rule_normalized, " +
+      "id, contract_id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, due_rule_normalized, field_provenance, " +
       "owner_role_suggested, external_dependency, financial_condition, penalty_condition, payment_linked, " +
       "review_status, activation_status",
     )
@@ -213,13 +214,22 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
         .eq("organization_id", ctx.organizationId).in("id", contractIds)
     : { data: [] as any[] };
   const byId = new Map((contracts ?? []).map((c: any) => [c.id, c]));
+  const settlements = await readCycleSettlements(ctx.supabase as any, ctx.organizationId,
+    rows.filter((o: any) => usesCycleSettlements({ dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized })).map((o: any) => o.id));
 
-  return rows.map((o: any) => ({
-    ...o,
-    contract_number: byId.get(o.contract_id)?.contract_number ?? null,
-    contract_title: byId.get(o.contract_id)?.title ?? null,
-    ...deadlineFacts(ctx, o, byId.get(o.contract_id)),
-  }));
+  return rows.map((o: any) => {
+    const { field_provenance: prov, ...rest } = o;
+    return {
+      ...rest,
+      // Reviewer-confirmed vs extraction-inferred, so an inferred value is never
+      // presented as an established fact.
+      external_dependency_provenance: prov?.external_dependency ?? null,
+      payment_linked_provenance: prov?.payment_linked ?? null,
+      contract_number: byId.get(o.contract_id)?.contract_number ?? null,
+      contract_title: byId.get(o.contract_id)?.title ?? null,
+      ...deadlineFacts(ctx, o, byId.get(o.contract_id), settledCyclesOf(settlements, o.id)),
+    };
+  });
 }
 
 /**
@@ -227,10 +237,11 @@ async function loadObligations(ctx: OfficerContext, filter: { contractId?: strin
  * oldest unsettled cycle of a supported recurring rule (then the next one).
  * A schedule that cannot be derived is reported as needs_schedule.
  */
-function deadlineFacts(ctx: OfficerContext, o: any, contract: any) {
+function deadlineFacts(ctx: OfficerContext, o: any, contract: any, settledCycles: string[] | null) {
   const schedule = obligationSchedule({
     dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized, frequency: o.frequency,
     contractStart: contract?.start_date ?? null, contractEnd: contract?.end_date ?? null, today: ctx.clock.today,
+    settledCycles,
   });
   const due = operationalDueDate(schedule);
   const position = classifyDeadline({ today: ctx.clock.today, dueDate: due });
@@ -240,7 +251,10 @@ function deadlineFacts(ctx: OfficerContext, o: any, contract: any) {
     due_date_operational: due,
     schedule: schedule.kind === "recurring"
       ? { kind: "recurring", rule: schedule.rule, unsettled_past_cycles: schedule.unsettledPastCount, next_cycle_due: schedule.nextDue,
-          note: "No per-cycle completion is recorded in VAZORA; every cycle due on or before today stays due." }
+          settled_cycles: settledCycles,
+          note: schedule.settlementsKnown
+            ? "Cycles due on or before today stay due until an authorized member records their completion. A recorded completion is not evidence verification or client acceptance."
+            : "Cycle completion records could not be read; some cycles listed as due may already be recorded as completed." }
       : schedule.kind === "needs_schedule" ? { kind: "needs_schedule", reason: schedule.reason } : { kind: schedule.kind },
   };
 }
@@ -311,7 +325,9 @@ const getObligation: OfficerTool = {
       clause_page: clauseById.get(r.clause_id)?.page_number ?? r.page_number ?? null,
     }));
 
-    const deadline = deadlineFacts(ctx, o, contract);
+    const settlements = await readCycleSettlements(ctx.supabase as any, ctx.organizationId,
+      usesCycleSettlements({ dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized }) ? [o.id] : []);
+    const deadline = deadlineFacts(ctx, o, contract, settledCyclesOf(settlements, o.id));
     const citations: OfficerCitation[] = [
       cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`),
       ...sourceRefs.filter((r) => r.clause_id).map((r) =>

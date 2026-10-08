@@ -575,6 +575,8 @@ const ACTIVITY_LABELS: Record<string, { en: string; ar: string }> = {
   "obligation.approved": { en: "approved an obligation", ar: "اعتمد التزامًا" },
   "obligation.edited": { en: "edited an obligation", ar: "عدّل التزامًا" },
   "obligation.rejected": { en: "rejected an obligation", ar: "رفض التزامًا" },
+  "obligation.cycle_settled": { en: "recorded the completion of an obligation cycle", ar: "سجّل إنجاز دورة التزام" },
+  "obligation.cycle_settlement_voided": { en: "voided a cycle completion record", ar: "ألغى تسجيل إنجاز دورة" },
   "assignment.approved": { en: "approved an assignment", ar: "اعتمد إسنادًا" },
   "evidence.created": { en: "created an evidence item", ar: "أنشأ عنصر دليل" },
   "evidence.linked": { en: "linked evidence", ar: "ربط دليلًا" },

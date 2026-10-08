@@ -60,7 +60,10 @@ export async function ObligationStateBadges({ state }: { state: ObligationState 
       {d.window === "needs_schedule" && (
         <span data-ob-schedule-reason={d.reason} className="text-[11px] leading-snug text-muted">{t(`needsScheduleReason.${d.reason}`)}</span>
       )}
-      {"recurring" in d && d.recurring && d.recurring.unsettledPastCount > 0 && (
+      {"recurring" in d && d.recurring && !d.recurring.settlementsKnown && (
+        <span data-ob-settlements-unknown className="text-[11px] leading-snug text-partial">{t("settlementsUnknown")}</span>
+      )}
+      {"recurring" in d && d.recurring?.settlementsKnown && d.recurring.unsettledPastCount > 0 && (
         <span data-ob-unsettled={d.recurring.unsettledPastCount} className="text-[11px] leading-snug text-muted">
           {t("unsettledCycles", { count: d.recurring.unsettledPastCount })}
         </span>

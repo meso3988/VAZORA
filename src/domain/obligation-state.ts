@@ -25,7 +25,7 @@ export type ObligationDeadline =
       daysUntilDue: number | null;
       /** operational due date: explicit, or the oldest unsettled recurring cycle */
       dueDate: CalendarDate | null;
-      recurring?: { rule: string; unsettledPastCount: number; nextDue: CalendarDate | null };
+      recurring?: { rule: string; unsettledPastCount: number; nextDue: CalendarDate | null; settlementsKnown: boolean };
     }
   | { window: "needs_schedule"; reason: NeedsScheduleReason }
   | { window: "unknown" };
@@ -93,10 +93,12 @@ export function obligationStates(
   matrix: EvidenceMatrixRow[] | null,
   today: CalendarDate | null,
   contract: { startDate?: string | null; endDate?: string | null } = {},
+  /** active settled cycle dates per obligation; null = settlement read failed */
+  settled: (obligationId: string) => CalendarDate[] | null = () => [],
 ): Map<string, ObligationState> {
   return new Map(obligations.map((o) => [o.id, {
     lifecycle: o.lifecycle ?? "approved_not_active",
-    deadline: today ? obligationDeadline(o, today, contract) : { window: "unknown" as const },
+    deadline: today ? obligationDeadline(o, today, contract, settled(o.id)) : { window: "unknown" as const },
     evidence: matrix ? obligationEvidence(matrix.filter((r) => r.requirement.obligationId === o.id)) : UNAVAILABLE,
   }]));
 }
@@ -105,16 +107,17 @@ function obligationDeadline(
   o: { dueDate: string; dueRuleNormalized?: string | null; frequencyRaw?: string | null },
   today: CalendarDate,
   contract: { startDate?: string | null; endDate?: string | null },
+  settledCycles: CalendarDate[] | null,
 ): ObligationDeadline {
   const s = obligationSchedule({
     dueDateNormalized: o.dueDate || null, dueRuleNormalized: o.dueRuleNormalized, frequency: o.frequencyRaw,
-    contractStart: contract.startDate, contractEnd: contract.endDate, today,
+    contractStart: contract.startDate, contractEnd: contract.endDate, today, settledCycles,
   });
   if (s.kind === "needs_schedule") return { window: "needs_schedule", reason: s.reason };
   const due = operationalDueDate(s);
   return {
     ...classifyDeadline({ today, dueDate: due }),
     dueDate: due,
-    ...(s.kind === "recurring" ? { recurring: { rule: s.rule, unsettledPastCount: s.unsettledPastCount, nextDue: s.nextDue } } : {}),
+    ...(s.kind === "recurring" ? { recurring: { rule: s.rule, unsettledPastCount: s.unsettledPastCount, nextDue: s.nextDue, settlementsKnown: s.settlementsKnown } } : {}),
   };
 }

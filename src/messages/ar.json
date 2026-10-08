@@ -1447,7 +1447,9 @@
         "explicit": "نصّية",
         "inferred": "مُستنتجة",
         "unknown": "غير معروف",
-        "conflict": "تعارض"
+        "conflict": "تعارض",
+        "human_confirmed": "أكده المراجع",
+        "human_corrected": "صححه المراجع"
       },
       "fields": {
         "requirement": "المتطلب",
@@ -1469,7 +1471,16 @@
         "confidence": "الثقة",
         "aiSuggested": "اقترحها AI",
         "humanApproved": "اعتمدها المراجع",
-        "risk": "ملاحظة مخاطرة"
+        "risk": "ملاحظة مخاطرة",
+        "paymentLinked": "مرتبط بالدفع",
+        "paymentNotLinked": "غير مرتبط بالدفع",
+        "paymentUnknown": "غير محدد",
+        "decisionKeep": "إبقاء ناتج الاستخراج (دون مراجعة)",
+        "decisionConfirm": "تأكيد القيمة المعروضة",
+        "decisionChange": "تصحيح إلى النص أدناه",
+        "decisionNone": "لا يوجد اعتماد على طرف خارجي",
+        "paymentDecisionKeep": "إبقاء ناتج الاستخراج (دون مراجعة)",
+        "externalNone": "لا يوجد (قرار المراجع)"
       },
       "actions": {
         "approve": "اعتمد",
@@ -2116,8 +2127,55 @@
         "unsupported_rule": "قاعدة الاستحقاق ليست قاعدة تقويمية مدعومة (مثل المرتبطة بحدث)",
         "rule_without_due_day": "التكرار مسجل دون يوم استحقاق"
       },
-      "unsettledCycles": "{count, plural, one {دورة سابقة واحدة} two {دورتان سابقتان} few {# دورات سابقة} many {# دورة سابقة} other {# دورة سابقة}} دون إنجاز مسجل",
-      "nextCycle": "الدورة التالية {date}"
+      "unsettledCycles": "{count, plural, one {دورة سابقة واحدة} two {دورتان سابقتان} few {# دورات سابقة} many {# دورة سابقة} other {# دورة سابقة}} دون إنجاز موثّق في فازورا",
+      "nextCycle": "الدورة التالية {date}",
+      "settlementsUnknown": "تعذّر تحميل سجلات الإنجاز"
+    },
+    "cycles": {
+      "title": "الدورات المتكررة",
+      "hint": "سجّل إنجاز دورة محددة. تسجيل الإنجاز ليس تحققًا من الدليل ولا قبولًا من العميل ولا مستخلصًا ولا دفعة.",
+      "noRecord": "لا يوجد إنجاز موثّق في فازورا",
+      "recorded": "تم تسجيل الإنجاز",
+      "completedOn": "أُنجز في {date}",
+      "completedOnLabel": "تاريخ الإنجاز (اختياري)",
+      "recordedBy": "سجّله {who} · {when}",
+      "byYou": "أنت",
+      "byMember": "عضو",
+      "note": "ملاحظة (مطلوبة)",
+      "evidence": "الدليل (اختياري)",
+      "noEvidence": "بدون دليل مرفق",
+      "record": "تسجيل الإنجاز",
+      "voidReason": "سبب التصحيح (مطلوب)",
+      "void": "إلغاء هذا التسجيل",
+      "voided": "ألغاه {who} · {when} — {reason}",
+      "unavailable": "تعذّر تحميل سجلات الإنجاز — لا تُعرض أي دورة كمنجزة أو غير منجزة.",
+      "olderCycles": "{count} دورات سابقة غير معروضة",
+      "notAuthorized": "يمكن للمالك أو المسؤول فقط تسجيل الإنجاز أو تصحيحه.",
+      "recordedNotice": "سُجّل الإنجاز للدورة المستحقة في {date}.",
+      "voidedNotice": "أُلغي تسجيل الإنجاز، ويبقى في السجل.",
+      "cycleDue": "دورة مستحقة في {date}",
+      "upcoming": "قادمة",
+      "errors": {
+        "invalid": "الطلب غير صالح.",
+        "not_authorized": "لا تملك صلاحية تسجيل إنجاز الدورات أو تصحيحه.",
+        "note_required": "الملاحظة مطلوبة.",
+        "reason_required": "السبب مطلوب لإلغاء التسجيل.",
+        "obligation_not_found": "الالتزام غير موجود في هذه المنشأة.",
+        "obligation_not_operational": "يمكن التسجيل لالتزام معتمد ومفعّل فقط.",
+        "not_a_scheduled_cycle": "هذا التاريخ ليس دورة من جدول هذا الالتزام.",
+        "schedule_not_defined": "لا يوجد جدول مدعوم لهذا الالتزام.",
+        "cycle_not_yet_due": "هذه الدورة لم يحن موعدها بعد.",
+        "completion_date_in_future": "لا يمكن أن يكون تاريخ الإنجاز في المستقبل.",
+        "evidence_item_required": "اختر عنصر الدليل.",
+        "evidence_out_of_scope": "هذا الدليل لا يخص هذا الالتزام.",
+        "evidence_version_out_of_scope": "نسخة الدليل لا تخص هذا العنصر.",
+        "evidence_used_for_other_cycle": "هذا الدليل مسجّل بالفعل لدورة أخرى.",
+        "cycle_already_settled": "لهذه الدورة تسجيل إنجاز فعّال بالفعل.",
+        "settlement_not_found": "التسجيل غير موجود.",
+        "settlement_not_active": "هذا التسجيل ملغى بالفعل.",
+        "not_authenticated": "يرجى تسجيل الدخول مجددًا.",
+        "write_failed": "تعذّر حفظ التسجيل. لم يُسجل شيء."
+      }
     }
   }
 }
