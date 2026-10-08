@@ -51,7 +51,9 @@ alter table obligation_cycle_settlements enable row level security;
 create policy obligation_cycle_settlements_select on obligation_cycle_settlements
   for select using (is_org_member (organization_id));
 
-revoke all on obligation_cycle_settlements from anon;
+-- Supabase's default privileges grant ALL on new tables to anon/authenticated;
+-- take them back so writes are refused by grants as well as by RLS.
+revoke all on obligation_cycle_settlements from anon, authenticated;
 grant select on obligation_cycle_settlements to authenticated;
 
 -- ---------------------------------------------------------------------------
