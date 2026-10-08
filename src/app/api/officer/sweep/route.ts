@@ -1,9 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-import { buildOfficerContext } from "@/lib/officer/context";
-import { runContractSweep } from "@/lib/officer/sweep";
-import { requireSupabaseEnv } from "@/lib/supabase/env";
+import { serviceDeps, sweepTarget, timingSafeEqual } from "@/lib/officer/scheduled-sweep";
 
 /**
  * Scheduled sweep endpoint — no browser presence required.
@@ -17,16 +14,9 @@ import { requireSupabaseEnv } from "@/lib/supabase/env";
  *     through env (the anon client cannot read another tenant)
  *   * results are counts only; no contract or evidence content is returned
  *
- * This deliberately introduces no external automation infrastructure: point
- * any scheduler at it, or keep using the in-app "Run sweep now" button.
+ * Vercel Cron uses the sibling GET adapter at /api/officer/sweep/scheduled,
+ * which shares the same core (lib/officer/scheduled-sweep.ts).
  */
-
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
 
 export async function POST(request: Request) {
   const secret = process.env.VAZORA_SWEEP_SECRET;
@@ -63,30 +53,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const { url } = requireSupabaseEnv();
-  const supabase = createClient(url, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  }) as unknown as Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServer>>;
-
   // buildOfficerContext still requires a real membership row for the actor:
   // the secret authorizes the CALL, the membership authorizes the SCOPE.
-  const ctx = await buildOfficerContext({
-    supabase, organizationId, userId: actorUserId, locale: "en",
-  });
-  if (!ctx) {
+  const result = await sweepTarget({ organizationId, actorUserId }, serviceDeps(serviceKey));
+  if (result.status === "not_authorized") {
     return NextResponse.json({ error: "actor is not a member of that organization" }, { status: 403 });
   }
-
-  const outcome = await runContractSweep({ ctx, trigger: "scheduled" });
+  // Codes only — no contract or evidence text crosses this boundary.
   return NextResponse.json({
-    status: outcome.status,
-    sweepRunId: outcome.sweepRunId,
-    contractsTotal: outcome.contractsTotal,
-    contractsDone: outcome.contractsDone,
-    created: outcome.created,
-    updated: outcome.updated,
-    resolved: outcome.resolved,
-    // Codes only — no contract or evidence text crosses this boundary.
-    failures: outcome.failures.length,
+    status: result.status,
+    sweepRunId: result.sweepRunId,
+    contractsTotal: result.contractsTotal,
+    contractsDone: result.contractsDone,
+    created: result.created,
+    updated: result.updated,
+    resolved: result.resolved,
+    failures: result.failures,
   });
 }

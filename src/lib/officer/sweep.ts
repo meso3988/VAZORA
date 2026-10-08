@@ -3,7 +3,8 @@ import "server-only";
 import { effectiveStatusForRequirement } from "@/domain/effective-status";
 import type { VerificationDiscrepancyView } from "@/domain/evidence";
 import type { OfficerContext } from "@/lib/officer/context";
-import { obligationSchedule, operationalDueDate } from "@/lib/officer/schedule";
+import { readCycleSettlements, settledCyclesOf } from "@/data/supabase/cycle-settlements";
+import { obligationSchedule, operationalDueDate, usesCycleSettlements } from "@/lib/officer/schedule";
 import {
   DEFAULT_THRESHOLDS,
   detectForContract,
@@ -39,8 +40,16 @@ export type SweepOutcome = {
   updated: number;
   resolved: number;
   failures: { contract_id: string; error: string }[];
-  status: "completed" | "partial" | "failed";
+  /** skipped = another sweep of this organization is running (nothing done) */
+  status: "completed" | "partial" | "failed" | "skipped";
 };
+
+/**
+ * A run still "running" after this long is treated as stopped (process
+ * crashed or timed out) and closed as failed before a new run starts, so an
+ * organization is never locked forever. Sweeps take seconds to minutes.
+ */
+export const SWEEP_LEASE_MS = 15 * 60 * 1000;
 
 /**
  * Run a sweep for the caller's organization.
@@ -58,7 +67,15 @@ export async function runContractSweep(opts: {
   const th = opts.thresholds ?? DEFAULT_THRESHOLDS;
   const today = ctx.clock.today;
 
-  const { data: runRow } = await ctx.supabase
+  // Close runs whose lease expired (stopped processes) — never published.
+  await ctx.supabase.from("officer_sweep_runs")
+    .update({ status: "failed", completed_at: new Date().toISOString(), failures: [{ contract_id: "organization", error: "sweep_run_abandoned" }] })
+    .eq("organization_id", ctx.organizationId).eq("status", "running")
+    .lt("started_at", new Date(Date.now() - SWEEP_LEASE_MS).toISOString());
+
+  // One running sweep per organization is enforced by the database (unique
+  // partial index, migration 0015): a concurrent start fails with 23505.
+  const { data: runRow, error: runErr } = await ctx.supabase
     .from("officer_sweep_runs")
     .insert({
       organization_id: ctx.organizationId,
@@ -72,7 +89,12 @@ export async function runContractSweep(opts: {
     .single();
   const sweepRunId = (runRow?.id as string) ?? null;
   if (!sweepRunId) {
-    return { ok: false, sweepRunId: null, contractsTotal: 0, contractsDone: 0, created: 0, updated: 0, resolved: 0, failures: [], status: "failed" };
+    const running = (runErr as { code?: string } | null)?.code === "23505";
+    return {
+      ok: false, sweepRunId: null, contractsTotal: 0, contractsDone: 0, created: 0, updated: 0, resolved: 0,
+      failures: [{ contract_id: "organization", error: running ? "sweep_already_running" : "sweep_run_start_failed" }],
+      status: running ? "skipped" : "failed",
+    };
   }
 
   await log(ctx, "officer.sweep_started", sweepRunId, { as_of: today, timezone: ctx.clock.timeZone });
@@ -95,7 +117,9 @@ export async function runContractSweep(opts: {
         observations_created: counts.created, observations_updated: counts.updated, observations_resolved: counts.resolved,
         failures,
       })
-      .eq("id", sweepRunId).eq("organization_id", ctx.organizationId)
+      // Only a run that still holds the lease may publish: an abandoned
+      // (reclaimed) run cannot overwrite a newer one.
+      .eq("id", sweepRunId).eq("organization_id", ctx.organizationId).eq("status", "running")
       .select("id, status");
     // Published only with persisted evidence: exactly this run, in this status.
     const persisted = !finErr && Array.isArray(pub) && pub.length === 1 && pub[0].status === status;
@@ -179,6 +203,16 @@ export async function runContractSweep(opts: {
     failures.push({ contract_id: "organization", error: e instanceof SweepReadError ? e.message : "scan_failed" });
   }
 
+  // Still the live run? A reclaimed run must not publish observations.
+  const { data: still } = await ctx.supabase.from("officer_sweep_runs")
+    .update({ contracts_done: contractsDone })
+    .eq("id", sweepRunId).eq("organization_id", ctx.organizationId).eq("status", "running")
+    .select("id");
+  if (!Array.isArray(still) || still.length !== 1) {
+    failures.push({ contract_id: "organization", error: "sweep_run_superseded" });
+    return finish("failed");
+  }
+
   let counts = { created: 0, updated: 0, resolved: 0 };
   try {
     const rec = await reconcileObservations(ctx, allFindings, sweepRunId, { scanned, orgScanned, allContractsScanned: scanned.size === contractRows.length });
@@ -219,7 +253,7 @@ async function sweepContract(
 
   const obligations = must(await ctx.supabase
     .from("contract_obligations")
-    .select("id, title, due_date_normalized, due_rule_raw, due_rule_normalized, frequency, financial_condition, penalty_condition, payment_linked, external_dependency, requires_external_acknowledgement, owner_role_suggested")
+    .select("id, title, due_date_normalized, due_rule_raw, due_rule_normalized, frequency, field_provenance, financial_condition, penalty_condition, payment_linked, external_dependency, requires_external_acknowledgement, owner_role_suggested")
     .eq("organization_id", ctx.organizationId)
     .eq("contract_id", contractId)
     .eq("review_status", "approved")
@@ -228,6 +262,12 @@ async function sweepContract(
   if (!obRows.length) return [];
 
   const obIds = obRows.map((o: any) => o.id as string);
+  // Cycle completions recorded by authorized members (0015). Unreadable
+  // records abort this contract's scan: an "overdue" built on unknown
+  // completions must not be published.
+  const settlements = await readCycleSettlements(ctx.supabase as any, ctx.organizationId,
+    obRows.filter((o: any) => usesCycleSettlements({ dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized })).map((o: any) => o.id as string));
+  if (!settlements.ok) throw new SweepReadError("obligation_cycle_settlements");
 
   const [reqRes, refRes, assignRes] = await Promise.all([
     ctx.supabase.from("obligation_evidence_requirements")
@@ -331,11 +371,13 @@ async function sweepContract(
       dueDate: operationalDueDate(obligationSchedule({
         dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized, frequency: o.frequency,
         contractStart: contract.start_date ?? null, contractEnd: contract.end_date ?? null, today,
+        settledCycles: settledCyclesOf(settlements, o.id as string),
       })),
       dueRuleRaw: (o.due_rule_raw as string | null) ?? null,
       clauseId: clauseByOb.get(o.id as string) ?? null,
       hasFinancialCondition: !!(o.financial_condition || o.penalty_condition || o.payment_linked),
       externalDependency: (o.external_dependency as string | null) ?? null,
+      externalDependencyInferred: !!o.external_dependency && (o.field_provenance as any)?.external_dependency === "inferred",
       requiresExternalAcknowledgement: !!o.requires_external_acknowledgement,
       ownerAssigned: ownerAssigned.has(o.id as string),
       suggestedOwnerRole: (o.owner_role_suggested as string | null) ?? null,

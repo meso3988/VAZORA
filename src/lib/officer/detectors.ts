@@ -70,6 +70,8 @@ export type ObligationFacts = {
   /** any financial/penalty condition text present (never an amount we invent) */
   hasFinancialCondition: boolean;
   externalDependency: string | null;
+  /** the dependency came from extraction inference and no reviewer confirmed it */
+  externalDependencyInferred?: boolean;
   requiresExternalAcknowledgement: boolean;
   ownerAssigned: boolean;
   suggestedOwnerRole: string | null;
@@ -246,7 +248,7 @@ export function detectForObligation(opts: {
         ? `Waiting on external party: ${r.name}`
         : `Missing required evidence: ${r.name}`,
       detail: waitingExternal
-        ? `No verified ${r.name.toLowerCase()} is recorded. This item depends on an external party${o.externalDependency ? ` (${o.externalDependency})` : ""}, not on internal work.`
+        ? `No verified ${r.name.toLowerCase()} is recorded. This item depends on an external party${o.externalDependency ? ` (${o.externalDependency}${o.externalDependencyInferred ? " — inferred by extraction, not confirmed by a reviewer" : ""})` : ""}, not on internal work.`
         : `No verified evidence is recorded for ${r.name}.`,
       contractId: o.contractId, obligationId: o.obligationId, evidenceRequirementId: r.requirementId,
       priorityReason: [
@@ -258,6 +260,7 @@ export function detectForObligation(opts: {
         requirement: r.name, operational_status: r.effective.operational,
         latest_verification_result: r.effective.latest,
         external_dependency: waitingExternal ? (o.externalDependency ?? "client acknowledgement") : null,
+        external_dependency_provenance: waitingExternal && o.externalDependency ? (o.externalDependencyInferred ? "inferred_unconfirmed" : "recorded") : null,
         gap_id: r.gap?.id ?? null, gap_status: r.gap?.status ?? null,
         due_date: o.dueDate, days_until_due: deadline.daysUntilDue, days_overdue: deadline.daysOverdue,
       },
