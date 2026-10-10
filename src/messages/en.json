@@ -2048,6 +2048,7 @@
         "proposeAssignment": "Propose assignment",
         "approveBelow": "Decide on this proposal in the conversation:",
         "sweptNotice": "Sweep {status}: {created} new, {resolved} resolved.",
+        "sweptSkippedNotice": "Another sweep of this organization is already running. Nothing was published by this request; its results will appear when it finishes.",
         "acknowledgedNotice": "Observation acknowledged. It stays open until the underlying condition changes.",
         "proposedNotice": "Proposal created and is waiting for approval."
       },

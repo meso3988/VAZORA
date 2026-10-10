@@ -183,7 +183,7 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
       ) : null}
       {typeof swept === "string" && swept && (
         <p className="rounded-md border border-line bg-elevated px-4 py-3 text-xs text-muted" role="status">
-          {t("center.sweptNotice", {
+          {swept === "skipped" ? t("center.sweptSkippedNotice") : t("center.sweptNotice", {
             status: swept,
             created: typeof created === "string" ? created : "0",
             resolved: typeof resolved === "string" ? resolved : "0",
