@@ -17,6 +17,7 @@ case "$STAGING_DATABASE_URL" in *oivrwhvbvfhsslsqghuz*) ;; *) echo "refusing: no
 PSQL_BIN="${PSQL_BIN:-/opt/homebrew/opt/postgresql@15/bin/psql}"
 q() { "$PSQL_BIN" "$STAGING_DATABASE_URL" -X -At -v ON_ERROR_STOP=1 -c "$1"; }
 MODE="${1:-inspect}"
+q "select 1" >/dev/null 2>/tmp/staging-migrate.err || { echo "STOP: cannot connect to the staging database: $(grep -m1 -oE 'FATAL: .*' /tmp/staging-migrate.err | sed -E 's/ for user .*//')"; exit 6; }
 
 echo "server: $(q "select current_setting('server_version')") · database: $(q 'select current_database()')"
 HAS_HISTORY=$(q "select to_regclass('supabase_migrations.schema_migrations') is not null")
