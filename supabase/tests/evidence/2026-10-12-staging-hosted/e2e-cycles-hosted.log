@@ -1,0 +1,34 @@
+with-staging: target oivrwhvbvfhsslsqghuz verified (URL, key kinds, keys accepted by staging, database URL)
+QA tenant 1d8acab9-164c-4aa9-b90f-79db3d7bbf8d on oivrwhvbvfhsslsqghuz (state /Users/mayasahaldashsh/.vazora-qa/cycles-hosted-tenant.json)
+today 2026-10-12 (Asia/Riyadh) · past cycles 2026-04-05,2026-05-05,2026-06-05,2026-07-05,2026-08-05,2026-09-05,2026-10-05
+PASS  UI en: notice shown after recording
+PASS  UI en: the recorded cycle shows 'Completion recorded' and 'Recorded by you'
+PASS  UI en: the other cycles stay 'No completion documented' — none,none,none
+PASS  DB: exactly one record, for that cycle, actor = signed-in owner, completion date separate — [{"id":"7bbccc15-10f1-42a9-b70a-6e1a500ac00f","cycle_due_date":"2026-09-05","recorded_by":"2f6451db-e9be-4c70-8d8a-6b6d74939d1b","completed_on":"2026-09-06","status":"active","recorded_at":"2026-10-11T22:21:49.145046+00:00"}]
+PASS  DB: one audit row by the owner
+PASS  6 simultaneous requests for one cycle → 1 recorded, 5 'already recorded' — 1/5
+PASS  UI member (en mobile): told only owner/admin can record; no record/void forms
+PASS  UI member: sees the record attributed to 'a member'
+PASS  server action refuses the member (cycleError=not_authorized) — /en/app/contracts/a94ee667-b6c8-4a7b-8a3b-f9c637d2c182/obligations?cycleError=not_authorized
+PASS  database refuses the member: record, direct insert, void — not_authorized | 42501 | not_authorized
+PASS  member can read the organization's records
+PASS  UI ar: void notice, cycle back to 'no completion', voided line kept
+PASS  UI ar: re-recorded after the correction
+PASS  DB: history kept — voided (by owner, with reason) then active
+PASS  DB: void audited
+PASS  sweep (2 cycles recorded): overdue finding still on the oldest cycle without a record — completed 2026-04-05
+PASS  sweep (all but the latest recorded): finding moves to the latest cycle only — completed active 2026-10-05
+PASS  Officer agrees (operational date = latest unrecorded cycle) — 2026-10-05
+PASS  records changed no evidence status and no gap
+PASS  UI ar mobile: every earlier cycle recorded, latest not, no overflow — recorded,recorded,recorded,recorded,recorded,recorded,none overflow=0
+PASS  UI en: every earlier cycle recorded, latest not — recorded,recorded,recorded,recorded,recorded,recorded,none overflow=0
+PASS  cron adapter: wrong secret → 401
+PASS  UI manual sweep shows a truthful notice (skipped is stated as such)
+rounds (manual/scheduled): completed/skipped  completed/skipped  completed/skipped  completed/skipped  ui:skipped/completed
+PASS  each round: never both skipped, never an error
+PASS  contention actually happened (at least one run was skipped by the lock)
+PASS  sweep runs never overlapped in time; none left running — 7 runs, overlaps 0
+PASS  no duplicated findings after the races — 9 active
+CLEANUP org deleted 1d8acab9-164c-4aa9-b90f-79db3d7bbf8d leftovers=none (service check: org 0, settlements 0) · auth users 2f6451db-e9be-4c70-8d8a-6b6d74939d1b:deleted 33a5ca3e-e19a-404b-a651-d2806f085af7:deleted 8423eded-811d-4cdf-9c12-5ae78dd28354:deleted
+
+27/27 passed
