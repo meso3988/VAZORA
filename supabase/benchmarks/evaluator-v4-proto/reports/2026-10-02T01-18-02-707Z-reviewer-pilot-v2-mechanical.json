@@ -1,0 +1,2011 @@
+[
+  {
+    "id": "HV2F-003",
+    "group": "supportedMaterial",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "No contract owner has been assigned to CN-142",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2298,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 232,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "No contract owner has been assigned to CN-142.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "CN-142 currently has no contract owner assigned.",
+        "entityScope": [
+          "CN-142"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-142.recordOwner",
+          "CN-142.assignmentStatus"
+        ],
+        "reason": "The record shows recordOwner as null and assignmentStatus as \"unassigned\". Together these establish that no owner is assigned.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "No contract owner has been assigned to CN-142",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "CN-142 currently has no contract owner assigned."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-022",
+    "group": "supportedMaterial",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "CN-160 expires on 31 March 2027 unless renewed",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2296,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 245,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "CN-160 expires on 31 March 2027 unless renewed.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "CN-160's current expiry date is 31 March 2027.",
+        "entityScope": [
+          "CN-160"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-160.expiryDate"
+        ],
+        "reason": "The source records expiryDate as 2027-03-31. The 'unless renewed' condition does not make the stated current expiry date hypothetical, and it is consistent with autoRenew being false.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "CN-160 expires on 31 March 2027 unless renewed",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "CN-160's current expiry date is 31 March 2027."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-007",
+    "group": "supportedMaterial",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2394,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 887,
+      "output_tokens_details": {
+        "thinking_tokens": 366
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active'",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Amendment AM-012 changed contract CN-104's status from under negotiation to active.",
+        "entityScope": [
+          "AM-012",
+          "CN-104"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-104.statusHistory.0.status",
+          "CN-104.statusHistory.1.status",
+          "CN-104.statusHistory.1.via",
+          "AM-012.contract"
+        ],
+        "reason": "CN-104's status history shows under_negotiation followed by active. The active entry is recorded as via AM-012, and AM-012 references CN-104.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "on 2 June 2026",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The status change of CN-104 to active through AM-012 took effect on 2 June 2026.",
+        "entityScope": [
+          "AM-012",
+          "CN-104"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-104.statusHistory.0.until",
+          "CN-104.statusHistory.1.from",
+          "AM-012.effectiveDate"
+        ],
+        "reason": "The active status runs from 2026-06-02, under_negotiation ends 2026-06-01, and AM-012's effective date is 2026-06-02.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 0.7333333333333333,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Amendment AM-012 changed contract CN-104's status from under negotiation to active."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-040",
+    "group": "supportedMaterial",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "None of the deliverables under OB-350 have been marked complete",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2338,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 237,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "None of the deliverables under OB-350 have been marked complete.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "No deliverable under obligation OB-350 currently has a complete status.",
+        "entityScope": [
+          "OB-350"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "OB-350.deliverables",
+          "OB-350.completedCount"
+        ],
+        "reason": "All three listed deliverables have non-complete statuses (in_progress, not_started, in_progress). The record's completedCount is 0.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "None of the deliverables under OB-350 have been marked complete",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "No deliverable under obligation OB-350 currently has a complete status."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-053",
+    "group": "supportedMaterial",
+    "locale": "ar",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2330,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 381,
+      "output_tokens_details": {
+        "thinking_tokens": 97
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The 60-day advance notice for contract CN-133 has not been sent to the counterparty.",
+        "entityScope": [
+          "CN-133"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-133.notice60Day.status",
+          "CN-133.notice60Day.dispatchDate"
+        ],
+        "reason": "The record's 60-day notice status is \"not_sent\", and its dispatchDate field is null. Together these establish that the notice has not been sent.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "The 60-day advance notice for contract CN-133 has not been sent to the counterparty."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-056",
+    "group": "supportedMaterial",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2365,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1068,
+      "output_tokens_details": {
+        "thinking_tokens": 614
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Record AP-230 documents an approval by Legal of clause CL-7.",
+        "entityScope": [
+          "AP-230",
+          "CL-7"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "AP-230.type",
+          "AP-230.subject",
+          "AP-230.decision",
+          "AP-230.approver"
+        ],
+        "reason": "AP-230 is an approval record with subject CL-7, decision 'approved', and a Legal approver. The record does not say the approval covered the wording specifically, but approving the clause is consistent with that reading.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "بتاريخ ٩ مايو ٢٠٢٦",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The approval was dated 9 May 2026.",
+        "entityScope": [
+          "AP-230"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "AP-230.decisionDate"
+        ],
+        "reason": "AP-230.decisionDate is 2026-05-09.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 0.7647058823529411,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Record AP-230 documents an approval by Legal of clause CL-7."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-071",
+    "group": "supportedMaterial",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        },
+        {
+          "span": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2359,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 923,
+      "output_tokens_details": {
+        "thinking_tokens": 383
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "Only punctuation (the joining comma and the final period) was left outside the units."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Evidence documents EV-631 and EV-632 have still not been received.",
+        "entityScope": [
+          "ACT-090",
+          "EV-631",
+          "EV-632"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "ACT-090.requiredEvidence",
+          "ACT-090.receivedEvidence",
+          "ACT-090.outstandingCount"
+        ],
+        "reason": "ACT-090 lists both documents as required. Its receivedEvidence list is empty, and outstandingCount is 2. Together these show neither document has been received.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Closing action ACT-090 requires receipt of EV-631 and EV-632.",
+        "entityScope": [
+          "ACT-090",
+          "EV-631",
+          "EV-632"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "ACT-090.requiredEvidence",
+          "ACT-090.status"
+        ],
+        "reason": "The record lists EV-631 and EV-632 as required evidence for ACT-090, which is still open. This is a recorded requirement, not a hypothetical.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Evidence documents EV-631 and EV-632 have still not been received."
+          }
+        ]
+      },
+      {
+        "refUnit": 1,
+        "refSpan": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 1,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Closing action ACT-090 requires receipt of EV-631 and EV-632."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-088",
+    "group": "supportedMaterial",
+    "locale": "mixed",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "SUPPORTED",
+      "units": [
+        {
+          "span": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2321,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 585,
+      "output_tokens_details": {
+        "thinking_tokens": 138
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "SUPPORTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The single sentence was split into an amount unit and an issue-date unit. The final period is punctuation only."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "INV-533 صدرت بمبلغ USD 18,750",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Invoice INV-533 was issued for an amount of USD 18,750.",
+        "entityScope": [
+          "INV-533"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "INV-533.amountUSD",
+          "INV-533.issuedDate"
+        ],
+        "reason": "The record shows an amount of 18750 USD and an issued date, which confirms the invoice was issued for that amount.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "في ٥ سبتمبر ٢٠٢٦",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Invoice INV-533 was issued on 5 September 2026.",
+        "entityScope": [
+          "INV-533"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "INV-533.issuedDate"
+        ],
+        "reason": "The issued date is recorded as 2026-09-05, which matches the stated date and falls before the reference clock.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 0.6363636363636364,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Invoice INV-533 was issued for an amount of USD 18,750."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-008",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "en",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "The renewal proposal for CN-120 has been executed",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2315,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 531,
+      "output_tokens_details": {
+        "thinking_tokens": 178
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The phrase 'The renewal proposal for CN-120' presupposes that a proposal exists. CN-120.renewal.proposalDate (2026-08-19) supports that presupposition. It was not split into a separate unit because the answer's claim is about execution."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "The renewal proposal for CN-120 has been executed.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The renewal proposal for contract CN-120 has been executed.",
+        "entityScope": [
+          "CN-120"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "CN-120.renewal.stage",
+          "CN-120.renewal.executedDate"
+        ],
+        "reason": "The renewal stage is 'proposal_submitted' and the tracked executedDate field is null as of 2026-10-01. The proposal was submitted on 2026-08-19 but has not been executed, and there are no action receipts.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "The renewal proposal for CN-120 has been executed",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "The renewal proposal for contract CN-120 has been executed."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-031",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "en",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "EV-610, the site completion certificate, has been verified by engineering",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2312,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 607,
+      "output_tokens_details": {
+        "thinking_tokens": 211
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "EV-610, the site completion certificate",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "EV-610 is the site completion certificate.",
+        "entityScope": [
+          "EV-610"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "EV-610.description",
+          "EV-610.type"
+        ],
+        "reason": "The record is evidence with the description 'site completion certificate'.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "has been verified by engineering",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "EV-610 has been verified, and engineering verified it.",
+        "entityScope": [
+          "EV-610"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "EV-610.status",
+          "EV-610.verifiedBy",
+          "EV-610.verifiedDate"
+        ],
+        "reason": "The record tracks verification, and verifiedBy and verifiedDate are both null. The status is only 'uploaded', so the evidence has not been verified by engineering or anyone else.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "EV-610, the site completion certificate, has been verified by engineering",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 0.5454545454545454,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "EV-610 is the site completion certificate."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-027",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "en",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "Our current exposure on CN-180 is the full contract value",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        },
+        {
+          "span": "the full contract value of USD 950,000",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": false
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2302,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 589,
+      "output_tokens_details": {
+        "thinking_tokens": 184
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Our current exposure on CN-180 is the full contract value",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The current financial exposure on CN-180 equals the full contract value (USD 950,000).",
+        "entityScope": [
+          "CN-180"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "CN-180.currentExposureUSD",
+          "CN-180.contractValueUSD"
+        ],
+        "reason": "The record shows a current exposure of USD 210,000. That is not the contract value of USD 950,000, so exposure does not equal the full contract value.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      },
+      {
+        "i": 1,
+        "span": "the full contract value of USD 950,000",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The contract value of CN-180 is USD 950,000.",
+        "entityScope": [
+          "CN-180"
+        ],
+        "temporalScope": "UNSPECIFIED",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "CN-180.contractValueUSD"
+        ],
+        "reason": "The record gives a contract value of USD 950,000.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "Our current exposure on CN-180 is the full contract value",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "The current financial exposure on CN-180 equals the full contract value (USD 950,000)."
+          }
+        ]
+      },
+      {
+        "refUnit": 1,
+        "refSpan": "the full contract value of USD 950,000",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": false,
+        "candidates": [
+          {
+            "unit": 1,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "The contract value of CN-180 is USD 950,000."
+          },
+          {
+            "unit": 0,
+            "ratio": 0.5,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "The current financial exposure on CN-180 equals the full contract value (USD 950,000)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-020",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "INSUFFICIENT_EVIDENCE",
+      "units": [
+        {
+          "span": "The executive sponsor signed off on the CN-156 extension terms",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2313,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 543,
+      "output_tokens_details": {
+        "thinking_tokens": 241
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "INSUFFICIENT_EVIDENCE",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "The executive sponsor signed off on the CN-156 extension terms.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The executive sponsor has signed off on the extension terms for CN-156.",
+        "entityScope": [
+          "CN-156"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [
+          "CN-156.extension.sponsorSignoff",
+          "CN-156.extension.stage"
+        ],
+        "reason": "The sponsor sign-off field says it is not recorded in the authoritative record, so the sources neither confirm nor rule out a sign-off. The stage 'terms_proposed' shows the terms are still proposed, but that does not establish whether a sign-off happened.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "The executive sponsor signed off on the CN-156 extension terms",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "INSUFFICIENT_EVIDENCE",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "claim": "The executive sponsor has signed off on the extension terms for CN-156."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-046",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "ar",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2355,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 835,
+      "output_tokens_details": {
+        "thinking_tokens": 420
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "ما زال العقد CN-091 في مرحلة المسودة",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Contract CN-091 is still in the draft stage as of now.",
+        "entityScope": [
+          "CN-091"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "CN-091.status",
+          "CN-091.executedDate",
+          "CN-091.statusHistory"
+        ],
+        "reason": "The record shows CN-091 as currently executed since 2026-02-10. Draft was a historical state that ended on 2026-02-09.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      },
+      {
+        "i": 1,
+        "span": "بانتظار المراجعة القانونية",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Contract CN-091 is currently awaiting legal review.",
+        "entityScope": [
+          "CN-091"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [],
+        "reason": "No source field tracks legal review for CN-091. The executed status does not by itself establish whether any legal review is pending.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 0.7272727272727273,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "Contract CN-091 is still in the draft stage as of now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-055",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "ar",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2337,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 497,
+      "output_tokens_details": {
+        "thinking_tokens": 212
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي.",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The finance department approved the budget increase for contract CN-108 last week.",
+        "entityScope": [
+          "CN-108"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "CN-108.budgetUplift.status",
+          "CN-108.budgetUplift.approver",
+          "CN-108.budgetUplift.decisionDate"
+        ],
+        "reason": "The budget uplift is still pending. The record has no approver and no decision date, so the claimed approval last week did not happen.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "The finance department approved the budget increase for contract CN-108 last week."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-068",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "INSUFFICIENT_EVIDENCE",
+      "units": [
+        {
+          "span": "تم التحقق من الوثيقة EV-622",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "required": false
+        },
+        {
+          "span": "واعتمادها من ضمان الجودة",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2347,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 823,
+      "output_tokens_details": {
+        "thinking_tokens": 370
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "INSUFFICIENT_EVIDENCE",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "تم التحقق من الوثيقة EV-622",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "Evidence document EV-622 was verified by QA on 12 August 2026 (the attribution and date in the sentence apply to both verbs).",
+        "entityScope": [
+          "EV-622"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "SUPPORTED",
+        "sourceRefs": [
+          "EV-622.verifiedBy",
+          "EV-622.verifiedDate"
+        ],
+        "reason": "EV-622 records verification by 'QA - P. Duarte (USR-058)' with verifiedDate 2026-08-12.",
+        "inventedRefs": [],
+        "effectiveVerdict": "SUPPORTED"
+      },
+      {
+        "i": 1,
+        "span": "واعتمادها من ضمان الجودة في ١٢ أغسطس ٢٠٢٦",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "EV-622 was approved by QA on 12 August 2026.",
+        "entityScope": [
+          "EV-622"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [],
+        "reason": "The record shows only verification. Verification is not approval, and the source has no approval field to establish or refute this claim.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "تم التحقق من الوثيقة EV-622",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "SUPPORTED",
+        "required": false,
+        "candidates": [
+          {
+            "unit": 0,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "SUPPORTED",
+            "claim": "Evidence document EV-622 was verified by QA on 12 August 2026 (the attribution and date in the sentence apply to both verbs)."
+          }
+        ]
+      },
+      {
+        "refUnit": 1,
+        "refSpan": "واعتمادها من ضمان الجودة",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "INSUFFICIENT_EVIDENCE",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 1,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "INSUFFICIENT_EVIDENCE",
+            "claim": "EV-622 was approved by QA on 12 August 2026."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-090",
+    "group": "contradictedOrUnsupportedMaterial",
+    "locale": "mixed",
+    "dangerous": true,
+    "reference": {
+      "caseVerdict": "CONTRADICTED",
+      "units": [
+        {
+          "span": "ACT-104 اكتمل في ٢٠ سبتمبر",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        },
+        {
+          "span": "ACT-111 مجدول لشهر أكتوبر",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "required": true
+        }
+      ]
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2370,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 831,
+      "output_tokens_details": {
+        "thinking_tokens": 233
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "CONTRADICTED",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The leading list markers (\"- \") were left out of the spans because they are only formatting."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Status update:",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "FILLER",
+        "claim": null,
+        "entityScope": [],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "Heading that introduces the list; it states no record fact.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      },
+      {
+        "i": 1,
+        "span": "ACT-104 اكتمل في ٢٠ سبتمبر",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "ACT-104 was completed on 20 September 2026.",
+        "entityScope": [
+          "ACT-104"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "ACT-104.status",
+          "ACT-104.completedDate",
+          "ACT-104.scheduledFor"
+        ],
+        "reason": "ACT-104's status is \"scheduled\" and its completedDate field is null. It is scheduled for 2026-10-20, which is after the reference clock, so it has not been completed.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      },
+      {
+        "i": 2,
+        "span": "ACT-111 مجدول لشهر أكتوبر",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "ACT-111 is currently scheduled for October 2026.",
+        "entityScope": [
+          "ACT-111"
+        ],
+        "temporalScope": "CURRENT",
+        "verdict": "CONTRADICTED",
+        "sourceRefs": [
+          "ACT-111.status",
+          "ACT-111.executedDate"
+        ],
+        "reason": "ACT-111's status is \"executed\", with an executedDate of 2026-09-04. It is not a pending action scheduled for October.",
+        "inventedRefs": [],
+        "effectiveVerdict": "CONTRADICTED"
+      }
+    ],
+    "candidates": [
+      {
+        "refUnit": 0,
+        "refSpan": "ACT-104 اكتمل في ٢٠ سبتمبر",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 1,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "ACT-104 was completed on 20 September 2026."
+          }
+        ]
+      },
+      {
+        "refUnit": 1,
+        "refSpan": "ACT-111 مجدول لشهر أكتوبر",
+        "refAssertion": "ASSERTED",
+        "refVerdict": "CONTRADICTED",
+        "required": true,
+        "candidates": [
+          {
+            "unit": 2,
+            "ratio": 1,
+            "assertion": "ASSERTED",
+            "verdict": "CONTRADICTED",
+            "claim": "ACT-111 is currently scheduled for October 2026."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "HV2F-091",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2254,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 196,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Has the countersigned copy of CN-125 been filed yet?",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "QUESTION",
+        "claim": null,
+        "entityScope": [
+          "CN-125"
+        ],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The answer only asks whether the countersigned copy has been filed. It states no fact about the filing status of CN-125.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-115",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2251,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 309,
+      "output_tokens_details": {
+        "thinking_tokens": 78
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The sources and receipts are empty and referenceClock is null. This does not matter because the answer makes no factual assertion."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "I won't speculate on the CN-137 dispute status.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "REFUSAL",
+        "claim": null,
+        "entityScope": [
+          "CN-137"
+        ],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The answer declines to comment on the CN-137 dispute status. It states no record state, dispute existence or outcome.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-121",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2274,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 566,
+      "output_tokens_details": {
+        "thinking_tokens": 263
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The answer is one conditional sentence. No sources were provided, so even a reading that treats the January start as an asserted renewal term could only be INSUFFICIENT_EVIDENCE."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "إذا اعتُمد تجديد العقد CN-120، فسيبدأ الأجل الجديد في يناير.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "CONDITIONAL",
+        "claim": null,
+        "entityScope": [
+          "CN-120"
+        ],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The sentence says what would happen if the CN-120 renewal were approved, with the new term starting in January. It does not state that a renewal has been approved, is pending, or that any start date is recorded.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-130",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2270,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 400,
+      "output_tokens_details": {
+        "thinking_tokens": 123
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The answer is a single Arabic imperative sentence. It reads like a user request, not an answer. No sources, receipts, request or reference clock were provided, and no assertions needed checking."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "لخِّص جميع الالتزامات المفتوحة في CN-188 ضمن جدول واحد.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "INSTRUCTION",
+        "claim": null,
+        "entityScope": [
+          "CN-188"
+        ],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The text is an imperative asking for a one-table summary of open obligations in CN-188. It states no fact about the contract's record state.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-148",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "mixed",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2251,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 191,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "شكرًا جزيلًا — appreciate it.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "FILLER",
+        "claim": null,
+        "entityScope": [],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "Bilingual expression of thanks ('thank you very much — appreciate it'); states no fact about any record, state, event or action.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-097",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "en",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2261,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1583,
+      "output_tokens_details": {
+        "thinking_tokens": 815
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "INSUFFICIENT_EVIDENCE",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The units overlap on purpose. The conditional frame is kept separate from the presupposed historical facts ('again', 'resend') and from the stated 48-hour obligation. No sources, receipts, request or reference clock were provided."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Should the regulator request REP-58 again",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "CONDITIONAL",
+        "claim": null,
+        "entityScope": [],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "This clause sets up a hypothetical future request. It does not state that such a request has been made.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      },
+      {
+        "i": 1,
+        "span": "request REP-58 again",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "The regulator has previously requested REP-58 at least once.",
+        "entityScope": [
+          "REP-58"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [],
+        "reason": "The word 'again' presupposes an earlier regulator request, which is stated as fact. No sources were provided, so this cannot be checked.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      },
+      {
+        "i": 2,
+        "span": "resend it",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "REP-58 was previously sent to the regulator.",
+        "entityScope": [
+          "REP-58"
+        ],
+        "temporalScope": "HISTORICAL",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [],
+        "reason": "'Resend' presupposes an earlier submission of REP-58. No source or receipt establishes or contradicts any sending.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      },
+      {
+        "i": 3,
+        "span": "we would need to resend it within 48 hours",
+        "assertion": "ASSERTED",
+        "nonAssertionKind": null,
+        "claim": "There is an obligation to resend REP-58 within 48 hours of a regulator request.",
+        "entityScope": [
+          "REP-58"
+        ],
+        "temporalScope": "UNSPECIFIED",
+        "verdict": "INSUFFICIENT_EVIDENCE",
+        "sourceRefs": [],
+        "reason": "The triggering request is hypothetical, but the existence of a 48-hour resend requirement is stated as an applicable rule. No source records such a requirement.",
+        "inventedRefs": [],
+        "effectiveVerdict": "INSUFFICIENT_EVIDENCE"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-135",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "ar",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2263,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 241,
+      "output_tokens_details": {
+        "thinking_tokens": 36
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": ""
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "بإمكاني قراءة سجلات العقود بالعربية والإنجليزية.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "CAPABILITY",
+        "claim": null,
+        "entityScope": [],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The answer says the assistant can read contract records in Arabic and English. It states no record, state or event, so it is a capability statement.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  },
+  {
+    "id": "HV2F-147",
+    "group": "nonAssertiveOrMixedModality",
+    "locale": "mixed",
+    "dangerous": false,
+    "reference": {
+      "caseVerdict": "NON_ASSERTION",
+      "units": []
+    },
+    "e8": null,
+    "usage": {
+      "input_tokens": 2256,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+        "ephemeral_5m_input_tokens": 0,
+        "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 385,
+      "output_tokens_details": {
+        "thinking_tokens": 126
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+    },
+    "stopReason": "end_turn",
+    "caseVerdict": "NON_ASSERTION",
+    "coverage": {
+      "allTextReviewed": true,
+      "notes": "The answer is only a request. It reads like the user's request rather than an answer, and it contains no factual assertions to check. No sources, receipts or reference clock were provided."
+    },
+    "logged": [],
+    "units": [
+      {
+        "i": 0,
+        "span": "Please summarize حالة الأدلة for CN-195 in a table.",
+        "assertion": "NON_ASSERTION",
+        "nonAssertionKind": "INSTRUCTION",
+        "claim": null,
+        "entityScope": [
+          "CN-195"
+        ],
+        "temporalScope": null,
+        "verdict": "NON_ASSERTION",
+        "sourceRefs": [],
+        "reason": "The text asks for a table summarizing the evidence status (حالة الأدلة) of CN-195. It states nothing about any record state.",
+        "inventedRefs": [],
+        "effectiveVerdict": "NON_ASSERTION"
+      }
+    ],
+    "candidates": []
+  }
+]

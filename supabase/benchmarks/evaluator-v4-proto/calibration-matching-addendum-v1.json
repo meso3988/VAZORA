@@ -1,0 +1,207 @@
+{
+  "addendum": "calibration matching addendum v1",
+  "appliesTo": {
+    "ledger": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-matching-ledger.json",
+    "ledgerSha256": "33a819702d869ff4bb1a92f6769a72b8aa1588f1018103ca3c8a15baf7e68238",
+    "finalScore": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-final-score.json",
+    "finalScoreSha256": "6c18b4592c954329a25553f6fe63b03a670559f9ffd786cc2a80a681d648eb27",
+    "rawResponses": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-raw.jsonl",
+    "rawSha256": "b81faf88199f7ffcdae3565fc3ed8947935867d5266ff4a26d96e2f64f5449d4",
+    "adjudication": "supabase/benchmarks/evaluator-v4-proto/reviewer-pilot-v2-adjudication.json",
+    "adjudicationSha256": "0431f3e6fd9f7cead12d9cc66f1fa1fb7f93f84ffe5da05333aa35f7f7f08b91"
+  },
+  "originalsModified": false,
+  "independentReview": "INDEPENDENT SUPPLEMENT + MATCHING FINAL REVIEW",
+  "scopeOfIndependentConfirmation": "the six audited items only (HV2F-007, 031, 046, 056, 088, 097); the other 18 calibration cases were not shown to the independent reviewer and are NOT independently confirmed",
+  "corrections": [
+    {
+      "case": "HV2F-007",
+      "kind": "MATCH RECORDING",
+      "original": {
+        "runnerAdjudication.reviewerUnit": 0,
+        "note": "reviewer split the transition (u0) and its date (u1); both SUPPORTED, together they cover the reference claim, historical scope preserved"
+      },
+      "corrected": {
+        "coveredByReviewerUnits": [
+          0,
+          1
+        ],
+        "reviewerUnitSpans": [
+          "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active'",
+          "on 2 June 2026"
+        ],
+        "reviewerVerdicts": [
+          "SUPPORTED",
+          "SUPPORTED"
+        ]
+      },
+      "referenceSpan": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+      "referenceAnswerOffset": 0,
+      "effect": "none: both units SUPPORTED; coverage unchanged; u1 was neither matched nor spurious, so no E5 arises"
+    },
+    {
+      "case": "HV2F-056",
+      "kind": "MATCH RECORDING",
+      "original": {
+        "runnerAdjudication.reviewerUnit": 0,
+        "note": "approval record (u0) and date (u1) split; both SUPPORTED"
+      },
+      "corrected": {
+        "coveredByReviewerUnits": [
+          0,
+          1
+        ],
+        "reviewerUnitSpans": [
+          "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230",
+          "بتاريخ ٩ مايو ٢٠٢٦"
+        ],
+        "reviewerVerdicts": [
+          "SUPPORTED",
+          "SUPPORTED"
+        ]
+      },
+      "referenceSpan": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+      "referenceAnswerOffset": 0,
+      "effect": "none: both units SUPPORTED; coverage unchanged; u1 was neither matched nor spurious, so no E5 arises"
+    },
+    {
+      "case": "HV2F-088",
+      "kind": "MATCH RECORDING",
+      "original": {
+        "runnerAdjudication.reviewerUnit": 0,
+        "note": "amount (u0) and Arabic-Indic date (u1) split; both SUPPORTED"
+      },
+      "corrected": {
+        "coveredByReviewerUnits": [
+          0,
+          1
+        ],
+        "reviewerUnitSpans": [
+          "INV-533 صدرت بمبلغ USD 18,750",
+          "في ٥ سبتمبر ٢٠٢٦"
+        ],
+        "reviewerVerdicts": [
+          "SUPPORTED",
+          "SUPPORTED"
+        ]
+      },
+      "referenceSpan": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+      "referenceAnswerOffset": 0,
+      "effect": "none: both units SUPPORTED; coverage unchanged; u1 was neither matched nor spurious, so no E5 arises"
+    },
+    {
+      "case": "HV2F-031",
+      "kind": "REFERENCE UNIT DEFINITION + MATCH",
+      "original": {
+        "referenceSpan": "EV-610, the site completion certificate, has been verified by engineering",
+        "automaticMatch": {
+          "reviewerUnit": 0,
+          "overlap": 0.55,
+          "reviewerVerdict": "SUPPORTED",
+          "otherCandidates": []
+        },
+        "runnerAdjudication": {
+          "decision": "COVERED",
+          "reviewerUnit": 1,
+          "reviewerVerdict": "CONTRADICTED",
+          "note": "The material claim (verified by engineering) is u1 = CONTRADICTED. The mechanical top candidate was u0, the descriptor 'the site completion certificate' (SUPPORTED, overlap 0.55); taking that candidate would have recorded a FALSE PASS. Span overlap alone is not coverage."
+        }
+      },
+      "corrected": {
+        "referenceCore": {
+          "subject": "EV-610",
+          "span": "has been verified by engineering",
+          "spanAnswerOffset": 41,
+          "verdict": "CONTRADICTED"
+        },
+        "linkedOriginalSpan": {
+          "span": "EV-610, the site completion certificate, has been verified by engineering",
+          "answerOffset": 0,
+          "note": "original reference span retained for traceability; the appositive 'the site completion certificate' is a descriptor, not the claim"
+        },
+        "coveredByReviewerUnits": [
+          1
+        ],
+        "overlapUnderNarrowedReference(scorer rule)": {
+          "u0": 0.0,
+          "u1": 1.0
+        }
+      },
+      "effect": "none on recorded results (runner had already adjudicated to u1); independently confirmed. The E1 the automatic match alone would have produced stays removed. Under the narrowed reference the automatic nomination itself now selects u1."
+    },
+    {
+      "case": "HV2F-046",
+      "kind": "REFERENCE UNIT DEFINITION",
+      "original": {
+        "referenceSpan": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+        "runnerAdjudication": {
+          "decision": "COVERED",
+          "reviewerUnit": 0,
+          "reviewerVerdict": "CONTRADICTED",
+          "note": "'still in draft' (current) contradicted by executed status; reviewer additionally split 'awaiting legal review' (u1) as INSUFFICIENT — part of the asserted sentence, not a spurious assertion"
+        }
+      },
+      "corrected": {
+        "core": {
+          "reviewerUnit": 0,
+          "span": "ما زال العقد CN-091 في مرحلة المسودة",
+          "answerOffset": 0,
+          "verdict": "CONTRADICTED",
+          "required": true
+        },
+        "qualifier": {
+          "reviewerUnit": 1,
+          "span": "بانتظار المراجعة القانونية",
+          "answerOffset": 37,
+          "acceptableVerdict": "INSUFFICIENT_EVIDENCE",
+          "required": false,
+          "note": "separate qualifier describing the draft stage; never spurious; never needs to agree with the core verdict"
+        },
+        "claimVerdict": "CONTRADICTED"
+      },
+      "effect": "none: coverage and E1–E8 unchanged"
+    },
+    {
+      "case": "HV2F-097",
+      "kind": "KNOWN REVIEWER DEFECT (unchanged)",
+      "recorded": {
+        "spurious": [
+          {
+            "reviewerUnit": 1,
+            "span": "request REP-58 again",
+            "error": "E5"
+          },
+          {
+            "reviewerUnit": 2,
+            "span": "resend it",
+            "error": "E5"
+          },
+          {
+            "reviewerUnit": 3,
+            "span": "we would need to resend it within 48 hours",
+            "error": "E5"
+          }
+        ],
+        "independentVerdict": "units 1, 2, 3 are NON_ASSERTION; the reviewer's ASSERTED labels are linguistic errors (KD-1)",
+        "segmentationOverlap": {
+          "units": [
+            0,
+            1
+          ],
+          "spans": [
+            "Should the regulator request REP-58 again",
+            "request REP-58 again"
+          ],
+          "note": "duplicate segmentation; recorded, not scored as an extra error"
+        }
+      },
+      "effect": "E5 = 3 retained; case disagreement retained; reference and prompt not changed"
+    }
+  ],
+  "effectOnResults": {
+    "coverage": "unchanged",
+    "E1toE8": "unchanged (E5 = 3, all others 0)",
+    "caseAgreement": "23/24 unchanged; the only disagreement is HV2F-097 (independently confirmed as correct). The overall 23/24 figure is not independently confirmed because 18 cases were not reviewed independently",
+    "E1Naming": "the independent reviewer could not verify the E-code name of the avoided HV2F-031 error because the E definitions were not in the packets; definitions are in reviewer-pilot-v2.json"
+  }
+}

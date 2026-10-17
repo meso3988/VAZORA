@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
 import { ContractTabs } from "@/components/app/contract-tabs";
 import { Mono, PageHeader } from "@/components/app/primitives";
 import { StatusPill } from "@/components/ui/status";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { Link } from "@/i18n/navigation";
 import { formatMoney, lt } from "@/lib/utils";
 import { asLocale } from "@/i18n/params";
@@ -16,9 +17,18 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
   const t = await getTranslations("app");
   const s = await getTranslations("sector");
   const f = await getFormatter();
-  const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContract(db, orgId, id, session.mode === "demo");
+  // A failed read is not a 404: show the localized unavailable state and
+  // drop the tabs + children, which would fail identically anyway.
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
+  const contract = read.contract;
+
+  const safeDate = (iso: string) => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? t("contract.dateUnknown") : f.dateTime(d, "medium");
+  };
 
   return (
     <>
@@ -37,19 +47,24 @@ export default async function ContractLayout(props: LayoutProps<"/[locale]/app/c
             <span aria-hidden>·</span>
             <span>{s(contract.sector)}</span>
             <span aria-hidden>·</span>
-            <Mono className="text-xs">{formatMoney(contract.value, locale, contract.currency, { compact: true })}</Mono>
+            {contract.value == null
+              ? <span>{t("contract.valueUnknown")}</span>
+              : <Mono className="text-xs">{formatMoney(contract.value, locale, contract.currency, { compact: true })}</Mono>}
             <span aria-hidden>·</span>
             <span>
+              {/* A real contract may have no recorded start/end date. Formatting
+                  an invalid Date throws and takes the whole page down, so an
+                  unknown date renders as unknown. */}
               {t("contract.period", {
-                start: f.dateTime(new Date(contract.startDate), "medium"),
-                end: f.dateTime(new Date(contract.endDate), "medium"),
+                start: safeDate(contract.startDate),
+                end: safeDate(contract.endDate),
               })}
             </span>
           </span>
         }
         actions={<StatusPill status={contract.status} />}
       />
-      <ContractTabs id={contract.id} />
+      <ContractTabs id={contract.id} deferred={session.mode === "live"} />
       {props.children}
     </>
   );

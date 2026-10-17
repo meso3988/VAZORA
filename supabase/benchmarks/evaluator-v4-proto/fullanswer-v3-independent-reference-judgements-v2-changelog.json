@@ -1,0 +1,88 @@
+{
+ "document": "changelog v1 -> v2 (changes only)",
+ "v1": {
+  "file": "fullanswer-v3-independent-reference-judgements.json",
+  "sha256": "732cc55d8be4dd10a2466259067c00ce5e53901db94e9875778eb7810a80f5f4"
+ },
+ "v2": {
+  "file": "fullanswer-v3-independent-reference-judgements-v2.json",
+  "sha256": "66d3f4d4b2c43f36fa2e177f3cf0abb4c68245d5022e2ee29962a9bf284b89e0"
+ },
+ "packetSha256": "bacb807794d74e4e3590bfa245beb300a4b7502b0489cf09221fbcd1a8c5f3a0",
+ "changes": [
+  {
+   "change": "ADD_UNIT",
+   "unitId": "FA-C01#R1",
+   "verdict": "SUPPORTED",
+   "why": "Confirmed v1 omission #1; the count claim was not covered by any packet unit."
+  },
+  {
+   "change": "SPLIT_UNIT",
+   "unitId": "FA-M03#1",
+   "into": [
+    "FA-M03#1a (INSUFFICIENT_EVIDENCE)",
+    "FA-M03#1b (SUPPORTED)"
+   ],
+   "parentCounted": false,
+   "why": "The two parts need different verdicts. The parent is kept in replacedUnits only and is not counted."
+  },
+  {
+   "change": "MERGE_TOKEN",
+   "caseId": "FA-C05",
+   "token": "No.",
+   "into": "FA-C05#0",
+   "why": "Reading B adopted on contextual evidence. The v1 proposal of a separate INSUFFICIENT_EVIDENCE unit is withdrawn, so the claim is not counted twice."
+  },
+  {
+   "change": "MERGE_TOKEN",
+   "caseId": "FA-S07",
+   "token": "لا.",
+   "into": "FA-S07#1",
+   "why": "Reading B adopted on contextual evidence. The v1 proposal of a separate INSUFFICIENT_EVIDENCE unit is withdrawn, so the claim is not counted twice."
+  },
+  {
+   "change": "MERGE_TOKEN",
+   "caseId": "FA-C08",
+   "token": "لا.",
+   "into": "FA-C08#1",
+   "why": "Reading B adopted on contextual evidence. The v1 proposal of a separate INSUFFICIENT_EVIDENCE unit is withdrawn, so the claim is not counted twice."
+  },
+  {
+   "change": "ADD_UNIT",
+   "unitId": "FA-M08#R1",
+   "verdict": "SUPPORTED",
+   "why": "Scope settled as platform level from the coordinated sentence; it does not overlap with FA-M08#2."
+  },
+  {
+   "change": "ADD_UNIT",
+   "unitId": "FA-M04#R1",
+   "verdict": "INSUFFICIENT_EVIDENCE",
+   "why": "v1 advisory note promoted to a required unit: a material window claim that the packet does not establish."
+  },
+  {
+   "change": "CONFIRM",
+   "unitId": "FA-C01#0",
+   "verdict": "UNDECIDABLE_IN_SCOPE",
+   "why": "Kept as UNDECIDABLE_IN_SCOPE. No definition of \"healthy\" introduced, no conversion to another verdict."
+  }
+ ],
+ "unchanged": "All other unit judgements are carried over from v1 unchanged.",
+ "countsV1toV2": {
+  "units": [
+   84,
+   88
+  ],
+  "materialRequired": [
+   79,
+   83
+  ],
+  "decidableRequired": [
+   78,
+   82
+  ],
+  "undecidable": [
+   1,
+   1
+  ]
+ }
+}

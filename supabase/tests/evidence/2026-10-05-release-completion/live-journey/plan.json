@@ -1,0 +1,37 @@
+{
+  "prices": {
+    "inPerM": 4,
+    "outPerM": 20,
+    "source": "developers.openai.com/api/docs/pricing — gpt-5.6-sol, short context"
+  },
+  "sizes": {
+    "extractionChars": 6445,
+    "toolDescriptionsChars": 4233
+  },
+  "rows": [
+    {
+      "what": "extraction (1 chunk, max_completion_tokens 12000)",
+      "requests": 1,
+      "worstInputTokens": 2578,
+      "maxOutputTokens": 12000,
+      "worstUsd": 0.2503
+    },
+    {
+      "what": "officer turn (≤5 rounds × 1500 + closing 900)",
+      "requests": 6,
+      "worstInputTokens": 54000,
+      "maxOutputTokens": 8400,
+      "worstUsd": 0.384
+    },
+    {
+      "what": "brief narrative (≤2 page loads × 500, only if assessment complete)",
+      "requests": 2,
+      "worstInputTokens": 8000,
+      "maxOutputTokens": 1000,
+      "worstUsd": 0.052
+    }
+  ],
+  "requestCeiling": 9,
+  "worstTotalUsd": 0.6863,
+  "budgetUsd": 1
+}

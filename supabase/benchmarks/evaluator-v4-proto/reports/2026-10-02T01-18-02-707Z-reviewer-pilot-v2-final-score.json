@@ -1,0 +1,54 @@
+{
+  "caseAgreement": "23/24",
+  "errors": {
+    "E1": [],
+    "E2": [],
+    "E3": [],
+    "E4": [],
+    "E5": [
+      "HV2F-097 u1: presupposition — 'again' extracted as asserted 'regulator previously requested REP-58' (pre-registered known risk)",
+      "HV2F-097 u2: presupposition — 'resend' extracted as asserted 'REP-58 was previously sent' (pre-registered known risk)",
+      "HV2F-097 u3: conditional consequent 'we would need to resend it within 48 hours' treated as an asserted standing obligation"
+    ],
+    "E6": [],
+    "E7": [],
+    "E8": [],
+    "REVIEW_NEEDED": []
+  },
+  "criteria": {
+    "E1_zero": true,
+    "E2_zero": true,
+    "E6_zero": true,
+    "E4_zero_on_required": true,
+    "E8_zero": true,
+    "caseAgreement_ge_23": true,
+    "noUnresolvedReview": true
+  },
+  "verdict": "MEETS PILOT CRITERIA",
+  "caseRows": [
+    "HV2F-003 [en] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-022 [en] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-007 [en] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-040 [en] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-053 [ar] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-056 [ar] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-071 [ar] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-088 [mixed] ref=SUPPORTED reviewer=SUPPORTED agree",
+    "HV2F-008 [en] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-031 [en] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-027 [en] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-020 [en] ref=INSUFFICIENT_EVIDENCE reviewer=INSUFFICIENT_EVIDENCE agree",
+    "HV2F-046 [ar] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-055 [ar] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-068 [ar] ref=INSUFFICIENT_EVIDENCE reviewer=INSUFFICIENT_EVIDENCE agree",
+    "HV2F-090 [mixed] ref=CONTRADICTED reviewer=CONTRADICTED agree",
+    "HV2F-091 [en] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-115 [en] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-121 [ar] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-130 [ar] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-148 [mixed] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-097 [en] ref=NON_ASSERTION reviewer=INSUFFICIENT_EVIDENCE DISAGREE",
+    "HV2F-135 [ar] ref=NON_ASSERTION reviewer=NON_ASSERTION agree",
+    "HV2F-147 [mixed] ref=NON_ASSERTION reviewer=NON_ASSERTION agree"
+  ]
+}

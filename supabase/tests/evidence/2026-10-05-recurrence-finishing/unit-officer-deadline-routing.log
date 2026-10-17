@@ -1,0 +1,43 @@
+PASS  EN mutation → ACTION offered: "Change the deadline on BETA-200 to next Friday.…"
+PASS  EN mutation → ACTION offered: "Move the due date of the SLA report to next Monday.…"
+PASS  EN mutation → ACTION offered: "Postpone the deadline for the safety inspection by a…"
+PASS  EN mutation → ACTION offered: "Extend the delivery date on ALPHA-100 to next month.…"
+PASS  EN mutation → ACTION offered: "Reschedule the site visit to tomorrow.…"
+PASS  EN mutation → ACTION offered: "Update the end date for DELTA-400.…"
+PASS  EN mutation → ACTION offered: "Can you amend the deadline for the audit?…"
+PASS  AR imperative mutation → ACTION offered: "غيّر موعد الاستحقاق على BETA-200 إلى الجمعة …"
+PASS  AR imperative mutation → ACTION offered: "غيّر الموعد النهائي إلى الأسبوع القادم.…"
+PASS  AR imperative mutation → ACTION offered: "عدّل الموعد إلى الجمعة القادمة.…"
+PASS  AR imperative mutation → ACTION offered: "أجّل موعد التسليم أسبوعًا.…"
+PASS  AR imperative mutation → ACTION offered: "مدّد موعد الاستحقاق.…"
+PASS  read-only → ACTION withheld: "What is the deadline on BETA-200?" — ["ORIENTATION","CONTRACT","EVIDENCE"]
+PASS  read-only → ACTION withheld: "ما موعد الاستحقاق؟" — ["ORIENTATION","CONTRACT","EVIDENCE"]
+PASS  read-only → ACTION withheld: "متى موعد التسليم؟" — ["ORIENTATION","CONTRACT","EVIDENCE"]
+PASS  read-only → ACTION withheld: "What changed this week?" — ["ORIENTATION","CONTRACT","ACTIVITY","EVIDENCE"]
+PASS  read-only → ACTION withheld: "ما الذي تغيّر في العقد؟" — ["ORIENTATION","CONTRACT","ACTIVITY","EVIDENCE"]
+PASS  read-only → ACTION withheld: "تغيّر الموعد الأسبوع الماضي؟" — ["ORIENTATION","CONTRACT","ACTIVITY","EVIDENCE"]
+PASS  read-only → ACTION withheld: "Did the vendor change the deadline last month?" — ["ORIENTATION","CONTRACT","ACTIVITY","EVIDENCE"]
+PASS  read-only → ACTION withheld: "Show me contracts whose deadline is overdue." — ["ORIENTATION","CONTRACT","PEOPLE","EVIDENCE"]
+PASS  unclassifiable question → full toolset fallback
+PASS  contract-scoped mutation → ACTION + scope groups
+PASS  deadline mutation offers lookup tools beside ACTION: "Change the deadline on BETA-200 to next Frid…"
+PASS  deadline mutation offers lookup tools beside ACTION: "غيّر موعد الاستحقاق على BETA-200 إلى الجمعة …"
+PASS  requestHumanApproval on foreign contract → refused
+PASS  createInternalAction on foreign contract → refused
+PASS  member lacks obligation.reschedule (execute-time gate)
+PASS  owner holds obligation.reschedule (execute-time gate)
+PASS  unknown action type refused
+PASS  no direct contract-mutation tool exists
+PASS  prompt carries resolved org timezone
+PASS  prompt carries resolved today (local)
+PASS  prompt forbids claiming a missing clock
+PASS  prompt requires explicit date before a deadline proposal
+PASS  prompt anchors candidate dates to resolved clock
+PASS  prompt: a date pick is clarification, not approval
+PASS  prompt without ACTION tools says the proposal path is unavailable
+PASS  prompt with ACTION tools omits the unavailable notice
+PASS  converse selects tools before building the prompt
+PASS  converse passes actionToolsOffered from the real selection
+PASS  idempotency + reused-proposal honesty tests still present
+
+41 passed · 0 failed

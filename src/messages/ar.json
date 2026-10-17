@@ -410,13 +410,32 @@
       "providerTitle": "رؤية أوسع لجهات التقييم.",
       "providerHint": "تصوّر مستقبلي · محفظة توضيحية",
       "portfolio": [
-        { "value": "42", "label": "منشأة عميلة" },
-        { "value": "17", "label": "تقييماً نشطاً" },
-        { "value": "5", "label": "أطر تقييم" },
-        { "value": "73", "label": "ملاحظة مفتوحة" },
-        { "value": "8", "label": "مراجعين بشريين" }
+        {
+          "value": "42",
+          "label": "منشأة عميلة"
+        },
+        {
+          "value": "17",
+          "label": "تقييماً نشطاً"
+        },
+        {
+          "value": "5",
+          "label": "أطر تقييم"
+        },
+        {
+          "value": "73",
+          "label": "ملاحظة مفتوحة"
+        },
+        {
+          "value": "8",
+          "label": "مراجعين بشريين"
+        }
       ],
-      "providerFlow": ["تقييم رقمي", "مراجعة بشرية", "قرار الجهة المخوّلة"]
+      "providerFlow": [
+        "تقييم رقمي",
+        "مراجعة بشرية",
+        "قرار الجهة المخوّلة"
+      ]
     },
     "engine": {
       "eyebrow": "06 / محرك واحد",
@@ -493,7 +512,11 @@
     "back": "رجوع",
     "learnMore": "اعرف أكثر",
     "comingSoon": "قريباً",
-    "skipToContent": "الانتقال إلى المحتوى"
+    "skipToContent": "الانتقال إلى المحتوى",
+    "contractsLoadFailed": "تعذّر تحميل العقود الآن. حاول مرة أخرى بعد قليل — لم تُحتسب أي أرقام من هذا.",
+    "contractLoadFailed": "تعذّر تحميل هذا العقد الآن. حاول مرة أخرى بعد قليل.",
+    "dataLoadFailed": "تعذّر تحميل هذه البيانات الآن. حاول مرة أخرى بعد قليل — لم تُحتسب أي أرقام من هذا.",
+    "reviewDataLoadFailed": "تعذّر تحميل قائمة المراجعة الآن. تبقى المراجعة والتفعيل متوقفة حتى يتم تحميل البيانات."
   },
   "status": {
     "verified": "مُتحقق منه",
@@ -583,7 +606,12 @@
       "subtitle": "تحوّل VAZORA كل عقد مُرسى إلى التزامات مُراقبة وأدلة مُتحقَّق منها ومخاطر واضحة ومطالبات جاهزة للدفع — باستمرار، بنداً بنداً.",
       "primary": "اطلب عرضاً",
       "secondary": "شاهد كيف تعمل",
-      "pillars": ["الالتزامات", "الأدلة", "التحقق", "جاهزية المطالبات"]
+      "pillars": [
+        "الالتزامات",
+        "الأدلة",
+        "التحقق",
+        "جاهزية المطالبات"
+      ]
     },
     "signature": {
       "document": "العقد · RTA-OM-2026-014",
@@ -656,7 +684,13 @@
       "eyebrow": "ذكاء الأدلة",
       "title": "ليس مستودع مستندات، بل نظام يعرف ما إذا كان بإمكانك إثباته.",
       "body": "تقرأ فازورا العقد المُرسى، وتهيكل كل التزام، وتربطه بالأدلة المطلوبة له، وتقيّم ما إذا كان الدليل يستوفي فعلاً متطلب المادة — قبل أن يسأل أحد.",
-      "chain": ["المادة الأصلية", "المتطلب", "الدليل", "التحقق", "القرار"],
+      "chain": [
+        "المادة الأصلية",
+        "المتطلب",
+        "الدليل",
+        "التحقق",
+        "القرار"
+      ],
       "chainDetail": [
         {
           "title": "البند 14.2 — توافر الخدمة",
@@ -1146,7 +1180,12 @@
       "sector": "القطاع",
       "sectorPlaceholder": "اختر القطاع",
       "contracts": "العقود النشطة قيد الإدارة",
-      "contractsOptions": ["1–5", "6–20", "21–100", "أكثر من 100"],
+      "contractsOptions": [
+        "1–5",
+        "6–20",
+        "21–100",
+        "أكثر من 100"
+      ],
       "language": "لغة الجلسة المفضلة",
       "message": "ما الذي تودّ رؤيته؟",
       "submit": "طلب العرض",
@@ -1275,7 +1314,9 @@
       "officerActivity": "نشاط مسؤول العقود",
       "inDays": "خلال {days} أيام",
       "assignments": "تعيينات للمراجعة",
-      "todayProgress": "تقدّم اليوم نحو التشغيل"
+      "todayProgress": "تقدّم اليوم نحو التشغيل",
+      "liveMetricsUnavailable": "مؤشرات المحفظة (تغطية الأدلة، جاهزية المستخلصات، التعرض المالي، أعداد المتأخر والمستحق) لا تُحتسب بعد لمساحات العمل الفعلية، لذلك لا تُعرض. المشكلات المرصودة والموافقات موجودة في ملخص مسؤول العقود أدناه.",
+      "contractsUnavailable": "تعذّر تحميل عقودك الآن، لذلك لا تُعرض أي أرقام للمحفظة. حاول مرة أخرى بعد قليل."
     },
     "lifecycle": {
       "title": "دورة حياة العقد",
@@ -1361,7 +1402,11 @@
       "clauseTrace": "تتبع المادة",
       "clauseTraceHint": "المادة الأصلية ← المتطلب ← الدليل ← التحقق",
       "actions": "الإجراءات",
-      "sections": "أقسام العقد"
+      "sections": "أقسام العقد",
+      "dateUnknown": "غير مسجَّل",
+      "noActions": "لا توجد إجراءات لمدير العقود على هذا العقد بعد.",
+      "unapprovedClauses": "استخراج غير معتمد — بنود من تحليل بانتظار المراجعة.",
+      "valueUnknown": "القيمة غير مسجّلة"
     },
     "documents": {
       "title": "مستندات العقد",
@@ -1378,17 +1423,156 @@
         "upload": "تعذّر رفع الملف. حاول مرة أخرى."
       }
     },
+    "review": {
+      "title": "مراجعة وتفعيل",
+      "obligations": "التزاماً",
+      "back": "← العودة للعقد",
+      "bulkApproved": "تم اعتماد {count} التزامات عالية الثقة",
+      "errUnresolved": "لا يمكن التفعيل — {count} التزامات لم تُحسم بعد",
+      "errGate": "بوابة التفعيل منعت العملية — تأكد من المراجعة والمصدر لكل التزام",
+      "cats": {
+        "all": "الكل",
+        "needsReview": "تتطلب مراجعة",
+        "high": "ثقة عالية",
+        "recurring": "دورية",
+        "payment": "مرتبطة بالمستخلص",
+        "financial": "شروط مالية",
+        "external": "اعتمادات خارجية",
+        "submission": "تتطلب تقديمًا",
+        "missingSource": "مصدر ناقص",
+        "conflict": "تعارض بنود",
+        "approved": "معتمدة"
+      },
+      "states": {
+        "explicit": "نصّية",
+        "inferred": "مُستنتجة",
+        "unknown": "غير معروف",
+        "conflict": "تعارض",
+        "human_confirmed": "أكده المراجع",
+        "human_corrected": "صححه المراجع"
+      },
+      "fields": {
+        "requirement": "المتطلب",
+        "frequency": "التكرار",
+        "due": "قاعدة الاستحقاق",
+        "evidence": "الأدلة المطلوبة",
+        "owner": "المسؤول",
+        "contributor": "المساهم",
+        "approver": "المعتمد",
+        "external": "الاعتماد الخارجي",
+        "payment": "علاقة بالدفع",
+        "financial": "شرط مالي",
+        "penalty": "شرط جزائي",
+        "submission": "التقديم",
+        "destination": "الوجهة",
+        "deadline": "القاعدة الزمنية",
+        "acknowledge": "إقرار خارجي",
+        "source": "المصدر التعاقدي",
+        "confidence": "الثقة",
+        "aiSuggested": "اقترحها AI",
+        "humanApproved": "اعتمدها المراجع",
+        "risk": "ملاحظة مخاطرة",
+        "paymentLinked": "مرتبط بالدفع",
+        "paymentNotLinked": "غير مرتبط بالدفع",
+        "paymentUnknown": "غير محدد",
+        "decisionKeep": "إبقاء ناتج الاستخراج (دون مراجعة)",
+        "decisionConfirm": "تأكيد القيمة المعروضة",
+        "decisionChange": "تصحيح إلى النص أدناه",
+        "decisionNone": "لا يوجد اعتماد على طرف خارجي",
+        "paymentDecisionKeep": "إبقاء ناتج الاستخراج (دون مراجعة)",
+        "externalNone": "لا يوجد (قرار المراجع)"
+      },
+      "actions": {
+        "approve": "اعتمد",
+        "edit": "عدّل",
+        "reject": "ارفض",
+        "bulkApprove": "اعتماد جماعي آمِن",
+        "activate": "فعّل العقد",
+        "save": "احفظ",
+        "cancel": "إلغاء"
+      },
+      "summary": {
+        "approved": "معتمدة",
+        "rejected": "مرفوضة",
+        "unresolved": "غير محسومة",
+        "sourceMissing": "بلا مصدر",
+        "conflicts": "تعارضات",
+        "exceptionsAssignments": "تعيينات تحتاج قرار"
+      },
+      "activation": {
+        "title": "تفعيل العقد",
+        "body": "التفعيل فعل بشري مقصود. بعده تصبح الالتزامات المعتمدة هي الأساس التشغيلي، ولا تُعدَّل بصمت عند إِعادـة التحليل.",
+        "unresolvedWarn": "{count} التزامات غير محسومة — احسمها قبل التفعيل."
+      },
+      "assignments": {
+        "title": "تعيينات تتطلب مراجعتك",
+        "pending": "خصائص اقتراحات الأدوار تحتاج موافقتك.",
+        "owner": "مالك",
+        "contributor": "مساهم",
+        "approver": "معتمد",
+        "external": "اعتماد خارجي",
+        "approveAll": "اعتمد عالية الثقة",
+        "bulk": "اعتمد الكل",
+        "approved": "معتمدة",
+        "reason": "السبب"
+      },
+      "inspector": {
+        "title": "فاحص الالتزام",
+        "aiVersion": "الاستخراج الأصلي",
+        "editNote": "التحرير يحافظ على نسخة AI الأصلية — لا تُمسح.",
+        "rejectNote": "اذكر سبب الرفض",
+        "noSource": "لم يُعثر على مصدر موثوق — راجع يدويًا قبل الاعتماد."
+      }
+    },
+    "ingestion": {
+      "title": "تحليل العقد",
+      "unavailable": "استخراج AI غير مهيأ — اضبط مزود الاستخراج.",
+      "unconfigured": "تحليل AI غير مهيأ لهذه البيئة — اضبط مزود الاستخراج أولًا (إعداد VAZORA_EXTRACTION_PROVIDER).",
+      "needDocuments": "ارفع ملف العقد أولًا من قسم مستندات العقد.",
+      "analyze": "تحليل العقد",
+      "running": "يُحلَّل العقد الآن ({status})…",
+      "stages": "قراءة المستندات ← هيكلة البنود ← تحديد الالتزامات ← متطلبات الأدلة ← الشروط المالية ← تجهيز المراجعة",
+      "failed": "تعذّر التحليل — راجع التفاصيل أو أعد المحاولة.",
+      "total": "إجمالي الالتزامات",
+      "recurring": "دورية",
+      "payment": "مرتبطة بالمستخلص",
+      "financial": "شروط مالية",
+      "external": "اعتمادات خارجية",
+      "needsReview": "تحتاج مراجعتك",
+      "readyHint": "التحليل جاهز — راجع الالتزامات قبل التفعيل."
+    },
     "pipeline": {
       "title": "مسار إدخال العقد — {file}",
       "hint": "رُفع بواسطة {by} · {date} · أصبح نشطًا خلال {total}",
       "stages": {
-        "uploaded": { "label": "تحميل العقد", "detail": "استلام الوثيقة الأصلية" },
-        "parsing": { "label": "قراءة البنية", "detail": "النصوص والجداول والملاحق" },
-        "clauses": { "label": "اكتشاف البنود", "detail": "{count} بنود مرتبطة بأدلة إثبات" },
-        "obligations": { "label": "توليد الالتزامات", "detail": "{count} التزامًا إلى السجل" },
-        "owners": { "label": "توزيع المسؤوليات", "detail": "مسؤول معيّن لكل التزام" },
-        "requests": { "label": "إرسال طلبات الأدلة", "detail": "إشعارات فورية للمالكين" },
-        "ready": { "label": "العقد نشط", "detail": "يُحدَّث باستمرار مع كل دليل" }
+        "uploaded": {
+          "label": "تحميل العقد",
+          "detail": "استلام الوثيقة الأصلية"
+        },
+        "parsing": {
+          "label": "قراءة البنية",
+          "detail": "النصوص والجداول والملاحق"
+        },
+        "clauses": {
+          "label": "اكتشاف البنود",
+          "detail": "{count} بنود مرتبطة بأدلة إثبات"
+        },
+        "obligations": {
+          "label": "توليد الالتزامات",
+          "detail": "{count} التزامًا إلى السجل"
+        },
+        "owners": {
+          "label": "توزيع المسؤوليات",
+          "detail": "مسؤول معيّن لكل التزام"
+        },
+        "requests": {
+          "label": "إرسال طلبات الأدلة",
+          "detail": "إشعارات فورية للمالكين"
+        },
+        "ready": {
+          "label": "العقد نشط",
+          "detail": "يُحدَّث باستمرار مع كل دليل"
+        }
       }
     },
     "obligations": {
@@ -1417,6 +1601,7 @@
         "status": "الحالة"
       },
       "verification": "التحقق",
+      "verify": "تشغيل التحقق",
       "checks": "الفحوصات",
       "passed": "نجح {passed} من {total} فحوصات",
       "byStatus": "حسب الحالة",
@@ -1428,10 +1613,251 @@
         "inspected": "ما الذي فحصته VAZORA؟",
         "result": "النتيجة",
         "why": "لماذا — ما نجح وما فشل",
-        "proofChain": "سلسلة الإثبات",
+        "proofChain": "سلسلة الإثبات — لماذا وصلت VAZORA إلى هذه النتيجة",
         "next": "ما الذي يغلق الفجوة؟",
         "openObligation": "فتح المتطلب",
-        "closeHint": "اختر دليلاً من الجدول لفحصه بالتفصيل."
+        "closeHint": "اختر دليلاً من الجدول لفحصه بالتفصيل.",
+        "criteriaCount": "{verified} من {total} فحوصات إلزامية مُتحقَّقة",
+        "openFile": "فتح الملف",
+        "runVerification": "تشغيل التحقق",
+        "zoneRequirement": "ما الذي كان مطلوبًا؟",
+        "zoneSubmitted": "ما الذي قُدِّم؟",
+        "zoneVerification": "ماذا يثبت؟",
+        "contract": "العقد",
+        "clause": "المادة",
+        "obligation": "الالتزام المعتمد",
+        "unlinkedObligation": "غير مرتبط بالتزام بعد",
+        "dueContext": "سياق الاستحقاق",
+        "requirements": "متطلبات الدليل",
+        "required": "إلزامي",
+        "notLinked": "غير مرتبط",
+        "noRequirements": "لا متطلبات دليل على هذا الالتزام.",
+        "linkRequirement": "ربط متطلب",
+        "link": "ربط",
+        "file": "الملف",
+        "version": "الإصدار",
+        "type": "النوع",
+        "size": "الحجم",
+        "uploaded": "تاريخ الرفع",
+        "uploadedBy": "رُفع بواسطة",
+        "newVersion": "رفع إصدار جديد",
+        "newVersionHint": "الإصدار الجديد لا يغلق أي فجوة — ينقلها إلى «دليل مستلَم» ويطلق إعادة التحقق.",
+        "upload": "رفع",
+        "noFile": "لم يُرفع ملف بعد.",
+        "pendingVerification": "بانتظار التحقق",
+        "pendingHint": "الممل مستلَم — لا شيء مُتحقَّق حتى يكتمل تشغيل التحقق.",
+        "runMeta": "المزوّد {provider} · النموذج {model}",
+        "versionHistory": "سجل الإصدارات",
+        "verificationFailed": "فشل التحقق",
+        "verificationFailedHint": "فشل التشغيل قبل إنتاج نتائج — لم تُسجَّل أي فحوصات. الملف ما زال مستلمًا فقط، غير متحقق.",
+        "verificationInProgress": "التحقق جارٍ",
+        "verificationInProgressHint": "تشغيل تحقق قيد التنفيذ. تظهر النتائج عند اكتماله."
+      },
+      "upload": {
+        "title": "تقديم دليل",
+        "hint": "PDF أو DOCX أو XLSX أو CSV أو صورة — حتى 25MB. الرفع لا يعني التحقق أبدًا.",
+        "nameField": "عنوان الدليل",
+        "typeField": "نوع الدليل",
+        "obligationField": "الالتزام المرتبط",
+        "noObligation": "بدون ربط بالتزام",
+        "submit": "رفع",
+        "types": {
+          "document": "مستند",
+          "report": "تقرير",
+          "record": "سجل",
+          "spreadsheet": "جدول بيانات",
+          "signature": "توقيع",
+          "acknowledgement": "اعتماد استلام",
+          "approval": "اعتماد",
+          "photo": "صورة",
+          "certificate": "شهادة",
+          "invoice": "فاتورة",
+          "kpi": "مؤشر أداء",
+          "log": "سجل تشغيل",
+          "meeting_minutes": "محضر اجتماع",
+          "system_record": "سجل نظام",
+          "other": "أخرى"
+        },
+        "contractField": "العقد",
+        "globalHint": "الدليل المرفوع يدخل «يحتاج ربطًا» حتى يُربط بمتطلب.",
+        "receivedNotice": "تم استلام الملف. حالة التحقق: قيد الانتظار — الرفع لا يجعل أي شيء مُتحقَّقًا.",
+        "errorNotice": "فشل الرفع — تحقق من نوع الملف وحجمه وبصمته ثم أعد المحاولة."
+      },
+      "humanOverride": "تجاوز بشري",
+      "result": {
+        "verified": "مُتحقَّق",
+        "partial": "جزئي",
+        "missing": "مفقود",
+        "notFound": "غير موجود",
+        "notApplicable": "لا ينطبق",
+        "needsHumanReview": "يحتاج مراجعة بشرية",
+        "unableToVerify": "تعذّر التحقق"
+      },
+      "itemStatus": {
+        "received": "مستلَم",
+        "verificationPending": "التحقق جارٍ",
+        "partiallyVerified": "مُتحقَّق جزئيًا",
+        "verified": "مُتحقَّق",
+        "needsReview": "يحتاج مراجعة بشرية",
+        "ocrRequired": "يتطلب OCR",
+        "rejected": "مرفوض"
+      },
+      "gapStatus": {
+        "open": "مفتوحة",
+        "evidenceReceived": "دليل مستلَم",
+        "reverificationPending": "إعادة التحقق جارية",
+        "resolved": "محلولة",
+        "dismissed": "أُغلقت بقرار بشري مخوَّل"
+      },
+      "chain": {
+        "title": "سلسلة الإثبات",
+        "clause": "مادة العقد الأصلية",
+        "page": "صفحة {page}",
+        "noClause": "لا يوجد مرجع مادة مسجَّل",
+        "obligation": "الالتزام المعتمد",
+        "noObligation": "غير مرتبط بالتزام",
+        "requirements": "متطلبات الدليل",
+        "required": "إلزامي",
+        "noRequirements": "لا معايير مرتبطة",
+        "version": "إصدار الدليل",
+        "noVersion": "لا إصدار ملف بعد",
+        "verification": "تشغيل التحقق",
+        "run": "{count, plural, one {# تشغيل} other {# تشغيلات}}",
+        "checks": "{verified} من {total} معايير مُتحقَّقة",
+        "noRun": "لا تشغيل تحقق بعد",
+        "result": "النتيجة",
+        "noResult": "لا نتيجة بعد",
+        "gaps": "الفجوات",
+        "noGaps": "لا فجوات — كل المعايير مستوفاة",
+        "runStatus": {
+          "queued": "في الانتظار",
+          "running": "التحقق جارٍ",
+          "failed": "فشل التحقق"
+        }
+      },
+      "check": {
+        "methodDeterministic": "حتمي",
+        "methodAi": "دلالي (AI)",
+        "confidence": "الثقة {value}",
+        "noExcerpt": "لا مقتطف مصدر — لا يمكن التحقق",
+        "page": "صفحة {page}",
+        "locationUnavailable": "موقع المصدر غير متاح — يحتاج مراجعة بشرية",
+        "overrideBy": "القرار بواسطة",
+        "vazoraWas": "نتيجة VAZORA:",
+        "overrideAction": "تسجيل قرار بشري…",
+        "humanDecision": "القرار البشري",
+        "overrideReason": "السبب (إلزامي) — مثال: تأكيد العميل وصل خارج الحزمة",
+        "overrideSubmit": "حفظ القرار البشري"
+      },
+      "versions": {
+        "notVerified": "لم يُتحقَّق بعد",
+        "download": "فتح الملف",
+        "current": "الحالية",
+        "viewing": "تعاين الإصدار {version}",
+        "backToCurrent": "العودة إلى الحالي",
+        "verificationFailed": "فشل التحقق",
+        "verificationInProgress": "التحقق جارٍ",
+        "checksVerified": "{verified}/{total} متحقق"
+      },
+      "gaps": {
+        "title": "فجوات الأدلة",
+        "none": "لا فجوات أدلة مفتوحة. كل المعايير الإلزامية مُتحقَّقة حاليًا.",
+        "openCount": "{count} {count, plural, one {فجوة مفتوحة} other {فجوات مفتوحة}}",
+        "lifecycle": "دورة حياة الفجوة",
+        "step": {
+          "open": "مفتوحة",
+          "evidence_received": "دليل مستلَم",
+          "reverification_pending": "إعادة التحقق",
+          "resolved": "محلولة"
+        },
+        "resolvedBy": "حُلّت بواسطة تشغيل التحقق {run}",
+        "dismissedHuman": "أُغلقت بقرار بشري مخوَّل",
+        "nextAction": "التالي: قدّم دليلاً يستوفي هذا المعيار",
+        "viaOverride": "بتجاوز بشري",
+        "openedHumanRegression": "فُتحت بتأكيد تراجع بشري"
+      },
+      "matrix": {
+        "title": "مصفوفة الأدلة",
+        "subtitle": "المعايير المطلوبة × الأدلة المقدَّمة × حالة التحقق",
+        "empty": "لا متطلبات دليل على الالتزامات المعتمدة بعد.",
+        "columns": {
+          "requirement": "الدليل المطلوب",
+          "submitted": "المُقدَّم",
+          "verification": "الحالة التشغيلية",
+          "gap": "الفجوة المفتوحة",
+          "next": "الإجراء التالي"
+        },
+        "coverage": "{verified} من {total} مُتحقَّقة",
+        "required": "إلزامي",
+        "items": "{count, plural, one {# عنصر} other {# عناصر}}",
+        "noneSubmitted": "لا شيء مُقدَّم",
+        "notVerified": "غير مُتحقَّق",
+        "resolveGap": "حل الفجوة",
+        "inspect": "فحص",
+        "upload": "رفع",
+        "uploadFor": "رفع دليل لـ{name}",
+        "verification": "الحالة التشغيلية",
+        "discrepancy": "تناقض في التحقق",
+        "latestModelResult": "آخر نتيجة تحقق: {result}",
+        "reviewDiscrepancy": "مراجعة التناقض",
+        "regressionConfirmed": "تراجع مؤكَّد من مخوَّل بشري"
+      },
+      "inbox": {
+        "title": "صندوق وارد الأدلة",
+        "subtitle": "الاستثناءات أولًا — ما يحتاج إجراءً الآن",
+        "liveOnly": "صندوق وارد الأدلة متاح في مساحة العمل الحية.",
+        "filters": "مرشحات الوارد",
+        "emptyCategory": "لا شيء هنا — هذه الفئة خالية.",
+        "cat": {
+          "all": "الكل ({count})",
+          "needs_linking": "يحتاج ربطًا ({count})",
+          "needs_verification": "يحتاج تحققًا ({count})",
+          "needs_human_review": "يحتاج مراجعة بشرية ({count})",
+          "reverification_pending": "إعادة التحقق جارية ({count})",
+          "partial": "جزئي ({count})",
+          "missing": "مفقود ({count})",
+          "verified": "مُتحقَّق ({count})",
+          "recent": "رُفع حديثًا ({count})",
+          "verification_discrepancy": "تناقضات التحقق ({count})"
+        },
+        "gaps": "{count} {count, plural, one {فجوة مفتوحة} other {فجوات مفتوحة}}",
+        "next": {
+          "link": "اربط بمتطلب",
+          "verify": "شغّل التحقق",
+          "waitRun": "إعادة التحقق جارية",
+          "resolveGap": "حل {count} {count, plural, one {فجوة مفتوحة} other {فجوات مفتوحة}}",
+          "inspect": "فحص",
+          "review": "مراجعة بشرية مطلوبة",
+          "reviewDiscrepancy": "راجع تناقض التحقق"
+        },
+        "contractFilter": "العقد",
+        "allContracts": "كل العقود",
+        "apply": "تطبيق",
+        "uploadedBy": "بواسطة",
+        "discrepancies": "{count} {count, plural, one {تناقض} other {تناقضات}}",
+        "priorStateInForce": "الحالة التشغيلية السابقة سارية · آخر نتيجة تحقق: {latest}"
+      },
+      "discrepancy": {
+        "title": "تناقضات التحقق",
+        "pending": "مراجعة بشرية مطلوبة",
+        "kept": "أُبقي على الحالة السابقة",
+        "confirmed": "تأكَّد التراجع",
+        "sameVersion": "نفس إصدار الدليل — ملف لم يتغيّر",
+        "runMeta": "المزوّد {provider} · النموذج {model}",
+        "reviewHint": "هذا الملف نفسه كان مُتحقَّقًا سابقًا. إعادة التشغيل الأضعف لا تُعيد فتح الفجوة تلقائيًا — القرار للمراجع.",
+        "keptLabel": "أُبقي على حالة التحقق السابقة",
+        "confirmedLabel": "تأكَّد التراجع — فُتحت فجوة جديدة",
+        "keepPrior": "الإبقاء على حالة التحقق السابقة",
+        "confirmRegression": "تأكيد التراجع",
+        "reasonPlaceholder": "سبب القرار (إلزامي)…",
+        "keptNotice": "رُوجِع التناقض — أُبقي على حالة التحقق السابقة.",
+        "regressionNotice": "تأكَّد التراجع — فُتحت فجوة جديدة بإسناد بشري.",
+        "effectiveHeading": "الحالة التشغيلية مقابل آخر نتيجة تحقق",
+        "operationalLabel": "الحالة التشغيلية",
+        "latestLabel": "آخر نتيجة تحقق",
+        "discrepancyLabel": "التناقض",
+        "priorInEffect": "الحالة التشغيلية السابقة (مُتحقَّقة) تبقى سارية حتى تُراجَع هذه الحالة.",
+        "keptByHuman": "أُبقي على حالة التحقق السابقة بقرار بشري مخوَّل."
       }
     },
     "risks": {
@@ -1462,7 +1888,8 @@
       }
     },
     "activity": {
-      "title": "النشاط"
+      "title": "النشاط",
+      "truncated": "تُعرض أحدث الأحداث — يوجد نشاط أقدم للعقد خارج هذه القائمة."
     },
     "tasks": {
       "title": "المهام",
@@ -1472,8 +1899,14 @@
         "mine": "مهامي",
         "overdue": "تستحق قريباً أو متأخرة",
         "waitingOnClient": "بانتظار العميل",
-        "done": "مكتملة"
-      }
+        "done": "مكتملة",
+        "waiting": "بانتظار الموافقة",
+        "held": "معتمد — لم يكتمل",
+        "completed": "مكتمل",
+        "closed": "مرفوض / فشل / ملغى",
+        "suggested": "مقترح"
+      },
+      "truncated": "تُعرض أحدث الإجراءات — توجد سجلات أقدم خارج هذه القائمة."
     },
     "notFound": "هذا العقد غير متاح ضمن منشأتك.",
     "officer": {
@@ -1505,6 +1938,244 @@
         "claim_readiness": "جاهزية المستخلص",
         "risk": "خطر",
         "verified": "مُتحقق منه"
+      },
+      "officerName": "ضابط العقود",
+      "you": "أنت",
+      "conversations": "المحادثات",
+      "conversation": "المحادثة",
+      "newConversation": "محادثة جديدة",
+      "noConversations": "لا توجد محادثات بعد.",
+      "untitled": "بلا عنوان",
+      "scopeContract": "ضمن عقد",
+      "scopeOrganization": "على مستوى المنظمة",
+      "startPrompt": "ابدأ محادثة لتسأل عن العقود والمواعيد والأدلة والفجوات.",
+      "threadEmpty": "اطرح أول سؤال — يجيب الضابط من سجلات VAZORA الحالية.",
+      "sources": "المصادر",
+      "toolsUsed": "{count} {count, plural, one {استعلام} other {استعلامات}} في VAZORA",
+      "send": "إرسال",
+      "providerMissing": "نموذج ضابط العقود غير مهيّأ",
+      "providerMissingNotice": "لا يوجد نموذج مهيّأ لضابط العقود، لذلك لا يمكنه الإجابة. اضبط VAZORA_OFFICER_PROVIDER و VAZORA_OFFICER_MODEL.",
+      "errorNotice": "تعذّر على الضابط إكمال الطلب ({code}).",
+      "demoFixtures": "بيانات توضيحية",
+      "timezone": {
+        "prompt": "حدّد المنطقة الزمنية لمنظمتك",
+        "why": "تُحسب المواعيد و“اليوم” والتأخير بالتوقيت المحلي لمنظمتك. القيمة الحالية {current} ولم يؤكّدها أحد.",
+        "label": "المنطقة الزمنية للمنظمة",
+        "save": "حفظ المنطقة الزمنية"
+      },
+      "action": {
+        "recommends": "توصية VAZORA",
+        "reason": "السبب",
+        "sources": "المصادر",
+        "approvalRequired": "تتطلب موافقة",
+        "approve": "موافقة",
+        "reject": "رفض",
+        "rejectReason": "سبب الرفض…",
+        "approvedBy": "وافق عليه",
+        "rejectedBy": "رفضه",
+        "approvedNotExecuted": "تمت الموافقة والتسجيل. لا تنفّذ VAZORA بعد التغييرات التعاقدية ولا المراسلات الخارجية — التنفيذ يأتي مع منفّذ الإجراءات.",
+        "noApprovalRight": "دورك لا يخوّلك الموافقة على هذا الإجراء.",
+        "approvedNotice": "تمت الموافقة على الإجراء وتسجيله.",
+        "rejectedNotice": "رُفض الإجراء.",
+        "status": {
+          "suggested": "مقترح",
+          "waiting_for_approval": "بانتظار الموافقة",
+          "approved": "معتمد",
+          "executing": "قيد التنفيذ",
+          "completed": "مكتمل",
+          "rejected": "مرفوض",
+          "failed": "فشل",
+          "cancelled": "ملغى"
+        }
+      },
+      "brief": {
+        "title": "موجز اليوم",
+        "greeting": "صباح الخير.",
+        "greetingNamed": "صباح الخير، {name}.",
+        "quiet": "لا شيء يحتاج انتباهك حاليًا.",
+        "newIssues": "مسائل جديدة",
+        "resolved": "مُغلقة",
+        "approvals": "بانتظار الموافقة",
+        "critical": "حرج",
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "monitoring": "قيد المراقبة",
+        "since": "بالمقارنة مع {kind} في {at}",
+        "sinceKind": {
+          "last_review": "مراجعتك الأخيرة",
+          "last_sweep": "المسح السابق",
+          "last_24h": "آخر ٢٤ ساعة"
+        },
+        "changeCount": "{count} {count, plural, one {تغيير مسجَّل} other {تغييرات مسجَّلة}}",
+        "highestPriority": "الأعلى أولوية",
+        "runSweep": "شغّل المسح الآن",
+        "lastSweep": "آخر مسح {at}",
+        "partial": "جزئي",
+        "incomplete": "لم أتمكن من إكمال التقييم الحالي. آخر تقييم ناجح معروض منفصلًا وقد يكون قديمًا.",
+        "incompleteNever": "لم أتمكن من إكمال التقييم الحالي، ولا يوجد تقييم ناجح سابق.",
+        "lastSuccessful": "آخر تقييم ناجح: {at}"
+      },
+      "center": {
+        "title": "مركز القيادة",
+        "hint": "{count} {count, plural, one {بند مفتوح} other {بنود مفتوحة}}",
+        "empty": "لا شيء يحتاج انتباهك حاليًا.",
+        "emptyIncomplete": "لا توجد نتائج من البيانات التي أمكن قراءتها. التقييم الحالي غير مكتمل، لذا لا يعني ذلك عدم وجود مشكلات.",
+        "section": {
+          "approvals": "بانتظار موافقتك",
+          "critical": "حرج",
+          "today": "اليوم",
+          "next_3_days": "الأيام الثلاثة القادمة",
+          "this_week": "هذا الأسبوع",
+          "monitoring": "قيد المراقبة",
+          "resolved": "أُغلقت حديثًا"
+        },
+        "severity": {
+          "critical": "حرج",
+          "high": "مرتفع",
+          "medium": "متوسط",
+          "low": "منخفض",
+          "informational": "للعلم"
+        },
+        "sources": "المصادر",
+        "firstSeen": "أول اكتشاف",
+        "lastSeen": "آخر ظهور",
+        "resolvedAt": "أُغلقت",
+        "acknowledged": "تم الاطلاع",
+        "recurring": "تكررت {count}×",
+        "explain": "اشرح هذا",
+        "acknowledge": "اطّلعت",
+        "proposeFollowUp": "اقترح متابعة",
+        "proposeAssignment": "اقترح إسنادًا",
+        "approveBelow": "اتخذ القرار على هذا المقترح في المحادثة:",
+        "sweptNotice": "المسح {status}: {created} جديدة، {resolved} أُغلقت.",
+        "sweptSkippedNotice": "يجري مسح آخر لهذه المنشأة حاليًا. لم يُنشر شيء من هذا الطلب، وستظهر النتائج عند انتهاء المسح الجاري.",
+        "acknowledgedNotice": "تم الاطلاع على الملاحظة. تبقى مفتوحة حتى يتغيّر الوضع الفعلي.",
+        "proposedNotice": "أُنشئ المقترح وهو بانتظار الموافقة."
+      },
+      "kind": {
+        "due_today": "مستحق اليوم",
+        "due_soon": "يستحق قريبًا",
+        "overdue": "متأخر",
+        "missing_required_evidence": "دليل مفقود",
+        "partial_evidence": "دليل جزئي",
+        "reverification_pending": "إعادة تحقق",
+        "verification_discrepancy": "تناقض تحقق",
+        "unassigned_obligation": "بلا مسؤول",
+        "external_dependency_pending": "بانتظار طرف خارجي",
+        "contract_expiry_approaching": "عقد ينتهي",
+        "recently_resolved": "أُغلقت",
+        "action_waiting_for_approval": "بانتظار الموافقة"
+      },
+      "contractActions": "إجراءات مدير العقود على هذا العقد",
+      "noContractActions": "لا توجد إجراءات مسجّلة لهذا العقد بعد.",
+      "askOpen": "افتح محادثة للعقد",
+      "askDemo": "معاينة للمحادثة — جلسات العرض للقراءة فقط. مساحة العمل الحقيقية تفتح محادثة بعقد محدد."
+    },
+    "indicator": {
+      "activeObligations": "الالتزامات المفعّلة",
+      "notCalculated": "غير محتسب في هذا الإصدار",
+      "deferred": "غير متاح في هذا الإصدار",
+      "unavailable": "تعذّر التحميل — لم يُحتسب شيء",
+      "incomplete": "غير مكتمل — عدد السجلات يتجاوز حد القراءة الموثوقة",
+      "short": {
+        "notCalculated": "غير محتسب",
+        "deferred": "ليس في هذا الإصدار",
+        "unavailable": "لم يُحمَّل",
+        "incomplete": "غير مكتمل"
+      }
+    },
+    "deferred": {
+      "badge": "ليس في هذا الإصدار",
+      "risks": {
+        "title": "سجل المخاطر — غير متاح في هذا الإصدار",
+        "body": "لا تُتتبَّع المخاطر والتعرض المالي في هذا الإصدار، لذلك لا يُسجَّل أو يُحتسب شيء هنا. لا تعني هذه الصفحة أن العقد بلا مخاطر. للاطلاع على المسائل التشغيلية الحالية استخدم الالتزامات والأدلة ومسؤول العقود."
+      },
+      "claims": {
+        "title": "المستخلصات — غير متاحة في هذا الإصدار",
+        "body": "إعداد المستخلصات وجاهزيتها ليسا ضمن هذا الإصدار، لذلك لا يُسجَّل أو يُحتسب شيء هنا. لا تعني هذه الصفحة عدم وجود مستخلصات، ولا أن أي مستخلص جاهز."
+      }
+    },
+    "obligationState": {
+      "lifecycle": {
+        "active": "نشط",
+        "approved_not_active": "معتمد — غير مفعّل"
+      },
+      "deadline": {
+        "overdue": "متأخر {days} يوم",
+        "today": "مستحق اليوم",
+        "next_3_days": "مستحق خلال {days} يوم",
+        "this_week": "مستحق خلال {days} يوم",
+        "monitoring": "مجدول",
+        "no_due_date": "بلا تاريخ استحقاق",
+        "unknown": "تعذّر تحميل الموعد",
+        "needs_schedule": "الجدول الزمني يحتاج تحديدًا"
+      },
+      "evidence": {
+        "verified": "الدليل مُتحقق منه",
+        "partial": "الدليل جزئي",
+        "missing": "الدليل ناقص",
+        "awaiting_verification": "تم استلام الدليل — بانتظار التحقق",
+        "needs_review": "الدليل بحاجة لمراجعة",
+        "no_requirements": "لا متطلبات أدلة مسجّلة",
+        "unavailable": "تعذّر تحميل حالة الدليل"
+      },
+      "satisfied": "{satisfied}/{required} متطلبات مستوفاة",
+      "priorInForce": "الحالة المتحققة السابقة سارية — تشغيل لاحق بانتظار مراجعة بشرية",
+      "chartTitle": "حالة أدلة الالتزامات",
+      "chartHint": "حالة التحقق الفعلية لأدلة كل التزام — منفصلة عن التفعيل والموعد.",
+      "needsScheduleReason": {
+        "no_schedule_start": "لا يوجد تاريخ بدء مسجل للعقد لجدولة الدورات منه",
+        "unsupported_rule": "قاعدة الاستحقاق ليست قاعدة تقويمية مدعومة (مثل المرتبطة بحدث)",
+        "rule_without_due_day": "التكرار مسجل دون يوم استحقاق"
+      },
+      "unsettledCycles": "{count, plural, one {دورة سابقة واحدة} two {دورتان سابقتان} few {# دورات سابقة} many {# دورة سابقة} other {# دورة سابقة}} دون إنجاز موثّق في فازورا",
+      "nextCycle": "الدورة التالية {date}",
+      "settlementsUnknown": "تعذّر تحميل سجلات الإنجاز"
+    },
+    "cycles": {
+      "title": "الدورات المتكررة",
+      "hint": "سجّل إنجاز دورة محددة. تسجيل الإنجاز ليس تحققًا من الدليل ولا قبولًا من العميل ولا مستخلصًا ولا دفعة.",
+      "noRecord": "لا يوجد إنجاز موثّق في فازورا",
+      "recorded": "تم تسجيل الإنجاز",
+      "completedOn": "أُنجز في {date}",
+      "completedOnLabel": "تاريخ الإنجاز (اختياري)",
+      "recordedBy": "سجّله {who} · {when}",
+      "byYou": "أنت",
+      "byMember": "عضو",
+      "note": "ملاحظة (مطلوبة)",
+      "evidence": "الدليل (اختياري)",
+      "noEvidence": "بدون دليل مرفق",
+      "record": "تسجيل الإنجاز",
+      "voidReason": "سبب التصحيح (مطلوب)",
+      "void": "إلغاء هذا التسجيل",
+      "voided": "ألغاه {who} · {when} — {reason}",
+      "unavailable": "تعذّر تحميل سجلات الإنجاز — لا تُعرض أي دورة كمنجزة أو غير منجزة.",
+      "olderCycles": "{count} دورات سابقة غير معروضة",
+      "notAuthorized": "يمكن للمالك أو المسؤول فقط تسجيل الإنجاز أو تصحيحه.",
+      "recordedNotice": "سُجّل الإنجاز للدورة المستحقة في {date}.",
+      "voidedNotice": "أُلغي تسجيل الإنجاز، ويبقى في السجل.",
+      "cycleDue": "دورة مستحقة في {date}",
+      "upcoming": "قادمة",
+      "errors": {
+        "invalid": "الطلب غير صالح.",
+        "not_authorized": "لا تملك صلاحية تسجيل إنجاز الدورات أو تصحيحه.",
+        "note_required": "الملاحظة مطلوبة.",
+        "reason_required": "السبب مطلوب لإلغاء التسجيل.",
+        "obligation_not_found": "الالتزام غير موجود في هذه المنشأة.",
+        "obligation_not_operational": "يمكن التسجيل لالتزام معتمد ومفعّل فقط.",
+        "not_a_scheduled_cycle": "هذا التاريخ ليس دورة من جدول هذا الالتزام.",
+        "schedule_not_defined": "لا يوجد جدول مدعوم لهذا الالتزام.",
+        "cycle_not_yet_due": "هذه الدورة لم يحن موعدها بعد.",
+        "completion_date_in_future": "لا يمكن أن يكون تاريخ الإنجاز في المستقبل.",
+        "evidence_item_required": "اختر عنصر الدليل.",
+        "evidence_out_of_scope": "هذا الدليل لا يخص هذا الالتزام.",
+        "evidence_version_out_of_scope": "نسخة الدليل لا تخص هذا العنصر.",
+        "evidence_used_for_other_cycle": "هذا الدليل مسجّل بالفعل لدورة أخرى.",
+        "cycle_already_settled": "لهذه الدورة تسجيل إنجاز فعّال بالفعل.",
+        "settlement_not_found": "التسجيل غير موجود.",
+        "settlement_not_active": "هذا التسجيل ملغى بالفعل.",
+        "not_authenticated": "يرجى تسجيل الدخول مجددًا.",
+        "write_failed": "تعذّر حفظ التسجيل. لم يُسجل شيء."
       }
     }
   }

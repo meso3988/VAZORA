@@ -15,7 +15,8 @@ export async function WorkspacePreview() {
   const db = getDataProvider();
   const contract = await db.contracts.getById(DEMO_ORGANIZATION_ID, CONTRACT_HERO_ID);
   const obligations = (await db.obligations.list(DEMO_ORGANIZATION_ID, { contractId: CONTRACT_HERO_ID })).slice(0, 5);
-  if (!contract) return null;
+  // The preview renders illustrative fixture figures only; without them, nothing.
+  if (!contract?.health) return null;
 
   const h = contract.health;
   const kpis = [
@@ -59,7 +60,7 @@ export async function WorkspacePreview() {
                 <td className="px-5 py-3 font-mono text-xs text-muted" dir="ltr">{o.clauseRef}</td>
                 <td className="max-w-[28ch] truncate px-5 py-3">{lt(o.requirement, locale)}</td>
                 <td className="hidden px-5 py-3 text-muted sm:table-cell">{o.ownerName}</td>
-                <td className="px-5 py-3"><StatusPill status={o.status} subtle /></td>
+                <td className="px-5 py-3">{o.status && <StatusPill status={o.status} subtle />}</td>
               </tr>
             ))}
           </tbody>

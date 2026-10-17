@@ -1,0 +1,96 @@
+build de31625 / 4HjeVCCZnqGwhV_yAurB5 (regression)
+PASS  rr alpha en /contracts 200
+PASS  rr alpha en /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · Government Benchmark Client Authority Active SAR 1.0M 1 0 due · 1 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not i
+PASS  rr alpha en /contracts BETA-200: active obligations computed = 1
+PASS  rr alpha en /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · Government Benchmark Client Authority Active SAR 1.0M 1 1 due · 0 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not 
+PASS  rr alpha en /contracts BETA-200: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  rr alpha en /contracts BETA-200: riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr alpha en /contracts BETA-200: claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr alpha en /contracts: no placeholder 0% or zero money in rows
+PASS  rr alpha en /contracts: no other-tenant contract
+PASS  rr alpha en nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  rr alpha en overview BETA-200 200
+PASS  rr alpha en overview KPI overdue = 1 — observed KPIs: Active obligations 1 0 due | Overdue 1 | Evidence coverage — Not calculated in this release Not calculated in this release | Open risks — Not available in this release Not available in this release | Risk exposure — Not 
+PASS  rr alpha en overview KPI active obligations = 1
+PASS  rr alpha en overview coverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  rr alpha en overview risksOpen labelled not in this release — {"state":"deferred","text":"— Not available in this release"}
+PASS  rr alpha en overview riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr alpha en overview claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr alpha en overview KPIs: no placeholder zero money / 0%
+PASS  rr alpha en lifecycle: no placeholder 0% / zero money — observed: Contract lifecycle Award → execution → evidence → verification → risk → claim → closeout Award Mar 19 Execution Active Evidence Not calculated Not calculated in this release Verification Not in this release Not available
+PASS  rr alpha en overview + tabs: no active risks/claims links — links=0
+PASS  rr alpha en tabs: risks/claims marked unavailable
+PASS  rr alpha en obligations tab 200
+PASS  rr alpha en obligations hint has no unknown denominator (n / 0) — observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 19, 2026
+PASS  rr alpha en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 19, 2026 – Aug 1, 2027 Active Overview Obligatio
+PASS  rr alpha en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 19, 2026 – Aug 1, 2027 Active Overview Obligatio
+PASS  rr alpha en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Claims — not available in this release Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page
+PASS  rr alpha en html dir
+PASS  rr alpha ar /contracts 200
+PASS  rr alpha ar /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 1 0 مستحق · 1 متأخر غير محتسب غير محتسب في هذا الإصدار ليس في هذا الإصدار غير متاح في هذا الإصدار ليس في هذا الإصد
+PASS  rr alpha ar /contracts BETA-200: active obligations computed = 1
+PASS  rr alpha ar /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 1 1 مستحق · 0 متأخر غير محتسب غير محتسب في هذا الإصدار ليس في هذا الإصدار غير متاح في هذا الإصدار ليس في هذا الإص
+PASS  rr alpha ar /contracts BETA-200: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"غير محتسب غير محتسب في هذا الإصدار"}
+PASS  rr alpha ar /contracts BETA-200: riskExposure labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  rr alpha ar /contracts BETA-200: claimReadiness labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  rr alpha ar /contracts: no placeholder 0% or zero money in rows
+PASS  rr alpha ar /contracts: no other-tenant contract
+PASS  rr alpha ar nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  rr alpha ar overview BETA-200 200
+PASS  rr alpha ar overview KPI overdue = 1 — observed KPIs: الالتزامات المفعّلة 1 0 مستحق | متأخرة 1 | تغطية الأدلة — غير محتسب في هذا الإصدار غير محتسب في هذا الإصدار | المخاطر المفتوحة — غير متاح في هذا الإصدار غير متاح في هذا الإصدار | التعرض للمخاطر — غير متاح في هذا الإصدار 
+PASS  rr alpha ar overview KPI active obligations = 1
+PASS  rr alpha ar overview coverage labelled not calculated — {"state":"not_calculated","text":"غير محتسب غير محتسب في هذا الإصدار"}
+PASS  rr alpha ar overview risksOpen labelled not in this release — {"state":"deferred","text":"— غير متاح في هذا الإصدار"}
+PASS  rr alpha ar overview riskExposure labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  rr alpha ar overview claimReadiness labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  rr alpha ar overview KPIs: no placeholder zero money / 0%
+PASS  rr alpha ar lifecycle: no placeholder 0% / zero money — observed: دورة حياة العقد الإرساء ← التنفيذ ← الإثبات ← التحقق ← المخاطرة ← المطالبة ← الإقفال الإرساء 19 مارس التنفيذ نشط الإثبات غير محتسب غير محتسب في هذا الإصدار التحقق ليس في هذا الإصدار غير متاح في هذا الإصدار المخاطرة ليس ف
+PASS  rr alpha ar overview + tabs: no active risks/claims links — links=0
+PASS  rr alpha ar tabs: risks/claims marked unavailable
+PASS  rr alpha ar obligations tab 200
+PASS  rr alpha ar obligations hint has no unknown denominator (n / 0) — observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 19 ما
+PASS  rr alpha ar direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 19 مارس 2026 – 1 أغسطس 2027 نشط نظرة عامة الا
+PASS  rr alpha ar direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 19 مارس 2026 – 1 أغسطس 2027 نشط نظرة عامة الا
+PASS  rr alpha ar direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: المستخلصات المستخلصات — غير متاحة في هذا الإصدار إعداد المستخلصات وجاهزيتها ليسا ضمن هذا الإصدار، لذلك لا يُسجَّل أو يُحتسب شيء هنا. لا تعني هذه الصفحة عدم وجود
+PASS  rr alpha ar html dir
+PASS  rr beta en /contracts 200
+PASS  rr beta en /contracts FM-008: overdue computed = 1 — observed row: Facilities Management — Central FM-008 · Government QA Client Authority Active Value not recorded 1 0 due · 1 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not in
+PASS  rr beta en /contracts FM-008: active obligations computed = 1
+PASS  rr beta en /contracts OM-014: overdue computed = 0 (real zero) — observed row: O&M Services — Northern Region OM-014 · Government QA Client Authority Active Value not recorded 1 1 due · 0 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not in 
+PASS  rr beta en /contracts FM-008: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  rr beta en /contracts FM-008: riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr beta en /contracts FM-008: claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr beta en /contracts: no placeholder 0% or zero money in rows
+PASS  rr beta en /contracts: no other-tenant contract
+PASS  rr beta en nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  rr beta en overview FM-008 200
+PASS  rr beta en overview KPI overdue = 1 — observed KPIs: Active obligations 1 0 due | Overdue 1 | Evidence coverage — Not calculated in this release Not calculated in this release | Open risks — Not available in this release Not available in this release | Risk exposure — Not 
+PASS  rr beta en overview KPI active obligations = 1
+PASS  rr beta en overview coverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  rr beta en overview risksOpen labelled not in this release — {"state":"deferred","text":"— Not available in this release"}
+PASS  rr beta en overview riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr beta en overview claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  rr beta en overview KPIs: no placeholder zero money / 0%
+PASS  rr beta en lifecycle: no placeholder 0% / zero money — observed: Contract lifecycle Award → execution → evidence → verification → risk → claim → closeout Award — Execution Active Evidence Not calculated Not calculated in this release Verification Not in this release Not available in t
+PASS  rr beta en overview + tabs: no active risks/claims links — links=0
+PASS  rr beta en tabs: risks/claims marked unavailable
+PASS  rr beta en obligations tab 200
+PASS  rr beta en obligations hint has no unknown denominator (n / 0) — observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded 
+PASS  rr beta en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded – Not recorded Active Overview Obligatio
+PASS  rr beta en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded – Not recorded Active Overview Obligatio
+PASS  rr beta en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Claims — not available in this release Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page
+PASS  rr beta en html dir
+PASS  rr empty: honest empty state, no failure text
+PASS  rr empty: /app/claims is the unavailable notice
+PASS  rr mobile en /app/contracts: no horizontal overflow
+PASS  rr mobile en /app/contracts/[id]: no horizontal overflow
+PASS  rr mobile en /app/contracts/[id]/risks: no horizontal overflow
+PASS  rr mobile ar /app/contracts: no horizontal overflow
+PASS  rr mobile ar /app/contracts/[id]: no horizontal overflow
+PASS  rr mobile ar /app/contracts/[id]/risks: no horizontal overflow
+PASS  rr demo /contracts keeps illustrative fixture figures
+PASS  rr demo nav keeps claims link
+PASS  rr demo badge visible
+PASS  rr demo /app/claims keeps fixture claims (no unavailable notice)
+
+93/93 passed

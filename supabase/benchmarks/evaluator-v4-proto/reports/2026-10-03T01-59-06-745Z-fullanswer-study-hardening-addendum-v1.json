@@ -1,0 +1,188 @@
+{
+  "document": "FULL-ANSWER VALIDATION — tool-correction and classification addendum v1",
+  "originalResult": {
+    "verdict": "DOES NOT MEET STUDY CRITERIA",
+    "file": "2026-10-03T01-59-06-745Z-fullanswer-study-auto-score.json",
+    "sha256": "eb1bf497e4eaadcf518a602034e65f6e03e59fa24ebdedc1693012cded028de6",
+    "status": "unchanged and authoritative"
+  },
+  "FA-M04_u7": {
+    "rawSourceRef": "t1:getRecentActivity.result.data.systemSummary.counts.officer.sweep_completed",
+    "sourceAsSent": {
+      "pointer": "/sources/t1:getRecentActivity/result/data/systemSummary",
+      "value": {
+        "counts": {
+          "officer.sweep_completed": 1
+        },
+        "complete": true
+      }
+    },
+    "finding": "the literal key 'officer.sweep_completed' exists; the dotted notation split it into two keys. Exactly one grouping resolves (/sources/t1:getRecentActivity/result/data/systemSummary/counts/officer.sweep_completed). Classification: RESOLVER / REFERENCE-FORMAT DEFECT, not a fabricated source.",
+    "rawResponseSha256": "d1160093fd93f00f884a32a50ea6155da5fa08511f5ee394ac676db264ff84bb"
+  },
+  "toolCorrectionView": {
+    "file": "2026-10-03T01-59-06-745Z-fullanswer-study-legacy-refs-addendum-score.json",
+    "sha256": "b365c0960095b6eb3a22dc94ce693d8283a262fa3d237bb2aa7684f9f0e19407",
+    "rule": "saved dotted paths accepted only through a single proven grouping; ambiguous stays unresolved; no fuzzy match",
+    "changes": "E6 1→0, E7 2→1 (FA-C04 u0 emitted remains), FA-M04 case verdict UNCERTAIN→INSUFFICIENT_EVIDENCE (agree), agreement 18/23→19/23",
+    "notANewFinalResult": "verdict still DOES NOT MEET (E1 2, E4 4, agreement FAIL); 9 matches remain ADJUDICATION_REQUIRED, so no final totals are declared"
+  },
+  "E5_classification": {
+    "note": "runner classification, not independent; no gold unit added or changed",
+    "counts": {
+      "SAME CLAIM, DIFFERENT SPLIT": 6,
+      "ADDITIONAL CLAIM, REVIEWER-SUPPORTED": 2,
+      "ADDITIONAL CLAIM, UNSUPPORTED": 0,
+      "NEEDS ADJUDICATION (reference)": 2
+    },
+    "items": [
+      {
+        "ref": "FA-S01 u2",
+        "span": "BETA-200 — Monthly Service Level Report",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "identity of the overdue item; the locked reference advisory states it is covered through subject binding, not a separate unit"
+      },
+      {
+        "ref": "FA-S06 u1",
+        "span": "BETA-200 — تقرير مستوى الخدمة الشهري",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "same advisory (FA-S06 listed)"
+      },
+      {
+        "ref": "FA-C02 u1",
+        "span": "BETA-200 — تقرير مستوى الخدمة الشهري",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "same advisory (FA-C02 listed)"
+      },
+      {
+        "ref": "FA-C01 u7",
+        "span": "Required evidence, Security compliance statement,",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "subject phrase of FA-C01#3 ('is operationally verified'), split off by the reviewer"
+      },
+      {
+        "ref": "FA-C04 u0",
+        "span": "The KPI results table on DELTA-400 was verified by VAZORA",
+        "reviewerVerdict": "REVIEWER_UNCERTAIN",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "first part of FA-C04#0; the reference advisory names this optional split; the reviewer was uncertain on it (E7), the contradicted part was detected"
+      },
+      {
+        "ref": "FA-C06 u1",
+        "span": "الالتزام «Monthly logistics report» يتضمن شرطًا ماليًا",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "SAME CLAIM, DIFFERENT SPLIT",
+        "basis": "overlaps the opening of FA-C06#1 ('يتضمن شرطًا ماليًا…'); below the overlap threshold, so not nominated automatically"
+      },
+      {
+        "ref": "FA-C01 u0",
+        "span": "EPSILON-500 — Security services — Western region",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "ADDITIONAL CLAIM, REVIEWER-SUPPORTED",
+        "basis": "contract identity heading, not a reference unit; cited sources resolve; support not independently adjudicated"
+      },
+      {
+        "ref": "FA-C06 u6",
+        "span": "لكنها ليست مبلغ التعرض المالي",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "ADDITIONAL CLAIM, REVIEWER-SUPPORTED",
+        "basis": "contract value is not exposure; not a reference unit; support not independently adjudicated"
+      },
+      {
+        "ref": "FA-S05 u0",
+        "span": "No.",
+        "reviewerVerdict": "SUPPORTED",
+        "category": "NEEDS ADJUDICATION (reference)",
+        "basis": "bare answer token; the locked reference records no absorbedSpans for this case and the final ruling did not address it"
+      },
+      {
+        "ref": "FA-C07 u0",
+        "span": "Yes.",
+        "reviewerVerdict": "CONTRADICTED",
+        "category": "NEEDS ADJUDICATION (reference)",
+        "basis": "same as FA-S05: bare answer token not addressed by the final ruling"
+      }
+    ]
+  },
+  "pendingMatches": [
+    "FA-S01#0",
+    "FA-S02#0",
+    "FA-C03#0",
+    "FA-M03#4",
+    "FA-M04#R1",
+    "FA-M04#0",
+    "FA-C05#0",
+    "FA-S07#1",
+    "FA-C08#1"
+  ],
+  "pendingNote": "not resolved by text overlap; still visible as ADJUDICATION_REQUIRED",
+  "promptV2": {
+    "file": "reviewer-prompt-v2.txt",
+    "sha256": "84646a29d4502527d2a3766837953ddf53434d3b7973123ad55c49f9094fb407",
+    "v1Sha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487",
+    "v1Kept": true,
+    "rules": [
+      {
+        "area": "INPUT / receipts",
+        "v1": "saved action receipts available to that answer",
+        "v2": "receipts for the request being answered; each field measures only what its name says, only for that request"
+      },
+      {
+        "area": "STEP 2 / CAPABILITY kind",
+        "v1": "what the assistant or system is able to do, with no record state",
+        "v2": "a general offer of help — what the assistant could do next — that states no operational fact"
+      },
+      {
+        "area": "STEP 2 / new distinction",
+        "v1": "(none)",
+        "v2": "three kinds of can/cannot: general offer = CAPABILITY; tool/path available or not in this session = ASSERTED; platform policy/operational capability = ASSERTED; checkable against session policy, offered tools or evidence; can/cannot alone never makes them NON_ASSERTION; never infer unavailability from a tool not being called"
+      },
+      {
+        "area": "new EVIDENCE LIMITS",
+        "v1": "(none beyond 'absence from incomplete records never proves…')",
+        "v2": "system-wide non-existence needs a source covering that scope; an unretrieved document/annex proves neither content nor emptiness; a conclusion from an unestablished premise is INSUFFICIENT_EVIDENCE, not SUPPORTED; an explicit status, tracked field or complete listing can support a negative within its scope"
+      },
+      {
+        "area": "new RECEIPTS",
+        "v1": "(none)",
+        "v2": "check receipts for claims about an action in this request; read each receipt only for what it measures (no proposal ≠ no other action; nothing in this request ≠ never); a receipt that explicitly covers a request-limited claim supports it"
+      },
+      {
+        "area": "SOURCE REFERENCES",
+        "v1": "dotted paths into sources",
+        "v2": "RFC 6901 JSON Pointers into the input, starting /sources/ or /receipts/, ~0/~1 escaping, dots literal, array index"
+      },
+      {
+        "area": "OUTPUT schema",
+        "v1": "sourceRefs: <dotted paths into sources>",
+        "v2": "sourceRefs: <JSON Pointers starting with /sources/ or /receipts/>"
+      }
+    ],
+    "unchanged": "model, thinking, effort, max_tokens, verdict set, output schema shape, trust boundary, all other rules; no case ids or case text"
+  },
+  "retestProposal": {
+    "status": "PROPOSED — NOT APPROVED, NOT RUN",
+    "cases": [
+      "FA-C06",
+      "FA-M06",
+      "FA-M08",
+      "FA-S07",
+      "FA-C08",
+      "FA-M07"
+    ],
+    "requestsBuilt": true,
+    "estimate": {
+      "inputTokensApprox": 30562,
+      "basis": "previous exact counts + prompt-length delta (~675 tokens/request, approximate; exact count is a separate step)",
+      "previousOutputTokensForTheseCases": 13905,
+      "expectedCostUsd": 0.46,
+      "worstCaseCostUsd": 1.09,
+      "proposedCapUsd": 1.2
+    }
+  },
+  "liveLimits": "Delivering new instructions to the request body does not show the model will follow them; only a run can show that."
+}

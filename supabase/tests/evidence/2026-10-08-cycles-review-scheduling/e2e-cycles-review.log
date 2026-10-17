@@ -1,0 +1,30 @@
+QA tenant 1bca7682-82a2-47b5-aed8-66ccf39219ba (state /Users/mayasahaldashsh/.vazora-qa/cycles-review-tenant.json)
+PASS  environment: obligation_cycle_settlements is not present (0015 not applied here) — PGRST205
+PASS  reader: missing table → { ok: false }, never 'no completions'
+PASS  Officer: completion records unknown is stated, not 'not completed' — {"kind":"recurring","rule":"monthly_day_5","unsettled_past_cycles":7,"next_cycle_due":"2026-11-05","settled_cycles":null,"note":"Cycle completion records could not be read; some cycles listed as due may already be record
+PASS  sweep: the recurring contract's scan fails, run is partial (not completed) — partial [{"contract_id":"c46f1361-0511-407b-83cf-b2b15ef2535d","error":"read_failed:obligation_cycle_settlements"}]
+PASS  UI en: cycles panel says records could not be loaded; no cycle shown completed or not
+PASS  UI en: no 'no completion documented' claim while records are unknown
+PASS  UI ar: cycles panel says records could not be loaded; no cycle shown completed or not
+PASS  UI ar: no 'no completion documented' claim while records are unknown
+PASS  UI en-mobile: cycles panel says records could not be loaded; no cycle shown completed or not
+PASS  UI en-mobile: no 'no completion documented' claim while records are unknown
+PASS  UI en-mobile: no horizontal overflow — 0px
+PASS  UI ar-mobile: cycles panel says records could not be loaded; no cycle shown completed or not
+PASS  UI ar-mobile: no 'no completion documented' claim while records are unknown
+PASS  UI ar-mobile: no horizontal overflow — 0px
+PASS  before correction: sweep reports 'waiting on external party' marked inferred_unconfirmed — partial {"gap_id":"6ffbe9db-4988-4026-a5a2-b13add32d86a","due_date":"2026-10-10","gap_status":"open","requirement":"Client acknowledgement","days_overdue":null,"days_until_due":2,"operational_status":"missing
+PASS  review: inferred dependency visible with its 'Inferred' state before approval
+PASS  review: corrected value persisted (external dependency none, approved by the session user) — {"s":"approved","e":null}
+PASS  review: payment link 'not determined' stays null, never false
+PASS  review: provenance records the human correction (not 'model was right') — {"payment_linked":"human_confirmed","edited_by_human":"explicit","external_dependency":"human_corrected"}
+PASS  review: original model output (ai_payload) not overwritten
+PASS  audit: before/after, decisions, note and actor recorded
+PASS  after re-login ar: corrected state shown, wrong dependency gone — صححه المراجع
+PASS  after re-login en-mobile: corrected state shown, wrong dependency gone — Reviewer corrected
+PASS  Officer reads the reviewed value (no external dependency) — {"e":null,"p":"human_corrected"}
+PASS  sweep after correction: 'waiting on external party' resolved (history kept), missing evidence reported instead — partial ext=resolved miss=active
+PASS  sweep after correction: the gap stays open (correction closes nothing)
+CLEANUP ok org=1bca7682-82a2-47b5-aed8-66ccf39219ba leftovers=none
+
+26/26 passed

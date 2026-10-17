@@ -1,0 +1,16 @@
+PASS  recovered en command-center: no false "nothing needs attention"
+PASS  recovered en command-center: incomplete notice gone after recovery
+PASS  recovered en command-center: known issues visible
+PASS  recovered en dashboard: no false "nothing needs attention"
+PASS  recovered en dashboard: incomplete notice gone after recovery
+PASS  recovered en dashboard: known issues visible
+PASS  recovered en: no page errors
+PASS  recovered ar command-center: no false "nothing needs attention"
+PASS  recovered ar command-center: incomplete notice gone after recovery
+PASS  recovered ar command-center: known issues visible
+PASS  recovered ar dashboard: no false "nothing needs attention"
+PASS  recovered ar dashboard: incomplete notice gone after recovery
+PASS  recovered ar dashboard: known issues visible
+PASS  recovered ar: no page errors
+
+HEALTH STATES (recovered): 14/14 pass

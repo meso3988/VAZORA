@@ -1,0 +1,86 @@
+build de31625 / 4HjeVCCZnqGwhV_yAurB5 on :3008; extraction answered by qa-replay-stub.mts with the recorded response of live request #1 (no model call)
+--- delay 0 ms
+{
+  "label": "delay0",
+  "contractId": "f9d1d2e7-3dba-4de6-9a78-5a123d9da98f",
+  "runCompletedAfterMs": 8070,
+  "redirectSeenAfterMs": 11082,
+  "finalUrl": "/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f?analysis=ok&n=6",
+  "readyNoticeShown": true,
+  "browserEvents": [
+    "requestfailed GET http://localhost:3008/en/login?_rsc=_i_aeImnuN6u1u1r net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/login?_rsc=EIIHFHJPd1H3prBf net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=Wxl2Zl2u3MHqzVgL net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=Wxl2Zl2u3MHqzVgL net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=FTH_Y_9aQ5uP2DAg net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=FTH_Y_9aQ5uP2DAg net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/dashboard?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=Va90IE6hfQ_IGbFS net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/evidence?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed POST http://localhost:3008/en/app/contracts/new net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/new?_rsc=rrY5wn2mA7mAtHFp net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f/acti net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f/obli net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f/obli net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f/acti net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f/evid net::ERR_ABORTED",
+    "requestfailed POST http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f?uplo net::ERR_ABORTED"
+  ]
+}
+qa-replay-stub on 127.0.0.1:8788, delay 0 ms
+#1 POST /v1/chat/completions — replying after 0 ms
+#1 replied after 7 ms
+--- delay 84000 ms
+{
+  "label": "delay84",
+  "contractId": "8c827481-51c0-44d1-b6df-f3a53190a083",
+  "runCompletedAfterMs": 93009,
+  "redirectSeenAfterMs": 96020,
+  "finalUrl": "/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083?analysis=ok&n=6",
+  "readyNoticeShown": true,
+  "browserEvents": [
+    "requestfailed GET http://localhost:3008/en/login?_rsc=EIIHFHJPd1H3prBf net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/evidence?_rsc=Wxl2Zl2u3MHqzVgL net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=Wxl2Zl2u3MHqzVgL net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=Wxl2Zl2u3MHqzVgL net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=FTH_Y_9aQ5uP2DAg net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts?_rsc=Va90IE6hfQ_IGbFS net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/agent?_rsc=Va90IE6hfQ_IGbFS net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/evidence?_rsc=Va90IE6hfQ_IGbFS net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/evidence?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/dashboard?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/tasks?_rsc=KvOFIcNK9wodE9tW net::ERR_ABORTED",
+    "requestfailed POST http://localhost:3008/en/app/contracts/new net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/f9d1d2e7-3dba-4de6-9a78-5a123d9da98f?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083?_rsc net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/evid net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/obli net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/offi net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/acti net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/offi net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/evid net::ERR_ABORTED",
+    "requestfailed POST http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083 net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/acti net::ERR_ABORTED",
+    "requestfailed GET http://localhost:3008/en/app/contracts/8c827481-51c0-44d1-b6df-f3a53190a083/obli net::ERR_ABORTED"
+  ]
+}
+qa-replay-stub on 127.0.0.1:8788, delay 84000 ms
+#1 POST /v1/chat/completions — replying after 84000 ms
+#1 replied after 84023 ms
+--- server log
+▲ Next.js 16.3.4
+- Local:         http://localhost:3008
+- Network:       http://192.168.1.114:3008
+✓ Ready in 442ms
+⚠ Warning: Next.js ignored package-lock.json in /Users/mayasahaldashsh because it is outside the current Git repository (/Users/mayasahaldashsh/Documents/VAZORA).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 132ms

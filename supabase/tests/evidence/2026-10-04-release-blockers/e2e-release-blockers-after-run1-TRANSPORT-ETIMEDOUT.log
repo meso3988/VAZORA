@@ -1,0 +1,95 @@
+(node:30208) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS  after alpha en /contracts 200
+PASS  after alpha en /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · Government Benchmark Client Authority Active SAR 1.0M 1 0 due · 1 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not i
+PASS  after alpha en /contracts BETA-200: active obligations computed = 1
+PASS  after alpha en /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · Government Benchmark Client Authority Active SAR 1.0M 1 1 due · 0 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not 
+PASS  after alpha en /contracts BETA-200: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  after alpha en /contracts BETA-200: riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after alpha en /contracts BETA-200: claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after alpha en /contracts: no placeholder 0% or zero money in rows
+PASS  after alpha en /contracts: no other-tenant contract
+PASS  after alpha en nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  after alpha en overview BETA-200 200
+PASS  after alpha en overview KPI overdue = 1 — observed KPIs: Active obligations 1 0 due | Overdue 1 | Evidence coverage — Not calculated in this release Not calculated in this release | Open risks — Not available in this release Not available in this release | Risk exposure — Not 
+PASS  after alpha en overview KPI active obligations = 1
+PASS  after alpha en overview coverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  after alpha en overview risksOpen labelled not in this release — {"state":"deferred","text":"— Not available in this release"}
+PASS  after alpha en overview riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after alpha en overview claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after alpha en overview KPIs: no placeholder zero money / 0%
+PASS  after alpha en lifecycle: no placeholder 0% / zero money — observed: Contract lifecycle Award → execution → evidence → verification → risk → claim → closeout Award Mar 18 Execution Active Evidence Not calculated Not calculated in this release Verification Not in this release Not available
+PASS  after alpha en overview + tabs: no active risks/claims links — links=0
+PASS  after alpha en tabs: risks/claims marked unavailable
+PASS  after alpha en obligations tab 200
+PASS  after alpha en obligations hint has no unknown denominator (n / 0) — observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026
+PASS  after alpha en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026 – Jul 31, 2027 Active Overview Obligati
+PASS  after alpha en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026 – Jul 31, 2027 Active Overview Obligati
+PASS  after alpha en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Claims — not available in this release Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page
+PASS  after alpha en html dir
+PASS  after alpha ar /contracts 200
+PASS  after alpha ar /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 1 0 مستحق · 1 متأخر غير محتسب غير محتسب في هذا الإصدار ليس في هذا الإصدار غير متاح في هذا الإصدار ليس في هذا الإصد
+PASS  after alpha ar /contracts BETA-200: active obligations computed = 1
+PASS  after alpha ar /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 1 1 مستحق · 0 متأخر غير محتسب غير محتسب في هذا الإصدار ليس في هذا الإصدار غير متاح في هذا الإصدار ليس في هذا الإص
+PASS  after alpha ar /contracts BETA-200: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"غير محتسب غير محتسب في هذا الإصدار"}
+PASS  after alpha ar /contracts BETA-200: riskExposure labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  after alpha ar /contracts BETA-200: claimReadiness labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  after alpha ar /contracts: no placeholder 0% or zero money in rows
+PASS  after alpha ar /contracts: no other-tenant contract
+PASS  after alpha ar nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  after alpha ar overview BETA-200 200
+PASS  after alpha ar overview KPI overdue = 1 — observed KPIs: الالتزامات المفعّلة 1 0 مستحق | متأخرة 1 | تغطية الأدلة — غير محتسب في هذا الإصدار غير محتسب في هذا الإصدار | المخاطر المفتوحة — غير متاح في هذا الإصدار غير متاح في هذا الإصدار | التعرض للمخاطر — غير متاح في هذا الإصدار 
+PASS  after alpha ar overview KPI active obligations = 1
+PASS  after alpha ar overview coverage labelled not calculated — {"state":"not_calculated","text":"غير محتسب غير محتسب في هذا الإصدار"}
+PASS  after alpha ar overview risksOpen labelled not in this release — {"state":"deferred","text":"— غير متاح في هذا الإصدار"}
+PASS  after alpha ar overview riskExposure labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  after alpha ar overview claimReadiness labelled not in this release — {"state":"deferred","text":"ليس في هذا الإصدار غير متاح في هذا الإصدار"}
+PASS  after alpha ar overview KPIs: no placeholder zero money / 0%
+PASS  after alpha ar lifecycle: no placeholder 0% / zero money — observed: دورة حياة العقد الإرساء ← التنفيذ ← الإثبات ← التحقق ← المخاطرة ← المطالبة ← الإقفال الإرساء 18 مارس التنفيذ نشط الإثبات غير محتسب غير محتسب في هذا الإصدار التحقق ليس في هذا الإصدار غير متاح في هذا الإصدار المخاطرة ليس ف
+PASS  after alpha ar overview + tabs: no active risks/claims links — links=0
+PASS  after alpha ar tabs: risks/claims marked unavailable
+PASS  after alpha ar obligations tab 200
+PASS  after alpha ar obligations hint has no unknown denominator (n / 0) — observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 ما
+PASS  after alpha ar direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 مارس 2026 – 31 يوليو 2027 نشط نظرة عامة ال
+PASS  after alpha ar direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 مارس 2026 – 31 يوليو 2027 نشط نظرة عامة ال
+PASS  after alpha ar direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: المستخلصات المستخلصات — غير متاحة في هذا الإصدار إعداد المستخلصات وجاهزيتها ليسا ضمن هذا الإصدار، لذلك لا يُسجَّل أو يُحتسب شيء هنا. لا تعني هذه الصفحة عدم وجود
+PASS  after alpha ar html dir
+PASS  after beta en /contracts 200
+PASS  after beta en /contracts FM-008: overdue computed = 1 — observed row: Facilities Management — Central FM-008 · Government QA Client Authority Active Value not recorded 1 0 due · 1 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not in
+PASS  after beta en /contracts FM-008: active obligations computed = 1
+PASS  after beta en /contracts OM-014: overdue computed = 0 (real zero) — observed row: O&M Services — Northern Region OM-014 · Government QA Client Authority Active Value not recorded 1 1 due · 0 overdue Not calculated Not calculated in this release Not in this release Not available in this release Not in 
+PASS  after beta en /contracts FM-008: evidenceCoverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  after beta en /contracts FM-008: riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after beta en /contracts FM-008: claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after beta en /contracts: no placeholder 0% or zero money in rows
+PASS  after beta en /contracts: no other-tenant contract
+PASS  after beta en nav: claims is not an active link and is marked unavailable — links=0 marked=1
+PASS  after beta en overview FM-008 200
+PASS  after beta en overview KPI overdue = 1 — observed KPIs: Active obligations 1 0 due | Overdue 1 | Evidence coverage — Not calculated in this release Not calculated in this release | Open risks — Not available in this release Not available in this release | Risk exposure — Not 
+PASS  after beta en overview KPI active obligations = 1
+PASS  after beta en overview coverage labelled not calculated — {"state":"not_calculated","text":"Not calculated Not calculated in this release"}
+PASS  after beta en overview risksOpen labelled not in this release — {"state":"deferred","text":"— Not available in this release"}
+PASS  after beta en overview riskExposure labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after beta en overview claimReadiness labelled not in this release — {"state":"deferred","text":"Not in this release Not available in this release"}
+PASS  after beta en overview KPIs: no placeholder zero money / 0%
+PASS  after beta en lifecycle: no placeholder 0% / zero money — observed: Contract lifecycle Award → execution → evidence → verification → risk → claim → closeout Award — Execution Active Evidence Not calculated Not calculated in this release Verification Not in this release Not available in t
+PASS  after beta en overview + tabs: no active risks/claims links — links=0
+PASS  after beta en tabs: risks/claims marked unavailable
+PASS  after beta en obligations tab 200
+PASS  after beta en obligations hint has no unknown denominator (n / 0) — observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded 
+PASS  after beta en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded – Not recorded Active Overview Obligatio
+PASS  after beta en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · Value not recorded · Not recorded – Not recorded Active Overview Obligatio
+PASS  after beta en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Claims — not available in this release Claim preparation and readiness are not part of this release, so nothing is recorded or calculated here. This page
+PASS  after beta en html dir
+PASS  after empty: honest empty state, no failure text
+page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://localhost:3005/en/app/claims", waiting until "load"
+
+    at go (/Users/mayasahaldashsh/Documents/VAZORA/supabase/tests/e2e-release-blockers.mts:56:24)
+    at main (/Users/mayasahaldashsh/Documents/VAZORA/supabase/tests/e2e-release-blockers.mts:162:11) {
+  log: [
+    '  - navigating to "http://localhost:3005/en/app/claims", waiting until "load"'
+  ],
+  name: 'TimeoutError'
+}

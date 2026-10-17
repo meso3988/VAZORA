@@ -1,0 +1,285 @@
+{
+  "provider": "openai-compat-officer",
+  "model": "gpt-5.6-sol",
+  "maxTokens": 128871,
+  "maxCalls": 34,
+  "used": {
+    "tokens": 85241,
+    "calls": 21
+  },
+  "requests": [
+    {
+      "n": 1,
+      "at": "2026-09-26T19:28:30.799Z",
+      "estimatedInput": 6146,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 128871,
+        "calls": 34
+      },
+      "actualInput": 2450,
+      "actualOutput": 45,
+      "estimateHeld": true
+    },
+    {
+      "n": 2,
+      "at": "2026-09-26T19:28:59.644Z",
+      "estimatedInput": 10824,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 126376,
+        "calls": 33
+      },
+      "actualInput": 5568,
+      "actualOutput": 66,
+      "estimateHeld": true
+    },
+    {
+      "n": 3,
+      "at": "2026-09-26T19:30:08.240Z",
+      "estimatedInput": 7243,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 120742,
+        "calls": 32
+      },
+      "actualInput": 2837,
+      "actualOutput": 13,
+      "estimateHeld": true
+    },
+    {
+      "n": 4,
+      "at": "2026-09-26T19:30:16.517Z",
+      "estimatedInput": 8948,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 117892,
+        "calls": 31
+      },
+      "actualInput": 3919,
+      "actualOutput": 93,
+      "estimateHeld": true
+    },
+    {
+      "n": 5,
+      "at": "2026-09-26T19:30:21.903Z",
+      "estimatedInput": 10146,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 113880,
+        "calls": 30
+      },
+      "actualInput": 4674,
+      "actualOutput": 173,
+      "estimateHeld": true
+    },
+    {
+      "n": 6,
+      "at": "2026-09-26T19:30:35.750Z",
+      "estimatedInput": 10653,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 109033,
+        "calls": 29
+      },
+      "actualInput": 4923,
+      "actualOutput": 115,
+      "estimateHeld": true
+    },
+    {
+      "n": 7,
+      "at": "2026-09-26T19:31:22.801Z",
+      "estimatedInput": 6662,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 103995,
+        "calls": 28
+      },
+      "actualInput": 2647,
+      "actualOutput": 13,
+      "estimateHeld": true
+    },
+    {
+      "n": 8,
+      "at": "2026-09-26T19:31:36.505Z",
+      "estimatedInput": 8367,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 101335,
+        "calls": 27
+      },
+      "actualInput": 3729,
+      "actualOutput": 41,
+      "estimateHeld": true
+    },
+    {
+      "n": 9,
+      "at": "2026-09-26T19:32:00.647Z",
+      "estimatedInput": 9103,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 97565,
+        "calls": 26
+      },
+      "actualInput": 4094,
+      "actualOutput": 154,
+      "estimateHeld": true
+    },
+    {
+      "n": 10,
+      "at": "2026-09-26T19:32:59.743Z",
+      "estimatedInput": 6154,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 93317,
+        "calls": 25
+      },
+      "actualInput": 2456,
+      "actualOutput": 28,
+      "estimateHeld": true
+    },
+    {
+      "n": 11,
+      "at": "2026-09-26T19:33:25.061Z",
+      "estimatedInput": 7251,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 90833,
+        "calls": 24
+      },
+      "actualInput": 2837,
+      "actualOutput": 15,
+      "estimateHeld": true
+    },
+    {
+      "n": 12,
+      "at": "2026-09-26T19:33:30.315Z",
+      "estimatedInput": 8430,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 87981,
+        "calls": 23
+      },
+      "actualInput": 3646,
+      "actualOutput": 94,
+      "estimateHeld": true
+    },
+    {
+      "n": 13,
+      "at": "2026-09-26T19:33:38.085Z",
+      "estimatedInput": 10595,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 84241,
+        "calls": 22
+      },
+      "actualInput": 5041,
+      "actualOutput": 161,
+      "estimateHeld": true
+    },
+    {
+      "n": 14,
+      "at": "2026-09-26T19:33:45.385Z",
+      "estimatedInput": 11062,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 79039,
+        "calls": 21
+      },
+      "actualInput": 5277,
+      "actualOutput": 145,
+      "estimateHeld": true
+    },
+    {
+      "n": 15,
+      "at": "2026-09-26T19:34:05.220Z",
+      "estimatedInput": 7259,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 73617,
+        "calls": 20
+      },
+      "actualInput": 2844,
+      "actualOutput": 44,
+      "estimateHeld": true
+    },
+    {
+      "n": 16,
+      "at": "2026-09-26T19:34:14.168Z",
+      "estimatedInput": 10120,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 70729,
+        "calls": 19
+      },
+      "actualInput": 4961,
+      "actualOutput": 145,
+      "estimateHeld": true
+    },
+    {
+      "n": 17,
+      "at": "2026-09-26T19:34:22.620Z",
+      "estimatedInput": 10559,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 65623,
+        "calls": 18
+      },
+      "actualInput": 5179,
+      "actualOutput": 81,
+      "estimateHeld": true
+    },
+    {
+      "n": 18,
+      "at": "2026-09-26T19:34:40.833Z",
+      "estimatedInput": 7259,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 60363,
+        "calls": 17
+      },
+      "actualInput": 2844,
+      "actualOutput": 13,
+      "estimateHeld": true
+    },
+    {
+      "n": 19,
+      "at": "2026-09-26T19:34:52.042Z",
+      "estimatedInput": 8964,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 57506,
+        "calls": 16
+      },
+      "actualInput": 3926,
+      "actualOutput": 95,
+      "estimateHeld": true
+    },
+    {
+      "n": 20,
+      "at": "2026-09-26T19:35:00.933Z",
+      "estimatedInput": 10192,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 53485,
+        "calls": 15
+      },
+      "actualInput": 4683,
+      "actualOutput": 141,
+      "estimateHeld": true
+    },
+    {
+      "n": 21,
+      "at": "2026-09-26T19:35:11.726Z",
+      "estimatedInput": 10621,
+      "maxOutput": 1500,
+      "remainingBefore": {
+        "tokens": 48661,
+        "calls": 14
+      },
+      "actualInput": 4897,
+      "actualOutput": 134,
+      "estimateHeld": true
+    }
+  ]
+}

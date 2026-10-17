@@ -1,0 +1,18 @@
+{
+  "outcome": "COMPLETE",
+  "used": {
+    "requests": 6,
+    "input": 31198,
+    "output": 14818,
+    "usd": 0.4212
+  },
+  "limits": {
+    "maxRequests": 6,
+    "maxInputTokens": 40000,
+    "maxOutputTokensIncludingThinking": 48000,
+    "maxCostUsdTotal": 1.2,
+    "max_tokens_perRequest": 8000,
+    "approval": "approved for this six-case retest only; total cap $1.20, 48,000 output tokens incl. thinking; no top-up, no raise; ceilings not targets"
+  },
+  "rawFile": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T20-24-59-429Z-fullanswer-retest-v2-raw.jsonl"
+}

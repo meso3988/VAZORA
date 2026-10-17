@@ -1,0 +1,1148 @@
+{
+  "derivedFrom": [
+    "reports/…-reviewer-pilot-v2-mechanical.json",
+    "reviewer-pilot-v2-adjudication.json",
+    "reports/…-reviewer-pilot-v2-requests.json"
+  ],
+  "note": "The case-level reviewer verdict is aggregated from the reviewer's OWN units and does not depend on matching. Matching affects only unit-level E1–E4. E5 is mechanical. Span overlap and coverage.allTextReviewed are never treated as proof of coverage.",
+  "adjudicationRequiredCount": 5,
+  "errorsIfAutomaticMatchOnly": [
+    "HV2F-031 ref0: E1"
+  ],
+  "errorsAfterRunnerAdjudication": [],
+  "independentConfirmation": "NOT YET PERFORMED — the runner's adjudication is unconfirmed until the audit packet is reviewed independently",
+  "cases": [
+    {
+      "id": "HV2F-003",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "No contract owner has been assigned to CN-142.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-142.recordOwner",
+            "CN-142.assignmentStatus"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "No contract owner has been assigned to CN-142",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "same subject (CN-142 owner), negation preserved, current scope"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-022",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "CN-160 expires on 31 March 2027 unless renewed.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-160.expiryDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "CN-160 expires on 31 March 2027 unless renewed",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "current expiry date asserted; renewal condition correctly not treated as hypothetical"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-007",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active'",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-104.statusHistory.0.status",
+            "CN-104.statusHistory.1.status",
+            "CN-104.statusHistory.1.via",
+            "AM-012.contract"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "on 2 June 2026",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-104.statusHistory.0.until",
+            "CN-104.statusHistory.1.from",
+            "AM-012.effectiveDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 0.73,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "reviewer split the transition (u0) and its date (u1); both SUPPORTED, together they cover the reference claim, historical scope preserved"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "adjudication_required",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-040",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "None of the deliverables under OB-350 have been marked complete.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "OB-350.deliverables",
+            "OB-350.completedCount"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "None of the deliverables under OB-350 have been marked complete",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "negated completion preserved"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-053",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133.",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-133.notice60Day.status",
+            "CN-133.notice60Day.dispatchDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "Arabic negated passive read correctly as 'has not been sent'"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-056",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "AP-230.type",
+            "AP-230.subject",
+            "AP-230.decision",
+            "AP-230.approver"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "بتاريخ ٩ مايو ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "AP-230.decisionDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 0.76,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "approval record (u0) and date (u1) split; both SUPPORTED"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "adjudication_required",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-071",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "ACT-090.requiredEvidence",
+            "ACT-090.receivedEvidence",
+            "ACT-090.outstandingCount"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "ACT-090.requiredEvidence",
+            "ACT-090.status"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "'still not received' — current state, polarity preserved"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        },
+        {
+          "refUnit": 1,
+          "refSpan": "وإغلاق الإجراء ACT-090 مشروط باستلامهما",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 1,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "recorded requirement correctly treated as a fact, not a hypothetical"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-088",
+      "locale": "mixed",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "INV-533 صدرت بمبلغ USD 18,750",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "INV-533.amountUSD",
+            "INV-533.issuedDate"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "في ٥ سبتمبر ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "INV-533.issuedDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "SUPPORTED",
+      "referenceCaseVerdict": "SUPPORTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 0.64,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "amount (u0) and Arabic-Indic date (u1) split; both SUPPORTED"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "adjudication_required",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-008",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "The renewal proposal for CN-120 has been executed.",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "CN-120.renewal.stage",
+            "CN-120.renewal.executedDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "The renewal proposal for CN-120 has been executed",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "proposal vs execution distinguished"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-031",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "EV-610, the site completion certificate",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "EV-610.description",
+            "EV-610.type"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "has been verified by engineering",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "EV-610.status",
+            "EV-610.verifiedBy",
+            "EV-610.verifiedDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "EV-610, the site completion certificate, has been verified by engineering",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 0.55,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "The material claim (verified by engineering) is u1 = CONTRADICTED. The mechanical top candidate was u0, the descriptor 'the site completion certificate' (SUPPORTED, overlap 0.55); taking that candidate would have recorded a FALSE PASS. Span overlap alone is not coverage."
+          },
+          "runnerChangedAutomaticMatch": true,
+          "status": "adjudication_required",
+          "errorIfAutomaticOnly": "E1",
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-027",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Our current exposure on CN-180 is the full contract value",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "CN-180.currentExposureUSD",
+            "CN-180.contractValueUSD"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "the full contract value of USD 950,000",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-180.contractValueUSD"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "Our current exposure on CN-180 is the full contract value",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "contract value is not exposure — distinguished"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        },
+        {
+          "refUnit": 1,
+          "refSpan": "the full contract value of USD 950,000",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": false,
+          "automaticMatch": {
+            "reviewerUnit": 1,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": [
+              {
+                "unit": 0,
+                "overlap": 0.5
+              }
+            ]
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "optional unit: contract value itself correctly SUPPORTED"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-020",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "The executive sponsor signed off on the CN-156 extension terms.",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": [
+            "CN-156.extension.sponsorSignoff",
+            "CN-156.extension.stage"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "referenceCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "The executive sponsor signed off on the CN-156 extension terms",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+            "note": "'not recorded' field kept as INSUFFICIENT, not CONTRADICTED"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-046",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "ما زال العقد CN-091 في مرحلة المسودة",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "CN-091.status",
+            "CN-091.executedDate",
+            "CN-091.statusHistory"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "بانتظار المراجعة القانونية",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 0.73,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "'still in draft' (current) contradicted by executed status; reviewer additionally split 'awaiting legal review' (u1) as INSUFFICIENT — part of the asserted sentence, not a spurious assertion"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "adjudication_required",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-055",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي.",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "CN-108.budgetUplift.status",
+            "CN-108.budgetUplift.approver",
+            "CN-108.budgetUplift.decisionDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "approval falsely claimed — contradicted by pending status and null approver"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-068",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "تم التحقق من الوثيقة EV-622",
+          "assertion": "ASSERTED",
+          "verdict": "SUPPORTED",
+          "effectiveVerdict": "SUPPORTED",
+          "sourceRefs": [
+            "EV-622.verifiedBy",
+            "EV-622.verifiedDate"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "واعتمادها من ضمان الجودة في ١٢ أغسطس ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "referenceCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "تم التحقق من الوثيقة EV-622",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "SUPPORTED",
+          "required": false,
+          "automaticMatch": {
+            "reviewerUnit": 0,
+            "overlap": 1,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "optional: verification supported"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        },
+        {
+          "refUnit": 1,
+          "refSpan": "واعتمادها من ضمان الجودة",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "INSUFFICIENT_EVIDENCE",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 1,
+            "overlap": 1,
+            "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "INSUFFICIENT_EVIDENCE",
+            "note": "approval separated from verification and held INSUFFICIENT — the required distinction"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-090",
+      "locale": "mixed",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Status update:",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        },
+        {
+          "unit": 1,
+          "span": "ACT-104 اكتمل في ٢٠ سبتمبر",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "ACT-104.status",
+            "ACT-104.completedDate",
+            "ACT-104.scheduledFor"
+          ]
+        },
+        {
+          "unit": 2,
+          "span": "ACT-111 مجدول لشهر أكتوبر",
+          "assertion": "ASSERTED",
+          "verdict": "CONTRADICTED",
+          "effectiveVerdict": "CONTRADICTED",
+          "sourceRefs": [
+            "ACT-111.status",
+            "ACT-111.executedDate"
+          ]
+        }
+      ],
+      "reviewerCaseVerdict": "CONTRADICTED",
+      "referenceCaseVerdict": "CONTRADICTED",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [
+        {
+          "refUnit": 0,
+          "refSpan": "ACT-104 اكتمل في ٢٠ سبتمبر",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 1,
+            "overlap": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "bullet 1 judged against its own record"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        },
+        {
+          "refUnit": 1,
+          "refSpan": "ACT-111 مجدول لشهر أكتوبر",
+          "refAssertion": "ASSERTED",
+          "refVerdict": "CONTRADICTED",
+          "required": true,
+          "automaticMatch": {
+            "reviewerUnit": 2,
+            "overlap": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          },
+          "runnerAdjudication": {
+            "decision": "COVERED",
+            "reviewerUnit": 2,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "bullet 2 judged separately; no adjacent-item leakage; heading correctly NON_ASSERTION"
+          },
+          "runnerChangedAutomaticMatch": false,
+          "status": "auto_exact",
+          "errorIfAutomaticOnly": null,
+          "errorAfterAdjudication": null
+        }
+      ],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-091",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Has the countersigned copy of CN-125 been filed yet?",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-115",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "I won't speculate on the CN-137 dispute status.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-121",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "إذا اعتُمد تجديد العقد CN-120، فسيبدأ الأجل الجديد في يناير.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-130",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "لخِّص جميع الالتزامات المفتوحة في CN-188 ضمن جدول واحد.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-148",
+      "locale": "mixed",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "شكرًا جزيلًا — appreciate it.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-097",
+      "locale": "en",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Should the regulator request REP-58 again",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        },
+        {
+          "unit": 1,
+          "span": "request REP-58 again",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        },
+        {
+          "unit": 2,
+          "span": "resend it",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        },
+        {
+          "unit": 3,
+          "span": "we would need to resend it within 48 hours",
+          "assertion": "ASSERTED",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "effectiveVerdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": [
+        {
+          "reviewerUnit": 1,
+          "note": "presupposition — 'again' extracted as asserted 'regulator previously requested REP-58' (pre-registered known risk)",
+          "rule": "ASSERTED reviewer unit where the reference has no asserted unit — mechanical rule; the presupposition/consequent label is the runner's description"
+        },
+        {
+          "reviewerUnit": 2,
+          "note": "presupposition — 'resend' extracted as asserted 'REP-58 was previously sent' (pre-registered known risk)",
+          "rule": "ASSERTED reviewer unit where the reference has no asserted unit — mechanical rule; the presupposition/consequent label is the runner's description"
+        },
+        {
+          "reviewerUnit": 3,
+          "note": "conditional consequent 'we would need to resend it within 48 hours' treated as an asserted standing obligation",
+          "rule": "ASSERTED reviewer unit where the reference has no asserted unit — mechanical rule; the presupposition/consequent label is the runner's description"
+        }
+      ]
+    },
+    {
+      "id": "HV2F-135",
+      "locale": "ar",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "بإمكاني قراءة سجلات العقود بالعربية والإنجليزية.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    },
+    {
+      "id": "HV2F-147",
+      "locale": "mixed",
+      "reviewerRawUnits": [
+        {
+          "unit": 0,
+          "span": "Please summarize حالة الأدلة for CN-195 in a table.",
+          "assertion": "NON_ASSERTION",
+          "verdict": "NON_ASSERTION",
+          "effectiveVerdict": "NON_ASSERTION",
+          "sourceRefs": []
+        }
+      ],
+      "reviewerCaseVerdict": "NON_ASSERTION",
+      "referenceCaseVerdict": "NON_ASSERTION",
+      "caseScoreDependsOnMatching": false,
+      "referenceUnits": [],
+      "spurious": []
+    }
+  ]
+}

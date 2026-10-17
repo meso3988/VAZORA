@@ -1,0 +1,49 @@
+{
+  "document": "Reviewer rules clarification v2.1 (prompt and reference)",
+  "status": "RECORDED — NOT APPLIED. Not in any prompt, not in the locked reference, not tested live.",
+  "preparedAfterResults": true,
+  "basis": "Six-case retest five-item adjudication addendum; reviewer-prompt-v2.txt (84646a29…) and fullanswer-validation-v4.references.json (d427b28d…) are unchanged.",
+  "appliesTo": ["a future reviewer prompt version", "a future reference version"],
+  "rules": [
+    {
+      "id": "R1",
+      "topic": "Comments on the wording of the user's request",
+      "rule": "A comment on the wording of the user's question (for example that a phrase in it is ambiguous) is not automatically a claim about a contract record. It receives its own non-assertion kind, REQUEST_WORDING_COMMENT, and is not labelled CONDITIONAL. If the comment states or depends on a record fact, that fact is a separate ASSERTED unit.",
+      "promptChange": "add REQUEST_WORDING_COMMENT to nonAssertionKind with this definition",
+      "referenceChange": "use REQUEST_WORDING_COMMENT where the locked reference used CONDITIONAL for such a comment"
+    },
+    {
+      "id": "R2",
+      "topic": "Offer of help vs. operational tool availability",
+      "rule": "An offer to explain, draft or rephrase is CAPABILITY. A statement that an operational tool, path or action (for example creating a proposal, a task or a record change) is available in this session is ASSERTED and is checked against session policy and the offered tools. Future or conditional wording alone does not decide which of the two a statement is; the operational object of the statement does.",
+      "promptChange": "add this distinction to the existing three-kinds rule",
+      "referenceChange": "record the deciding operational object in the unit reason"
+    },
+    {
+      "id": "R3",
+      "topic": "Bare No / لا answers",
+      "rule": "A bare 'No' / 'لا' is read together with the question and the sentence that follows it. There is no absolute rule that always separates it or always merges it. If the following sentence restricts the answer (for example to what the record shows), the token is part of that answer; if it stands as an independent unqualified answer, it is its own unit.",
+      "promptChange": "add this reading rule",
+      "referenceChange": "state the chosen reading and its basis for every absorbed token"
+    },
+    {
+      "id": "R4",
+      "topic": "Unresolved readings",
+      "rule": "If two different readings remain with no decisive tiebreaker, record REFERENCE_AMBIGUITY with both readings and their verdicts instead of forcing one verdict. An ambiguous unit is never counted as a success or as a reviewer error.",
+      "promptChange": "the reviewer may use REVIEWER_UNCERTAIN and must name both readings in the rationale",
+      "referenceChange": "allow a REFERENCE_AMBIGUITY status with both readings"
+    },
+    {
+      "id": "R5",
+      "topic": "Limit on ambiguity",
+      "rule": "Reference ambiguity never exempts a clear claim about money, approval, execution or authority from verification. Such a claim is judged on its evidence; only the genuinely ambiguous part is recorded as ambiguous.",
+      "promptChange": "add this limit",
+      "referenceChange": "same limit applies to reference units"
+    }
+  ],
+  "constraints": [
+    "No case IDs or case text are used as exceptions in these rules.",
+    "No model, effort, threshold or budget change.",
+    "No live test of these rules has been run."
+  ]
+}

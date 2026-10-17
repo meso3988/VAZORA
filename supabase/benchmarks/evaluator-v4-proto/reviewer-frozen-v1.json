@@ -1,0 +1,86 @@
+{
+  "reviewer": "hybrid-semantic-reviewer-frozen-v1",
+  "status": "FROZEN — the exact configuration that met the 24-case calibration criteria (commit 55e9f1c). Not to be tuned before the full-answer validation study.",
+  "model": "claude-opus-5-5",
+  "settings": {
+    "max_tokens": 4000,
+    "thinking": {
+      "type": "adaptive"
+    },
+    "output_config": {
+      "effort": "medium"
+    },
+    "omitted": [
+      "temperature",
+      "top_p",
+      "top_k",
+      "tools",
+      "thinking.budget_tokens"
+    ]
+  },
+  "pricingBasis": {
+    "inputUsdPerMillion": 4,
+    "outputUsdPerMillion": 20,
+    "source": "https://platform.claude.com/docs/en/models/opus-5-5/overview"
+  },
+  "artifacts": {
+    "prompt (system instructions + output schema)": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reviewer-prompt-v1.txt",
+      "sha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487"
+    },
+    "pilot manifest": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reviewer-pilot-v2.json",
+      "sha256": "3c4dab0564bf515f75f0a82049efb689d2380b5c85e5fb01936ce4f0635d6b4c"
+    },
+    "request bodies": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-requests.json",
+      "sha256": "67bb1e3b7e3ab530f9448e91b310781c1d75b6aaf2cdf238d525823f2dbbf613"
+    },
+    "raw responses": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-raw.jsonl",
+      "sha256": "b81faf88199f7ffcdae3565fc3ed8947935867d5266ff4a26d96e2f64f5449d4"
+    },
+    "mechanical scoring": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-mechanical.json",
+      "sha256": "da9435f46b096d300946d82916596f2877722c0f301a953099b5b638d6d71599"
+    },
+    "adjudication": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reviewer-pilot-v2-adjudication.json",
+      "sha256": "0431f3e6fd9f7cead12d9cc66f1fa1fb7f93f84ffe5da05333aa35f7f7f08b91"
+    },
+    "final score": {
+      "path": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-final-score.json",
+      "sha256": "6c18b4592c954329a25553f6fe63b03a670559f9ffd786cc2a80a681d648eb27"
+    },
+    "runner": {
+      "path": "supabase/tests/evaluator-v4-reviewer-pilot-v2-run.ts",
+      "sha256": "ab7c2d2fabf51bbdb610220edf27f539f801ded7e8d59fe3c110f4a76905fc03"
+    },
+    "scorer": {
+      "path": "supabase/tests/evaluator-v4-reviewer-pilot-v2-score.ts",
+      "sha256": "e0141766a221313456af369a443c54e46db3fa19291d2f6c130d1c6519cfe137"
+    }
+  },
+  "requestBodyShape": "{model, max_tokens, thinking, output_config, system: <prompt>, messages:[{role:'user', content: JSON.stringify({caseId, request, referenceClock, answer, sources, receipts})}]}",
+  "knownDefects": [
+    {
+      "id": "KD-1",
+      "source": "HV2F-097 (calibration run)",
+      "finding": "Presuppositions ('again', 'resend') and a conditional consequent ('we would need to resend it within 48 hours') were extracted as ASSERTED claims (3x E5). Recorded as a known reviewer defect. It is NOT erased by the overall calibration pass and the prompt is NOT tuned for it before the next study."
+    }
+  ],
+  "calibrationResult": {
+    "verdict": "MEETS PILOT CRITERIA",
+    "caseAgreement": "23/24",
+    "E1": 0,
+    "E2": 0,
+    "E3": 0,
+    "E4": 0,
+    "E5": 3,
+    "E6": 0,
+    "E7": 0,
+    "E8": 0,
+    "usd": 0.4954,
+    "scope": "exposed 24-case calibration sample; not blind acceptance; not final approval of the reviewer or of VAZORA"
+  }
+}

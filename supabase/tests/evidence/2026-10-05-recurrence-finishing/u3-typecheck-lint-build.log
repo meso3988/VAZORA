@@ -1,0 +1,13 @@
+commit de31625
+--- typecheck
+> tsc --noEmit -p tsconfig.json
+
+--- lint (0 errors)
+  4:1  warning  Unused eslint-disable directive (no problems were reported)
+  1:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+  1:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+✖ 4 problems (0 errors, 4 warnings)
+--- build
+✓ Compiled successfully in 5.5s
+BUILD_ID 4HjeVCCZnqGwhV_yAurB5
+--- heldout-v2 scorer maintenance copy vs 1e3dc08 source on copied predictions: score JSON identical, stdout identical, equal to the committed historical report (verdict FAIL)

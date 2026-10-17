@@ -8,6 +8,8 @@
  * so demo data renders natively in both English and Arabic.
  */
 
+import type { ObligationLifecycle, ObligationState } from "@/domain/obligation-state";
+
 export type LocalizedText = { en: string; ar: string };
 
 export type ISODate = string;
@@ -56,11 +58,13 @@ export type Contract = {
   client: LocalizedText;
   sector: Sector;
   status: ContractStatus;
-  value: number;
+  /** null when no contract value is recorded — never shown as 0 */
+  value: number | null;
   currency: string;
   startDate: ISODate;
   endDate: ISODate;
-  health: ContractHealth;
+  /** illustrative demo figures only; live indicators come from domain/indicators */
+  health?: ContractHealth;
 };
 
 /** Top-level indicators. Each is grounded in counted objects, never a synthetic score. */
@@ -107,9 +111,17 @@ export type Obligation = {
   requirement: LocalizedText;
   ownerId: string;
   ownerName: string;
-  status: ObligationStatus;
+  /** illustrative demo status only — live obligations carry `lifecycle` + `state` */
+  status?: ObligationStatus;
+  /** live review/activation state (approved obligations only are listed) */
+  lifecycle?: ObligationLifecycle;
+  /** live lifecycle / deadline / effective evidence, kept separate */
+  state?: ObligationState;
   cadence: ObligationCadence;
   dueDate: ISODate;
+  /** live: normalized recurrence rule (e.g. monthly_day_5) and raw frequency */
+  dueRuleNormalized?: string | null;
+  frequencyRaw?: string | null;
   requiredEvidence: LocalizedText[];
   evidenceIds: string[];
   claimId?: string;
@@ -129,7 +141,7 @@ export type Evidence = {
   contractId: string;
   obligationId: string;
   fileName: string;
-  fileType: "pdf" | "xlsx" | "docx" | "jpg" | "eml";
+  fileType: string;
   uploadedBy: string;
   uploadedAt: ISODate;
   version: number;

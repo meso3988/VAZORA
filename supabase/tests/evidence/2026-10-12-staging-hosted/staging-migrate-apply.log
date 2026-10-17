@@ -1,0 +1,22 @@
+with-staging: target oivrwhvbvfhsslsqghuz verified (URL, key kinds, keys accepted by staging, database URL)
+server: 17.11 · database: postgres
+migration history table: absent · applied: none
+public tables: none
+application rows: 0
+auth users: 0 · storage objects: 0
+apply 0001_phase2a_foundation ok (sha256 3eebdd2baa8f)
+apply 0002_phase2a_org_creator_read ok (sha256 bdc7d986f5b8)
+apply 0003_phase2a_security_fixes ok (sha256 9b5bcfb5abd0)
+apply 0004_phase2b_ingestion ok (sha256 3a102c144d0d)
+apply 0005_phase3_evidence ok (sha256 be52d2e545eb)
+apply 0006_evidence_policy_hardening ok (sha256 33de709bfb99)
+apply 0007_verification_discrepancy ok (sha256 e227b30bc113)
+apply 0008_discrepancy_scope_per_version ok (sha256 a4d0c4e21c9e)
+apply 0009_phase4a_contract_officer ok (sha256 f90730bfbb81)
+apply 0010_officer_conversation_support ok (sha256 9f547f91311e)
+apply 0011_officer_sweep ok (sha256 5d4829597b61)
+apply 0012_activity_log_recording_time ok (sha256 8d0c40db7b97)
+apply 0013_officer_action_identity ok (sha256 b6df0ec9ce9b)
+apply 0014_officer_observation_resolution ok (sha256 b6954b0ff1cd)
+apply 0015_cycle_settlements_and_sweep_lock ok (sha256 eaf8148b1b0e)
+history now: 0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011 0012 0013 0014 0015

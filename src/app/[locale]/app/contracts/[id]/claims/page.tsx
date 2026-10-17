@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
+
+import { ContractLoadFailed } from "@/components/app/contract-unavailable";
+import { DeferredNotice } from "@/components/app/deferred-notice";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Empty, Panel } from "@/components/app/primitives";
 import { ClaimCard } from "@/components/app/tables";
-import { requireTenant } from "@/data/context";
+import { readContract, requireTenant } from "@/data/context";
 import { asLocale } from "@/i18n/params";
 
 export default async function ContractClaims(props: PageProps<"/[locale]/app/contracts/[id]/claims">) {
@@ -11,9 +14,13 @@ export default async function ContractClaims(props: PageProps<"/[locale]/app/con
   const locale = asLocale(rawLocale);
   setRequestLocale(locale);
   const t = await getTranslations("app.claims");
-  const { orgId, db } = await requireTenant();
-  const contract = await db.contracts.getById(orgId, id);
-  if (!contract) notFound();
+  const { session, orgId, db } = await requireTenant();
+  const read = await readContract(db, orgId, id, session.mode === "demo");
+  if (read.status === "unavailable") return <ContractLoadFailed />;
+  if (read.status === "not_found") notFound();
+  // Claims are not part of this release: live tenants get the declaration,
+  // never "no claims have been prepared".
+  if (session.mode !== "demo") return <DeferredNotice feature="claims" />;
   const claims = (await db.claims.list(orgId, { contractId: id })).sort((a, b) => b.number - a.number);
 
   return (

@@ -1,0 +1,1299 @@
+import "server-only";
+
+import { z } from "zod";
+
+import { effectiveItemStatus, effectiveStatusForRequirement } from "@/domain/effective-status";
+import type { OfficerCitation } from "@/domain/officer";
+import { actionIdentityKey, type ActionTarget } from "@/lib/officer/action-identity";
+import { assessContractHealth, HealthUnavailableError } from "@/lib/officer/health";
+import { authorizeAction, classifyAction, type ToolClass } from "@/lib/officer/authority";
+import type { OfficerContext } from "@/lib/officer/context";
+import { readCycleSettlements, settledCyclesOf } from "@/data/supabase/cycle-settlements";
+import { obligationSchedule, operationalDueDate, usesCycleSettlements } from "@/lib/officer/schedule";
+import { classifyDeadline } from "@/lib/officer/time";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * Contract Officer tool registry.
+ *
+ * The model may call these by name with validated arguments. It never
+ * receives a database handle, SQL, a service-role key, or the ability to
+ * name an organization: `ctx.organizationId` is injected server-side from
+ * the session and RLS independently re-checks every statement.
+ *
+ * Structured data first — dates, statuses, owners, evidence and gaps are
+ * answered from VAZORA tables, never from embeddings or model memory.
+ */
+
+export type ToolResult =
+  | { ok: true; data: unknown; citations: OfficerCitation[]; summary: string }
+  | { ok: false; error: string };
+
+export type OfficerTool = {
+  name: string;
+  toolClass: ToolClass;
+  description: string;
+  /** zod schema for model-supplied arguments — organization ids are never accepted */
+  input: z.ZodTypeAny;
+  handler: (ctx: OfficerContext, args: any) => Promise<ToolResult>;
+};
+
+const ok = (data: unknown, citations: OfficerCitation[], summary: string): ToolResult =>
+  ({ ok: true, data, citations, summary });
+
+const empty = z.object({}).strict();
+
+/**
+ * Resolve a caller-supplied contract id inside the caller's organization.
+ * A model-hallucinated or cross-tenant id resolves to null here and is
+ * refused before any further query runs.
+ */
+async function resolveContract(ctx: OfficerContext, contractId: string) {
+  const { data } = await ctx.supabase
+    .from("contracts")
+    .select("id, contract_number, title, client_name, status, start_date, end_date, contract_value, currency")
+    .eq("organization_id", ctx.organizationId)
+    .eq("id", contractId)
+    .maybeSingle();
+  return data ?? null;
+}
+
+const cite = (
+  target: OfficerCitation["target"],
+  id: string,
+  label: string,
+  contractId?: string | null,
+  href?: string | null,
+): OfficerCitation => ({ target, id, label, contractId: contractId ?? null, href: href ?? null });
+
+/** Only approved + active obligations are operational truth. */
+const OPERATIONAL_OBLIGATION = { review_status: "approved", activation_status: "active" } as const;
+
+const OPEN_GAP_STATES = ["open", "evidence_received", "reverification_pending"];
+
+// ---------------------------------------------------------------------------
+// READ_ONLY tools
+// ---------------------------------------------------------------------------
+
+const getOrganizationSummary: OfficerTool = {
+  name: "getOrganizationSummary",
+  toolClass: "READ_ONLY",
+  description:
+    "Organization name, local date/time and timezone, contract counts, and counts of open gaps, pending verification discrepancies and actions awaiting approval.",
+  input: empty,
+  handler: async (ctx) => {
+    const [{ data: contracts }, { count: openGaps }, { count: pendingDiscrepancies }, { count: waitingActions }] =
+      await Promise.all([
+        ctx.supabase.from("contracts").select("id, status").eq("organization_id", ctx.organizationId),
+        ctx.supabase.from("evidence_gaps").select("id", { count: "exact", head: true })
+          .eq("organization_id", ctx.organizationId).in("status", OPEN_GAP_STATES),
+        ctx.supabase.from("evidence_verification_discrepancies").select("id", { count: "exact", head: true })
+          .eq("organization_id", ctx.organizationId).eq("status", "pending"),
+        ctx.supabase.from("officer_actions").select("id", { count: "exact", head: true })
+          .eq("organization_id", ctx.organizationId).in("status", ["suggested", "waiting_for_approval"]),
+      ]);
+    const rows = contracts ?? [];
+    return ok(
+      {
+        organization: ctx.organizationName,
+        clock: ctx.clock,
+        contracts: { total: rows.length, active: rows.filter((c: any) => c.status === "active").length },
+        openGaps: openGaps ?? 0,
+        pendingVerificationDiscrepancies: pendingDiscrepancies ?? 0,
+        actionsAwaitingApproval: waitingActions ?? 0,
+      },
+      [],
+      `${rows.length} contracts · ${openGaps ?? 0} open gaps · ${pendingDiscrepancies ?? 0} pending discrepancies`,
+    );
+  },
+};
+
+const listContracts: OfficerTool = {
+  name: "listContracts",
+  toolClass: "READ_ONLY",
+  description: "List the organization's contracts with number, title, client, status and dates.",
+  input: z.object({ status: z.enum(["active", "mobilizing", "closeout", "archived"]).optional() }).strict(),
+  handler: async (ctx, args) => {
+    let q = ctx.supabase
+      .from("contracts")
+      .select("id, contract_number, title, client_name, status, start_date, end_date")
+      .eq("organization_id", ctx.organizationId)
+      .order("created_at", { ascending: false });
+    if (args.status) q = q.eq("status", args.status);
+    const { data } = await q;
+    const rows = data ?? [];
+    return ok(
+      rows,
+      rows.map((c: any) => cite("contract", c.id, `${c.contract_number} — ${c.title}`, c.id, `/app/contracts/${c.id}`)),
+      `${rows.length} contracts`,
+    );
+  },
+};
+
+const getContract: OfficerTool = {
+  name: "getContract",
+  toolClass: "READ_ONLY",
+  description: "One contract's metadata, documents and operational obligation counts.",
+  input: z.object({ contractId: z.string().uuid() }).strict(),
+  handler: async (ctx, args) => {
+    const contract = await resolveContract(ctx, args.contractId);
+    if (!contract) return { ok: false, error: "contract_not_found_in_organization" };
+    const [{ data: docs }, { data: obligations }] = await Promise.all([
+      ctx.supabase.from("contract_documents").select("id, file_name, document_type")
+        .eq("organization_id", ctx.organizationId).eq("contract_id", contract.id),
+      ctx.supabase.from("contract_obligations")
+        .select("id, review_status, activation_status")
+        .eq("organization_id", ctx.organizationId).eq("contract_id", contract.id),
+    ]);
+    const all = obligations ?? [];
+    return ok(
+      {
+        contract,
+        documents: docs ?? [],
+        obligations: {
+          total: all.length,
+          operational: all.filter((o: any) =>
+            o.review_status === OPERATIONAL_OBLIGATION.review_status &&
+            o.activation_status === OPERATIONAL_OBLIGATION.activation_status).length,
+          drafts: all.filter((o: any) => o.review_status !== "approved").length,
+        },
+      },
+      [cite("contract", contract.id, `${contract.contract_number} — ${contract.title}`, contract.id, `/app/contracts/${contract.id}`)],
+      `${contract.contract_number}: ${all.length} obligations`,
+    );
+  },
+};
+
+const getContractClause: OfficerTool = {
+  name: "getContractClause",
+  toolClass: "READ_ONLY",
+  description: "Retrieve the source text of a clause so a claim can be traced to the contract.",
+  input: z.object({ clauseId: z.string().uuid() }).strict(),
+  handler: async (ctx, args) => {
+    const { data } = await ctx.supabase
+      .from("contract_clauses")
+      .select("id, contract_id, clause_number, heading, text, page_number")
+      .eq("organization_id", ctx.organizationId)
+      .eq("id", args.clauseId)
+      .maybeSingle();
+    if (!data) return { ok: false, error: "clause_not_found_in_organization" };
+    return ok(
+      data,
+      [cite("clause", data.id, `Clause ${data.clause_number ?? ""}`.trim(), data.contract_id,
+        `/app/contracts/${data.contract_id}`)],
+      `clause ${data.clause_number ?? data.id.slice(0, 8)}`,
+    );
+  },
+};
+
+/** Shared obligation projection with deterministic deadline classification. */
+async function loadObligations(ctx: OfficerContext, filter: { contractId?: string; operationalOnly?: boolean }) {
+  let q = ctx.supabase
+    .from("contract_obligations")
+    .select(
+      "id, contract_id, title, requirement_text, obligation_type, frequency, due_rule_raw, due_date_normalized, due_rule_normalized, field_provenance, " +
+      "owner_role_suggested, external_dependency, financial_condition, penalty_condition, payment_linked, " +
+      "review_status, activation_status",
+    )
+    .eq("organization_id", ctx.organizationId);
+  if (filter.contractId) q = q.eq("contract_id", filter.contractId);
+  if (filter.operationalOnly !== false) {
+    q = q.eq("review_status", OPERATIONAL_OBLIGATION.review_status)
+      .eq("activation_status", OPERATIONAL_OBLIGATION.activation_status);
+  }
+  const { data } = await q;
+  const rows = data ?? [];
+
+  // Carry the human-facing contract identity so the Officer can name the
+  // contract ("FM-008") without a second lookup — a UUID is not an answer.
+  const contractIds = [...new Set(rows.map((o: any) => o.contract_id).filter(Boolean))];
+  const { data: contracts } = contractIds.length
+    ? await ctx.supabase
+        .from("contracts").select("id, contract_number, title, start_date, end_date")
+        .eq("organization_id", ctx.organizationId).in("id", contractIds)
+    : { data: [] as any[] };
+  const byId = new Map((contracts ?? []).map((c: any) => [c.id, c]));
+  const settlements = await readCycleSettlements(ctx.supabase as any, ctx.organizationId,
+    rows.filter((o: any) => usesCycleSettlements({ dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized })).map((o: any) => o.id));
+
+  return rows.map((o: any) => {
+    const { field_provenance: prov, ...rest } = o;
+    return {
+      ...rest,
+      // Reviewer-confirmed vs extraction-inferred, so an inferred value is never
+      // presented as an established fact.
+      external_dependency_provenance: prov?.external_dependency ?? null,
+      payment_linked_provenance: prov?.payment_linked ?? null,
+      contract_number: byId.get(o.contract_id)?.contract_number ?? null,
+      contract_title: byId.get(o.contract_id)?.title ?? null,
+      ...deadlineFacts(ctx, o, byId.get(o.contract_id), settledCyclesOf(settlements, o.id)),
+    };
+  });
+}
+
+/**
+ * Deadline position from the operational schedule: an explicit date, or the
+ * oldest unsettled cycle of a supported recurring rule (then the next one).
+ * A schedule that cannot be derived is reported as needs_schedule.
+ */
+function deadlineFacts(ctx: OfficerContext, o: any, contract: any, settledCycles: string[] | null) {
+  const schedule = obligationSchedule({
+    dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized, frequency: o.frequency,
+    contractStart: contract?.start_date ?? null, contractEnd: contract?.end_date ?? null, today: ctx.clock.today,
+    settledCycles,
+  });
+  const due = operationalDueDate(schedule);
+  const position = classifyDeadline({ today: ctx.clock.today, dueDate: due });
+  return {
+    ...position,
+    ...(schedule.kind === "needs_schedule" ? { window: "needs_schedule" as const } : {}),
+    due_date_operational: due,
+    schedule: schedule.kind === "recurring"
+      ? { kind: "recurring", rule: schedule.rule, unsettled_past_cycles: schedule.unsettledPastCount, next_cycle_due: schedule.nextDue,
+          settled_cycles: settledCycles,
+          note: schedule.settlementsKnown
+            ? "Cycles due on or before today stay due until an authorized member records their completion. A recorded completion is not evidence verification or client acceptance."
+            : "Cycle completion records could not be read; some cycles listed as due may already be recorded as completed." }
+      : schedule.kind === "needs_schedule" ? { kind: "needs_schedule", reason: schedule.reason } : { kind: schedule.kind },
+  };
+}
+
+const listObligations: OfficerTool = {
+  name: "listObligations",
+  toolClass: "READ_ONLY",
+  description:
+    "Operational (approved + active) obligations with operational due dates (an explicit date, or for a monthly rule the oldest cycle with no recorded completion, else the next cycle; needs_schedule when no schedule can be derived) and deterministic deadline windows. Set includeDrafts to inspect unreviewed extraction drafts — those are NOT operational truth.",
+  input: z.object({
+    contractId: z.string().uuid().optional(),
+    includeDrafts: z.boolean().optional(),
+  }).strict(),
+  handler: async (ctx, args) => {
+    if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
+      return { ok: false, error: "contract_not_found_in_organization" };
+    }
+    const rows = await loadObligations(ctx, {
+      contractId: args.contractId,
+      operationalOnly: args.includeDrafts !== true,
+    });
+    return ok(
+      rows,
+      rows.map((o: any) => cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`)),
+      `${rows.length} obligations`,
+    );
+  },
+};
+
+const getObligation: OfficerTool = {
+  name: "getObligation",
+  toolClass: "READ_ONLY",
+  description: "One obligation with its source reference, evidence requirements and deadline position.",
+  input: z.object({ obligationId: z.string().uuid() }).strict(),
+  handler: async (ctx, args) => {
+    const { data: o } = await ctx.supabase
+      .from("contract_obligations")
+      .select("*")
+      .eq("organization_id", ctx.organizationId)
+      .eq("id", args.obligationId)
+      .maybeSingle();
+    if (!o) return { ok: false, error: "obligation_not_found_in_organization" };
+    const [{ data: refs }, { data: reqs }, { data: contract }] = await Promise.all([
+      ctx.supabase.from("obligation_source_refs")
+        .select("id, clause_id, page_number, source_snippet")
+        .eq("organization_id", ctx.organizationId).eq("obligation_id", o.id),
+      ctx.supabase.from("obligation_evidence_requirements")
+        .select("id, name, description, evidence_type, required")
+        .eq("organization_id", ctx.organizationId).eq("obligation_id", o.id),
+      ctx.supabase.from("contracts").select("contract_number, title, start_date, end_date")
+        .eq("organization_id", ctx.organizationId).eq("id", o.contract_id).maybeSingle(),
+    ]);
+
+    // Resolve the clause NUMBER, not just an opaque id: "show me the source"
+    // must be answerable from this one call, or the model is left guessing
+    // whether traceability exists at all.
+    const clauseIds = [...new Set((refs ?? []).map((r: any) => r.clause_id).filter(Boolean))];
+    const { data: clauses } = clauseIds.length
+      ? await ctx.supabase.from("contract_clauses")
+          .select("id, clause_number, heading, page_number")
+          .eq("organization_id", ctx.organizationId).in("id", clauseIds)
+      : { data: [] as any[] };
+    const clauseById = new Map((clauses ?? []).map((c: any) => [c.id, c]));
+    const sourceRefs = (refs ?? []).map((r: any) => ({
+      ...r,
+      clause_number: clauseById.get(r.clause_id)?.clause_number ?? null,
+      clause_heading: clauseById.get(r.clause_id)?.heading ?? null,
+      clause_page: clauseById.get(r.clause_id)?.page_number ?? r.page_number ?? null,
+    }));
+
+    const settlements = await readCycleSettlements(ctx.supabase as any, ctx.organizationId,
+      usesCycleSettlements({ dueDateNormalized: o.due_date_normalized, dueRuleNormalized: o.due_rule_normalized }) ? [o.id] : []);
+    const deadline = deadlineFacts(ctx, o, contract, settledCyclesOf(settlements, o.id));
+    const citations: OfficerCitation[] = [
+      cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`),
+      ...sourceRefs.filter((r) => r.clause_id).map((r) =>
+        cite("clause", r.clause_id, r.clause_number ? `Clause ${r.clause_number}` : "Source clause",
+          o.contract_id, `/app/contracts/${o.contract_id}`)),
+      ...(reqs ?? []).map((r: any) => cite("evidence_requirement", r.id, r.name, o.contract_id)),
+    ];
+    return ok(
+      {
+        obligation: o,
+        contract_number: contract?.contract_number ?? null,
+        contract_title: contract?.title ?? null,
+        operational: o.review_status === "approved" && o.activation_status === "active",
+        deadline,
+        sourceRefs,
+        source_traceability: sourceRefs.length
+          ? "recorded"
+          : "none recorded for this obligation",
+        evidenceRequirements: reqs ?? [],
+      },
+      citations,
+      `${o.title} · ${deadline.window}${sourceRefs[0]?.clause_number ? ` · clause ${sourceRefs[0].clause_number}` : ""}`,
+    );
+  },
+};
+
+const getUpcomingObligations: OfficerTool = {
+  name: "getUpcomingObligations",
+  toolClass: "READ_ONLY",
+  description:
+    "Operational obligations due within N days ahead, inclusive (default 7), computed server-side in the organization timezone. withinDays 0 = due today only, 1 = today and tomorrow.",
+  input: z.object({ withinDays: z.number().int().min(0).max(365).optional() }).strict(),
+  handler: async (ctx, args) => {
+    const within = args.withinDays ?? 7;
+    const rows = (await loadObligations(ctx, {}))
+      .filter((o: any) => o.daysUntilDue != null && o.daysUntilDue >= 0 && o.daysUntilDue <= within)
+      .sort((a: any, b: any) => (a.daysUntilDue ?? 0) - (b.daysUntilDue ?? 0));
+    return ok(
+      { asOf: ctx.clock.today, timeZone: ctx.clock.timeZone, withinDays: within, obligations: rows },
+      rows.map((o: any) => cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`)),
+      `${rows.length} due within ${within} days`,
+    );
+  },
+};
+
+const getOverdueObligations: OfficerTool = {
+  name: "getOverdueObligations",
+  toolClass: "READ_ONLY",
+  description: "Operational obligations whose operational due date has passed (including unsettled past cycles of recurring rules), with exact days overdue.",
+  input: empty,
+  handler: async (ctx) => {
+    const rows = (await loadObligations(ctx, {}))
+      .filter((o: any) => o.window === "overdue")
+      .sort((a: any, b: any) => (b.daysOverdue ?? 0) - (a.daysOverdue ?? 0));
+    return ok(
+      { asOf: ctx.clock.today, timeZone: ctx.clock.timeZone, obligations: rows },
+      [
+        ...rows.map((o: any) => cite("obligation", o.id, o.title, o.contract_id, `/app/contracts/${o.contract_id}/obligations`)),
+        ...[...new Set(rows.map((o: any) => o.contract_id))].map((cid: any) =>
+          cite("contract", cid, rows.find((o: any) => o.contract_id === cid)?.contract_number ?? "contract", cid, `/app/contracts/${cid}`)),
+      ],
+      `${rows.length} overdue`,
+    );
+  },
+};
+
+const getEvidenceStatus: OfficerTool = {
+  name: "getEvidenceStatus",
+  toolClass: "READ_ONLY",
+  description:
+    "Effective OPERATIONAL evidence status per requirement, plus the latest verification result. A pending discrepancy holds the previously accepted state — operational status is what to act on.",
+  input: z.object({
+    contractId: z.string().uuid().optional(),
+    obligationId: z.string().uuid().optional(),
+  }).strict(),
+  handler: async (ctx, args) => {
+    if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
+      return { ok: false, error: "contract_not_found_in_organization" };
+    }
+    let reqQ = ctx.supabase
+      .from("obligation_evidence_requirements")
+      .select("id, obligation_id, name, evidence_type, required")
+      .eq("organization_id", ctx.organizationId);
+    if (args.obligationId) reqQ = reqQ.eq("obligation_id", args.obligationId);
+    const { data: reqRows } = await reqQ;
+    let requirements = reqRows ?? [];
+
+    if (args.contractId) {
+      const { data: obs } = await ctx.supabase
+        .from("contract_obligations").select("id")
+        .eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId);
+      const ids = new Set((obs ?? []).map((o: any) => o.id));
+      requirements = requirements.filter((r: any) => ids.has(r.obligation_id));
+    }
+    if (!requirements.length) return ok({ requirements: [] }, [], "no evidence requirements");
+
+    const reqIds = requirements.map((r: any) => r.id);
+    const [{ data: checks }, { data: discs }, { data: gaps }] = await Promise.all([
+      ctx.supabase.from("evidence_verification_checks")
+        .select("evidence_requirement_id, result, human_result, verification_run_id, created_at")
+        .eq("organization_id", ctx.organizationId).in("evidence_requirement_id", reqIds)
+        .order("created_at", { ascending: false }),
+      ctx.supabase.from("evidence_verification_discrepancies").select("*")
+        .eq("organization_id", ctx.organizationId).in("evidence_requirement_id", reqIds),
+      ctx.supabase.from("evidence_gaps").select("id, evidence_requirement_id, status, gap_type, opened_via")
+        .eq("organization_id", ctx.organizationId).in("evidence_requirement_id", reqIds)
+        .in("status", OPEN_GAP_STATES),
+    ]);
+
+    const runIds = [...new Set((checks ?? []).map((c: any) => c.verification_run_id).filter(Boolean))];
+    const { data: runs } = runIds.length
+      ? await ctx.supabase.from("evidence_verification_runs")
+          .select("id, evidence_version_id, verifier_provider, verifier_model, completed_at")
+          .eq("organization_id", ctx.organizationId).in("id", runIds)
+      : { data: [] as any[] };
+    const runById = new Map((runs ?? []).map((r: any) => [r.id, r]));
+
+    const discrepancies = (discs ?? []).map((d: any) => ({
+      id: d.id, requirementId: d.evidence_requirement_id, evidenceVersionId: d.evidence_version_id,
+      priorResult: d.prior_result, currentResult: d.current_result, status: d.status,
+      priorCheckId: d.prior_check_id, currentCheckId: d.current_check_id,
+      priorRunId: d.prior_run_id, currentRunId: d.current_run_id,
+      provider: d.provider, model: d.model, resolvedBy: d.resolved_by, resolvedAt: d.resolved_at,
+      resolutionNote: d.resolution_note, createdAt: d.created_at,
+    }));
+
+    const latestByReq = new Map<string, any>();
+    for (const c of checks ?? []) {
+      if (!latestByReq.has(c.evidence_requirement_id)) latestByReq.set(c.evidence_requirement_id, c);
+    }
+    const gapByReq = new Map<string, any>();
+    for (const g of gaps ?? []) if (!gapByReq.has(g.evidence_requirement_id)) gapByReq.set(g.evidence_requirement_id, g);
+
+    const citations: OfficerCitation[] = [];
+    const out = requirements.map((r: any) => {
+      const latest = latestByReq.get(r.id);
+      const run = latest ? runById.get(latest.verification_run_id) : null;
+      const latestResult = latest ? (latest.human_result ?? latest.result) : null;
+      const effective = effectiveStatusForRequirement({
+        requirementId: r.id,
+        latestResult,
+        latestVersionId: run?.evidence_version_id ?? null,
+        humanOverridden: latest?.human_result != null,
+        discrepancies: discrepancies as any,
+      });
+      citations.push(cite("evidence_requirement", r.id, r.name));
+      if (run) citations.push(cite("verification_run", run.id, `Verification run ${String(run.id).slice(0, 8)}`));
+      const gap = gapByReq.get(r.id);
+      if (gap) citations.push(cite("evidence_gap", gap.id, `Gap ${gap.gap_type}`));
+      return {
+        requirementId: r.id, obligationId: r.obligation_id, name: r.name,
+        required: r.required, evidenceType: r.evidence_type,
+        operationalStatus: effective.operational,
+        latestVerificationResult: effective.latest,
+        priorStateInForce: effective.priorStateInForce,
+        discrepancyStatus: effective.discrepancyStatus,
+        statusSource: effective.source,
+        humanOverridden: latest?.human_result != null,
+        provider: run?.verifier_provider ?? null,
+        model: run?.verifier_model ?? null,
+        lastVerifiedAt: run?.completed_at ?? null,
+        openGap: gap ? { id: gap.id, status: gap.status, type: gap.gap_type, openedVia: gap.opened_via } : null,
+      };
+    });
+    const verified = out.filter((r) => r.operationalStatus === "verified").length;
+    return ok({ requirements: out }, citations, `${verified}/${out.length} operationally verified`);
+  },
+};
+
+const getEvidenceGaps: OfficerTool = {
+  name: "getEvidenceGaps",
+  toolClass: "READ_ONLY",
+  description: "Open evidence gaps — required evidence that is operationally incomplete.",
+  input: z.object({ contractId: z.string().uuid().optional() }).strict(),
+  handler: async (ctx, args) => {
+    if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
+      return { ok: false, error: "contract_not_found_in_organization" };
+    }
+    let q = ctx.supabase
+      .from("evidence_gaps")
+      .select("id, contract_id, obligation_id, evidence_requirement_id, gap_type, status, description, opened_via, created_at")
+      .eq("organization_id", ctx.organizationId)
+      .in("status", OPEN_GAP_STATES)
+      .order("created_at", { ascending: false });
+    if (args.contractId) q = q.eq("contract_id", args.contractId);
+    const { data } = await q;
+    const rows = data ?? [];
+    return ok(
+      rows,
+      rows.map((g: any) => cite("evidence_gap", g.id, `${g.gap_type} gap`, g.contract_id,
+        `/app/contracts/${g.contract_id}/evidence`)),
+      `${rows.length} open gaps`,
+    );
+  },
+};
+
+const getVerificationDiscrepancies: OfficerTool = {
+  name: "getVerificationDiscrepancies",
+  toolClass: "READ_ONLY",
+  description:
+    "Same-version verification discrepancies: a later run disagreed with a previously accepted result on UNCHANGED evidence. Pending ones await human review; the prior operational state remains in force.",
+  input: z.object({
+    contractId: z.string().uuid().optional(),
+    status: z.enum(["pending", "kept_prior", "regression_confirmed"]).optional(),
+  }).strict(),
+  handler: async (ctx, args) => {
+    let q = ctx.supabase
+      .from("evidence_verification_discrepancies")
+      .select("*")
+      .eq("organization_id", ctx.organizationId)
+      .order("created_at", { ascending: false });
+    if (args.status) q = q.eq("status", args.status);
+    const { data } = await q;
+    let rows = data ?? [];
+    if (args.contractId) {
+      if (!(await resolveContract(ctx, args.contractId))) {
+        return { ok: false, error: "contract_not_found_in_organization" };
+      }
+      const { data: items } = await ctx.supabase.from("evidence_items").select("id")
+        .eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId);
+      const ids = new Set((items ?? []).map((i: any) => i.id));
+      rows = rows.filter((d: any) => ids.has(d.evidence_item_id));
+    }
+    if (!rows.length) return ok([], [], "no discrepancies");
+
+    // Carry human-readable identity: a discrepancy the Officer cannot name by
+    // contract and requirement is an answer the user cannot act on.
+    const itemIds = [...new Set(rows.map((d: any) => d.evidence_item_id).filter(Boolean))];
+    const reqIds = [...new Set(rows.map((d: any) => d.evidence_requirement_id).filter(Boolean))];
+    const [{ data: items }, { data: reqs }] = await Promise.all([
+      itemIds.length
+        ? ctx.supabase.from("evidence_items").select("id, contract_id, title")
+            .eq("organization_id", ctx.organizationId).in("id", itemIds)
+        : Promise.resolve({ data: [] as any[] }),
+      reqIds.length
+        ? ctx.supabase.from("obligation_evidence_requirements").select("id, name, obligation_id")
+            .eq("organization_id", ctx.organizationId).in("id", reqIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const contractIds = [...new Set((items ?? []).map((i: any) => i.contract_id).filter(Boolean))];
+    const { data: contracts } = contractIds.length
+      ? await ctx.supabase.from("contracts").select("id, contract_number, title")
+          .eq("organization_id", ctx.organizationId).in("id", contractIds)
+      : { data: [] as any[] };
+    const itemById = new Map((items ?? []).map((i: any) => [i.id, i]));
+    const reqById = new Map((reqs ?? []).map((r: any) => [r.id, r]));
+    const contractById = new Map((contracts ?? []).map((c: any) => [c.id, c]));
+
+    const enriched = rows.map((d: any) => {
+      const item = itemById.get(d.evidence_item_id);
+      const contract = item ? contractById.get(item.contract_id) : null;
+      return {
+        ...d,
+        contract_number: contract?.contract_number ?? null,
+        contract_title: contract?.title ?? null,
+        evidence_item_title: item?.title ?? null,
+        requirement_name: reqById.get(d.evidence_requirement_id)?.name ?? null,
+        // Restate the Phase 3 invariant in the payload itself.
+        operational_state_note: d.status === "pending"
+          ? `The previously accepted result (${d.prior_result}) remains the operational state until a human decides.`
+          : null,
+      };
+    });
+
+    const citations: OfficerCitation[] = enriched.flatMap((d: any) => [
+      cite("verification_discrepancy", d.id,
+        `${d.contract_number ?? "discrepancy"}: ${d.prior_result} → ${d.current_result}`,
+        d.contract_id ?? null, `/app/evidence/${d.evidence_item_id}`),
+      ...(d.contract_number && itemById.get(d.evidence_item_id)
+        ? [cite("contract", itemById.get(d.evidence_item_id).contract_id, d.contract_number,
+            itemById.get(d.evidence_item_id).contract_id,
+            `/app/contracts/${itemById.get(d.evidence_item_id).contract_id}`)]
+        : []),
+    ]);
+
+    return ok(
+      enriched, citations,
+      `${enriched.filter((d: any) => d.status === "pending").length} pending of ${enriched.length}`,
+    );
+  },
+};
+
+/**
+ * The Officer's own bookkeeping (sweep runs, observation lifecycle). It is
+ * summarized as counts and never listed, so a sweep that writes dozens of
+ * rows cannot crowd real business changes out of the model's context.
+ */
+const SYSTEM_EVENT_PATTERNS = ["officer.sweep_%", "officer.observation_%"];
+const ACTIVITY_PAGE_MAX = 25;
+/** Keeps one page well under converse's per-result context cap. */
+const ACTIVITY_PAGE_CHARS = 4500;
+const SYSTEM_SUMMARY_CAP = 1000;
+
+/** "created_at|id" — a stable keyset cursor (ties on created_at broken by id). */
+const encodeCursor = (row: { created_at: string; id: string }) => `${row.created_at}|${row.id}`;
+function decodeCursor(cursor: string): { at: string; id: string } | null {
+  const [at, id] = cursor.split("|");
+  return at && id && !Number.isNaN(Date.parse(at)) && /^[0-9a-f-]{36}$/i.test(id) ? { at, id } : null;
+}
+
+/** Readable references: contract numbers and titles instead of raw ids. */
+async function activityLabels(ctx: OfficerContext, rows: any[]) {
+  const idsOf = (type: string) => [...new Set(rows.filter((r) => r.entity_type === type && r.entity_id).map((r) => r.entity_id))];
+  const [obs, items, checks] = await Promise.all([
+    idsOf("obligation").length ? ctx.supabase.from("contract_obligations").select("id, title, contract_id").eq("organization_id", ctx.organizationId).in("id", idsOf("obligation")) : { data: [] },
+    idsOf("evidence_item").length ? ctx.supabase.from("evidence_items").select("id, title, contract_id").eq("organization_id", ctx.organizationId).in("id", idsOf("evidence_item")) : { data: [] },
+    idsOf("evidence_verification_check").length ? ctx.supabase.from("evidence_verification_checks").select("id, check_label").eq("organization_id", ctx.organizationId).in("id", idsOf("evidence_verification_check")) : { data: [] },
+  ]);
+  const contractIds = [...new Set([...idsOf("contract"), ...(obs.data ?? []).map((o: any) => o.contract_id), ...(items.data ?? []).map((i: any) => i.contract_id)].filter(Boolean))];
+  const { data: contracts } = contractIds.length
+    ? await ctx.supabase.from("contracts").select("id, contract_number").eq("organization_id", ctx.organizationId).in("id", contractIds)
+    : { data: [] as any[] };
+  const number = new Map((contracts ?? []).map((c: any) => [c.id, c.contract_number]));
+  const ob = new Map((obs.data ?? []).map((o: any) => [o.id, o]));
+  const it = new Map((items.data ?? []).map((i: any) => [i.id, i]));
+  const ck = new Map((checks.data ?? []).map((c: any) => [c.id, c]));
+  return (r: any): { label: string | null; contract_number: string | null } => {
+    if (r.entity_type === "obligation" && ob.has(r.entity_id)) return { label: ob.get(r.entity_id).title, contract_number: number.get(ob.get(r.entity_id).contract_id) ?? null };
+    if (r.entity_type === "evidence_item" && it.has(r.entity_id)) return { label: it.get(r.entity_id).title, contract_number: number.get(it.get(r.entity_id).contract_id) ?? null };
+    if (r.entity_type === "evidence_verification_check" && ck.has(r.entity_id)) return { label: ck.get(r.entity_id).check_label, contract_number: null };
+    if (r.entity_type === "contract" && number.has(r.entity_id)) return { label: number.get(r.entity_id), contract_number: number.get(r.entity_id) };
+    return { label: null, contract_number: typeof r.metadata?.contract === "string" ? r.metadata.contract : null };
+  };
+}
+
+/** Metadata as bounded data: long strings are clipped, never interpreted. */
+function compactMetadata(meta: unknown): Record<string, unknown> {
+  if (!meta || typeof meta !== "object") return {};
+  return Object.fromEntries(Object.entries(meta as Record<string, unknown>)
+    .filter(([, v]) => v !== null && v !== undefined)
+    .map(([k, v]) => [k, typeof v === "string" && v.length > 200 ? `${v.slice(0, 200)}…` : v]));
+}
+
+const getRecentActivity: OfficerTool = {
+  name: "getRecentActivity",
+  toolClass: "READ_ONLY",
+  description:
+    "Recorded business changes — what changed and when (a change record does not prove what is true NOW). Set sinceLastReview ONLY for 'since my last review': the server resolves the caller's own review watermark. For calendar windows ('since yesterday', 'today', 'this week / last 7 days') set window — the server resolves local midnight in the organization's timezone; never compute a date. Results are paged: if complete is false, pass before=nextBefore for the next page, or tell the user the list is partial. The Officer's own sweep bookkeeping is summarized in systemSummary, not listed. contractId limits changes to that contract.",
+  input: z.object({
+    contractId: z.string().uuid().optional(),
+    sinceIso: z.string().datetime().optional(),
+    sinceLastReview: z.boolean().optional(),
+    window: z.enum(["since_yesterday", "today", "last_7_days"]).optional(),
+    before: z.string().max(120).optional(),
+    limit: z.number().int().min(1).max(ACTIVITY_PAGE_MAX).optional(),
+  }).strict(),
+  handler: async (ctx, args) => {
+    // The watermark is server state for THIS user — never a model guess and
+    // never something the user should have to type.
+    let since: string | null = args.sinceIso ?? null;
+    let sinceSource = args.sinceIso ? "caller_supplied" : "none";
+    if (args.window) {
+      // Calendar windows are distinct from the review watermark: "since
+      // yesterday" is local midnight yesterday, not the last time you looked.
+      since = args.window === "today" ? ctx.clock.startOfTodayIso
+        : args.window === "since_yesterday" ? ctx.clock.startOfYesterdayIso
+        : ctx.clock.startOfLast7DaysIso;
+      sinceSource = args.window;
+    } else if (args.sinceLastReview) {
+      const { data: state } = await ctx.supabase
+        .from("officer_user_state")
+        .select("last_reviewed_at")
+        .eq("organization_id", ctx.organizationId)
+        .eq("user_id", ctx.userId)
+        .maybeSingle();
+      if (state?.last_reviewed_at) {
+        since = state.last_reviewed_at as string;
+        sinceSource = "last_review";
+      } else {
+        const { data: sweep } = await ctx.supabase
+          .from("officer_sweep_runs")
+          .select("started_at, completed_at")
+          .eq("organization_id", ctx.organizationId)
+          .in("status", ["completed", "partial"])
+          .order("started_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        since = (sweep?.completed_at as string | null) ?? (sweep?.started_at as string | null) ?? null;
+        sinceSource = since ? "previous_sweep" : "no_watermark_recorded";
+      }
+    }
+
+    // Contract scope: the contract itself, its obligations and its evidence.
+    let scopeIds: string[] | null = null;
+    if (args.contractId) {
+      if (!(await resolveContract(ctx, args.contractId))) return { ok: false, error: "contract_not_found_in_organization" };
+      const [{ data: obs }, { data: items }] = await Promise.all([
+        ctx.supabase.from("contract_obligations").select("id").eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId),
+        ctx.supabase.from("evidence_items").select("id").eq("organization_id", ctx.organizationId).eq("contract_id", args.contractId),
+      ]);
+      scopeIds = [args.contractId, ...(obs ?? []).map((o: any) => o.id), ...(items ?? []).map((i: any) => i.id)];
+    }
+    const cursor = args.before ? decodeCursor(args.before) : null;
+    if (args.before && !cursor) return { ok: false, error: "invalid_cursor" };
+
+    const pageSize = args.limit ?? 20;
+    let q = ctx.supabase
+      .from("activity_log")
+      .select("id, event_type, entity_type, entity_id, metadata, created_at")
+      .eq("organization_id", ctx.organizationId);
+    for (const p of SYSTEM_EVENT_PATTERNS) q = q.not("event_type", "like", p);
+    if (since) q = q.gte("created_at", since);
+    if (scopeIds) q = q.in("entity_id", scopeIds);
+    if (cursor) q = q.or(`created_at.lt."${cursor.at}",and(created_at.eq."${cursor.at}",id.lt.${cursor.id})`);
+    const { data, error } = await q
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(pageSize + 1);
+    if (error) return { ok: false, error: `activity_query_failed: ${error.message}` };
+    const fetched = data ?? [];
+    let hasMore = fetched.length > pageSize;
+    const rows = fetched.slice(0, pageSize);
+    const labelOf = await activityLabels(ctx, rows);
+    // entity_id stays for follow-up tool calls; label/contract_number are what
+    // the user should see. No label is invented when nothing resolves.
+    const events = rows.map((r: any) => ({
+      id: r.id, event_type: r.event_type, created_at: r.created_at, entity_type: r.entity_type, entity_id: r.entity_id,
+      ...labelOf(r), details: compactMetadata(r.metadata),
+    }));
+    // Size-bound the page: overflow moves to the next page instead of being
+    // cut off blindly by the context cap.
+    while (events.length > 1 && JSON.stringify(events).length > ACTIVITY_PAGE_CHARS) { events.pop(); hasMore = true; }
+    const last = events[events.length - 1];
+
+    // System bookkeeping: counted in the same window, never listed.
+    let systemSummary: { counts: Record<string, number>; complete: boolean } | null = null;
+    if (!scopeIds) {
+      let sq = ctx.supabase.from("activity_log").select("event_type")
+        .eq("organization_id", ctx.organizationId)
+        .or(SYSTEM_EVENT_PATTERNS.map((p) => `event_type.like.${p}`).join(","));
+      if (since) sq = sq.gte("created_at", since);
+      const { data: sys } = await sq.limit(SYSTEM_SUMMARY_CAP);
+      const counts: Record<string, number> = {};
+      for (const s of sys ?? []) counts[s.event_type] = (counts[s.event_type] ?? 0) + 1;
+      systemSummary = { counts, complete: (sys ?? []).length < SYSTEM_SUMMARY_CAP };
+    }
+
+    return ok(
+      {
+        since, sinceSource, asOf: ctx.clock.nowIso, contractScoped: !!scopeIds,
+        changes: events, hasMore, complete: !hasMore,
+        nextBefore: hasMore && last ? encodeCursor(last) : null,
+        systemSummary,
+      },
+      events.map((e) => cite("activity_event", e.id, e.label ? `${e.event_type} — ${e.label}` : e.event_type)),
+      `${events.length} change(s)${hasMore ? " (more available)" : ""}${since ? ` since ${since.slice(0, 10)} (${sinceSource})` : ""}`,
+    );
+  },
+};
+
+const getOrganizationMembers: OfficerTool = {
+  name: "getOrganizationMembers",
+  toolClass: "READ_ONLY",
+  description:
+    "Members of this organization with role and display identity — who can be assigned work and who may approve.",
+  input: empty,
+  handler: async (ctx) => {
+    const { data } = await ctx.supabase
+      .from("organization_members")
+      .select("user_id, role, created_at")
+      .eq("organization_id", ctx.organizationId);
+    const rows = data ?? [];
+    // Display identity comes from a narrow security-definer function scoped
+    // to fellow members; auth.users is not readable directly. If it is
+    // unavailable we degrade honestly to the user id rather than inventing
+    // a name.
+    const { data: identities } = await ctx.supabase.rpc("org_member_identities", { org: ctx.organizationId });
+    const byId = new Map((identities ?? []).map((i: any) => [i.user_id, i]));
+    const merged = rows.map((m: any) => {
+      const id = byId.get(m.user_id) as any;
+      return {
+        userId: m.user_id,
+        role: m.role,
+        displayName: id?.display_name ?? null,
+        email: id?.email ?? null,
+        identityResolved: !!id,
+        memberSince: m.created_at,
+      };
+    });
+    return ok(merged, [], `${merged.length} members`);
+  },
+};
+
+const getAssignments: OfficerTool = {
+  name: "getAssignments",
+  toolClass: "READ_ONLY",
+  description:
+    "Ownership state per obligation, including AI assignment suggestions and whether a human decided on them. A pending suggestion is NOT an assignment.",
+  input: z.object({ contractId: z.string().uuid().optional() }).strict(),
+  handler: async (ctx, args) => {
+    let obQ = ctx.supabase
+      .from("contract_obligations")
+      .select("id, contract_id, title, owner_role_suggested")
+      .eq("organization_id", ctx.organizationId);
+    if (args.contractId) {
+      if (!(await resolveContract(ctx, args.contractId))) {
+        return { ok: false, error: "contract_not_found_in_organization" };
+      }
+      obQ = obQ.eq("contract_id", args.contractId);
+    }
+    const { data: obs } = await obQ;
+    const ids = (obs ?? []).map((o: any) => o.id);
+    const { data: sugg } = ids.length
+      ? await ctx.supabase.from("obligation_assignment_suggestions")
+          .select("id, obligation_id, suggestion_kind, suggested_role, suggested_person_id, suggested_person_name, approved, decided_by, decided_at")
+          .eq("organization_id", ctx.organizationId).in("obligation_id", ids)
+      : { data: [] as any[] };
+    const byOb = new Map<string, any[]>();
+    for (const s of sugg ?? []) byOb.set(s.obligation_id, [...(byOb.get(s.obligation_id) ?? []), s]);
+    const rows = (obs ?? []).map((o: any) => {
+      const list = byOb.get(o.id) ?? [];
+      return {
+        obligationId: o.id, contractId: o.contract_id, title: o.title,
+        suggestedRole: o.owner_role_suggested,
+        confirmedOwner: list.find((s: any) => s.suggestion_kind === "owner" && s.approved === true) ?? null,
+        pendingSuggestions: list.filter((s: any) => s.approved === null),
+        unassigned: !list.some((s: any) => s.suggestion_kind === "owner" && s.approved === true),
+      };
+    });
+    // Assignment state is a claim about the obligation record — the row that
+    // states it must be citable, not only its parent contract.
+    const contractIds = [...new Set(rows.map((r: any) => r.contractId as string))];
+    const { data: contractRows } = contractIds.length
+      ? await ctx.supabase.from("contracts").select("id, contract_number")
+          .eq("organization_id", ctx.organizationId).in("id", contractIds)
+      : { data: [] as any[] };
+    const contractNumber = new Map((contractRows ?? []).map((c: any) => [c.id as string, c.contract_number as string]));
+    const citations = [
+      ...rows.map((r: any) => cite("obligation", r.obligationId, r.title, r.contractId, `/app/contracts/${r.contractId}/obligations`)),
+      ...contractIds.map((cid) => cite("contract", cid, contractNumber.get(cid) ?? "contract", cid, `/app/contracts/${cid}`)),
+    ];
+    return ok(rows, citations, `${rows.filter((r) => r.unassigned).length} unassigned of ${rows.length}`);
+  },
+};
+
+// ---------------------------------------------------------------------------
+// SAFE_INTERNAL_WRITE / APPROVAL_REQUIRED tools
+// ---------------------------------------------------------------------------
+
+/** Insert an officer_actions proposal. Never executes anything itself. */
+const OPEN_PROPOSAL = ["suggested", "waiting_for_approval"];
+const PROPOSAL_COLUMNS = "id, status, requires_approval, action_type";
+
+/**
+ * Resolve the structured target of a proposal inside the caller's
+ * organization, most specific first: gap → obligation → contract. Parents are
+ * DERIVED from the child, so "same gap, contract id omitted" and "same gap,
+ * contract id supplied" are one target; a supplied parent that contradicts the
+ * child is refused rather than guessed.
+ */
+async function resolveActionTarget(
+  ctx: OfficerContext,
+  input: { contractId?: string | null; obligationId?: string | null; gapId?: string | null },
+): Promise<{ ok: true; target: ActionTarget } | { ok: false; error: string }> {
+  let contractId = input.contractId ?? null;
+  let obligationId = input.obligationId ?? null;
+  const gapId = input.gapId ?? null;
+  const clash = (given: string | null, actual: string | null) => !!given && !!actual && given !== actual;
+
+  if (gapId) {
+    const { data: gap } = await ctx.supabase
+      .from("evidence_gaps").select("id, contract_id, obligation_id")
+      .eq("organization_id", ctx.organizationId).eq("id", gapId).maybeSingle();
+    if (!gap) return { ok: false, error: "gap_not_found_in_organization" };
+    if (clash(contractId, gap.contract_id) || clash(obligationId, gap.obligation_id)) {
+      return { ok: false, error: "target_mismatch: gap does not belong to the given contract/obligation" };
+    }
+    contractId = gap.contract_id;
+    obligationId = gap.obligation_id ?? obligationId;
+  }
+  if (obligationId) {
+    const { data: ob } = await ctx.supabase
+      .from("contract_obligations").select("id, contract_id")
+      .eq("organization_id", ctx.organizationId).eq("id", obligationId).maybeSingle();
+    if (!ob) return { ok: false, error: "obligation_not_found_in_organization" };
+    if (clash(contractId, ob.contract_id)) {
+      return { ok: false, error: "target_mismatch: obligation does not belong to the given contract" };
+    }
+    contractId = ob.contract_id;
+  }
+  if (contractId && !(await resolveContract(ctx, contractId))) {
+    return { ok: false, error: "contract_not_found_in_organization" };
+  }
+  return { ok: true, target: { contractId, obligationId, gapId } };
+}
+
+async function findOpenProposal(ctx: OfficerContext, key: string) {
+  const { data } = await ctx.supabase
+    .from("officer_actions").select(PROPOSAL_COLUMNS)
+    .eq("organization_id", ctx.organizationId).eq("idempotency_key", key)
+    .in("status", OPEN_PROPOSAL).maybeSingle();
+  return data ?? null;
+}
+
+async function proposeAction(
+  ctx: OfficerContext,
+  input: {
+    actionType: string;
+    args: Record<string, unknown>;
+    reason: string;
+    contractId?: string | null;
+    obligationId?: string | null;
+    gapId?: string | null;
+    conversationId?: string | null;
+    riskLevel?: "low" | "medium" | "high";
+    citations?: OfficerCitation[];
+  },
+): Promise<ToolResult> {
+  const requiresApproval = classifyAction(input.actionType) === "APPROVAL_REQUIRED";
+  // Proposing is allowed broadly; EXECUTION authority is re-checked at
+  // approval time. We still refuse to draft an action nobody could ever run.
+  const auth = authorizeAction(ctx.role, input.actionType);
+  if (!auth.allowed && auth.reason === "unknown_action") {
+    return { ok: false, error: "unknown_action_type" };
+  }
+  if (!auth.allowed && auth.reason === "not_available_yet") {
+    return { ok: false, error: "action_channel_not_available_in_phase_4a" };
+  }
+  const resolved = await resolveActionTarget(ctx, input);
+  if (!resolved.ok) return resolved;
+  const { target } = resolved;
+
+  // IDEMPOTENCY: identity = action type + structured target + operational
+  // parameters, derived here — never the model's wording. The partial unique
+  // index (migration 0013) makes "one open proposal per identity" atomic.
+  const key = actionIdentityKey(input.actionType, target, input.args);
+  const reused = (row: any) =>
+    ok({ ...row, reused: true }, input.citations ?? [], `existing open proposal reused (${row.status}); nothing new was created`);
+
+  const existing = await findOpenProposal(ctx, key);
+  if (existing) return reused(existing);
+
+  // Open proposals recorded before 0013 have no key: derive theirs from their
+  // stored structured columns so the transition cannot create a duplicate.
+  const { data: legacy } = await ctx.supabase
+    .from("officer_actions")
+    .select(`${PROPOSAL_COLUMNS}, contract_id, obligation_id, arguments`)
+    .eq("organization_id", ctx.organizationId).eq("action_type", input.actionType)
+    .is("idempotency_key", null).in("status", OPEN_PROPOSAL);
+  const legacyHit = (legacy ?? []).find((d: any) => actionIdentityKey(input.actionType,
+    { contractId: d.contract_id, obligationId: d.obligation_id, gapId: null }, d.arguments ?? {}) === key);
+  if (legacyHit) {
+    const { id, status, requires_approval, action_type } = legacyHit as any;
+    return reused({ id, status, requires_approval, action_type });
+  }
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data, error } = await ctx.supabase
+      .from("officer_actions")
+      .insert({
+        organization_id: ctx.organizationId,
+        contract_id: target.contractId,
+        obligation_id: target.obligationId,
+        evidence_gap_id: target.gapId,
+        idempotency_key: key,
+        conversation_id: input.conversationId ?? null,
+        action_type: input.actionType,
+        arguments: input.args,
+        reason: input.reason,
+        citations: input.citations ?? [],
+        risk_level: input.riskLevel ?? (requiresApproval ? "medium" : "low"),
+        requires_approval: requiresApproval,
+        status: requiresApproval ? "waiting_for_approval" : "suggested",
+        proposed_by: null, // proposed by the Officer, not by a human
+      })
+      .select(PROPOSAL_COLUMNS)
+      .single();
+    if (data) return ok({ ...data, reused: false }, input.citations ?? [], `proposed ${input.actionType} (${data.status})`);
+    // A concurrent request won the insert: return ITS proposal.
+    if (error?.code === "23505") {
+      const winner = await findOpenProposal(ctx, key);
+      if (winner) return reused(winner);
+      continue; // the winner was decided in between — an open slot exists again
+    }
+    return { ok: false, error: `proposal_failed: ${error?.message ?? "unknown"}` };
+  }
+  return { ok: false, error: "proposal_failed: identity contention" };
+}
+
+const createInternalAction: OfficerTool = {
+  name: "createInternalAction",
+  toolClass: "SAFE_INTERNAL_WRITE",
+  description:
+    "Propose an internal officer note or follow-up task (a human confirms it). Internal bookkeeping only — it sends nothing and changes no contract, obligation, evidence or gap. Pass gapId when the follow-up concerns one specific evidence gap. If an open proposal for the same target exists it is returned with reused=true and nothing new is created.",
+  input: z.object({
+    actionType: z.enum(["officer.note", "officer.internal_task"]),
+    title: z.string().min(3).max(200),
+    reason: z.string().min(3).max(2000),
+    contractId: z.string().uuid().optional(),
+    obligationId: z.string().uuid().optional(),
+    gapId: z.string().uuid().optional(),
+    conversationId: z.string().uuid().optional(),
+  }).strict(),
+  handler: (ctx, args) =>
+    proposeAction(ctx, {
+      actionType: args.actionType,
+      args: { title: args.title },
+      reason: args.reason,
+      contractId: args.contractId ?? null,
+      obligationId: args.obligationId ?? null,
+      gapId: args.gapId ?? null,
+      conversationId: args.conversationId ?? null,
+      riskLevel: "low",
+    }),
+};
+
+const proposeAssignment: OfficerTool = {
+  name: "proposeAssignment",
+  toolClass: "APPROVAL_REQUIRED",
+  description:
+    "Propose an owner for an obligation. Creates an approval request — it does NOT assign anyone.",
+  input: z.object({
+    obligationId: z.string().uuid(),
+    assigneeUserId: z.string().uuid(),
+    reason: z.string().min(3).max(2000),
+    conversationId: z.string().uuid().optional(),
+  }).strict(),
+  handler: async (ctx, args) => {
+    const { data: ob } = await ctx.supabase
+      .from("contract_obligations").select("id, contract_id, title")
+      .eq("organization_id", ctx.organizationId).eq("id", args.obligationId).maybeSingle();
+    if (!ob) return { ok: false, error: "obligation_not_found_in_organization" };
+    // An assignee must be a member of THIS organization — never another
+    // company's employee, whatever the model proposed.
+    const { data: member } = await ctx.supabase
+      .from("organization_members").select("user_id")
+      .eq("organization_id", ctx.organizationId).eq("user_id", args.assigneeUserId).maybeSingle();
+    if (!member) return { ok: false, error: "assignee_not_a_member_of_this_organization" };
+    return proposeAction(ctx, {
+      actionType: "obligation.assign_owner",
+      args: { obligationId: ob.id, assigneeUserId: args.assigneeUserId },
+      reason: args.reason,
+      contractId: ob.contract_id,
+      obligationId: ob.id,
+      conversationId: args.conversationId ?? null,
+      riskLevel: "medium",
+      citations: [cite("obligation", ob.id, ob.title, ob.contract_id, `/app/contracts/${ob.contract_id}/obligations`)],
+    });
+  },
+};
+
+const requestHumanApproval: OfficerTool = {
+  name: "requestHumanApproval",
+  toolClass: "APPROVAL_REQUIRED",
+  description:
+    "Escalate to a human: request internal evidence, escalate to a contract manager, or ask for review of a discrepancy. Creates an approval request; nothing is sent externally in Phase 4A. Pass gapId when it concerns one specific evidence gap. An existing open request for the same target is returned with reused=true.",
+  input: z.object({
+    actionType: z.enum(["officer.request_evidence_internal", "officer.escalate"]),
+    summary: z.string().min(3).max(200),
+    reason: z.string().min(3).max(2000),
+    contractId: z.string().uuid().optional(),
+    obligationId: z.string().uuid().optional(),
+    gapId: z.string().uuid().optional(),
+    conversationId: z.string().uuid().optional(),
+    riskLevel: z.enum(["low", "medium", "high"]).optional(),
+  }).strict(),
+  handler: (ctx, args) =>
+    proposeAction(ctx, {
+      actionType: args.actionType,
+      args: { summary: args.summary },
+      reason: args.reason,
+      contractId: args.contractId ?? null,
+      obligationId: args.obligationId ?? null,
+      gapId: args.gapId ?? null,
+      conversationId: args.conversationId ?? null,
+      riskLevel: args.riskLevel ?? "medium",
+    }),
+};
+
+const getContractHealth: OfficerTool = {
+  name: "getContractHealth",
+  toolClass: "READ_ONLY",
+  description:
+    "Health of one or all active contracts from the monitoring sweep: unresolved actionable issues (unassigned, overdue, missing evidence, pending discrepancy review, waiting approvals) and whether the assessment is current. Call this BEFORE calling any contract healthy or issue-free. verdict: actionable_issues | no_actionable_issues_recorded | assessment_incomplete.",
+  input: z.object({ contractId: z.string().uuid().optional() }).strict(),
+  handler: async (ctx, args) => {
+    if (args.contractId && !(await resolveContract(ctx, args.contractId))) {
+      return { ok: false, error: "contract_not_found_in_organization" };
+    }
+    let health;
+    try {
+      health = await assessContractHealth(ctx, { contractIds: args.contractId ? [args.contractId] : undefined });
+    } catch (e) {
+      // Safe code only — never a raw database message.
+      return { ok: false, error: `health_assessment_unavailable: ${e instanceof HealthUnavailableError ? e.code : "read_failed"}` };
+    }
+    // Each recorded issue already carries the citations its detector wrote —
+    // surface them so a claim about a specific obligation cites that
+    // obligation's record, not only the contract's.
+    const issueCitations = health.flatMap((h) =>
+      h.issues.flatMap((i) =>
+        (i.citations ?? []).map((c) =>
+          cite(c.target as OfficerCitation["target"], c.id, c.label, h.contractId,
+            c.target === "obligation" ? `/app/contracts/${h.contractId}/obligations` : `/app/contracts/${h.contractId}`))));
+    const seen = new Set<string>();
+    const citations = [
+      ...health.map((h) => cite("contract", h.contractId, `${h.contractNumber} — ${h.title}`, h.contractId, `/app/contracts/${h.contractId}`)),
+      ...issueCitations,
+    ].filter((c) => {
+      const k = `${c.target}:${c.id}`;
+      return seen.has(k) ? false : (seen.add(k), true);
+    });
+    return ok(
+      { contracts: health },
+      citations,
+      `${health.length} contract(s): ${health.filter((h) => h.verdict === "no_actionable_issues_recorded").length} without recorded actionable issues`,
+    );
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Registry
+// ---------------------------------------------------------------------------
+
+const TOOLS: OfficerTool[] = [
+  getOrganizationSummary,
+  listContracts,
+  getContract,
+  getContractClause,
+  listObligations,
+  getObligation,
+  getUpcomingObligations,
+  getOverdueObligations,
+  getContractHealth,
+  getEvidenceStatus,
+  getEvidenceGaps,
+  getVerificationDiscrepancies,
+  getRecentActivity,
+  getOrganizationMembers,
+  getAssignments,
+  createInternalAction,
+  proposeAssignment,
+  requestHumanApproval,
+];
+
+export const OFFICER_TOOLS: ReadonlyMap<string, OfficerTool> = new Map(TOOLS.map((t) => [t.name, t]));
+
+export function listOfficerTools(): readonly OfficerTool[] {
+  return TOOLS;
+}
+
+/**
+ * Tool domains. Sending all 17 schemas on every round cost ~9.3k input
+ * tokens per question in Checkpoint 2. Grouping lets a narrow question carry
+ * only the schemas it plausibly needs.
+ *
+ * SAFETY: selection is deterministic (keyword + conversation scope), never an
+ * LLM pre-router that could silently hide a required tool. ORIENTATION tools
+ * are always present so the model can always find its way, and the caller
+ * escalates to the full set when the model asks for something outside the
+ * selected groups.
+ */
+export type ToolGroup = "ORIENTATION" | "CONTRACT" | "EVIDENCE" | "PEOPLE" | "ACTIVITY" | "ACTION";
+
+export const TOOL_GROUPS: Record<ToolGroup, readonly string[]> = {
+  ORIENTATION: ["getOrganizationSummary", "listContracts"],
+  CONTRACT: ["getContract", "getContractClause", "listObligations", "getObligation",
+             "getUpcomingObligations", "getOverdueObligations", "getContractHealth"],
+  EVIDENCE: ["getEvidenceStatus", "getEvidenceGaps", "getVerificationDiscrepancies"],
+  PEOPLE: ["getOrganizationMembers", "getAssignments"],
+  ACTIVITY: ["getRecentActivity"],
+  ACTION: ["createInternalAction", "proposeAssignment", "requestHumanApproval"],
+};
+
+/** Keywords that reliably imply a domain, in English and Arabic. */
+const GROUP_HINTS: Record<Exclude<ToolGroup, "ORIENTATION">, string[]> = {
+  CONTRACT: ["contract", "clause", "obligation", "due", "overdue", "deadline", "expiry", "expire",
+             "week", "today", "tomorrow", "month", "recurrence", "schedule", "requirement",
+             "healthy", "health", "on track", "سليم", "صحي", "بحالة جيدة",
+             "عقد", "بند", "التزام", "موعد", "متأخر", "استحقاق", "أسبوع", "اليوم", "غدا", "شهر", "انتهاء"],
+  EVIDENCE: ["evidence", "verified", "verification", "gap", "discrepancy", "proof", "acknowledg",
+             "override", "report", "submitted", "missing", "incomplete",
+             "دليل", "أدلة", "تحقق", "فجوة", "تناقض", "إقرار", "تجاوز", "تقرير", "ناقص", "مفقود"],
+  PEOPLE: ["who", "owner", "assign", "responsible", "member", "team", "role",
+           "مين", "من", "مسؤول", "إسناد", "مالك", "فريق", "دور"],
+  ACTIVITY: ["changed", "change", "recent", "activity", "since", "yesterday", "history", "log",
+             "تغير", "تغيّر", "جديد", "نشاط", "أمس", "سجل", "منذ"],
+  // "resolve/close/dismiss" must reach requestHumanApproval so the Officer can
+  // route to the human-review workflow — there is no tool that closes a gap.
+  ACTION: ["propose", "assign", "follow up", "follow-up", "escalate", "request", "recommend",
+           "approve", "action", "task", "chase", "remind",
+           "resolve", "close", "dismiss", "mark ",
+           "اقترح", "أسند", "متابعة", "تصعيد", "اطلب", "توصية", "إجراء", "مهمة",
+           "حلّ", "محلول", "أغلق", "إغلاق", "تجاهل", "ذكّر", "تابع"],
+};
+
+/**
+ * Mutation intent → ACTION. A bare "change"/"تغيّر" is not enough: the
+ * English arms require the change verb in IMPERATIVE position — message
+ * start, after sentence punctuation, or after a request opener ("can you",
+ * "we need to", "please") — so an interrogative "did the vendor change the
+ * deadline?" stays a read. Temporal verbs (postpone/delay/reschedule) are
+ * self-sufficient; the rest must land within a short gap on a schedulable
+ * object ("change the deadline", "extend the delivery date"). The Arabic
+ * arm requires an imperative verb at a word boundary followed by a date
+ * noun, so "تغيّر الموعد" ("the date changed") never unlocks write tools.
+ */
+const MUTATION_INTENT = new RegExp(
+  [
+    // imperative-position temporal verb — the object needn't be a date word
+    String.raw`(?:^|[.!?;:]\s+|\b(?:please|kindly|can you|could you|would you|will you|i need to|we need to|need to|i want to|we want to|i should|we should|should|must|make sure to|remember to|don't forget to|let'?s)\s+)(?:reschedul\w*|postpon\w*|delay\w*)\b`,
+    // imperative-position change verb aimed at a schedulable object
+    String.raw`(?:^|[.!?;:]\s+|\b(?:please|kindly|can you|could you|would you|will you|i need to|we need to|need to|i want to|we want to|i should|we should|should|must|make sure to|remember to|don't forget to|let'?s)\s+)(?:change|move|shift|set|adjust|amend|update|extend|push\s+back|push|shorten|bring\s+forward)\b[\w\s]{0,56}?\b(?:deadline|due\s+date|end\s+date|expiry|expiration|deliver\w*|submission|milestone|timeline|schedule|target\s+date|date|موعد|الاستحقاق)\b`,
+    // Arabic imperative at a boundary + a date noun
+    String.raw`(?:^|[\s،؛])(?:غيّر|غيِّر|عدّل|عدِّل|أجّل|أجِّل|اجّل|أخّر|اخّر|مدّد|مدِّد|انقل|حدّث|حدِّث)\s+(?:ال)?(?:موعد|استحقاق|تاريخ|نهاية|جدول)`,
+  ].join("|"),
+  "i",
+);
+
+/**
+ * Deterministic tool selection for one question.
+ *
+ * Contract-scoped conversations skip ORIENTATION breadth by default but keep
+ * the contract/evidence domains, which is what "what is incomplete here?"
+ * needs. An unmatched question falls back to ALL tools — correctness first.
+ */
+export function selectToolGroups(opts: {
+  question: string;
+  contractScoped: boolean;
+}): { groups: ToolGroup[]; tools: OfficerTool[]; fullFallback: boolean } {
+  const q = opts.question.toLowerCase();
+  const groups: ToolGroup[] = ["ORIENTATION"];
+  for (const [group, hints] of Object.entries(GROUP_HINTS) as [Exclude<ToolGroup, "ORIENTATION">, string[]][]) {
+    if (hints.some((h) => q.includes(h))) groups.push(group);
+  }
+  if (MUTATION_INTENT.test(q) && !groups.includes("ACTION")) groups.push("ACTION");
+
+  // A question we cannot classify gets everything — never guess narrower.
+  if (groups.length === 1) {
+    return { groups: Object.keys(TOOL_GROUPS) as ToolGroup[], tools: [...TOOLS], fullFallback: true };
+  }
+
+  // Contract questions almost always end up asking about evidence, and
+  // evidence questions need the obligation they belong to. Pair them so the
+  // model is never one missing schema away from a wrong answer.
+  if (groups.includes("CONTRACT") && !groups.includes("EVIDENCE")) groups.push("EVIDENCE");
+  if (groups.includes("EVIDENCE") && !groups.includes("CONTRACT")) groups.push("CONTRACT");
+
+  const names = new Set(groups.flatMap((g) => TOOL_GROUPS[g]));
+  return { groups, tools: TOOLS.filter((t) => names.has(t.name)), fullFallback: false };
+}
+
+/**
+ * Execute a model-requested tool.
+ *
+ * Unknown tools, invalid arguments and cross-tenant identifiers are refused
+ * here — before any query runs — and RLS refuses again underneath.
+ */
+export async function runOfficerTool(
+  ctx: OfficerContext,
+  name: string,
+  rawArgs: unknown,
+): Promise<ToolResult> {
+  const tool = OFFICER_TOOLS.get(name);
+  if (!tool) return { ok: false, error: "unknown_tool" };
+  const parsed = tool.input.safeParse(rawArgs ?? {});
+  if (!parsed.success) {
+    return { ok: false, error: `invalid_arguments: ${parsed.error.issues.slice(0, 3).map((i) => i.path.join(".") + " " + i.message).join("; ")}` };
+  }
+  if (!ctx.officer.enabled) return { ok: false, error: "officer_disabled_for_organization" };
+  try {
+    return await tool.handler(ctx, parsed.data);
+  } catch (e) {
+    return { ok: false, error: `tool_failed: ${e instanceof Error ? e.message : "unknown"}` };
+  }
+}
+
+/** Item-level effective status helper re-exported for Officer consumers. */
+export { effectiveItemStatus };

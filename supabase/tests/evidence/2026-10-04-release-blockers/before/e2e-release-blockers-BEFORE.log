@@ -1,0 +1,97 @@
+build: commit 158edcc (product code = 4277ba2), BUILD_ID gNekLDEaCSK_ai3psnmmh, next start :3005, VAZORA_OFFICER_PROVIDER=none
+ground truth (Officer getOverdueObligations, org clock 2026-10-04 Asia/Riyadh): alpha BETA-200 6d overdue, other 5 none; beta FM-008 6d overdue; empty no contracts
+PASS  before alpha en /contracts 200
+FAIL  before alpha en /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · Government Benchmark Client Authority Active SAR 1.0M 0 0 due 0% — 0%
+FAIL  before alpha en /contracts BETA-200: active obligations computed = 1
+FAIL  before alpha en /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · Government Benchmark Client Authority Active SAR 1.0M 0 0 due 0% — 0%
+FAIL  before alpha en /contracts BETA-200: evidenceCoverage labelled not calculated — null
+FAIL  before alpha en /contracts BETA-200: riskExposure labelled not in this release — null
+FAIL  before alpha en /contracts BETA-200: claimReadiness labelled not in this release — null
+FAIL  before alpha en /contracts: no placeholder 0% or zero money in rows
+PASS  before alpha en /contracts: no other-tenant contract
+FAIL  before alpha en nav: claims is not an active link and is marked unavailable — links=1 marked=0
+PASS  before alpha en overview BETA-200 200
+FAIL  before alpha en overview KPI overdue = 1 — observed KPIs: Obligations 0 0 due | Overdue 0 | Evidence coverage 0% | Open risks 0 | Risk exposure SAR 0.0 | Next claim readiness 0%
+FAIL  before alpha en overview KPI active obligations = 1
+FAIL  before alpha en overview coverage labelled not calculated — null
+FAIL  before alpha en overview risksOpen labelled not in this release — null
+FAIL  before alpha en overview riskExposure labelled not in this release — null
+FAIL  before alpha en overview claimReadiness labelled not in this release — null
+FAIL  before alpha en overview KPIs: no placeholder zero money / 0%
+FAIL  before alpha en lifecycle: no placeholder 0% / zero money — observed: 
+FAIL  before alpha en overview + tabs: no active risks/claims links — links=3
+FAIL  before alpha en tabs: risks/claims marked unavailable
+PASS  before alpha en obligations tab 200
+PASS  before alpha en obligations hint has no unknown denominator (n / 0) — observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026
+FAIL  before alpha en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026 – Jul 31, 2027 Active Overview Obligati
+FAIL  before alpha en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · Government · SAR 1.0M · Mar 18, 2026 – Jul 31, 2027 Active Overview Obligati
+FAIL  before alpha en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Readiness is computed from verified requirements.
+PASS  before alpha en html dir
+PASS  before alpha ar /contracts 200
+FAIL  before alpha ar /contracts BETA-200: overdue computed = 1 — observed row: عقد تشغيل وصيانة — المنطقة الوسطى BETA-200 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 0 0 مستحق 0‎%‎ — 0%
+FAIL  before alpha ar /contracts BETA-200: active obligations computed = 1
+FAIL  before alpha ar /contracts ALPHA-100: overdue computed = 0 (real zero) — observed row: Facilities maintenance — Northern ALPHA-100 · القطاع الحكومي Benchmark Client Authority نشط ‏1.0 مليون ر.س 0 0 مستحق 0‎%‎ — 0%
+FAIL  before alpha ar /contracts BETA-200: evidenceCoverage labelled not calculated — null
+FAIL  before alpha ar /contracts BETA-200: riskExposure labelled not in this release — null
+FAIL  before alpha ar /contracts BETA-200: claimReadiness labelled not in this release — null
+FAIL  before alpha ar /contracts: no placeholder 0% or zero money in rows
+PASS  before alpha ar /contracts: no other-tenant contract
+FAIL  before alpha ar nav: claims is not an active link and is marked unavailable — links=1 marked=0
+PASS  before alpha ar overview BETA-200 200
+FAIL  before alpha ar overview KPI overdue = 1 — observed KPIs: الالتزامات 0 0 مستحق | متأخرة 0 | تغطية الأدلة 0‎%‎ | المخاطر المفتوحة 0 | التعرض للمخاطر ‏0.0 ر.س | جاهزية المستخلص القادم 0‎%‎
+FAIL  before alpha ar overview KPI active obligations = 1
+FAIL  before alpha ar overview coverage labelled not calculated — null
+FAIL  before alpha ar overview risksOpen labelled not in this release — null
+FAIL  before alpha ar overview riskExposure labelled not in this release — null
+FAIL  before alpha ar overview claimReadiness labelled not in this release — null
+FAIL  before alpha ar overview KPIs: no placeholder zero money / 0%
+FAIL  before alpha ar lifecycle: no placeholder 0% / zero money — observed: 
+FAIL  before alpha ar overview + tabs: no active risks/claims links — links=3
+FAIL  before alpha ar tabs: risks/claims marked unavailable
+PASS  before alpha ar obligations tab 200
+PASS  before alpha ar obligations hint has no unknown denominator (n / 0) — observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 ما
+FAIL  before alpha ar direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 مارس 2026 – 31 يوليو 2027 نشط نظرة عامة ال
+FAIL  before alpha ar direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: العقود / BETA-200 عقد تشغيل وصيانة — المنطقة الوسطى Benchmark Client Authority · القطاع الحكومي · ‏1.0 مليون ر.س · 18 مارس 2026 – 31 يوليو 2027 نشط نظرة عامة ال
+FAIL  before alpha ar direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: المستخلصات تُحتسب الجاهزية من المتطلبات المُتحقق منها.
+PASS  before alpha ar html dir
+PASS  before beta en /contracts 200
+FAIL  before beta en /contracts FM-008: overdue computed = 1 — observed row: Facilities Management — Central FM-008 · Government QA Client Authority Active SAR 0.0 0 0 due 0% — 0%
+FAIL  before beta en /contracts FM-008: active obligations computed = 1
+FAIL  before beta en /contracts OM-014: overdue computed = 0 (real zero) — observed row: O&M Services — Northern Region OM-014 · Government QA Client Authority Active SAR 0.0 0 0 due 0% — 0%
+FAIL  before beta en /contracts FM-008: evidenceCoverage labelled not calculated — null
+FAIL  before beta en /contracts FM-008: riskExposure labelled not in this release — null
+FAIL  before beta en /contracts FM-008: claimReadiness labelled not in this release — null
+FAIL  before beta en /contracts: no placeholder 0% or zero money in rows
+PASS  before beta en /contracts: no other-tenant contract
+FAIL  before beta en nav: claims is not an active link and is marked unavailable — links=1 marked=0
+PASS  before beta en overview FM-008 200
+FAIL  before beta en overview KPI overdue = 1 — observed KPIs: Obligations 0 0 due | Overdue 0 | Evidence coverage 0% | Open risks 0 | Risk exposure SAR 0.0 | Next claim readiness 0%
+FAIL  before beta en overview KPI active obligations = 1
+FAIL  before beta en overview coverage labelled not calculated — null
+FAIL  before beta en overview risksOpen labelled not in this release — null
+FAIL  before beta en overview riskExposure labelled not in this release — null
+FAIL  before beta en overview claimReadiness labelled not in this release — null
+FAIL  before beta en overview KPIs: no placeholder zero money / 0%
+FAIL  before beta en lifecycle: no placeholder 0% / zero money — observed: 
+FAIL  before beta en overview + tabs: no active risks/claims links — links=3
+FAIL  before beta en tabs: risks/claims marked unavailable
+PASS  before beta en obligations tab 200
+FAIL  before beta en obligations hint has no unknown denominator (n / 0) — observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · SAR 0.0 · Not recorded – Not recor
+FAIL  before beta en direct /app/contracts/[id]/risks: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · SAR 0.0 · Not recorded – Not recorded Active Overview Obligations Evidence
+FAIL  before beta en direct /app/contracts/[id]/claims: explicit unavailable notice, not an empty list — status=200 observed: Contracts / FM-008 Facilities Management — Central QA Client Authority · Government · SAR 0.0 · Not recorded – Not recorded Active Overview Obligations Evidence
+FAIL  before beta en direct /app/claims: explicit unavailable notice, not an empty list — status=200 observed: Claims Readiness is computed from verified requirements.
+PASS  before beta en html dir
+PASS  before empty: honest empty state, no failure text
+FAIL  before empty: /app/claims is the unavailable notice
+PASS  before mobile en /app/contracts: no horizontal overflow
+PASS  before mobile en /app/contracts/[id]: no horizontal overflow
+PASS  before mobile en /app/contracts/[id]/risks: no horizontal overflow
+PASS  before mobile ar /app/contracts: no horizontal overflow
+PASS  before mobile ar /app/contracts/[id]: no horizontal overflow
+PASS  before mobile ar /app/contracts/[id]/risks: no horizontal overflow
+PASS  before demo /contracts keeps illustrative fixture figures
+PASS  before demo nav keeps claims link
+PASS  before demo badge visible
+PASS  before demo /app/claims keeps fixture claims (no unavailable notice)
+
+28/93 passed

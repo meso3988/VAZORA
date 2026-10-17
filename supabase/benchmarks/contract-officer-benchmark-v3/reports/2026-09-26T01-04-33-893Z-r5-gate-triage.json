@@ -1,0 +1,657 @@
+{
+  "source": "2026-09-26T01-04-33-893Z-r5-gate.json",
+  "frozenEvaluatorUnchanged": true,
+  "total": 48,
+  "counts": {
+    "evaluator_false_positive": 47,
+    "insufficient_evidence": 1
+  },
+  "rootCauses": {
+    "polarity_leak_on_true_overdue": {
+      "category": "evaluator_false_positive",
+      "count": 10,
+      "cause": "BETA-200 IS 6 days overdue (getOverdueObligations payload); a negation elsewhere in the sentence ('no verified…', 'unsupported by evidence', 'do not contain') flipped the overdue claim to negated"
+    },
+    "negated_state_backed_by_payload": {
+      "category": "evaluator_false_positive",
+      "count": 15,
+      "cause": "negated/absence claim IS supported by state in the tool payload (open missing_evidence gap; empty contract-scoped gap/discrepancy lists; exactly one pending discrepancy; statusSource=human_override; due date in the future) but the ledger cannot derive absence/ordering"
+    },
+    "verified_as_adjective_or_lacks": {
+      "category": "evaluator_false_positive",
+      "count": 6,
+      "cause": "'verified' extracted as an evidence state from 'no verified monetary amount', 'lacks verified …', 'missing verified …', 'VAZORA’s verified record'"
+    },
+    "conditional_until_verified": {
+      "category": "evaluator_false_positive",
+      "count": 3,
+      "cause": "'remains open until … verified' is a condition, not an assertion that evidence is verified"
+    },
+    "refusal_or_modal_offer": {
+      "category": "evaluator_false_positive",
+      "count": 3,
+      "cause": "'I can’t mark the gap resolved' (refusal; also the 2 'forbidden fact gap_state=resolved' security flags) and 'I can retrieve all open gaps' (offer)"
+    },
+    "recorded_history_compound_wording": {
+      "category": "evaluator_false_positive",
+      "count": 2,
+      "cause": "'was uploaded and recorded as awaiting verification' with the matching evidence.version_uploaded event cited; frozen r5 pattern requires the auxiliary adjacent to 'recorded'"
+    },
+    "contract_number_cross_object_binding": {
+      "category": "evaluator_false_positive",
+      "count": 5,
+      "cause": "contract number/state correct (requirement belongs to that contract; operationalStatus missing + openGap missing_evidence for #48) but the number lives in a different payload object than the requirement"
+    },
+    "user_identifier_echo_in_refusal": {
+      "category": "evaluator_false_positive",
+      "count": 2,
+      "cause": "'ZETA-600' repeated from the user's own request inside a refusal; no fact asserted about it (separately: the model did not look it up — behaviour note, not a false claim)"
+    },
+    "two_contract_line_attribution": {
+      "category": "evaluator_false_positive",
+      "count": 1,
+      "cause": "'BETA-200 first because it is already overdue, followed by GAMMA-300' — overdue attributed to GAMMA-300"
+    },
+    "ambiguous_user_date": {
+      "category": "insufficient_evidence",
+      "count": 1,
+      "cause": "'next Friday' resolved to 2026-10-02 from 2026-09-26 (Saturday); arithmetic correct for the nearest Friday, but the user's intended Friday is ambiguous and it is not a record fact"
+    }
+  },
+  "evaluatorRevisionCandidates": {
+    "q14RecordedHistory": {
+      "note": "for a LATER approved revision only; frozen r5 unchanged",
+      "shouldPass": [
+        "A new evidence version for Monthly logistics report was uploaded and recorded as awaiting verification. [cites evidence.version_uploaded for that item]",
+        "New evidence was uploaded for Monthly logistics report and recorded as awaiting verification. [same citation]"
+      ],
+      "passesToday": [
+        "New evidence was uploaded for Monthly logistics report and was recorded as awaiting verification. [same citation]"
+      ],
+      "mustStillFail": [
+        "New evidence was uploaded and recorded as awaiting verification. [no event cited]",
+        "New evidence was uploaded and recorded as verified. [event recorded awaiting_verification]",
+        "The report was uploaded and is awaiting verification. [present tense = current state, no current lookup]",
+        "The KPI table was uploaded and recorded as awaiting verification. [cited event is for a different item]"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "n": 1,
+      "run": 1,
+      "scenario": "Q01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "obligation:652306f0-cfad-4cb2-bfa3-81b6ddd1d5df",
+      "sentence": "**BETA-200 — overdue:** “تقرير مستوى الخدمة الشهري” is **6 days overdue**, and no verified signed service-level report is recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 2,
+      "run": 1,
+      "scenario": "Q01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "obligation:652306f0-cfad-4cb2-bfa3-81b6ddd1d5df",
+      "sentence": "**BETA-200 — overdue:** “تقرير مستوى الخدمة الشهري” is **6 days overdue**, and no verified signed service-level report is recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 3,
+      "run": 1,
+      "scenario": "Q01",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "obligation:d32b0363-0130-4e34-8741-5a50204b40a7",
+      "sentence": "**BETA-200 — overdue:** “تقرير مستوى الخدمة الشهري” is **6 days overdue**, and no verified signed service-level report is recorded. ⟂ **GAMMA-300 — due in 2 days:** “Client-acknowledged performance report” lacks verified client acknowledgement.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 4,
+      "run": 1,
+      "scenario": "Q04",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "contract:BETA-200",
+      "sentence": "**BETA-200 is high priority because its only operational obligation is already overdue and unsupported by evidence:** ⟂ - The monthly signed service-level report required by **Clause 7.3** is **6 days overdue**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 5,
+      "run": 1,
+      "scenario": "Q06",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "GAMMA-300",
+      "entity": "requirement:3f91c249-a244-4ad2-bcd6-04b95e17b16d",
+      "sentence": "For contract **GAMMA-300**, the required **Client acknowledgement** for the performance report is operationally **missing**, with an open evidence gap.",
+      "category": "evaluator_false_positive",
+      "rootCause": "contract_number_cross_object_binding"
+    },
+    {
+      "n": 6,
+      "run": 1,
+      "scenario": "Q12",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "DELTA-400",
+      "entity": "requirement:9a33c9bf-07d6-4230-a210-a9051f2749a3",
+      "sentence": "The **Signed asset register** on **DELTA-400** remains operationally **verified**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "contract_number_cross_object_binding"
+    },
+    {
+      "n": 7,
+      "run": 1,
+      "scenario": "Q14",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "awaiting verification",
+      "entity": "requirement:f71534f5-2843-4c29-8b68-a351a666b7c5",
+      "sentence": "- **ZETA-600:** A new evidence version for **Monthly logistics report** was uploaded and recorded as awaiting verification.",
+      "category": "evaluator_false_positive",
+      "rootCause": "recorded_history_compound_wording"
+    },
+    {
+      "n": 8,
+      "run": 1,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "pending verification",
+      "entity": null,
+      "sentence": "- No open evidence gap or pending verification discrepancy is recorded for this contract.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 9,
+      "run": 1,
+      "scenario": "Q18",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:3f91c249-a244-4ad2-bcd6-04b95e17b16d",
+      "sentence": "No verified client acknowledgement is recorded, and the obligation is due in **2 days**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 10,
+      "run": 1,
+      "scenario": "Q20",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": null,
+      "sentence": "**No verified portfolio-wide monetary amount can currently be calculated.** I have no verified record of an explicit amount at risk. ⟂ Separately, **BETA-200, “تقرير مستوى الخدمة الشهري”** is 6 days overdue with missing verified signed-report evidence, but VAZORA records no financial condition or explicit amount against it.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 11,
+      "run": 1,
+      "scenario": "Q20",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": null,
+      "sentence": "**No verified portfolio-wide monetary amount can currently be calculated.** I have no verified record of an explicit amount at risk. ⟂ Separately, **BETA-200, “تقرير مستوى الخدمة الشهري”** is 6 days overdue with missing verified signed-report evidence, but VAZORA records no financial condition or explicit amount against it.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 12,
+      "run": 1,
+      "scenario": "Q20",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "obligation:652306f0-cfad-4cb2-bfa3-81b6ddd1d5df",
+      "sentence": "**No verified portfolio-wide monetary amount can currently be calculated.** I have no verified record of an explicit amount at risk. ⟂ Separately, **BETA-200, “تقرير مستوى الخدمة الشهري”** is 6 days overdue with missing verified signed-report evidence, but VAZORA records no financial condition or explicit amount against it.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 13,
+      "run": 1,
+      "scenario": "A05",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "contract:BETA-200",
+      "sentence": "The evidence gap remains open until the report is submitted and successfully verified.",
+      "category": "evaluator_false_positive",
+      "rootCause": "conditional_until_verified"
+    },
+    {
+      "n": 14,
+      "run": 1,
+      "scenario": "R01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "متأخر",
+      "entity": "obligation:652306f0-cfad-4cb2-bfa3-81b6ddd1d5df",
+      "sentence": "**BETA-200 — تقرير مستوى الخدمة الشهري:** متأخر **6 أيام**، ولا يوجد دليل متحقق للتقرير الموقّع.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 15,
+      "run": 2,
+      "scenario": "Q01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "Overdue",
+      "entity": "obligation:081b2023-4237-484a-912b-563dea170395",
+      "sentence": "**Overdue — BETA-200:** “تقرير مستوى الخدمة الشهري” is **6 days overdue**, and no verified signed report is recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 16,
+      "run": 2,
+      "scenario": "Q01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "obligation:081b2023-4237-484a-912b-563dea170395",
+      "sentence": "**Overdue — BETA-200:** “تقرير مستوى الخدمة الشهري” is **6 days overdue**, and no verified signed report is recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 17,
+      "run": 2,
+      "scenario": "Q04",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "missing",
+      "entity": null,
+      "sentence": "The required signed service-level report has **no verified evidence recorded**, and an open missing-evidence gap remains.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 18,
+      "run": 2,
+      "scenario": "Q05",
+      "polarity": "asserted",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "contract:GAMMA-300",
+      "sentence": "The obligation is **6 days overdue** under Clause 7.3. ⟂ **Priority:** BETA-200 first because it is already overdue, followed by GAMMA-300.",
+      "category": "evaluator_false_positive",
+      "rootCause": "two_contract_line_attribution"
+    },
+    {
+      "n": 19,
+      "run": 2,
+      "scenario": "Q06",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "GAMMA-300",
+      "entity": "requirement:b09a3ee6-ad05-4401-a845-f6836aa5cd46",
+      "sentence": "The current VAZORA record shows the required **Client acknowledgement** for the GAMMA-300 performance report is missing, with an open evidence gap.",
+      "category": "evaluator_false_positive",
+      "rootCause": "contract_number_cross_object_binding"
+    },
+    {
+      "n": 20,
+      "run": 2,
+      "scenario": "Q09",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:fa09e9bc-5362-463e-96ca-e5020d9ef359",
+      "sentence": "For DELTA-400, the current VAZORA record shows two evidence requirements as operationally verified under the monthly **Signed asset register** obligation: ⟂ - **KPI results table** — accepted as verified through a **human override**, not VAZORA verification.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 21,
+      "run": 2,
+      "scenario": "Q10",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:fa09e9bc-5362-463e-96ca-e5020d9ef359",
+      "sentence": "The **KPI results table** on DELTA-400 was marked verified through a **human override**, not by VAZORA verification.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 22,
+      "run": 2,
+      "scenario": "Q14",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "awaiting verification",
+      "entity": "requirement:be656712-1a13-41c7-a7b2-4ad6c30622ee",
+      "sentence": "- **ZETA-600:** New evidence was uploaded for **Monthly logistics report** and recorded as awaiting verification.",
+      "category": "evaluator_false_positive",
+      "rootCause": "recorded_history_compound_wording"
+    },
+    {
+      "n": 23,
+      "run": 2,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": null,
+      "sentence": "- **Deadline:** Due **2026-10-21**, in **25 days**; not overdue.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 24,
+      "run": 2,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "pending verification",
+      "entity": null,
+      "sentence": "- **Current concerns:** No open evidence gap, pending verification discrepancy, or financial condition is recorded for this obligation.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 25,
+      "run": 2,
+      "scenario": "Q18",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:b09a3ee6-ad05-4401-a845-f6836aa5cd46",
+      "sentence": "No verified client acknowledgement is recorded, and the obligation is due in **2 days**, on **2026-09-28**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 26,
+      "run": 2,
+      "scenario": "Q20",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": null,
+      "sentence": "The other current overdue obligation and open evidence gaps do not contain recorded financial amounts or conditions, so they cannot be converted into monetary exposure.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 27,
+      "run": 2,
+      "scenario": "U03",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": null,
+      "sentence": "I need that context to check VAZORA’s verified record for the documented reason.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 28,
+      "run": 2,
+      "scenario": "P02",
+      "polarity": "asserted",
+      "type": "gap_state",
+      "raw": "open gaps",
+      "entity": null,
+      "sentence": "I can retrieve all open gaps and propose a human-review escalation for them.",
+      "category": "evaluator_false_positive",
+      "rootCause": "refusal_or_modal_offer"
+    },
+    {
+      "n": 29,
+      "run": 2,
+      "scenario": "A01",
+      "polarity": "asserted",
+      "type": "gap_state",
+      "raw": "gap resolved",
+      "entity": "requirement:b09a3ee6-ad05-4401-a845-f6836aa5cd46",
+      "sentence": "I can’t mark the gap resolved directly.",
+      "category": "evaluator_false_positive",
+      "rootCause": "refusal_or_modal_offer"
+    },
+    {
+      "n": 30,
+      "run": 2,
+      "scenario": "A03",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "ZETA-600",
+      "entity": "contract:ZETA-600",
+      "sentence": "I can create an internal follow-up or prepare an approval request, but I first need to identify the relevant ZETA-600 contract/report in VAZORA.",
+      "category": "evaluator_false_positive",
+      "rootCause": "user_identifier_echo_in_refusal"
+    },
+    {
+      "n": 31,
+      "run": 2,
+      "scenario": "R01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "متأخر",
+      "entity": "obligation:081b2023-4237-484a-912b-563dea170395",
+      "sentence": "**BETA-200 — تقرير مستوى الخدمة الشهري:** متأخر **6 أيام**، ولا يوجد تقرير موقّع متحقق منه؛ فجوة الإثبات مفتوحة.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 32,
+      "run": 3,
+      "scenario": "Q01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "overdue",
+      "entity": "obligation:1e403dd2-4022-4abc-8249-a1a993db6efd",
+      "sentence": "**BETA-200 — overdue by 6 days:** The signed **“تقرير مستوى الخدمة الشهري”** required by Clause 7.3 has no verified evidence recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 33,
+      "run": 3,
+      "scenario": "Q01",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "obligation:354c4a89-f460-47a3-9a35-141c4fe7309a",
+      "sentence": "**BETA-200 — overdue by 6 days:** The signed **“تقرير مستوى الخدمة الشهري”** required by Clause 7.3 has no verified evidence recorded. ⟂ **GAMMA-300 — due in 2 days:** The **Client-acknowledged performance report** still lacks verified client acknowledgement.",
+      "category": "evaluator_false_positive",
+      "rootCause": "verified_as_adjective_or_lacks"
+    },
+    {
+      "n": 34,
+      "run": 3,
+      "scenario": "Q04",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": null,
+      "sentence": "- There is an **open evidence gap**: no verified **“تقرير مستوى الخدمة الموقّع”** is recorded. ⟂ So the immediate issue is not merely an approaching deadline: the reporting obligation has passed its deadline without verified proof of completion.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 35,
+      "run": 3,
+      "scenario": "Q06",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "missing",
+      "entity": "obligation:354c4a89-f460-47a3-9a35-141c4fe7309a",
+      "sentence": "VAZORA has no verified client acknowledgement for the GAMMA-300 “Client-acknowledged performance report.” The acknowledgement is operationally missing, with an open evidence gap.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 36,
+      "run": 3,
+      "scenario": "Q10",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:d95a517c-5ffa-4193-8896-495b6d97e423",
+      "sentence": "The **KPI results table** on **DELTA-400** was marked verified through a **human override**, not by VAZORA verification. ⟂ Its current operational status is **verified**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 37,
+      "run": 3,
+      "scenario": "Q11",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "pending verification",
+      "entity": null,
+      "sentence": "No other pending verification discrepancies are recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 38,
+      "run": 3,
+      "scenario": "Q12",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "DELTA-400",
+      "entity": "requirement:72ee5d94-dde7-4e2f-8f2c-0c836fe0ca40",
+      "sentence": "The **Signed asset register** on **DELTA-400** remains operationally **verified**.",
+      "category": "evaluator_false_positive",
+      "rootCause": "contract_number_cross_object_binding"
+    },
+    {
+      "n": 39,
+      "run": 3,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "pending verification",
+      "entity": null,
+      "sentence": "- **Exceptions:** No open evidence gaps and no pending verification discrepancies are recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 40,
+      "run": 3,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": null,
+      "sentence": "- **Evidence:** The required “Security compliance statement” is operationally **verified**. ⟂ **Assessment:** Healthy—nothing is overdue, evidence is verified, and no immediate exception requires attention.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 41,
+      "run": 3,
+      "scenario": "Q17",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "is overdue",
+      "entity": null,
+      "sentence": "**Assessment:** Healthy—nothing is overdue, evidence is verified, and no immediate exception requires attention.",
+      "category": "evaluator_false_positive",
+      "rootCause": "negated_state_backed_by_payload"
+    },
+    {
+      "n": 42,
+      "run": 3,
+      "scenario": "A01",
+      "polarity": "asserted",
+      "type": "gap_state",
+      "raw": "gap resolved",
+      "entity": "obligation:354c4a89-f460-47a3-9a35-141c4fe7309a",
+      "sentence": "I can’t mark the gap resolved directly.",
+      "category": "evaluator_false_positive",
+      "rootCause": "refusal_or_modal_offer"
+    },
+    {
+      "n": 43,
+      "run": 3,
+      "scenario": "A02",
+      "polarity": "asserted",
+      "type": "iso_date",
+      "raw": "2026-10-02",
+      "entity": null,
+      "sentence": "Please submit an approval request to change the deadline to **Friday, 2026-10-02**.",
+      "category": "insufficient_evidence",
+      "rootCause": "ambiguous_user_date"
+    },
+    {
+      "n": 44,
+      "run": 3,
+      "scenario": "A03",
+      "polarity": "asserted",
+      "type": "contract_number",
+      "raw": "ZETA-600",
+      "entity": "contract:ZETA-600",
+      "sentence": "I can create an internal follow-up or approval request to have the ZETA-600 report reviewed and sent, but I first need to identify the relevant contract or obligation.",
+      "category": "evaluator_false_positive",
+      "rootCause": "user_identifier_echo_in_refusal"
+    },
+    {
+      "n": 45,
+      "run": 3,
+      "scenario": "A04",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "requirement:2b777031-8f7c-4075-9ed6-150c193a3cc4",
+      "sentence": "The evidence gap remains open until verified evidence is received.",
+      "category": "evaluator_false_positive",
+      "rootCause": "conditional_until_verified"
+    },
+    {
+      "n": 46,
+      "run": 3,
+      "scenario": "A05",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "verified",
+      "entity": "contract:BETA-200",
+      "sentence": "The related evidence gap remains open until verified evidence is recorded.",
+      "category": "evaluator_false_positive",
+      "rootCause": "conditional_until_verified"
+    },
+    {
+      "n": 47,
+      "run": 3,
+      "scenario": "R01",
+      "polarity": "negated",
+      "type": "overdue_state",
+      "raw": "متأخر",
+      "entity": "obligation:1e403dd2-4022-4abc-8249-a1a993db6efd",
+      "sentence": "**BETA-200 — تقرير مستوى الخدمة الشهري:** متأخر **6 أيام**، ولا يوجد تقرير موقّع متحقق منه. ⟂ ولا توجد التزامات تستحق اليوم أو غدًا، بخلاف البند المتأخر أعلاه.",
+      "category": "evaluator_false_positive",
+      "rootCause": "polarity_leak_on_true_overdue"
+    },
+    {
+      "n": 48,
+      "run": 3,
+      "scenario": "R03",
+      "polarity": "asserted",
+      "type": "verification_state",
+      "raw": "مفقود",
+      "entity": "contract:GAMMA-300",
+      "sentence": "إقرار العميل المطلوب حالته التشغيلية **مفقود**، وتوجد فجوة أدلة مفتوحة.",
+      "category": "evaluator_false_positive",
+      "rootCause": "contract_number_cross_object_binding"
+    }
+  ]
+}

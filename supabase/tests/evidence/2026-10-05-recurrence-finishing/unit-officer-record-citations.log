@@ -1,0 +1,19 @@
+PASS  getAssignments succeeds — {"ok":true,"data":[{"obligationId":"22222222-2222-4222-8222-222222222222","contractId":"11111111-1111-4111-8111-111111111111","title":"Quarterly security compliance statement","suggestedRole":"Project
+PASS  getAssignments emits one obligation citation per row — [{"target":"obligation","id":"22222222-2222-4222-8222-222222222222","label":"Quarterly security compliance statement","contractId":"11111111-1111-4111-8111-111111111111","href":"/app/contracts/11111111-1111-4111-8111-111111111111/obligations"},{"target":"obligation","id":"33333333-3333-4333-8333-333333333333","label":"تقرير مستوى الخدمة الشهري","contractId":"11111111-1111-4111-8111-111111111111","href":"/app/contracts/11111111-1111-4111-8111-111111111111/obligations"},{"target":"contract","id":"11111111-1111-4111-8111-111111111111","label":"EPSILON-500","contractId":"11111111-1111-4111-8111-111111111111","href":"/app/contracts/11111111-1111-4111-8111-111111111111"}]
+PASS  getAssignments obligation cite carries id + contract link
+PASS  getAssignments cites the Arabic-titled obligation with its real id
+PASS  getAssignments also emits the contract citation for row claims
+PASS  getContractHealth succeeds — {"ok":true,"data":{"contracts":[{"contractId":"11111111-1111-4111-8111-111111111111","contractNumber":"EPSILON-500","title":"Security services — Western region","verdict":"actionable_issues","issues":[{"kind":"unassigned","severity":"medium","title":"Obligation has no confirmed owner","detail":null,
+PASS  getContractHealth keeps the contract citation
+PASS  getContractHealth emits the obligation citation stored on the issue — [{"target":"contract","id":"11111111-1111-4111-8111-111111111111","label":"EPSILON-500 — Security services — Western region","contractId":"11111111-1111-4111-8111-111111111111","href":"/app/contracts/11111111-1111-4111-8111-111111111111"},{"target":"obligation","id":"22222222-2222-4222-8222-222222222222","label":"Quarterly security compliance statement","contractId":"11111111-1111-4111-8111-111111111111","href":"/app/contracts/11111111-1111-4111-8111-111111111111/obligations"}]
+PASS  issue rows expose obligationId for downstream citing — [{"kind":"unassigned","severity":"medium","title":"Obligation has no confirmed owner","detail":null,"status":"active","obligationId":"22222222-2222-4222-8222-222222222222","citations":[{"target":"obli
+PASS  prompt: obligation-level claims cite the obligation, not the contract stand-in
+PASS  prompt: deadline change on a named contract looks up obligations first
+PASS  prompt: single eligible obligation is named, not asked about
+PASS  prompt: several eligible obligations may still be disambiguated
+PASS  prompt: contract value is not exposure
+PASS  prompt: value may only explain what is missing, never answer the exposure question
+PASS  getAssignments still enforces org scope on the contract lookup
+PASS  getContractHealth issue citations come from the stored observation, never fabricated
+
+17 passed · 0 failed

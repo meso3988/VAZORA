@@ -31,6 +31,20 @@ export function formatMoney(
     .replace(/SAR/, locale === "ar" ? "ر.س" : "SAR");
 }
 
+/**
+ * Guard for date formatting.
+ *
+ * Real tenant rows legitimately carry no date (an obligation with no
+ * normalized due date, a contract with no recorded period). Passing an
+ * Invalid Date to Intl THROWS, which in a server component takes the whole
+ * page down — so callers must render "unknown" instead of formatting.
+ */
+export function validDate(iso: string | null | undefined): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function daysBetween(fromISO: string, toISO: string): number {
   const a = new Date(fromISO).getTime();
   const b = new Date(toISO).getTime();

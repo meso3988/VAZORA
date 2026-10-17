@@ -1,0 +1,211 @@
+{
+  "document": "calibration-matching-comparison",
+  "for": "the same independent reviewer, after the verdicts in INDEPENDENT REFERENCE + MATCHING AUDIT were issued without sight of these decisions",
+  "sources": [
+    "reviewer-pilot-v2-adjudication.json (runner decisions, unchanged)",
+    "reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-matching-ledger.json (automatic matches, unchanged)",
+    "the independent reviewer's report"
+  ],
+  "originalCalibrationReport": "unchanged; this file is a traceable addendum only",
+  "rows": [
+    {
+      "case": "HV2F-007",
+      "originalDecision": {
+        "automaticMatch": [
+          {
+            "refUnit": 0,
+            "reviewerUnit": 0,
+            "overlap": 0.73,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          }
+        ],
+        "runnerAdjudication": [
+          {
+            "refUnit": 0,
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "reviewer split the transition (u0) and its date (u1); both SUPPORTED, together they cover the reference claim, historical scope preserved"
+          }
+        ],
+        "spurious": []
+      },
+      "independentVerdict": "units 0 + 1 together cover the claim (transition + AM-012 in u0, date in u1); both SUPPORTED, same time scope",
+      "difference": "recording only: the runner's adjudication record names reviewerUnit 0 alone, while its note relies on u0 and u1 together. The independent verdict makes the two-unit coverage explicit.",
+      "impact": {
+        "coverage": "covered either way",
+        "E1_E8": "none",
+        "caseScore": "unchanged (SUPPORTED/agree)"
+      }
+    },
+    {
+      "case": "HV2F-056",
+      "originalDecision": {
+        "automaticMatch": [
+          {
+            "refUnit": 0,
+            "reviewerUnit": 0,
+            "overlap": 0.76,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          }
+        ],
+        "runnerAdjudication": [
+          {
+            "refUnit": 0,
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "approval record (u0) and date (u1) split; both SUPPORTED"
+          }
+        ],
+        "spurious": []
+      },
+      "independentVerdict": "units 0 + 1 (approval/record in u0, date in u1); SUPPORTED under either reading of 'بتاريخ' since only decisionDate exists",
+      "difference": "recording only: single reviewerUnit recorded; two-unit coverage was in the note only",
+      "impact": {
+        "coverage": "covered either way",
+        "E1_E8": "none",
+        "caseScore": "unchanged"
+      }
+    },
+    {
+      "case": "HV2F-088",
+      "originalDecision": {
+        "automaticMatch": [
+          {
+            "refUnit": 0,
+            "reviewerUnit": 0,
+            "overlap": 0.64,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          }
+        ],
+        "runnerAdjudication": [
+          {
+            "refUnit": 0,
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "SUPPORTED",
+            "note": "amount (u0) and Arabic-Indic date (u1) split; both SUPPORTED"
+          }
+        ],
+        "spurious": []
+      },
+      "independentVerdict": "units 0 + 1 (amount in u0, issue date in u1); u0's extra issuedDate citation is harmless",
+      "difference": "recording only: single reviewerUnit recorded; two-unit coverage was in the note only",
+      "impact": {
+        "coverage": "covered either way",
+        "E1_E8": "none",
+        "caseScore": "unchanged"
+      }
+    },
+    {
+      "case": "HV2F-031",
+      "originalDecision": {
+        "automaticMatch": [
+          {
+            "refUnit": 0,
+            "reviewerUnit": 0,
+            "overlap": 0.55,
+            "reviewerVerdict": "SUPPORTED",
+            "otherCandidates": []
+          }
+        ],
+        "runnerAdjudication": [
+          {
+            "refUnit": 0,
+            "decision": "COVERED",
+            "reviewerUnit": 1,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "The material claim (verified by engineering) is u1 = CONTRADICTED. The mechanical top candidate was u0, the descriptor 'the site completion certificate' (SUPPORTED, overlap 0.55); taking that candidate would have recorded a FALSE PASS. Span overlap alone is not coverage."
+          }
+        ],
+        "spurious": []
+      },
+      "independentVerdict": "unit 1 alone is the verification claim (CONTRADICTED: status uploaded, verifiedBy/verifiedDate null); unit 0 is an identifying appositive and is not a substitute",
+      "difference": "none on the match: the runner changed the automatic match (u0) to u1, which is what the independent reviewer selected. Additional finding: the reference unit itself should be narrowed to its core ('EV-610 has been verified by engineering'), because as written it spans two units with different verdicts.",
+      "impact": {
+        "coverage": "confirmed",
+        "E1_E8": "the automatic match alone would have produced E1; the adjudicated match (now independently confirmed) has no E1",
+        "caseScore": "unchanged (CONTRADICTED/agree)"
+      }
+    },
+    {
+      "case": "HV2F-046",
+      "originalDecision": {
+        "automaticMatch": [
+          {
+            "refUnit": 0,
+            "reviewerUnit": 0,
+            "overlap": 0.73,
+            "reviewerVerdict": "CONTRADICTED",
+            "otherCandidates": []
+          }
+        ],
+        "runnerAdjudication": [
+          {
+            "refUnit": 0,
+            "decision": "COVERED",
+            "reviewerUnit": 0,
+            "reviewerVerdict": "CONTRADICTED",
+            "note": "'still in draft' (current) contradicted by executed status; reviewer additionally split 'awaiting legal review' (u1) as INSUFFICIENT — part of the asserted sentence, not a spurious assertion"
+          }
+        ],
+        "spurious": []
+      },
+      "independentVerdict": "unit 0 is the core contradicted claim (still in draft vs status executed since 2026-02-10); unit 1 ('awaiting legal review') is a separate qualifier, INSUFFICIENT_EVIDENCE acceptable; whole claim CONTRADICTED",
+      "difference": "none on the match. Additional finding: the reference should state that unit 0 is the core; a rule requiring every matched unit to share the reference verdict would wrongly reject this correct match.",
+      "impact": {
+        "coverage": "confirmed",
+        "E1_E8": "none",
+        "caseScore": "unchanged"
+      }
+    },
+    {
+      "case": "HV2F-097",
+      "originalDecision": {
+        "automaticMatch": [],
+        "runnerAdjudication": [],
+        "spurious": [
+          {
+            "reviewerUnit": 1,
+            "note": "presupposition — 'again' extracted as asserted 'regulator previously requested REP-58' (pre-registered known risk)"
+          },
+          {
+            "reviewerUnit": 2,
+            "note": "presupposition — 'resend' extracted as asserted 'REP-58 was previously sent' (pre-registered known risk)"
+          },
+          {
+            "reviewerUnit": 3,
+            "note": "conditional consequent 'we would need to resend it within 48 hours' treated as an asserted standing obligation"
+          }
+        ]
+      },
+      "independentVerdict": "units 1, 2 and 3 are NON_ASSERTION (presuppositions of 'again' and 're-' inside a conditional, and a 'would' consequent raised to a standing obligation); the reviewer's ASSERTED labels are linguistic errors. Unit 0 overlaps unit 1 (duplicate segmentation).",
+      "difference": "none: the runner scored the same three units as spurious assertions (E5 x3). Additional finding: duplicate segmentation of u0/u1 noted.",
+      "impact": {
+        "coverage": "n/a (reference has no asserted units)",
+        "E1_E8": "E5 = 3 confirmed; case remains the single disagreement (reviewer INSUFFICIENT_EVIDENCE vs reference NON_ASSERTION)",
+        "caseScore": "unchanged (23/24)"
+      }
+    }
+  ],
+  "summary": {
+    "matchesThatDiffer": 0,
+    "recordingCorrections": [
+      "HV2F-007, HV2F-056, HV2F-088: the adjudication record should list both reviewer units as covering the reference claim"
+    ],
+    "referenceDefinitionCorrections": [
+      "HV2F-031: reference unit to be narrowed to its core claim, keeping its link to the original span",
+      "HV2F-046: reference to name unit 0 as the core and unit 1 as a separate qualifier"
+    ],
+    "reviewerDefectsConfirmed": [
+      "HV2F-097 units 1, 2, 3: presupposition / conditional consequent labelled ASSERTED (KD-1)",
+      "HV2F-031 unit 0: appositive labelled ASSERTED — minor, its SUPPORTED verdict is harmless"
+    ],
+    "effectOnCalibration": "E1–E8 unchanged (E1 0, E2 0, E3 0, E4 0, E5 3, E6 0, E7 0, E8 0); case agreement unchanged at 23/24. The calibration adjudication is now independently confirmed for the six audited items, subject to the reference corrections above being recorded."
+  },
+  "spanLinkPolicy": "Any reference split keeps each sub-claim tied to its original character position; the answer text and sources are not rewritten."
+}

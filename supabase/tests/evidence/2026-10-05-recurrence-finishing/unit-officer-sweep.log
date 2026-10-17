@@ -1,0 +1,56 @@
+PASS  clock-uses-org-timezone — Asia/Riyadh 2026-10-05
+PASS  sweep1-ok — {"ok":true,"sweepRunId":"f0cf14da-f759-4727-8b2b-655466dad7a2","contractsTotal":1,"contractsDone":1,"created":10,"updated":0,"resolved":0,"failures":[],"status":"completed"}
+PASS  sweep1-created — created=10 updated=0
+PASS  A-due-soon-detected — [["missing_required_evidence","high","next_3_days"],["due_soon","high","next_3_days"]]
+PASS  A-missing-evidence-detected — ["missing_required_evidence","due_soon"]
+PASS  A-has-clause-citation — traceable to the contract
+PASS  A-recommends-action
+PASS  A-facts-deterministic — [{"gap_id":"a167801b-cf66-48dc-8464-a62ce18f2adc","due_date":"2026-10-06","gap_status":"open","requirement":"A report","days_overdue":null,"days_until_due":1,"operational_status":"missing","external_dependency":null,"latest_verification_result":"missing"},{"due_date":"2026-10-06","days_until_due":1,"partial_requirements":0,"unproven_requirements":1,"financial_condition_present":false}]
+PASS  B-no-noise — []
+PASS  C-overdue-critical — [["missing_required_evidence","high"],["overdue","critical"]]
+PASS  C-days-overdue-exact — [{"gap_id":"7d99028b-267b-482f-88ea-34f87a6893e9","due_date":"2026-09-29","gap_status":"open","requirement":"C report","days_overdue":6,"days_until_due":-6,"operational_status":"missing","external_dependency":null,"latest_verification_result":"missing"},{"due_date":"2026-09-29","due_rule":"monthly by the fifth","days_overdue":6,"partial_requirements":0,"unproven_requirements":1,"financial_condition_present":false}]
+PASS  D-unassigned-detected
+PASS  D-suggested-role-shown
+PASS  D-assignment-needs-approval
+PASS  E-external-dependency — ["external_dependency_pending","due_soon"]
+PASS  E-not-blamed-internally — ["No verified e client acknowledgement is recorded. This item ","Required evidence is not yet proven for this obligation."]
+PASS  F-discrepancy-detected
+PASS  F-not-called-missing — ["verification_discrepancy"]
+PASS  F-operational-still-verified — [{"requirement":"F signed report","discrepancy_id":"da63e6f5-b889-48f4-8517-ad044853948f","operational_status":"verified","prior_state_in_force":true,"latest_verification_result":"needs_human_review"}]
+PASS  F-cites-discrepancy
+PASS  I-approval-waiting
+PASS  J-expiry-detected — [{"end_date":"2026-10-25","days_until_end":20}]
+PASS  K-healthy-silent — []
+PASS  all-observations-cited — uncited=
+PASS  no-invented-financial-exposure — no amounts invented
+PASS  sweep2-no-duplicates — before=10 after=10 created=0 updated=10
+PASS  sweep2-first-detected-stable
+PASS  sweep2-last-seen-advanced
+PASS  sweep3-resolved-something — resolved=2
+PASS  resolved-not-deleted — status=resolved
+PASS  resolved-history-preserved
+PASS  resolved-leaves-active-set
+PASS  sweep4-reopened — created=2
+PASS  reopen-keeps-first-detected — {"first_detected_at":"2026-10-05T19:45:18.412502+00:00","reopen_count":1,"reopened_at":"2026-10-05T19:45:51.881+00:00","status":"active"}
+PASS  acknowledge-works — {"ok":true}
+PASS  acknowledge-idempotent-guard — {"ok":false,"error":"not_found_or_not_active"}
+PASS  acknowledge-does-not-resolve
+PASS  brief-deterministic-counts — {"approvals":1,"counts":{"critical":2,"today":1,"next3Days":4,"thisWeek":0,"monitoring":3},"asOf":"2026-10-05"}
+PASS  brief-has-priorities — items=5
+PASS  brief-not-quiet
+PASS  brief-severity-ordered — critical
+PASS  brief-since-last-review
+PASS  brief-no-invented-changes — changes=0
+PASS  brief-new-issues-reset — newIssues=0 (nothing new since the watermark)
+PASS  iso-beta-sees-nothing — rows=0
+PASS  iso-beta-cannot-read-one
+PASS  iso-beta-cannot-acknowledge — {"ok":false,"error":"not_found_or_not_active"}
+PASS  iso-beta-cannot-resolve — status=acknowledged
+PASS  iso-beta-sweep-empty — {"ok":true,"sweepRunId":"9edd937b-9e46-4556-a8e2-edfc86939876","contractsTotal":0,"contractsDone":0,"created":0,"updated":0,"resolved":0,"failures":[],"status":"completed"}
+PASS  iso-beta-brief-quiet
+PASS  sweep-runs-recorded — ["completed","completed","completed","completed"]
+PASS  sweep-run-records-clock
+PASS  sweep-trigger-recorded
+PASS  audit-events-logged — officer.observation_acknowledged,officer.sweep_completed,officer.observation_created,officer.sweep_started,officer.observation_resolved
+
+OFFICER SWEEP: 54/54 PASS

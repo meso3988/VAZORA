@@ -1,0 +1,68 @@
+build 7e12e1c / -Nl6mqFscCFr0H65bzdTo
+PASS  run alpha en: server response contains no demo fixture content
+PASS  run alpha en: rendered page contains no demo fixture content
+PASS  run alpha en: translation-bundle demo strings are not rendered
+PASS  run alpha en: any such string in the response is attributable to the translation bundle
+PASS  run alpha en: no other tenant's contract numbers (response or page)
+PASS  run alpha en: no financial totals shown (not implemented for live tenants)
+PASS  run alpha en: own monitored contracts visible
+PASS  run alpha en: approvals count = this tenant's real open proposals — shown 1 · db 1
+PASS  run beta en: server response contains no demo fixture content
+PASS  run beta en: rendered page contains no demo fixture content
+PASS  run beta en: translation-bundle demo strings are not rendered
+PASS  run beta en: any such string in the response is attributable to the translation bundle
+PASS  run beta en: no other tenant's contract numbers (response or page)
+PASS  run beta en: no financial totals shown (not implemented for live tenants)
+PASS  run beta en: own monitored contracts visible
+PASS  run beta en: approvals count = this tenant's real open proposals — shown 2 · db 2
+PASS  run empty en: server response contains no demo fixture content
+PASS  run empty en: rendered page contains no demo fixture content
+PASS  run empty en: translation-bundle demo strings are not rendered
+PASS  run empty en: any such string in the response is attributable to the translation bundle
+PASS  run empty en: no other tenant's contract numbers (response or page)
+PASS  run empty en: no financial totals shown (not implemented for live tenants)
+PASS  run empty en: empty tenant — no false reassurance
+PASS  run alpha ar: server response contains no demo fixture content
+PASS  run alpha ar: rendered page contains no demo fixture content
+PASS  run alpha ar: translation-bundle demo strings are not rendered
+PASS  run alpha ar: any such string in the response is attributable to the translation bundle
+PASS  run alpha ar: no other tenant's contract numbers (response or page)
+PASS  run alpha ar: no financial totals shown (not implemented for live tenants)
+PASS  run alpha ar: own monitored contracts visible
+PASS  run alpha ar: approvals count = this tenant's real open proposals — shown 1 · db 1
+PASS  run beta ar: server response contains no demo fixture content
+PASS  run beta ar: rendered page contains no demo fixture content
+PASS  run beta ar: translation-bundle demo strings are not rendered
+PASS  run beta ar: any such string in the response is attributable to the translation bundle
+PASS  run beta ar: no other tenant's contract numbers (response or page)
+PASS  run beta ar: no financial totals shown (not implemented for live tenants)
+PASS  run beta ar: own monitored contracts visible
+PASS  run beta ar: approvals count = this tenant's real open proposals — shown 2 · db 2
+PASS  run empty ar: server response contains no demo fixture content
+PASS  run empty ar: rendered page contains no demo fixture content
+PASS  run empty ar: translation-bundle demo strings are not rendered
+PASS  run empty ar: any such string in the response is attributable to the translation bundle
+PASS  run empty ar: no other tenant's contract numbers (response or page)
+PASS  run empty ar: no financial totals shown (not implemented for live tenants)
+PASS  run empty ar: empty tenant — no false reassurance
+PASS  run switch-alpha en: server response contains no demo fixture content
+PASS  run switch-alpha en: rendered page contains no demo fixture content
+PASS  run switch-alpha en: translation-bundle demo strings are not rendered
+PASS  run switch-alpha en: any such string in the response is attributable to the translation bundle
+PASS  run switch-alpha en: no other tenant's contract numbers (response or page)
+PASS  run switch-alpha en: no financial totals shown (not implemented for live tenants)
+PASS  run switch-alpha en: own monitored contracts visible
+PASS  run switch-alpha en: approvals count = this tenant's real open proposals — shown 1 · db 1
+PASS  run switch: after sign-out the dashboard is no longer reachable — http://localhost:3005/en/login?next=%2Fen%2Fapp%2Fdashboard
+PASS  run switch-beta en: server response contains no demo fixture content
+PASS  run switch-beta en: rendered page contains no demo fixture content
+PASS  run switch-beta en: translation-bundle demo strings are not rendered
+PASS  run switch-beta en: any such string in the response is attributable to the translation bundle
+PASS  run switch-beta en: no other tenant's contract numbers (response or page)
+PASS  run switch-beta en: no financial totals shown (not implemented for live tenants)
+PASS  run switch-beta en: own monitored contracts visible
+PASS  run switch-beta en: approvals count = this tenant's real open proposals — shown 2 · db 2
+PASS  run demo en: demo fixtures shown only in explicit demo mode
+PASS  run demo ar: demo fixtures shown only in explicit demo mode
+
+DASHBOARD PROVENANCE (run): 65/65 pass

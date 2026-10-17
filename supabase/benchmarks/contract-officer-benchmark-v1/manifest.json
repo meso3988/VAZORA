@@ -1,0 +1,18 @@
+{
+  "benchmark": "contract-officer-benchmark-v1",
+  "frozenAt": "2026-09-22",
+  "scenarioCount": 36,
+  "files": [
+    {
+      "file": "fixture.ts",
+      "bytes": 18371,
+      "sha256": "b2ebccfe6d1d2ac5fda2b3319f863b6b8170562a3324e08d537dac62e33c52a5"
+    },
+    {
+      "file": "ground-truth.ts",
+      "bytes": 14506,
+      "sha256": "616efc2789e4b8c5b1dfb2f4466f2568b58b7e77dfe8dbce2783de99f491c255"
+    }
+  ],
+  "note": "Ground truth is frozen. Never edit it to improve a model score — cut a new benchmark version instead."
+}

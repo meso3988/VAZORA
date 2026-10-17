@@ -1,0 +1,40 @@
+PASS  contract with an overdue obligation: overdue = 1
+PASS  active total counts every operational row incl. no-date
+PASS  due this month: today and end-of-month inclusive, next month and overdue excluded
+PASS  contract with no overdue obligation: overdue is a real zero
+PASS  contract with no operational obligations: real zeros
+PASS  rows for an unrequested contract are ignored
+PASS  coverage is not_calculated in live (no implemented formula)
+PASS  risks / exposure / readiness are deferred in live
+PASS  reads contract_obligations
+PASS  scoped to the caller's organization
+PASS  operational definition: approved + active
+PASS  scoped to the page's contracts
+PASS  bounded read with truncation probe (limit + 1)
+PASS  success → counted values
+PASS  Alpha vs Beta: each read is filtered by its own organization id
+PASS  genuine empty result → real zeros (not a failure)
+PASS  returned error → every count unavailable, never zero
+PASS  thrown / network error → unavailable
+PASS  malformed result → unavailable
+PASS  truncated read → incomplete for every contract (no understated count)
+PASS  failure states keep coverage not_calculated and risks deferred
+PASS  no contracts → no query, no indicators
+PASS  demo indicators keep fixture figures as values
+PASS  live provider: no placeholder health object
+PASS  live provider: contract value not coerced to 0
+PASS  /app/contracts reads indicators, not contract.health
+PASS  overview reads indicators, not contract.health
+PASS  overview: risks/claims stub reads are demo-only
+PASS  overview: live shows deferred notices
+PASS  lifecycle: no demo-date default, no contract.health
+PASS  obligations hint: live denominator is the list's own count
+PASS  contracts/[id]/risks/page.tsx: live returns the risks notice before any stub read
+PASS  contracts/[id]/claims/page.tsx: live returns the claims notice before any stub read
+PASS  claims/page.tsx: live returns the claims notice before any stub read
+PASS  shell: live claims nav is declared, not linked
+PASS  tabs: live risks/claims are declared, not linked
+PASS  en: indicator + deferred copy present
+PASS  ar: indicator + deferred copy present
+
+38/38 passed

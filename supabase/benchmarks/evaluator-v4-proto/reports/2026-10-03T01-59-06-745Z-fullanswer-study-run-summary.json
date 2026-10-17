@@ -1,0 +1,18 @@
+{
+  "outcome": "COMPLETE",
+  "used": {
+    "requests": 24,
+    "input": 120939,
+    "output": 46765,
+    "usd": 1.4191
+  },
+  "limits": {
+    "maxRequests": 24,
+    "maxInputTokens": 140000,
+    "maxOutputTokensIncludingThinking": 192000,
+    "maxCostUsdTotal": 4.5,
+    "max_tokens_perRequest": 8000,
+    "approval": "user approval for this study only; total cap, no top-up, no raise; ceilings not targets"
+  },
+  "rawFile": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-03T01-59-06-745Z-fullanswer-study-raw.jsonl"
+}

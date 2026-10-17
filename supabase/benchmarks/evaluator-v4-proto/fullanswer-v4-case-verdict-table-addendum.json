@@ -1,0 +1,232 @@
+{
+  "addendum": "case-verdict table correction",
+  "reference": {
+    "file": "fullanswer-validation-v4.references.json",
+    "sha256": "d427b28d6b4544f58c44d234226611be58e701f7602fe9e5c2f95a1f295f4f1f"
+  },
+  "error": "The reconciliation report text stated SUPPORTED 12 and 'INSUFFICIENT_EVIDENCE 4 then 5' (sum not 24). Report-text error only; the reference is consistent and unchanged.",
+  "corrected": {
+    "SUPPORTED": 10,
+    "INCOMPLETE": 1,
+    "CONTRADICTED": 7,
+    "NON_ASSERTION": 1,
+    "INSUFFICIENT_EVIDENCE": 5
+  },
+  "sum": 24,
+  "uniqueCases": 24,
+  "rows": [
+    {
+      "caseId": "FA-S01",
+      "locale": "en",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S01#0",
+        "FA-S01#1",
+        "FA-S01#2"
+      ]
+    },
+    {
+      "caseId": "FA-S02",
+      "locale": "en",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S02#0",
+        "FA-S02#1",
+        "FA-S02#2",
+        "FA-S02#3"
+      ]
+    },
+    {
+      "caseId": "FA-S03",
+      "locale": "en",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S03#0",
+        "FA-S03#1"
+      ]
+    },
+    {
+      "caseId": "FA-S04",
+      "locale": "mixed",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S04#0",
+        "FA-S04#1"
+      ]
+    },
+    {
+      "caseId": "FA-S05",
+      "locale": "en",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S05#0"
+      ]
+    },
+    {
+      "caseId": "FA-S06",
+      "locale": "ar",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S06#0",
+        "FA-S06#1",
+        "FA-S06#2"
+      ]
+    },
+    {
+      "caseId": "FA-S07",
+      "locale": "ar",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S07#0",
+        "FA-S07#1",
+        "FA-S07#2",
+        "FA-S07#3",
+        "FA-S07#4"
+      ]
+    },
+    {
+      "caseId": "FA-S08",
+      "locale": "ar",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-S08#0",
+        "FA-S08#1",
+        "FA-S08#2"
+      ]
+    },
+    {
+      "caseId": "FA-C01",
+      "locale": "en",
+      "derivedCaseVerdict": "INCOMPLETE",
+      "determiningUnits": [
+        "FA-C01#0"
+      ]
+    },
+    {
+      "caseId": "FA-C02",
+      "locale": "ar",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C02#1"
+      ]
+    },
+    {
+      "caseId": "FA-C03",
+      "locale": "en",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C03#0"
+      ]
+    },
+    {
+      "caseId": "FA-C04",
+      "locale": "en",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C04#0"
+      ]
+    },
+    {
+      "caseId": "FA-C05",
+      "locale": "en",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C05#2"
+      ]
+    },
+    {
+      "caseId": "FA-C06",
+      "locale": "ar",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C06#3"
+      ]
+    },
+    {
+      "caseId": "FA-C07",
+      "locale": "en",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C07#0"
+      ]
+    },
+    {
+      "caseId": "FA-C08",
+      "locale": "ar",
+      "derivedCaseVerdict": "CONTRADICTED",
+      "determiningUnits": [
+        "FA-C08#4"
+      ]
+    },
+    {
+      "caseId": "FA-M01",
+      "locale": "en",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-M01#0",
+        "FA-M01#1",
+        "FA-M01#2",
+        "FA-M01#3"
+      ]
+    },
+    {
+      "caseId": "FA-M02",
+      "locale": "en",
+      "derivedCaseVerdict": "NON_ASSERTION",
+      "determiningUnits": [
+        "FA-M02#0",
+        "FA-M02#1"
+      ]
+    },
+    {
+      "caseId": "FA-M03",
+      "locale": "en",
+      "derivedCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "determiningUnits": [
+        "FA-M03#1a"
+      ]
+    },
+    {
+      "caseId": "FA-M04",
+      "locale": "en",
+      "derivedCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "determiningUnits": [
+        "FA-M04#R1",
+        "FA-M04#4"
+      ]
+    },
+    {
+      "caseId": "FA-M05",
+      "locale": "ar",
+      "derivedCaseVerdict": "SUPPORTED",
+      "determiningUnits": [
+        "FA-M05#0",
+        "FA-M05#1"
+      ]
+    },
+    {
+      "caseId": "FA-M06",
+      "locale": "en",
+      "derivedCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "determiningUnits": [
+        "FA-M06#5"
+      ]
+    },
+    {
+      "caseId": "FA-M07",
+      "locale": "en",
+      "derivedCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "determiningUnits": [
+        "FA-M07#1"
+      ]
+    },
+    {
+      "caseId": "FA-M08",
+      "locale": "en",
+      "derivedCaseVerdict": "INSUFFICIENT_EVIDENCE",
+      "determiningUnits": [
+        "FA-M08#3"
+      ]
+    }
+  ]
+}

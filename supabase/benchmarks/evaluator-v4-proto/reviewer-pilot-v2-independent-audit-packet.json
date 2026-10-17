@@ -1,0 +1,294 @@
+{
+  "purpose": "Independent audit of matching decisions in the 24-case calibration. You receive the answer, the exact sources the reviewer saw, and the reviewer's units. You do NOT receive the runner's decisions, any reference verdicts, old detector results or code. Answer each question from the text and sources only.",
+  "items": [
+    {
+      "id": "HV2F-007",
+      "answer": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026.",
+      "sources": {
+        "CN-104": {
+          "type": "contract",
+          "status": "active",
+          "statusHistory": [
+            {
+              "status": "under_negotiation",
+              "until": "2026-06-01"
+            },
+            {
+              "status": "active",
+              "from": "2026-06-02",
+              "via": "AM-012"
+            }
+          ]
+        },
+        "AM-012": {
+          "type": "amendment",
+          "contract": "CN-104",
+          "effectiveDate": "2026-06-02"
+        }
+      },
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active'",
+          "assertion": "ASSERTED",
+          "claim": "Amendment AM-012 changed contract CN-104's status from under negotiation to active.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-104.statusHistory.0.status",
+            "CN-104.statusHistory.1.status",
+            "CN-104.statusHistory.1.via",
+            "AM-012.contract"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "on 2 June 2026",
+          "assertion": "ASSERTED",
+          "claim": "The status change of CN-104 to active through AM-012 took effect on 2 June 2026.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "CN-104.statusHistory.0.until",
+            "CN-104.statusHistory.1.from",
+            "AM-012.effectiveDate"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "referenceClaim": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026",
+          "ask": "Which reviewer unit(s), if any, address this same claim — same subject, same content, same polarity (asserted vs negated), same time scope? Answer with unit numbers, NONE, or AMBIGUOUS, and give a one-line reason."
+        }
+      ]
+    },
+    {
+      "id": "HV2F-056",
+      "answer": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦.",
+      "sources": {
+        "AP-230": {
+          "type": "approval",
+          "subject": "CL-7",
+          "decision": "approved",
+          "approver": "Legal - H. Lindell (USR-044)",
+          "decisionDate": "2026-05-09"
+        }
+      },
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230",
+          "assertion": "ASSERTED",
+          "claim": "Record AP-230 documents an approval by Legal of clause CL-7.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "AP-230.type",
+            "AP-230.subject",
+            "AP-230.decision",
+            "AP-230.approver"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "بتاريخ ٩ مايو ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "claim": "The approval was dated 9 May 2026.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "AP-230.decisionDate"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "referenceClaim": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦",
+          "ask": "Which reviewer unit(s), if any, address this same claim — same subject, same content, same polarity (asserted vs negated), same time scope? Answer with unit numbers, NONE, or AMBIGUOUS, and give a one-line reason."
+        }
+      ]
+    },
+    {
+      "id": "HV2F-088",
+      "answer": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦.",
+      "sources": {
+        "INV-533": {
+          "type": "invoice",
+          "amountUSD": 18750,
+          "issuedDate": "2026-09-05"
+        }
+      },
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "INV-533 صدرت بمبلغ USD 18,750",
+          "assertion": "ASSERTED",
+          "claim": "Invoice INV-533 was issued for an amount of USD 18,750.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "INV-533.amountUSD",
+            "INV-533.issuedDate"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "في ٥ سبتمبر ٢٠٢٦",
+          "assertion": "ASSERTED",
+          "claim": "Invoice INV-533 was issued on 5 September 2026.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "INV-533.issuedDate"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "referenceClaim": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦",
+          "ask": "Which reviewer unit(s), if any, address this same claim — same subject, same content, same polarity (asserted vs negated), same time scope? Answer with unit numbers, NONE, or AMBIGUOUS, and give a one-line reason."
+        }
+      ]
+    },
+    {
+      "id": "HV2F-031",
+      "answer": "EV-610, the site completion certificate, has been verified by engineering.",
+      "sources": {
+        "EV-610": {
+          "type": "evidence",
+          "description": "site completion certificate",
+          "status": "uploaded",
+          "verifiedBy": null,
+          "verifiedDate": null
+        }
+      },
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "EV-610, the site completion certificate",
+          "assertion": "ASSERTED",
+          "claim": "EV-610 is the site completion certificate.",
+          "verdict": "SUPPORTED",
+          "sourceRefs": [
+            "EV-610.description",
+            "EV-610.type"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "has been verified by engineering",
+          "assertion": "ASSERTED",
+          "claim": "EV-610 has been verified, and engineering verified it.",
+          "verdict": "CONTRADICTED",
+          "sourceRefs": [
+            "EV-610.status",
+            "EV-610.verifiedBy",
+            "EV-610.verifiedDate"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "referenceClaim": "EV-610, the site completion certificate, has been verified by engineering",
+          "ask": "Which reviewer unit(s), if any, address this same claim — same subject, same content, same polarity (asserted vs negated), same time scope? Answer with unit numbers, NONE, or AMBIGUOUS, and give a one-line reason."
+        }
+      ]
+    },
+    {
+      "id": "HV2F-046",
+      "answer": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية.",
+      "sources": {
+        "CN-091": {
+          "type": "contract",
+          "status": "executed",
+          "executedDate": "2026-02-10",
+          "statusHistory": [
+            {
+              "status": "draft",
+              "until": "2026-02-09"
+            },
+            {
+              "status": "executed",
+              "from": "2026-02-10"
+            }
+          ]
+        }
+      },
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "ما زال العقد CN-091 في مرحلة المسودة",
+          "assertion": "ASSERTED",
+          "claim": "Contract CN-091 is still in the draft stage as of now.",
+          "verdict": "CONTRADICTED",
+          "sourceRefs": [
+            "CN-091.status",
+            "CN-091.executedDate",
+            "CN-091.statusHistory"
+          ]
+        },
+        {
+          "unit": 1,
+          "span": "بانتظار المراجعة القانونية",
+          "assertion": "ASSERTED",
+          "claim": "Contract CN-091 is currently awaiting legal review.",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        }
+      ],
+      "questions": [
+        {
+          "referenceClaim": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية",
+          "ask": "Which reviewer unit(s), if any, address this same claim — same subject, same content, same polarity (asserted vs negated), same time scope? Answer with unit numbers, NONE, or AMBIGUOUS, and give a one-line reason."
+        }
+      ]
+    },
+    {
+      "id": "HV2F-097",
+      "answer": "Should the regulator request REP-58 again, we would need to resend it within 48 hours.",
+      "sources": {},
+      "reviewerUnits": [
+        {
+          "unit": 0,
+          "span": "Should the regulator request REP-58 again",
+          "assertion": "NON_ASSERTION",
+          "claim": null,
+          "verdict": "NON_ASSERTION",
+          "sourceRefs": []
+        },
+        {
+          "unit": 1,
+          "span": "request REP-58 again",
+          "assertion": "ASSERTED",
+          "claim": "The regulator has previously requested REP-58 at least once.",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        },
+        {
+          "unit": 2,
+          "span": "resend it",
+          "assertion": "ASSERTED",
+          "claim": "REP-58 was previously sent to the regulator.",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        },
+        {
+          "unit": 3,
+          "span": "we would need to resend it within 48 hours",
+          "assertion": "ASSERTED",
+          "claim": "There is an obligation to resend REP-58 within 48 hours of a regulator request.",
+          "verdict": "INSUFFICIENT_EVIDENCE",
+          "sourceRefs": []
+        }
+      ],
+      "questions": [
+        {
+          "reviewerUnit": 1,
+          "ask": "Does the answer itself assert this unit as fact, or is it a presupposition / conditional consequence / non-assertion? Answer ASSERTED, NON_ASSERTION or AMBIGUOUS with a one-line reason."
+        },
+        {
+          "reviewerUnit": 2,
+          "ask": "Does the answer itself assert this unit as fact, or is it a presupposition / conditional consequence / non-assertion? Answer ASSERTED, NON_ASSERTION or AMBIGUOUS with a one-line reason."
+        },
+        {
+          "reviewerUnit": 3,
+          "ask": "Does the answer itself assert this unit as fact, or is it a presupposition / conditional consequence / non-assertion? Answer ASSERTED, NON_ASSERTION or AMBIGUOUS with a one-line reason."
+        }
+      ]
+    }
+  ]
+}

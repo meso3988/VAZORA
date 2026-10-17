@@ -1,0 +1,18 @@
+{
+  "outcome": "COMPLETE",
+  "used": {
+    "requests": 24,
+    "input": 55432,
+    "output": 13685,
+    "usd": 0.4954
+  },
+  "limits": {
+    "maxRequests": 24,
+    "maxInputTokens": 100000,
+    "maxOutputTokensIncludingThinking": 96000,
+    "maxCostUsdTotal": 2.2,
+    "max_tokens_perRequest": 4000,
+    "approval": "option C, explicitly approved for this pilot only; the $2.20 cap is a total, not per request; these are ceilings, not targets"
+  },
+  "rawFile": "supabase/benchmarks/evaluator-v4-proto/reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-raw.jsonl"
+}

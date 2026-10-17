@@ -1,0 +1,42 @@
+{
+  "pilot": "hybrid-semantic-reviewer-pilot-v2",
+  "rule": "Each reference unit is COVERED only when a reviewer unit addresses the same claim: same subject/entity, same content, same polarity, same temporal scope. Span overlap only nominated candidates. References were fixed before the run and are not changed here. Ambiguity would be REVIEW_NEEDED (none arose).",
+  "adjudicatedFrom": "reports/2026-10-02T01-18-02-707Z-reviewer-pilot-v2-mechanical.json (derived only from the committed raw file)",
+  "cases": [
+    { "id": "HV2F-003", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "same subject (CN-142 owner), negation preserved, current scope" } ], "spurious": [] },
+    { "id": "HV2F-022", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "current expiry date asserted; renewal condition correctly not treated as hypothetical" } ], "spurious": [] },
+    { "id": "HV2F-007", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "reviewer split the transition (u0) and its date (u1); both SUPPORTED, together they cover the reference claim, historical scope preserved" } ], "spurious": [] },
+    { "id": "HV2F-040", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "negated completion preserved" } ], "spurious": [] },
+    { "id": "HV2F-053", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "Arabic negated passive read correctly as 'has not been sent'" } ], "spurious": [] },
+    { "id": "HV2F-056", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "approval record (u0) and date (u1) split; both SUPPORTED" } ], "spurious": [] },
+    { "id": "HV2F-071", "units": [
+      { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "'still not received' — current state, polarity preserved" },
+      { "refUnit": 1, "decision": "COVERED", "reviewerUnit": 1, "reviewerVerdict": "SUPPORTED", "note": "recorded requirement correctly treated as a fact, not a hypothetical" } ], "spurious": [] },
+    { "id": "HV2F-088", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "amount (u0) and Arabic-Indic date (u1) split; both SUPPORTED" } ], "spurious": [] },
+    { "id": "HV2F-008", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "CONTRADICTED", "note": "proposal vs execution distinguished" } ], "spurious": [] },
+    { "id": "HV2F-031", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 1, "reviewerVerdict": "CONTRADICTED", "note": "The material claim (verified by engineering) is u1 = CONTRADICTED. The mechanical top candidate was u0, the descriptor 'the site completion certificate' (SUPPORTED, overlap 0.55); taking that candidate would have recorded a FALSE PASS. Span overlap alone is not coverage." } ], "spurious": [] },
+    { "id": "HV2F-027", "units": [
+      { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "CONTRADICTED", "note": "contract value is not exposure — distinguished" },
+      { "refUnit": 1, "decision": "COVERED", "reviewerUnit": 1, "reviewerVerdict": "SUPPORTED", "note": "optional unit: contract value itself correctly SUPPORTED" } ], "spurious": [] },
+    { "id": "HV2F-020", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "INSUFFICIENT_EVIDENCE", "note": "'not recorded' field kept as INSUFFICIENT, not CONTRADICTED" } ], "spurious": [] },
+    { "id": "HV2F-046", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "CONTRADICTED", "note": "'still in draft' (current) contradicted by executed status; reviewer additionally split 'awaiting legal review' (u1) as INSUFFICIENT — part of the asserted sentence, not a spurious assertion" } ], "spurious": [] },
+    { "id": "HV2F-055", "units": [ { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "CONTRADICTED", "note": "approval falsely claimed — contradicted by pending status and null approver" } ], "spurious": [] },
+    { "id": "HV2F-068", "units": [
+      { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 0, "reviewerVerdict": "SUPPORTED", "note": "optional: verification supported" },
+      { "refUnit": 1, "decision": "COVERED", "reviewerUnit": 1, "reviewerVerdict": "INSUFFICIENT_EVIDENCE", "note": "approval separated from verification and held INSUFFICIENT — the required distinction" } ], "spurious": [] },
+    { "id": "HV2F-090", "units": [
+      { "refUnit": 0, "decision": "COVERED", "reviewerUnit": 1, "reviewerVerdict": "CONTRADICTED", "note": "bullet 1 judged against its own record" },
+      { "refUnit": 1, "decision": "COVERED", "reviewerUnit": 2, "reviewerVerdict": "CONTRADICTED", "note": "bullet 2 judged separately; no adjacent-item leakage; heading correctly NON_ASSERTION" } ], "spurious": [] },
+    { "id": "HV2F-091", "units": [], "spurious": [] },
+    { "id": "HV2F-115", "units": [], "spurious": [] },
+    { "id": "HV2F-121", "units": [], "spurious": [] },
+    { "id": "HV2F-130", "units": [], "spurious": [] },
+    { "id": "HV2F-148", "units": [], "spurious": [] },
+    { "id": "HV2F-097", "units": [], "spurious": [
+      { "reviewerUnit": 1, "note": "presupposition — 'again' extracted as asserted 'regulator previously requested REP-58' (pre-registered known risk)" },
+      { "reviewerUnit": 2, "note": "presupposition — 'resend' extracted as asserted 'REP-58 was previously sent' (pre-registered known risk)" },
+      { "reviewerUnit": 3, "note": "conditional consequent 'we would need to resend it within 48 hours' treated as an asserted standing obligation" } ] },
+    { "id": "HV2F-135", "units": [], "spurious": [] },
+    { "id": "HV2F-147", "units": [], "spurious": [] }
+  ]
+}

@@ -1,0 +1,12 @@
+PASS  readfail en command-center: no false "nothing needs attention"
+PASS  readfail en command-center: incomplete assessment is stated
+PASS  readfail en dashboard: no false "nothing needs attention"
+PASS  readfail en dashboard: incomplete assessment is stated
+PASS  readfail en: no page errors
+PASS  readfail ar command-center: no false "nothing needs attention"
+PASS  readfail ar command-center: incomplete assessment is stated
+PASS  readfail ar dashboard: no false "nothing needs attention"
+PASS  readfail ar dashboard: incomplete assessment is stated
+PASS  readfail ar: no page errors
+
+HEALTH STATES (readfail): 10/10 pass

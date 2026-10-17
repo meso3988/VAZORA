@@ -1,0 +1,87 @@
+PASS  queue populated → ok + action row
+PASS  queue org-scoped
+PASS  queue successful-empty → ok:true + []
+PASS  queue error → ok:false
+PASS  queue thrown error → ok:false
+PASS  queue contract filter applied
+PASS  queue status filter applied
+PASS  queue truncation flagged, not rendered complete
+PASS  queue non-array payload → ok:false
+PASS  row maps id/type/status/summary
+PASS  row preserves conversation + contract linkage
+PASS  approved-but-held stays status=approved, executedAt empty
+PASS  held marker preserved in executionResult
+PASS  executed internal action → completed + executedAt
+PASS  rejected state preserved
+PASS  clauses approved-only run → basis approved
+PASS  clauses approved+newer pending → basis stays approved
+PASS  clauses pending-only → basis ready_for_review (label required)
+PASS  clauses failed run read → ok:false (no silent unapproved fallback)
+PASS  clauses failed clause read → ok:false
+PASS  clauses no operative run → ok + empty + no basis
+PASS  clauses query restricts to approved|ready_for_review
+PASS  clauses demo → fixtures via listClauses
+PASS  clauses live → checked reader
+PASS  clauses failed read → ok:false (never empty)
+PASS  clauses live without checked reader → ok:false (no silent legacy)
+PASS  clauses thrown → ok:false
+PASS  events demo → fixtures via listEvents
+PASS  events live → checked reader
+PASS  events truncation propagated
+PASS  events failed read → ok:false
+PASS  events live without checked reader → ok:false
+PASS  activity demo → fixtures via list
+PASS  activity live → checked reader
+PASS  activity failed read → ok:false
+PASS  activity truncation propagated
+PASS  activity live without checked reader → ok:false
+PASS  tasks page reads real officer_actions
+PASS  tasks page groups real statuses
+PASS  tasks page role-gates approval
+PASS  tasks page reuses existing approve/reject server actions
+PASS  tasks page returnTo=/app/tasks
+PASS  tasks page renders truncation honestly
+PASS  tasks page failure → DataLoadFailed, not empty queues
+PASS  tasks page demo path uses fixtures
+PASS  approve/reject honor allowlisted returnTo
+PASS  returnTo falls back to /app/agent
+PASS  approve path still reauthorizes server-side
+PASS  reject path still reauthorizes server-side
+PASS  officer page uses checked events read
+PASS  officer page reads contract-scoped officer_actions
+PASS  officer page failure → notice not empty feed
+PASS  officer page gates approve on real capability
+PASS  officer page passes contract-scoped returnTo
+PASS  OfficerAsk live path opens the real conversation
+PASS  OfficerAsk passes contractId to conversation
+PASS  OfficerAsk demo is an explicit preview, no fake input
+PASS  activity page uses checked read
+PASS  activity page failure → notice
+PASS  activity page truncation note
+PASS  activity page no unchecked db.activity.list
+PASS  badge reflects the row's actual status key
+PASS  held note only on approved-and-never-executed
+PASS  overview uses readClauseList
+PASS  overview labels unapproved clause extraction
+PASS  overview uses checked events + activity
+PASS  overview reads live officer actions
+PASS  overview clause trace gates on clause read
+PASS  overview no unchecked stub calls remain
+PASS  provider events read officer_observations, active+acknowledged only
+PASS  provider activity reads activity_log
+PASS  provider activity resolves contract via entity tables
+PASS  provider activity honors metadata contract linkage
+PASS  provider obligations join clause source refs
+PASS  provider exposes checked variants
+PASS  provider clauses delegate to the operative-run reader
+PASS  clauses approved baseline beats newer pending run
+PASS  clauses failed run read → ok:false, no unapproved fallback
+PASS  clauses deterministic order
+PASS  tasks group keys exist en+ar
+PASS  tasks truncated key en+ar
+PASS  officer contract keys en+ar
+PASS  activity truncated + contract.noActions en+ar
+PASS  held group label is honest (approved, not completed)
+PASS  unapproved-clause label exists en+ar
+
+85/85 passed

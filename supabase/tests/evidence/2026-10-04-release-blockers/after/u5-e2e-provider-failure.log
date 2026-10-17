@@ -1,0 +1,18 @@
+A: build 7e12e1c / -Nl6mqFscCFr0H65bzdTo :3005 VAZORA_OFFICER_PROVIDER=none; B: same build :3006 SIMULATED connection failure (openai-compat-officer, VAZORA_AI_BASE_URL=http://127.0.0.1:9, dummy key, MAX_RETRIES=0)
+PASS  A en: explicit "no model configured" notice
+PASS  A en: question box and send disabled (no silent submit)
+PASS  A en: no assistant answer stored
+PASS  A ar: explicit "no model configured" notice
+PASS  A ar: question box and send disabled (no silent submit)
+PASS  A ar: no assistant answer stored
+PASS  B en: provider configured → question box enabled
+PASS  B en: explicit failure notice with error code — code=provider network error: fetch failed (attempts 1)
+PASS  B en: no assistant answer stored for the failed turn
+PASS  B en: no demo data
+PASS  B ar: provider configured → question box enabled
+PASS  B ar: explicit failure notice with error code — code=provider network error: fetch failed (attempts 1)
+PASS  B ar: no assistant answer stored for the failed turn
+PASS  B ar: no demo data
+PASS  A+B: no proposal/action rows created by a failed or absent provider — before=3 after=3
+
+15/15 passed

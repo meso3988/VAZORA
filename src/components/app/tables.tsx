@@ -1,10 +1,11 @@
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
+import { ObligationStateBadges } from "@/components/app/obligation-state";
 import { Empty, Mono, Ring, Table, Td, Th } from "@/components/app/primitives";
 import { StatusDot, StatusPill, statusTone } from "@/components/ui/status";
 import { claimReadiness, type Claim, type Evidence, type Obligation, type Risk } from "@/domain/types";
 import { Link } from "@/i18n/navigation";
-import { cn, formatMoney, lt } from "@/lib/utils";
+import { cn, formatMoney, lt, validDate } from "@/lib/utils";
 
 export async function ObligationsTable({
   obligations,
@@ -17,6 +18,7 @@ export async function ObligationsTable({
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app.obligations");
+  const os = await getTranslations("app.obligationState");
   const cad = await getTranslations("cadence");
   const f = await getFormatter();
   if (!obligations.length) return <Empty>—</Empty>;
@@ -52,10 +54,33 @@ export async function ObligationsTable({
             </Td>
             <Td className="whitespace-nowrap text-muted">{o.ownerName}</Td>
             <Td className="whitespace-nowrap text-muted">{cad(o.cadence)}</Td>
-            <Td><Mono className={cn("text-sm", o.status === "overdue" && "text-missing")}>{f.dateTime(new Date(o.dueDate), "short")}</Mono></Td>
-            <Td className="whitespace-nowrap text-muted">{t("evidenceCount", { count: o.evidenceIds.length })}</Td>
+            <Td>
+              {/* An obligation may have no normalized due date — show that
+                  honestly instead of throwing on an Invalid Date. */}
+              {(() => {
+                // Live: the operational due date (explicit, or the oldest
+                // unsettled cycle of a recurring rule); demo: the fixture date.
+                const due = o.state ? ("dueDate" in o.state.deadline ? o.state.deadline.dueDate : null) : o.dueDate;
+                return validDate(due ?? "")
+                  ? <Mono data-ob-due={due} className={cn("text-sm", (o.state ? o.state.deadline.window === "overdue" : o.status === "overdue") && "text-missing")}>{f.dateTime(validDate(due!)!, "short")}</Mono>
+                  : <span className="text-faint">—</span>;
+              })()}
+            </Td>
+            <Td className="whitespace-nowrap text-muted">
+              {/* Live: requirement coverage from the evidence matrix — the
+                  list read carries no evidence links, so never a count of 0. */}
+              {o.state
+                ? o.state.evidence.required > 0 ? os("satisfied", { satisfied: o.state.evidence.satisfied, required: o.state.evidence.required }) : "—"
+                : t("evidenceCount", { count: o.evidenceIds.length })}
+            </Td>
             <Td>{o.penaltyExposure ? <Mono className="text-sm text-at-risk">{formatMoney(o.penaltyExposure, locale, currency, { compact: true })}</Mono> : <span className="text-faint">—</span>}</Td>
-            <Td><StatusPill status={o.status} subtle /></Td>
+            <Td>
+              {o.state
+                ? <ObligationStateBadges state={o.state} />
+                : o.status
+                  ? <StatusPill status={o.status} subtle />
+                  : <span className="text-faint">—</span>}
+            </Td>
           </tr>
         ))}
       </tbody>
@@ -67,10 +92,16 @@ export async function EvidenceTable({
   evidence,
   obligations,
   contractTitles,
+  verifyAction,
+  detailBasePath,
 }: {
   evidence: Evidence[];
   obligations: Obligation[];
   contractTitles?: Record<string, string>;
+  /** Optional server action enabling the per-row "Run verification" button */
+  verifyAction?: (formData: FormData) => void | Promise<void>;
+  /** When set (live mode), the file cell links to the Evidence Inspector */
+  detailBasePath?: string;
 }) {
   const locale = await getLocale();
   const t = await getTranslations("app.evidence");
@@ -88,6 +119,7 @@ export async function EvidenceTable({
           <Th>{t("columns.version")}</Th>
           <Th>{t("verification")}</Th>
           <Th>{t("columns.status")}</Th>
+          {verifyAction ? <Th><span className="sr-only">{t("verify")}</span></Th> : null}
         </tr>
       </thead>
       <tbody className="divide-y divide-line">
@@ -98,7 +130,13 @@ export async function EvidenceTable({
             <tr key={e.id} className="align-top hover:bg-fg/3">
               <Td>
                 <div className="flex flex-col gap-0.5">
-                  <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                  {detailBasePath ? (
+                    <Link href={`${detailBasePath}/${e.id}`} className="hover:underline">
+                      <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                    </Link>
+                  ) : (
+                    <Mono className="text-sm text-fg">{e.fileName}</Mono>
+                  )}
                   <span className="text-xs uppercase text-faint">{e.fileType}</span>
                 </div>
               </Td>
@@ -132,6 +170,21 @@ export async function EvidenceTable({
                 </div>
               </Td>
               <Td><StatusPill status={e.status} subtle /></Td>
+              {verifyAction ? (
+                <Td>
+                  <form action={verifyAction}>
+                    <input type="hidden" name="evidenceItemId" value={e.id} />
+                    <input type="hidden" name="contractId" value={e.contractId} />
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      className="inline-flex h-7 items-center rounded-sm border border-line bg-elevated px-2.5 text-xs font-medium text-fg transition-colors hover:bg-fg/5"
+                    >
+                      {t("verify")}
+                    </button>
+                  </form>
+                </Td>
+              ) : null}
             </tr>
           );
         })}

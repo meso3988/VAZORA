@@ -1,0 +1,26 @@
+[
+  {
+    "id": "25ba1395-56f1-4baf-af5e-9bbd82c1ed1b",
+    "organization_id": "4da18aa7-da70-4c80-bcbd-62a9faa04632",
+    "contract_id": "8b745d79-d4bb-4409-9500-b60aadde9fcf",
+    "status": "ready_for_review",
+    "error_code": null,
+    "error_message": null,
+    "parser_version": "0.2.0",
+    "extractor_version": "openai-compat",
+    "model_identifier": "gpt-5.6-sol",
+    "document_count": 1,
+    "page_count": 0,
+    "segment_count": 1,
+    "retry_count": 0,
+    "duration_ms": 83761,
+    "usage_tokens_input": null,
+    "usage_tokens_output": null,
+    "idempotency_key": "8b745d79-d4bb-4409-9500-b60aadde9fcf:4401091f73951b24bb95f8326623cdfc31322b1e4b501a85bca3c311f8edc500",
+    "document_fingerprint": "4401091f73951b24bb95f8326623cdfc31322b1e4b501a85bca3c311f8edc500",
+    "started_at": "2026-10-05T13:55:05.656+00:00",
+    "completed_at": "2026-10-05T13:56:29.726+00:00",
+    "created_by": "9eeb2385-2c0f-40b8-b40c-8e31df8fde64",
+    "created_at": "2026-10-05T13:55:05.850377+00:00"
+  }
+]

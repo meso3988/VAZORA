@@ -1,5 +1,6 @@
 import { FileText, Upload } from "lucide-react";
 
+import { DataLoadFailed } from "@/components/app/contract-unavailable";
 import { Mono, Panel } from "@/components/app/primitives";
 import { Button } from "@/components/ui/button";
 import type { ContractDocument } from "@/domain/types";
@@ -32,7 +33,8 @@ export function DocumentPanel({
 }: {
   contractId: string;
   locale: string;
-  documents: ContractDocument[];
+  /** null = the read failed — render an unavailable state, never "no documents". */
+  documents: ContractDocument[] | null;
   canUpload: boolean;
   labels: Labels;
   error?: string;
@@ -68,7 +70,9 @@ export function DocumentPanel({
         </p>
       )}
 
-      {documents.length === 0 ? (
+      {documents === null ? (
+        <div className="px-5 py-4"><DataLoadFailed message="dataLoadFailed" /></div>
+      ) : documents.length === 0 ? (
         <p className="px-5 py-6 text-sm text-muted">{labels.empty}</p>
       ) : (
         <ul className="divide-y divide-line">

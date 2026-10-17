@@ -12,16 +12,23 @@
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.76.1",
+    "@xmldom/xmldom": "^0.8.15",
     "clsx": "^2.1.1",
+    "jszip": "^3.10.2",
     "lucide-react": "^1.43.0",
+    "mammoth": "^1.11.0",
     "motion": "^13.2.0",
     "next": "16.3.4",
     "next-intl": "^4.14.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
-    "three": "0.180.0"
+    "three": "0.180.0",
+    "unpdf": "^1.4.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -29,9 +36,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "0.180.0",
+    "docx": "^9.5.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

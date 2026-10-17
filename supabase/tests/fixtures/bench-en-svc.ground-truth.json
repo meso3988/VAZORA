@@ -1,0 +1,101 @@
+{
+  "benchmark": "bench-en-svc",
+  "language": "en",
+  "files": [
+    "bench-en-svc.docx"
+  ],
+  "obligations": [
+    {
+      "clause": "5.1",
+      "requirement": "Monthly service report with eight KPIs, acknowledged by the Client",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "Monthly service report",
+        "Eight KPI results",
+        "Project Manager signature"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": "Client acknowledgement",
+      "submission": {
+        "destination": "PMO",
+        "channel": "portal",
+        "deadline_rule": "day 5 monthly"
+      },
+      "owner_role": "Project Manager"
+    },
+    {
+      "clause": "7.2",
+      "requirement": "Signed preventive maintenance records with each invoice",
+      "frequency": "monthly",
+      "due_rule": "with_monthly_claim",
+      "evidence": [
+        "Signed maintenance records"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": "Maintenance Lead"
+    },
+    {
+      "clause": "10",
+      "requirement": "10.4 — invoice only after service report acknowledgement",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "Service report acknowledgment"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": "Client written acknowledgement",
+      "submission": null,
+      "owner_role": "Project Manager"
+    },
+    {
+      "clause": "12",
+      "requirement": "Liquidated damages of 0.5% per week of delay",
+      "frequency": null,
+      "due_rule": null,
+      "evidence": [],
+      "payment_linked": null,
+      "financial": "penalty",
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": null
+    },
+    {
+      "clause": "13",
+      "requirement": "Client site-readiness certificate before Phase Two",
+      "frequency": null,
+      "due_rule": null,
+      "evidence": [
+        "Site readiness certificate"
+      ],
+      "payment_linked": null,
+      "financial": null,
+      "external_dependency": "Client representative signature",
+      "submission": null,
+      "owner_role": null
+    },
+    {
+      "clause": "15",
+      "requirement": "Submit reports via Client portal to PMO by day 5",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "Monthly service report"
+      ],
+      "payment_linked": false,
+      "financial": null,
+      "external_dependency": null,
+      "submission": {
+        "destination": "Client PMO",
+        "channel": "portal",
+        "deadline_rule": "day 5 monthly"
+      },
+      "owner_role": "Project Coordinator"
+    }
+  ]
+}

@@ -1,0 +1,4508 @@
+{
+  "run": "frozen-materiality-detector-vs-blind-heldout-v2",
+  "ranAt": "2026-10-01T23:05:44.317Z",
+  "detectorCommit": "8928ced",
+  "detectorHashes": {
+    "arabic.ts": "2fae05606f507dd639a1252e05341992468cdbef69b85604eb7d96141291cc19",
+    "frames.ts": "d91a59d44908d21885a3a3d6881a98de4f20da6e5e6c2ddab8c6b17fdb2ee342",
+    "materiality.ts": "eb9b7d79cab440d2d8002b3a0cc795a8a0daafdaa686870ef78c5ee0d73e4fcb",
+    "segment.ts": "875421706e5c67258fc4671e83e697907d718aa3df26df0f16acc6cba5132756"
+  },
+  "dataset": {
+    "path": "/Users/mayasahaldashsh/heldout-v2-final.json",
+    "sha256": "0b94875366b86814cdf6f95689fe2a14d92f72d22a40a07ab268f553f81f8ac7",
+    "caseCount": 150
+  },
+  "adapter": {
+    "name": "evaluator-v4-heldout-v2-predict.ts",
+    "kind": "format-only",
+    "notes": [
+      "accepts a bare top-level JSON array of cases",
+      "projects each case to { id, text }; all label/metadata fields dropped before prediction",
+      "no locale passed: the frozen detector interface does not accept one",
+      "frozen segment() for segmentation and frozen rollUp() for aggregation",
+      "no classification logic added"
+    ]
+  },
+  "aggregationPolicy": "any unit MATERIAL_ASSERTION -> MATERIAL_ASSERTION; else any UNCERTAIN -> UNCERTAIN; else NON_MATERIAL",
+  "predictions": [
+    {
+      "id": "HV2F-001",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "Contract CN-118 is currently assigned to contract owner D.",
+          "itemIndex": -1,
+          "scope": [
+            "cn118"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:owner",
+            "object:contract",
+            "entity",
+            "en-finite"
+          ]
+        },
+        {
+          "unitText": "Mercer (USR-021).",
+          "itemIndex": -1,
+          "scope": [
+            "usr021"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [],
+          "signals": [
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-002",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "Obligation OB-204 was reassigned to L.",
+          "itemIndex": -1,
+          "scope": [
+            "ob204"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "object:obligation",
+            "entity",
+            "en-finite"
+          ]
+        },
+        {
+          "unitText": "Okafor at the start of this quarter.",
+          "itemIndex": -1,
+          "scope": [
+            "ob204"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:quarter",
+            "quantity"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-003",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "No contract owner has been assigned to CN-142.",
+          "itemIndex": -1,
+          "scope": [
+            "cn142"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:owner",
+            "object:contract",
+            "entity",
+            "negation",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-004",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "Milestone MIL-077 is owned by K.",
+          "itemIndex": -1,
+          "scope": [
+            "mil077"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:own",
+            "object:milestone",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "Baranski.",
+          "itemIndex": -1,
+          "scope": [
+            "mil077"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "no record-related predicate or subject",
+          "frames": [],
+          "signals": []
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-005",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The record for CN-170 names a group, the Regional Delivery Queue, rather than an individual owner.",
+          "itemIndex": -1,
+          "scope": [
+            "cn170"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "A-responsibility",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:A-responsibility:owner",
+            "frame:G-evidence:record",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-006",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "CN-091 remains in draft status pending legal review.",
+          "itemIndex": -1,
+          "scope": [
+            "cn091"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:draft",
+            "frame:G-evidence:review",
+            "entity",
+            "state",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-007",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Amendment AM-012 moved CN-104 from 'under negotiation' to 'active' on 2 June 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "am012",
+            "cn104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:move",
+            "object:amendment",
+            "entity",
+            "state",
+            "quantity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-008",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The renewal proposal for CN-120 has been executed.",
+          "itemIndex": -1,
+          "scope": [
+            "cn120"
+          ],
+          "modality": "PROPOSAL",
+          "modalityCue": "proposal wording",
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:D-authorization:propose",
+            "frame:H-execution:execute",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-009",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "CN-137 has entered arbitration following a dispute notice.",
+          "itemIndex": -1,
+          "scope": [
+            "cn137"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:notice",
+            "entity",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-010",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "SUB-340's status changed to 'superseded' once the revised version was filed.",
+          "itemIndex": -1,
+          "scope": [
+            "sub340"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:B-state-change:change",
+            "frame:C-communication:file",
+            "frame:G-evidence:status",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-011",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The quarterly compliance report REP-58 was sent to the regulator on 30 June.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:report",
+            "entity",
+            "quantity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-012",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "SUB-412 was submitted through the vendor portal on 14 July 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "sub412"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "entity",
+            "quantity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-013",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Legal submitted the counter-signed copy of CN-125 to the records team yesterday.",
+          "itemIndex": -1,
+          "scope": [
+            "cn125"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:sign",
+            "frame:E-temporal:yesterday",
+            "frame:G-evidence:record",
+            "entity",
+            "quantity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-014",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The 60-day notice for CN-133 was never dispatched to the counterparty.",
+          "itemIndex": -1,
+          "scope": [
+            "cn133"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:C-communication:dispatch",
+            "frame:E-temporal:day",
+            "entity",
+            "negation",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-015",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Procurement acknowledged receipt of the redline package for CN-140.",
+          "itemIndex": -1,
+          "scope": [
+            "cn140"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:acknowledge",
+            "entity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-016",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Finance approved the budget uplift on CN-108 last week.",
+          "itemIndex": -1,
+          "scope": [
+            "cn108"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "frame:E-temporal:week",
+            "entity",
+            "quantity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-017",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "AP-230 records Legal's approval of the CL-7 liability cap wording on 9 May 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "ap230",
+            "cl7"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "frame:G-evidence:record",
+            "entity",
+            "quantity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-018",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The CL-12 indemnity wording was approved by the Risk Committee.",
+          "itemIndex": -1,
+          "scope": [
+            "cl12"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-019",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "No approval exists yet for the CN-149 subcontracting request.",
+          "itemIndex": -1,
+          "scope": [
+            "cn149"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "entity",
+            "negation",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-020",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The executive sponsor signed off on the CN-156 extension terms.",
+          "itemIndex": -1,
+          "scope": [
+            "cn156"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:sign",
+            "frame:D-authorization:sign off",
+            "object:term",
+            "entity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-021",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The delivery deadline for OB-310 was moved to 15 August 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:move",
+            "frame:E-temporal:deadline",
+            "entity",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-022",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "CN-160 expires on 31 March 2027 unless renewed.",
+          "itemIndex": -1,
+          "scope": [
+            "cn160"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "hypothetical modal",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:expire",
+            "entity",
+            "quantity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-023",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "OB-318 is already overdue.",
+          "itemIndex": -1,
+          "scope": [
+            "ob318"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:overdue",
+            "entity",
+            "state",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-024",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The grace period on INV-520 was extended by ten days.",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:extend",
+            "frame:E-temporal:period",
+            "entity",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-025",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "No payment milestone falls due for CN-166 before January 2027.",
+          "itemIndex": -1,
+          "scope": [
+            "cn166"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:E-temporal:due",
+            "frame:E-temporal:fall due",
+            "frame:F-quantity:payment",
+            "object:milestone",
+            "entity",
+            "state",
+            "negation",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-026",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "CN-172 carries an unapproved exposure of USD 480,000.",
+          "itemIndex": -1,
+          "scope": [
+            "cn172"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:F-quantity:exposure",
+            "frame:H-execution:carry",
+            "entity",
+            "quantity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-027",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Our current exposure on CN-180 is the full contract value of USD 950,000.",
+          "itemIndex": -1,
+          "scope": [
+            "cn180"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:F-quantity:value",
+            "object:contract",
+            "entity",
+            "quantity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-028",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "INV-533 totals USD 18,750 and was issued on 5 September 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "inv533"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:C-communication:issue",
+            "frame:F-quantity:total",
+            "entity",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-029",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The penalty under CL-15 is capped at 10% of annual fees.",
+          "itemIndex": -1,
+          "scope": [
+            "cl15"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:F-quantity:penalty",
+            "entity",
+            "quantity",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-030",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Currency exposure on CN-188 is fully hedged.",
+          "itemIndex": -1,
+          "scope": [
+            "cn188"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:F-quantity:exposure",
+            "entity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-031",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "EV-610, the site completion certificate, has been verified by engineering.",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:G-evidence:verify",
+            "frame:H-execution:completion",
+            "entity",
+            "state",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-032",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "EV-622 was verified by quality assurance on 12 August 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "ev622"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:verify",
+            "entity",
+            "state",
+            "quantity",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-033",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The missing insurance certificate for CN-195 has been received and filed.",
+          "itemIndex": -1,
+          "scope": [
+            "cn195"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:file",
+            "frame:G-evidence:certificate",
+            "entity",
+            "state",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-034",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "No verified exposure amount exists for CN-198.",
+          "itemIndex": -1,
+          "scope": [
+            "cn198"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:F-quantity:amount",
+            "frame:G-evidence:verify",
+            "entity",
+            "state",
+            "negation",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-035",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Two evidence items remain outstanding for ACT-090 before it can be closed.",
+          "itemIndex": -1,
+          "scope": [
+            "act090"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "G-evidence",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:B-state-change:close",
+            "frame:G-evidence:evidence",
+            "frame:H-execution:act",
+            "entity",
+            "state",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-036",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ACT-104, the data-migration rehearsal, was completed on 20 September.",
+          "itemIndex": -1,
+          "scope": [
+            "act104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:complete",
+            "frame:H-execution:act on",
+            "entity",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-037",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ACT-111 was executed on 4 September 2026 and countersigned the same day.",
+          "itemIndex": -1,
+          "scope": [
+            "act111"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:E-temporal:day",
+            "frame:H-execution:execute",
+            "entity",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-038",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The onboarding checklist for CN-210 has been fully executed.",
+          "itemIndex": -1,
+          "scope": [
+            "cn210"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:execute",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-039",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The acceptance tests for MIL-090 passed on the first attempt.",
+          "itemIndex": -1,
+          "scope": [
+            "mil090"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:accept",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-040",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "None of the deliverables under OB-350 have been marked complete.",
+          "itemIndex": -1,
+          "scope": [
+            "ob350"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:complete",
+            "object:deliverable",
+            "entity",
+            "state",
+            "negation",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-041",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "أُسندت مسؤولية العقد CN-118 إلى م.",
+          "itemIndex": -1,
+          "scope": [
+            "cn118"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:مسئول",
+            "object:عقد",
+            "entity",
+            "ar-perfective",
+            "ar-passive",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "النعيمي مطلع الشهر الجاري.",
+          "itemIndex": -1,
+          "scope": [
+            "cn118"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:شهر",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-042",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "المالك المسجَّل للعقد CN-142 ليس معيَّنًا بعد في النظام.",
+          "itemIndex": -1,
+          "scope": [
+            "cn142"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:مالك",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-043",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "مسؤول متابعة الالتزام OB-204 هو ر.",
+          "itemIndex": -1,
+          "scope": [
+            "ob204"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:مسئول",
+            "object:التزام",
+            "entity",
+            "ar-copula",
+            "ar-imperfective"
+          ]
+        },
+        {
+          "unitText": "قاسم.",
+          "itemIndex": -1,
+          "scope": [
+            "ob204"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "no record-related predicate or subject",
+          "frames": [],
+          "signals": []
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-044",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تتولى مجموعة التسليم الإقليمي إدارة العقد CN-170 بالكامل.",
+          "itemIndex": -1,
+          "scope": [
+            "cn170"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "frame:F-quantity:مجموع",
+            "frame:H-execution:اكمل",
+            "object:عقد",
+            "object:تسليم",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-045",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "تم تحديث بيانات المالك للعقد CN-177، وأصبحت مسؤوليته لدى ف.",
+          "itemIndex": -1,
+          "scope": [
+            "cn177"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility",
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:A-responsibility:مالك",
+            "frame:B-state-change:حدث",
+            "object:عقد",
+            "entity",
+            "ar-completion",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "سالم.",
+          "itemIndex": -1,
+          "scope": [
+            "cn177"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:سلم"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-046",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ما زال العقد CN-091 في مرحلة المسودة بانتظار المراجعة القانونية.",
+          "itemIndex": -1,
+          "scope": [
+            "cn091"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:مسوده",
+            "frame:G-evidence:مراجعه",
+            "object:عقد",
+            "object:مرحله",
+            "entity",
+            "ar-still",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-047",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تم اعتماد العقد CN-104 رسميًا ونُقلت حالته إلى «سارٍ» في ٢ يونيو ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "cn104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:B-state-change:نقل",
+            "frame:D-authorization:اعتمد",
+            "object:عقد",
+            "entity",
+            "state",
+            "ar-completion",
+            "ar-perfective",
+            "ar-passive",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-048",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "نُفِّذ اقتراح تجديد العقد CN-120 بالفعل.",
+          "itemIndex": -1,
+          "scope": [
+            "cn120"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:D-authorization:اقترح",
+            "frame:H-execution:نفذ",
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-049",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لم تُستكمل إجراءات إنهاء العقد CN-137 حتى تاريخه.",
+          "itemIndex": -1,
+          "scope": [
+            "cn137"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:E-temporal:تاريخ",
+            "frame:H-execution:اكمل",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-050",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لن يدخل العقد CN-190 حيز النفاذ قبل نهاية الربع الرابع.",
+          "itemIndex": -1,
+          "scope": [
+            "cn190"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:E-temporal:ربع",
+            "frame:H-execution:نفذ",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-051",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أُرسل التقرير ربع السنوي REP-58 إلى الجهة الرقابية في ٣٠ يونيو.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility",
+            "C-communication",
+            "E-temporal",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:A-responsibility:جهه",
+            "frame:C-communication:ارسل",
+            "frame:E-temporal:ربع",
+            "frame:G-evidence:تقرير",
+            "entity",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-052",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "قدَّم الفريق القانوني النسخة الموقعة من العقد CN-125 إلى قسم السجلات.",
+          "itemIndex": -1,
+          "scope": [
+            "cn125"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:قدم",
+            "frame:G-evidence:سجل",
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-053",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لم يُرسَل الإشعار المسبق بالستين يومًا إلى الطرف المقابل في العقد CN-133.",
+          "itemIndex": -1,
+          "scope": [
+            "cn133"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-054",
+      "unitCount": 3,
+      "perUnit": [
+        {
+          "unitText": "أرسلتُ حزمة الملاحظات على مسودة العقد CN-140 عبر بوابة الموردين، وإليك التفاصيل:",
+          "itemIndex": -1,
+          "scope": [
+            "cn140"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:D-authorization:مسوده",
+            "object:عقد",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "تاريخ الإرسال: ٢٠ يونيو ٢٠٢٦",
+          "itemIndex": 0,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:E-temporal:تاريخ",
+            "ar-imperfective"
+          ]
+        },
+        {
+          "unitText": "القناة: بوابة الموردين",
+          "itemIndex": 1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "insufficient signal",
+          "frames": [],
+          "signals": [
+            "ar-perfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-055",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "اعتمدت الإدارة المالية زيادة الميزانية للعقد CN-108 الأسبوع الماضي.",
+          "itemIndex": -1,
+          "scope": [
+            "cn108"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:D-authorization:اعتمد",
+            "frame:E-temporal:اسبوع",
+            "object:عقد",
+            "entity",
+            "quantity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-056",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "موافقة الشؤون القانونية على صياغة البند CL-7 موثقة في السجل AP-230 بتاريخ ٩ مايو ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "cl7",
+            "ap230"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:وافق",
+            "frame:E-temporal:تاريخ",
+            "frame:G-evidence:سجل",
+            "object:بند",
+            "entity",
+            "state",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-057",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "رفضت لجنة المخاطر صياغة البند البديل CL-12b.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "object:بند",
+            "entity",
+            "quantity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-058",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "طلب التعاقد من الباطن للعقد CN-149 لا يزال بلا أي موافقة مسجلة.",
+          "itemIndex": -1,
+          "scope": [
+            "cn149"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:وافق",
+            "object:عقد",
+            "entity",
+            "state",
+            "negation",
+            "ar-still",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-059",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "عُدِّل الموعد النهائي لتسليم الالتزام OB-310 إلى ١٥ أغسطس ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "C-communication",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:عدل",
+            "frame:C-communication:سلم",
+            "frame:E-temporal:موعد",
+            "object:التزام",
+            "object:تسليم",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-060",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "الالتزام OB-318 متأخر عن موعده المستحق.",
+          "itemIndex": -1,
+          "scope": [
+            "ob318"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:مستحق",
+            "object:التزام",
+            "entity",
+            "state",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-061",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تاريخ انتهاء العقد CN-160 هو ٣١ مارس ٢٠٢٧، وهو غير قابل للتجديد التلقائي.",
+          "itemIndex": -1,
+          "scope": [
+            "cn160"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:غير",
+            "frame:E-temporal:تاريخ",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-copula",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-062",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "قُدِّم طلب تمديد لفترة سماح الفاتورة INV-520 لمدة عشرة أيام.",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "C-communication",
+            "E-temporal",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:B-state-change:مدد",
+            "frame:C-communication:قدم",
+            "frame:E-temporal:مدة",
+            "frame:F-quantity:فاتوره",
+            "entity",
+            "quantity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-063",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "يتحمل العقد CN-172 تعرضًا غير معتمد بقيمة ٤٨٠٬٠٠٠ دولار أمريكي.",
+          "itemIndex": -1,
+          "scope": [
+            "cn172"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:B-state-change:غير",
+            "frame:F-quantity:قيمه",
+            "object:عقد",
+            "object:امر",
+            "entity",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-064",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "التعرض الحالي للعقد CN-180 يساوي كامل قيمة العقد البالغة ٩٥٠٬٠٠٠ دولار.",
+          "itemIndex": -1,
+          "scope": [
+            "cn180"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:C-communication:بلغ",
+            "frame:F-quantity:قيمه",
+            "frame:H-execution:اكمل",
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-065",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "بلغت قيمة الفاتورة INV-533 ما مجموعه ١٨٬٧٥٠ دولارًا أمريكيًا عند إصدارها في ٥ سبتمبر ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "inv533"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:C-communication:بلغ",
+            "frame:F-quantity:قيمه",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-066",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تنص المادة CL-15 على سقف جزائي قدره ١٠٪ من الرسوم السنوية.",
+          "itemIndex": -1,
+          "scope": [
+            "cl15"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:مدة",
+            "object:ماده",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-067",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تحقق قسم الهندسة من شهادة إنجاز الموقع EV-610.",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:G-evidence:تحقق",
+            "frame:H-execution:انجز",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-068",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تم التحقق من الوثيقة EV-622 واعتمادها من ضمان الجودة في ١٢ أغسطس ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "ev622"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:اعتمد",
+            "frame:G-evidence:تحقق",
+            "object:ماده",
+            "entity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-069",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أُغلقت فجوة الأدلة الخاصة بشهادة التأمين للعقد CN-195 بعد استلامها وتوثيقها.",
+          "itemIndex": -1,
+          "scope": [
+            "cn195"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:B-state-change:اغلق",
+            "frame:G-evidence:ادله",
+            "object:عقد",
+            "entity",
+            "ar-perfective",
+            "ar-passive",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-070",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لا يوجد حتى الآن مبلغ تعرض موثق للعقد CN-198.",
+          "itemIndex": -1,
+          "scope": [
+            "cn198"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:F-quantity:مبلغ",
+            "object:عقد",
+            "entity",
+            "state",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-071",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "الوثيقتان EV-631 و EV-632 ما زالتا غير مستلمتين، وإغلاق الإجراء ACT-090 مشروط باستلامهما.",
+          "itemIndex": -1,
+          "scope": [
+            "ev631",
+            "ev632",
+            "act090"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:B-state-change:غير",
+            "frame:H-execution:act",
+            "frame:H-execution:اجراء",
+            "entity",
+            "negation",
+            "ar-perfective",
+            "ar-still",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-072",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "اكتملت بروفة ترحيل البيانات ACT-104 في ٢٠ سبتمبر.",
+          "itemIndex": -1,
+          "scope": [
+            "act104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:act",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-073",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "نُفِّذ الإجراء ACT-111 ووُقِّع بالتزامن في ٤ سبتمبر ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "act111"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:D-authorization:وقع",
+            "frame:H-execution:act",
+            "frame:H-execution:نفذ",
+            "object:التزام",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-074",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "استُكملت جميع بنود قائمة التهيئة للعقد CN-210.",
+          "itemIndex": -1,
+          "scope": [
+            "cn210"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:F-quantity:قيمه",
+            "frame:H-execution:اكمل",
+            "object:عقد",
+            "entity",
+            "state",
+            "ar-perfective",
+            "ar-passive",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-075",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لم يُنجز أيٌّ من مخرجات الالتزام OB-350 حتى الآن.",
+          "itemIndex": -1,
+          "scope": [
+            "ob350"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:انجز",
+            "object:التزام",
+            "entity",
+            "negation",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-076",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أُغلق الإجراء ACT-090 بعد اكتمال الأدلة المطلوبة.",
+          "itemIndex": -1,
+          "scope": [
+            "act090"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "G-evidence",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:B-state-change:اغلق",
+            "frame:G-evidence:ادله",
+            "frame:H-execution:act",
+            "frame:H-execution:اجراء",
+            "entity",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-077",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "The record shows CN-118 reassigned — أُسند العقد إلى م.",
+          "itemIndex": -1,
+          "scope": [
+            "cn118"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:A-responsibility:اسند",
+            "frame:G-evidence:record",
+            "object:عقد",
+            "entity",
+            "ar-passive",
+            "en-finite",
+            "ar-imperfective"
+          ]
+        },
+        {
+          "unitText": "النعيمي بدلًا من المالك الحالي.",
+          "itemIndex": -1,
+          "scope": [
+            "cn118"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:مالك",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-078",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Owner of CN-170 هو جهة جماعية: Regional Delivery Queue (GRP-05).",
+          "itemIndex": -1,
+          "scope": [
+            "cn170",
+            "grp05"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:owner",
+            "frame:A-responsibility:جهه",
+            "entity",
+            "ar-copula"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-079",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "CN-091 لا يزال in draft and has not been executed.",
+          "itemIndex": -1,
+          "scope": [
+            "cn091"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:D-authorization:draft",
+            "frame:H-execution:execute",
+            "entity",
+            "negation",
+            "ar-still",
+            "en-finite",
+            "ar-imperfective",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-080",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تم نقل حالة SUB-340 إلى 'superseded' بعد filing the revised version.",
+          "itemIndex": -1,
+          "scope": [
+            "sub340"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:B-state-change:revise",
+            "frame:B-state-change:نقل",
+            "frame:C-communication:file",
+            "frame:G-evidence:filing",
+            "frame:G-evidence:حاله",
+            "entity",
+            "ar-completion",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-081",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تقرير REP-58 تم إرساله to the regulator بتاريخ ٣٠ يونيو.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "E-temporal",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:E-temporal:تاريخ",
+            "frame:G-evidence:تقرير",
+            "entity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-082",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Submitted via the vendor portal — تم رفع SUB-412 بتاريخ ١٤ يوليو ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "sub412"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:C-communication:رفع",
+            "frame:E-temporal:تاريخ",
+            "entity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-083",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Finance approved uplift — اعتماد الزيادة في CN-108 تم last week.",
+          "itemIndex": -1,
+          "scope": [
+            "cn108"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "frame:D-authorization:اعتمد",
+            "frame:E-temporal:week",
+            "entity",
+            "quantity",
+            "ar-imperfective",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-084",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The sponsor وقَّع على the extension terms of CN-156.",
+          "itemIndex": -1,
+          "scope": [
+            "cn156"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:وقع",
+            "object:term",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-085",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "الموعد النهائي لـ OB-310 تم تغييره to August 15, 2026.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:موعد",
+            "entity",
+            "quantity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-086",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "العقد CN-166 expires on ٣١ مارس ٢٠٢٧.",
+          "itemIndex": -1,
+          "scope": [
+            "cn166"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:expire",
+            "object:عقد",
+            "entity",
+            "ar-imperfective",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-087",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Unapproved exposure على CN-172 بلغ ٤٨٠ ألف دولار.",
+          "itemIndex": -1,
+          "scope": [
+            "cn172"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "C-communication",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:C-communication:بلغ",
+            "frame:F-quantity:exposure",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-088",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "INV-533 صدرت بمبلغ USD 18,750 في ٥ سبتمبر ٢٠٢٦.",
+          "itemIndex": -1,
+          "scope": [
+            "inv533"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:C-communication:اصدر",
+            "frame:F-quantity:مبلغ",
+            "entity",
+            "quantity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-089",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "EV-610 تم التحقق منها by engineering.",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:تحقق",
+            "entity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-090",
+      "unitCount": 3,
+      "perUnit": [
+        {
+          "unitText": "Status update:",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "B-state-change",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:B-state-change:update",
+            "frame:G-evidence:status"
+          ]
+        },
+        {
+          "unitText": "ACT-104 اكتمل في ٢٠ سبتمبر",
+          "itemIndex": 0,
+          "scope": [
+            "act104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:act",
+            "entity",
+            "ar-imperfective"
+          ]
+        },
+        {
+          "unitText": "ACT-111 مجدول لشهر أكتوبر",
+          "itemIndex": 1,
+          "scope": [
+            "act111"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:E-temporal:شهر",
+            "frame:H-execution:act",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-091",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Has the countersigned copy of CN-125 been filed yet?",
+          "itemIndex": -1,
+          "scope": [
+            "cn125"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:file",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-092",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Who is the current owner of record for CN-163?",
+          "itemIndex": -1,
+          "scope": [
+            "cn163"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "A-responsibility",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:A-responsibility:owner",
+            "frame:G-evidence:record",
+            "entity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-093",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "When does the grace period on INV-520 lapse?",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:lapse",
+            "entity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-094",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Was EV-610 ever verified, and by whom?",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:verify",
+            "entity",
+            "state",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-095",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Which obligations under CN-188 remain open?",
+          "itemIndex": -1,
+          "scope": [
+            "cn188"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:open",
+            "object:obligation",
+            "entity",
+            "state",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-096",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "If the renewal for CN-120 is approved, the new term would begin in January.",
+          "itemIndex": -1,
+          "scope": [
+            "cn120"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:approve",
+            "object:term",
+            "entity",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-097",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Should the regulator request REP-58 again, we would need to resend it within 48 hours.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "hypothetical modal",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [],
+          "signals": [
+            "entity",
+            "quantity",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-098",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "If OB-310 slips past August, escalate to the delivery board.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:E-temporal:slip",
+            "entity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-099",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Unless finance signs off today, the uplift on CN-108 will not make this cycle.",
+          "itemIndex": -1,
+          "scope": [
+            "cn108"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "hypothetical modal",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:D-authorization:sign",
+            "frame:D-authorization:sign off",
+            "frame:E-temporal:today",
+            "entity",
+            "negation",
+            "quantity",
+            "en-finite",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-100",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The vendor claims 'the certificate was delivered in June,' but we have not confirmed that.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:deliver",
+            "frame:G-evidence:certificate",
+            "state",
+            "negation",
+            "en-finite",
+            "en-inflected-frame-verb",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-101",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "'The penalty was already paid,' according to their account manager — treating that as unverified for now.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "REPORTED_ATTRIBUTION",
+          "modalityCue": "attribution verb",
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:F-quantity:penalty",
+            "state",
+            "en-finite",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-102",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The draft minutes quote Legal as saying the clause 'looks acceptable.'",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:draft",
+            "object:clause",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-103",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Please pull the latest amendment for CN-104 and attach it here.",
+          "itemIndex": -1,
+          "scope": [
+            "cn104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:amend",
+            "object:amendment",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-104",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Summarize every open obligation on CN-188 in one table.",
+          "itemIndex": -1,
+          "scope": [
+            "cn188"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:open",
+            "object:obligation",
+            "entity",
+            "state",
+            "quantity"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-105",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Remind me to revisit INV-520 next Tuesday.",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [],
+          "signals": [
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-106",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Do not forward REP-58 until Legal clears it.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "H-execution"
+          ],
+          "signals": [
+            "frame:C-communication:forward",
+            "frame:H-execution:do",
+            "entity",
+            "negation",
+            "en-finite"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-107",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "I can draft a renewal comparison for CN-160 if you want.",
+          "itemIndex": -1,
+          "scope": [
+            "cn160"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:draft",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-108",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "This workspace can generate exposure reports per contract.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:F-quantity:exposure",
+            "frame:G-evidence:report",
+            "object:contract",
+            "entity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-109",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "I am able to read Arabic and English contract records.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "capability statement with no asserted record state",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:record",
+            "object:contract",
+            "entity",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-110",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Thanks — that clears things up.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "no record-related predicate or subject",
+          "frames": [],
+          "signals": []
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-111",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Noted, appreciate the quick turnaround.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "no record-related predicate or subject",
+          "frames": [],
+          "signals": []
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-112",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "OK, moving on to the next agenda item.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:move",
+            "en-inflected-frame-verb"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-113",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "We could shift the OB-310 delivery to mid-August if that helps.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:shift",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-114",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "My suggestion: route the CN-149 subcontract request through Risk first.",
+          "itemIndex": -1,
+          "scope": [
+            "cn149"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "record-related vocabulary without a detectable predication",
+          "frames": [
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:D-authorization:suggestion",
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-115",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "I won't speculate on the CN-137 dispute status.",
+          "itemIndex": -1,
+          "scope": [
+            "cn137"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:status",
+            "entity",
+            "negation"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-116",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "هل أُودعت النسخة المصادق عليها من العقد CN-125 لدى قسم السجلات؟",
+          "itemIndex": -1,
+          "scope": [
+            "cn125"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:D-authorization:صادق",
+            "frame:G-evidence:سجل",
+            "object:عقد",
+            "entity",
+            "ar-perfective",
+            "ar-passive",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-117",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "من المالك الحالي للعقد CN-163 في النظام؟",
+          "itemIndex": -1,
+          "scope": [
+            "cn163"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "A-responsibility"
+          ],
+          "signals": [
+            "frame:A-responsibility:مالك",
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-118",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "متى تنتهي فترة السماح للفاتورة INV-520؟",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "E-temporal",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:E-temporal:انتهي",
+            "frame:F-quantity:فاتوره",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-119",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "هل تم التحقق من الوثيقة EV-610؟",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:تحقق",
+            "entity",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "ومن قام بذلك؟",
+          "itemIndex": -1,
+          "scope": [
+            "ev610"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:قام"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-120",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ما الالتزامات التي ما تزال مفتوحة في العقد CN-188؟",
+          "itemIndex": -1,
+          "scope": [
+            "cn188"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [],
+          "signals": [
+            "object:التزام",
+            "object:عقد",
+            "entity",
+            "state",
+            "ar-still",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-121",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "إذا اعتُمد تجديد العقد CN-120، فسيبدأ الأجل الجديد في يناير.",
+          "itemIndex": -1,
+          "scope": [
+            "cn120"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "B-state-change",
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:اجل",
+            "frame:D-authorization:اعتمد",
+            "frame:E-temporal:اجل",
+            "object:عقد",
+            "entity",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-122",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "في حال طلبت الجهة الرقابية التقرير REP-58 مجددًا، سنعيد إرساله خلال ٤٨ ساعة.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "A-responsibility",
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:A-responsibility:جهه",
+            "frame:C-communication:ارسل",
+            "frame:G-evidence:تقرير",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-123",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "إن تأخر تسليم OB-310 عن أغسطس، فصعِّدوا الأمر إلى مجلس التسليم.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "object:تسليم",
+            "object:امر",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-124",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ما لم توافق المالية اليوم، لن تدخل زيادة الميزانية في CN-108 هذه الدورة.",
+          "itemIndex": -1,
+          "scope": [
+            "cn108"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "D-authorization",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:D-authorization:وافق",
+            "frame:E-temporal:اليوم",
+            "entity",
+            "negation",
+            "quantity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-125",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لو كان لدينا تأكيد على استلام الشهادة، لأغلقنا الفجوة الآن.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "B-state-change",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:B-state-change:اغلق",
+            "frame:G-evidence:فجوه",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-126",
+      "unitCount": 2,
+      "perUnit": [
+        {
+          "unitText": "يؤكد المورد أن «الشهادة سُلِّمت في يونيو»",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "quotation not adopted by the Officer",
+          "frames": [
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "frame:G-evidence:شهاده",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        },
+        {
+          "unitText": "نا لم نتحقق من ذلك بعد.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:تحقق",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-127",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "بحسب مدير الحساب: «الغرامة سُددت بالفعل» — ونتعامل معها كمعلومة غير موثقة.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change",
+            "F-quantity"
+          ],
+          "signals": [
+            "frame:B-state-change:غير",
+            "frame:F-quantity:غرامه",
+            "state",
+            "negation",
+            "ar-perfective",
+            "ar-passive",
+            "ar-attribution",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-128",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ورد في محضر الاجتماع أن الشؤون القانونية ترى الصياغة «مقبولة مبدئيًا».",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:محضر",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-129",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أرفق أحدث تعديل للعقد CN-104 في هذه المساحة.",
+          "itemIndex": -1,
+          "scope": [
+            "cn104"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "B-state-change"
+          ],
+          "signals": [
+            "frame:B-state-change:عدل",
+            "object:عقد",
+            "object:تعديل",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-130",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لخِّص جميع الالتزامات المفتوحة في CN-188 ضمن جدول واحد.",
+          "itemIndex": -1,
+          "scope": [
+            "cn188"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "object:التزام",
+            "entity",
+            "quantity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-131",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ذكِّرني بمراجعة الفاتورة INV-520 يوم الثلاثاء المقبل.",
+          "itemIndex": -1,
+          "scope": [
+            "inv520"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "E-temporal",
+            "F-quantity",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:E-temporal:يوم",
+            "frame:F-quantity:فاتوره",
+            "frame:G-evidence:مراجعه",
+            "entity",
+            "quantity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-132",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لا تُرسل التقرير REP-58 قبل موافقة الشؤون القانونية.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "D-authorization",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:D-authorization:وافق",
+            "frame:G-evidence:تقرير",
+            "entity",
+            "negation",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-133",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أستطيع إعداد مقارنة لخيارات تجديد العقد CN-160 عند الحاجة.",
+          "itemIndex": -1,
+          "scope": [
+            "cn160"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "capability statement with no asserted record state",
+          "frames": [],
+          "signals": [
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-134",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "يمكن للنظام توليد تقارير التعرض لكل عقد على حدة.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "F-quantity",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:F-quantity:تعرض",
+            "frame:G-evidence:تقرير",
+            "object:عقد",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-135",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "بإمكاني قراءة سجلات العقود بالعربية والإنجليزية.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "capability statement with no asserted record state",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:سجل",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-136",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "شكرًا، توضحت الصورة الآن.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "UNCERTAIN",
+          "reason": "insufficient signal",
+          "frames": [],
+          "signals": [
+            "ar-perfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "UNCERTAIN"
+    },
+    {
+      "id": "HV2F-137",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "تمام، وصلت — شكرًا على سرعة الإنجاز.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "H-execution"
+          ],
+          "signals": [
+            "frame:H-execution:انجز",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-138",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "حسنًا، ننتقل إلى البند التالي من جدول الأعمال.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "object:بند",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-139",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أقترح تأجيل تسليم OB-310 إلى منتصف أغسطس إن كان ذلك مناسبًا.",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "C-communication",
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "frame:D-authorization:اقترح",
+            "object:تسليم",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-140",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "الأفضل برأيي: إحالة طلب التعاقد من الباطن للعقد CN-149 إلى إدارة المخاطر أولًا.",
+          "itemIndex": -1,
+          "scope": [
+            "cn149"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:حاله",
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-141",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "لن أخمِّن وضع النزاع على العقد CN-137.",
+          "itemIndex": -1,
+          "scope": [
+            "cn137"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [],
+          "signals": [
+            "object:عقد",
+            "entity",
+            "negation",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-142",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "ذكر ممثل المورد أن الدفعة سُلِّمت، دون أن يقدم مستندًا.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication",
+            "F-quantity",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "frame:F-quantity:دفعه",
+            "frame:G-evidence:مستند",
+            "negation",
+            "ar-perfective",
+            "ar-attribution",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-143",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "إن كان تقرير REP-58 قد أُرسل فعلًا، فسيظهر في سجل الإرسال.",
+          "itemIndex": -1,
+          "scope": [
+            "rep58"
+          ],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "C-communication",
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:G-evidence:سجل",
+            "entity",
+            "ar-passive",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-144",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "سأل الفريق: «هل وصلت شهادة التأمين للعقد CN-195؟»",
+          "itemIndex": -1,
+          "scope": [
+            "cn195"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:شهاده",
+            "object:عقد",
+            "entity",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-145",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "متى كان due date لـ OB-310 قبل أي تعديل؟",
+          "itemIndex": -1,
+          "scope": [
+            "ob310"
+          ],
+          "modality": "QUESTION",
+          "modalityCue": "interrogative punctuation",
+          "materiality": "NON_MATERIAL",
+          "reason": "question asserts nothing",
+          "frames": [
+            "B-state-change",
+            "E-temporal"
+          ],
+          "signals": [
+            "frame:B-state-change:عدل",
+            "frame:E-temporal:due",
+            "object:تعديل",
+            "entity",
+            "state",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-146",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "If اعتمدت المالية the uplift, سنرسل إشعارًا إلى المورّد.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "CONDITIONAL",
+          "modalityCue": "embedded interrogative (whether/if)",
+          "materiality": "NON_MATERIAL",
+          "reason": "hypothetical only, no completed action asserted outside the protasis",
+          "frames": [
+            "C-communication",
+            "D-authorization"
+          ],
+          "signals": [
+            "frame:C-communication:ارسل",
+            "frame:D-authorization:اعتمد",
+            "ar-perfective",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-147",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "Please summarize حالة الأدلة for CN-195 in a table.",
+          "itemIndex": -1,
+          "scope": [
+            "cn195"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "G-evidence"
+          ],
+          "signals": [
+            "frame:G-evidence:ادله",
+            "entity",
+            "ar-imperfective"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-148",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "شكرًا جزيلًا — appreciate it.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "no record-related predicate or subject",
+          "frames": [],
+          "signals": []
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    },
+    {
+      "id": "HV2F-149",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "The vendor insists «تم التسليم في يونيو» — still unverified.",
+          "itemIndex": -1,
+          "scope": [],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "MATERIAL_ASSERTION",
+          "reason": "record-related frame with an asserted predicate",
+          "frames": [
+            "C-communication"
+          ],
+          "signals": [
+            "frame:C-communication:سلم",
+            "object:تسليم",
+            "entity",
+            "state",
+            "ar-completion",
+            "ar-imperfective",
+            "action-occurrence"
+          ]
+        }
+      ],
+      "predictedMateriality": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "HV2F-150",
+      "unitCount": 1,
+      "perUnit": [
+        {
+          "unitText": "أقدر أجهّز comparison between the CN-160 and CN-166 renewals.",
+          "itemIndex": -1,
+          "scope": [
+            "cn160",
+            "cn166"
+          ],
+          "modality": "ASSERTION",
+          "modalityCue": null,
+          "materiality": "NON_MATERIAL",
+          "reason": "capability statement with no asserted record state",
+          "frames": [],
+          "signals": [
+            "entity"
+          ]
+        }
+      ],
+      "predictedMateriality": "NON_MATERIAL"
+    }
+  ]
+}

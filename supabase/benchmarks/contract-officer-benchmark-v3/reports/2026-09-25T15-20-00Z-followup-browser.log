@@ -1,0 +1,66 @@
+(node:46655) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS  en-desktop: login
+PASS  en-desktop: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  en-desktop: dir=ltr
+PASS  en-desktop: command center renders — 3251 chars
+PASS  en-desktop: observations visible — FM-008,OM-014,OPS-021
+PASS  en-desktop: approval card visible — waiting-for-approval section
+PASS  en-desktop: approval controls present — 7 controls
+PASS  en-desktop: contract officer page renders — 660 chars
+PASS  en-desktop: composer present
+NOT ASSESSED  en-desktop: conversation answered — no live model turn allotted (shared budget)
+NOT ASSESSED  en-desktop: reply grounded in seeded contracts — no live model turn allotted (shared budget)
+NOT ASSESSED  en-desktop: citations rendered — no live model turn allotted (shared budget)
+NOT ASSESSED  en-desktop: no invented money in reply — no live model turn allotted (shared budget)
+PASS  en-desktop: tasks page renders
+PASS  en-desktop: no console errors
+PASS  ar-desktop: login
+PASS  ar-desktop: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  ar-desktop: dir=rtl
+PASS  ar-desktop: command center renders — 2835 chars
+PASS  ar-desktop: observations visible — FM-008,OM-014,OPS-021
+PASS  ar-desktop: approval card visible — waiting-for-approval section
+PASS  ar-desktop: approval controls present — 3 controls
+PASS  ar-desktop: contract officer page renders — 607 chars
+PASS  ar-desktop: composer present
+PASS  ar-desktop: conversation answered — 1075 chars new
+PASS  ar-desktop: reply grounded in seeded contracts
+PASS  ar-desktop: citations rendered — 2 new citation links
+PASS  ar-desktop: no invented money in reply
+PASS  ar-desktop: tasks page renders
+PASS  ar-desktop: no console errors
+PASS  en-mobile: login
+PASS  en-mobile: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  en-mobile: dir=ltr
+PASS  en-mobile: command center renders — 3069 chars
+PASS  en-mobile: observations visible — FM-008,OM-014,OPS-021
+PASS  en-mobile: approval card visible — waiting-for-approval section
+PASS  en-mobile: approval controls present — 7 controls
+PASS  en-mobile: contract officer page renders — 478 chars
+FAIL  en-mobile: suite threw — TimeoutError: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://localhost:3003/en/app/agent", waiting until "load"
+
+PASS  ar-mobile: login
+PASS  ar-mobile: served by build 4cob3-9M9koVAwBdJkAvo
+PASS  ar-mobile: dir=rtl
+PASS  ar-mobile: command center renders — 2651 chars
+PASS  ar-mobile: observations visible — FM-008,OM-014,OPS-021
+PASS  ar-mobile: approval card visible — waiting-for-approval section
+PASS  ar-mobile: approval controls present — 3 controls
+PASS  ar-mobile: contract officer page renders — 423 chars
+PASS  ar-mobile: composer present
+NOT ASSESSED  ar-mobile: conversation answered — no live model turn allotted (shared budget)
+NOT ASSESSED  ar-mobile: reply grounded in seeded contracts — no live model turn allotted (shared budget)
+NOT ASSESSED  ar-mobile: citations rendered — no live model turn allotted (shared budget)
+NOT ASSESSED  ar-mobile: no invented money in reply — no live model turn allotted (shared budget)
+PASS  ar-mobile: tasks page renders
+PASS  ar-mobile: no console errors
+
+4A.1 BROWSER REGRESSION: 45 PASS · 1 FAIL · 8 NOT ASSESSED
+  FAILED: en-mobile: suite threw TimeoutError: page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://localhost:3003/en/app/agent", waiting until "load"
+
+BROWSER MODEL USAGE: 1 turns · 4762 tokens (API-reported) · ≤2 requests (upper bound)

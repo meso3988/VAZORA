@@ -1,0 +1,57 @@
+PASS  A (stub) complete assessment, no issues → ALPHA-100 no_actionable_issues_recorded, complete
+PASS  B (stub) existing issue → EPSILON-500 actionable_issues
+PASS  C DEFECT REPRO: observation read ERROR → assessment_incomplete (was: no_actionable_issues_recorded) — ALPHA-100:assessment_incomplete,EPSILON-500:assessment_incomplete
+PASS  C gap names the failed read with a safe code, no raw database text
+PASS  C observation read THROWS (network) → assessment_incomplete
+PASS  E truncated observation read (limit reached) → incomplete, never a clean result
+PASS  D contract_obligations errors → ALPHA-100 not healthy (assessment_incomplete) — read_failed:contract_obligations — part of the assessment data could not be read
+PASS  D contract_obligations failure → EPSILON-500 known issue still visible, with incomplete coverage
+PASS  D evidence_gaps throws → ALPHA-100 not healthy (assessment_incomplete) — read_failed:evidence_gaps — part of the assessment data could not be read
+PASS  D evidence_gaps failure → EPSILON-500 known issue still visible, with incomplete coverage
+PASS  D officer_sweep_runs errors → ALPHA-100 not healthy (assessment_incomplete) — read_failed:officer_sweep_runs — part of the assessment data could not be read | no_completed_sweep — the contract has never been assessed
+PASS  D officer_sweep_runs failure → EPSILON-500 known issue still visible, with incomplete coverage
+PASS  D evidence_verification_discrepancies throws → ALPHA-100 not healthy (assessment_incomplete) — read_failed:evidence_verification_discrepancies — part of the assessment data could not be read
+PASS  D evidence_verification_discrepancies failure → EPSILON-500 known issue still visible, with incomplete coverage
+PASS  D obligation_evidence_requirements errors → ALPHA-100 not healthy (assessment_incomplete) — read_failed:obligation_evidence_requirements — part of the assessment data could not be read
+PASS  D obligation_evidence_requirements failure → EPSILON-500 known issue still visible, with incomplete coverage
+PASS  D contract list unreadable → HealthUnavailableError (no empty 'nothing to report')
+PASS  D getContractHealth tool → safe error code, no raw message — {"ok":false,"error":"health_assessment_unavailable: contracts_read_failed"}
+PASS  E partial sweep: EPSILON-500 known issue visible + incomplete coverage
+PASS  E last successful assessment kept as HISTORY (earlier run), not as fresh
+PASS  H (stub) other contract in the same partial sweep stays scoped and complete
+PASS  latest sweep ATTEMPT failed → no contract gets a clean result
+PASS  J guard: incomplete assessment cannot be called healthy/fully checked — ALPHA-100 cannot be described as healthy: its assessment is incomplete (read_failed:officer_observations). I could not complete the current assessment. The last successful assessment (2026-09-26T08:00:00Z) is shown separately and may be outdated.
+PASS  J guard: assessment unreadable → reassurance replaced — I could not complete the current assessment, and there is no earlier successful assessment.
+PASS  J guard (Arabic): incomplete → لم أتمكن من إكمال التقييم الحالي — لا يمكن وصف ALPHA-100 بأنه سليم: التقييم غير مكتمل (read_failed:officer_observations). لم أتمكن من إكمال التقييم الحالي. آخر تقييم ناجح (2026-09-26T08:00:00Z) معروض منفصلًا وقد يكون قديمًا.
+PASS  J guard: known issues + incomplete coverage disclosed together — EPSILON-500 cannot be described as healthy: 1 actionable issue is recorded — No owner assigned: EPSILON-500. Coverage is incomplete (sweep_failed_for_contract).
+PASS  F observation write failure → sweep NOT published as completed — partial
+PASS  F failure recorded for BETA-200 with a safe code — [{"contract_id":"31635952-8c2b-4ab3-b1e5-949b7ab9361f","error":"observation_write_failed"}]
+PASS  F BETA-200 (no observations saved) is NOT a clean bill of health — assessment_incomplete sweep_failed_for_contract
+PASS  F BETA-200 freshness not advanced: no successful assessment recorded for it
+PASS  H ALPHA-100 in the same sweep remains scoped: complete, no actionable issues
+PASS  H EPSILON-500 in the same sweep: actionable, complete
+PASS  F brief after a partial sweep: not quiet, assessment incomplete — {"complete":false,"reasons":["latest_sweep_partial"],"lastSuccessfulAt":null}
+PASS  I recovery sweep completed — []
+PASS  I BETA-200 now actionable with complete coverage
+PASS  I no duplicate active observations
+PASS  G failed replacement scan → sweep partial with EPSILON-500 failure — [{"contract_id":"fed7dae7-b166-4cd1-b8d1-4d597c953502","error":"scan_failed"}]
+PASS  G EPSILON-500's previous observations NOT silently resolved — 1 → 1
+PASS  G EPSILON-500: known issue visible, coverage incomplete
+PASS  G EPSILON-500 last successful assessment = the earlier good run (history, not fresh)
+PASS  H ALPHA-100 unaffected by EPSILON-500's failure
+PASS  G2 contract list read failure → sweep failed
+PASS  G2 no observation resolved by the failed sweep — 8 → 8
+PASS  G2 after a failed latest attempt, no contract is presented clean — ZETA-600:actionable_issues,ALPHA-100:assessment_incomplete,BETA-200:actionable_issues,GAMMA-300:actionable_issues,DELTA-400:actionable_issues,EPSILON-500:actionable_issues
+PASS  G3 observation set unreadable → sweep failed, nothing resolved
+PASS  F2 publication write failure → outcome failed, stored run not published — failed / running
+PASS  F2 health does not treat the unpublished run as fresh
+PASS  C (live) observation read error → no contract clean
+PASS  C (live) readObservations reports failure explicitly (not [])
+PASS  Brief with observation read failure: not quiet, incomplete, no false calm
+PASS  I2 clean sweep after failures → completed; ALPHA-100 clean and complete again
+PASS  I2 still no duplicate active observations
+PASS  J scripted Officer: 'healthy and fully checked' replaced by the incomplete statement — ALPHA-100 cannot be described as healthy: its assessment is incomplete (read_failed:officer_observations). I could not complete the current assessment. The last successful assessment (2026-10-05T20:07:13.903927+00:00) is shown separately and may be outdated.
+PASS  J scripted Officer with the assessment unreadable → no reassurance — I could not complete the current assessment, and there is no earlier successful assessment.
+CLEANUP ok org=b8b8b201-cf57-47cc-93cd-0ef0e18c38a2  leftovers=none
+
+HEALTH FAILURE SAFETY: 54/54 pass

@@ -1,0 +1,67 @@
+{
+  "benchmark": "bench-mixed-dc",
+  "language": "mixed",
+  "files": [
+    "bench-mixed-dc.docx"
+  ],
+  "obligations": [
+    {
+      "clause": "8",
+      "requirement": "uptime ≥ 99.9% شهري",
+      "frequency": "monthly",
+      "due_rule": null,
+      "evidence": [
+        "قياس uptime شهري موثق"
+      ],
+      "payment_linked": null,
+      "financial": null,
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": "مدير العمليات"
+    },
+    {
+      "clause": "9",
+      "requirement": "Monthly uptime report by day 10 after period end",
+      "frequency": "monthly",
+      "due_rule": "day_10_after_period_end",
+      "evidence": [
+        "Monthly uptime report"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": null,
+      "submission": {
+        "destination": "Client portal",
+        "channel": "portal",
+        "deadline_rule": "day 10 after period end"
+      },
+      "owner_role": "Operations Manager"
+    },
+    {
+      "clause": "11",
+      "requirement": "خصم 1% عند انخفاض الـuptime",
+      "frequency": null,
+      "due_rule": null,
+      "evidence": [],
+      "payment_linked": null,
+      "financial": "deduction",
+      "external_dependency": null,
+      "submission": null,
+      "owner_role": null
+    },
+    {
+      "clause": "12",
+      "requirement": "Client acknowledgement before payment release",
+      "frequency": "monthly",
+      "due_rule": "monthly_day_5",
+      "evidence": [
+        "Client acknowledgement"
+      ],
+      "payment_linked": true,
+      "financial": null,
+      "external_dependency": "Client portal acknowledgement",
+      "submission": null,
+      "owner_role": "Operations Manager"
+    }
+  ]
+}

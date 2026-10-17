@@ -1,0 +1,55 @@
+build: commit a41c904 (product = 7e12e1c), BUILD_ID D1VqBnO_qCtmp2uqj7cJF, next start :3005, VAZORA_OFFICER_PROVIDER=none
+QA tenants: alpha 448bb2f2…, beta b77e1608…; EPSILON-500 due date set to 2026-09-30 in the QA tenant (overdue + verified case)
+FAIL  before alpha en BETA-200: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before alpha en BETA-200: deadline window = overdue
+FAIL  before alpha en BETA-200: evidence state = missing
+FAIL  before alpha en BETA-200: no "Verified" anywhere in the status cell
+FAIL  before alpha en GAMMA-300: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before alpha en GAMMA-300: deadline window = next_3_days
+FAIL  before alpha en GAMMA-300: evidence state = missing
+FAIL  before alpha en GAMMA-300: no "Verified" anywhere in the status cell
+FAIL  before alpha en ALPHA-100: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before alpha en ALPHA-100: deadline window = monitoring
+FAIL  before alpha en ALPHA-100: evidence state = verified
+FAIL  before alpha en EPSILON-500: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before alpha en EPSILON-500: deadline window = overdue
+FAIL  before alpha en EPSILON-500: evidence state = verified
+FAIL  before alpha en DELTA-400: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before alpha en DELTA-400: deadline window = monitoring
+FAIL  before alpha en DELTA-400: evidence state = verified
+FAIL  before alpha en DELTA-400: prior verified state in force is stated
+FAIL  before alpha en overview BETA-200: chart shows evidence state, not activation — observed chart: "Obligations by status Counted from obligations, evidence and claims — not a composite score. Verified 1"
+FAIL  before alpha en overview BETA-200: clause-trace verification slot shows evidence state — data-ob-evidence nodes=0
+FAIL  before alpha ar BETA-200: lifecycle reads Active (not Verified) — observed status cell: "مُتحقق منه"
+FAIL  before alpha ar BETA-200: deadline window = overdue
+FAIL  before alpha ar BETA-200: evidence state = missing
+FAIL  before alpha ar BETA-200: no "مُتحقق منه" anywhere in the status cell
+FAIL  before alpha ar GAMMA-300: lifecycle reads Active (not Verified) — observed status cell: "مُتحقق منه"
+FAIL  before alpha ar GAMMA-300: deadline window = next_3_days
+FAIL  before alpha ar GAMMA-300: evidence state = missing
+FAIL  before alpha ar GAMMA-300: no "مُتحقق منه" anywhere in the status cell
+FAIL  before alpha ar ALPHA-100: lifecycle reads Active (not Verified) — observed status cell: "مُتحقق منه"
+FAIL  before alpha ar ALPHA-100: deadline window = monitoring
+FAIL  before alpha ar ALPHA-100: evidence state = verified
+FAIL  before alpha ar EPSILON-500: lifecycle reads Active (not Verified) — observed status cell: "مُتحقق منه"
+FAIL  before alpha ar EPSILON-500: deadline window = overdue
+FAIL  before alpha ar EPSILON-500: evidence state = verified
+FAIL  before alpha ar DELTA-400: lifecycle reads Active (not Verified) — observed status cell: "مُتحقق منه"
+FAIL  before alpha ar DELTA-400: deadline window = monitoring
+FAIL  before alpha ar DELTA-400: evidence state = verified
+FAIL  before alpha ar DELTA-400: prior verified state in force is stated
+FAIL  before alpha ar overview BETA-200: chart shows evidence state, not activation — observed chart: "الالتزامات حسب الحالة معدودة من الالتزامات والأدلة والمستخلصات — وليست درجة مركّبة. مُتحقق منه 1"
+FAIL  before alpha ar overview BETA-200: clause-trace verification slot shows evidence state — data-ob-evidence nodes=0
+FAIL  before beta en OPS-021: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before beta en OPS-021: deadline window = monitoring
+FAIL  before beta en OPS-021: evidence state = no_requirements
+FAIL  before beta en OPS-021: no "Verified" anywhere in the status cell
+FAIL  before beta en FM-008: lifecycle reads Active (not Verified) — observed status cell: "Verified"
+FAIL  before beta en FM-008: deadline window = overdue
+FAIL  before beta en FM-008: evidence state = no_requirements
+FAIL  before beta en FM-008: no "Verified" anywhere in the status cell
+FAIL  before beta en overview OPS-021: chart shows evidence state, not activation — observed chart: "Obligations by status Counted from obligations, evidence and claims — not a composite score. Verified 1"
+PASS  before beta en overview OPS-021: clause-trace verification slot shows evidence state — data-ob-evidence nodes=0
+PASS  before demo: obligations keep fixture status pills, no live state badges
+
+2/51 passed

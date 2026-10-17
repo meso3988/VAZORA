@@ -1,0 +1,8 @@
+=== LIVE JOURNEY 2026-10-05T13:54:39.022Z base=http://localhost:3007 tenant=4da18aa7-da70-4c80-bcbd-62a9faa04632
+PASS  contract created from the UI and opened from the list — 8b745d79-d4bb-4409-9500-b60aadde9fcf (created by the first attempt)
+PASS  document uploaded and stored — [{"id":"75ce4da6-d3bf-4765-8053-acd9d78cfad3","file_name":"bench-en-svc.docx","file_size":8181}]
+ERROR page.waitForURL: Timeout 300000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at main (/Users/mayasahaldashsh/Documents/VAZORA/supabase/tests/e2e-live-journey.mts:105:14)

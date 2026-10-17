@@ -1,0 +1,5 @@
+typecheck exit=0
+lint: ✖ 4 problems (0 errors, 4 warnings)
+build exit=0
+unit cycle-settlements-scheduling: 42/42
+built commit: 6ce97b0 (product code unchanged since; later commits: migration grant fix, .env.example names, tests)

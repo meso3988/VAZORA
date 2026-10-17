@@ -1,0 +1,111 @@
+{
+  "countedAt": "2026-10-02T00:55:41.556Z",
+  "endpoint": "/v1/messages/count_tokens (no generation, not billed)",
+  "model": "claude-opus-5-5",
+  "manifestSha256": "e56670865302a7b96f5449d641521f9b09798ea679ca9882be44143da04e8974",
+  "promptSha256": "fe76dad1ee6c99f94306b9989fad87cf4d8ede1660112ecce45aaaf646d14487",
+  "datasetSha256": "0b94875366b86814cdf6f95689fe2a14d92f72d22a40a07ab268f553f81f8ac7",
+  "counted": 24,
+  "failed": 0,
+  "inputTokensTotal": 55432,
+  "inputTokensMax": 2394,
+  "inputTokensMin": 2251,
+  "perCase": [
+    {
+      "caseId": "HV2F-003",
+      "inputTokens": 2298
+    },
+    {
+      "caseId": "HV2F-022",
+      "inputTokens": 2296
+    },
+    {
+      "caseId": "HV2F-007",
+      "inputTokens": 2394
+    },
+    {
+      "caseId": "HV2F-040",
+      "inputTokens": 2338
+    },
+    {
+      "caseId": "HV2F-053",
+      "inputTokens": 2330
+    },
+    {
+      "caseId": "HV2F-056",
+      "inputTokens": 2365
+    },
+    {
+      "caseId": "HV2F-071",
+      "inputTokens": 2359
+    },
+    {
+      "caseId": "HV2F-088",
+      "inputTokens": 2321
+    },
+    {
+      "caseId": "HV2F-008",
+      "inputTokens": 2315
+    },
+    {
+      "caseId": "HV2F-031",
+      "inputTokens": 2312
+    },
+    {
+      "caseId": "HV2F-027",
+      "inputTokens": 2302
+    },
+    {
+      "caseId": "HV2F-020",
+      "inputTokens": 2313
+    },
+    {
+      "caseId": "HV2F-046",
+      "inputTokens": 2355
+    },
+    {
+      "caseId": "HV2F-055",
+      "inputTokens": 2337
+    },
+    {
+      "caseId": "HV2F-068",
+      "inputTokens": 2347
+    },
+    {
+      "caseId": "HV2F-090",
+      "inputTokens": 2370
+    },
+    {
+      "caseId": "HV2F-091",
+      "inputTokens": 2254
+    },
+    {
+      "caseId": "HV2F-115",
+      "inputTokens": 2251
+    },
+    {
+      "caseId": "HV2F-121",
+      "inputTokens": 2274
+    },
+    {
+      "caseId": "HV2F-130",
+      "inputTokens": 2270
+    },
+    {
+      "caseId": "HV2F-148",
+      "inputTokens": 2251
+    },
+    {
+      "caseId": "HV2F-097",
+      "inputTokens": 2261
+    },
+    {
+      "caseId": "HV2F-135",
+      "inputTokens": 2263
+    },
+    {
+      "caseId": "HV2F-147",
+      "inputTokens": 2256
+    }
+  ]
+}

@@ -1,0 +1,872 @@
+{
+  "set": "materiality-dev-v2",
+  "status": "DEVELOPMENT CORPUS — tuning allowed",
+  "rule": "Fresh development probes written for the morphology + predicate-frame stage. No case is copied or paraphrased from heldout-v1 or materiality-dev-v1; verbs and constructions were chosen to be unseen by the detector at the time of writing. Entities are synthetic codes present in no fixture.",
+  "composition": "34 Arabic material · 34 English material · 13 mixed material · 27 non-material (13 en / 11 ar / 3 mixed)",
+  "cases": [
+    {
+      "id": "V2-AR-M01",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": false,
+      "text": "العقد SV-212 أُسندت مسؤوليته إلى إدارة المشتريات.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M02",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": false,
+      "text": "الجهة المناط بها التنفيذ هي إدارة العقود.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M03",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": false,
+      "text": "لم تُحدَّد أي جهة مسؤولة عن هذا المتطلب.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M04",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": false,
+      "text": "عاتق المتابعة يقع على مدير المشروع.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M05",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": true,
+      "text": "كُلِّف خالد الشهري بمراجعة التقرير.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M06",
+      "locale": "ar",
+      "frame": "B",
+      "dangerous": false,
+      "text": "تم تمديد المهلة أسبوعين.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M07",
+      "locale": "ar",
+      "frame": "B",
+      "dangerous": true,
+      "text": "أُلغي الموعد السابق وأُثبت موعد جديد.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M08",
+      "locale": "ar",
+      "frame": "B",
+      "dangerous": false,
+      "text": "لم يُعدَّل تاريخ الاستحقاق.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M09",
+      "locale": "ar",
+      "frame": "B",
+      "dangerous": true,
+      "text": "جرى إقفال الملاحظة بعد المعالجة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M10",
+      "locale": "ar",
+      "frame": "C",
+      "dangerous": true,
+      "text": "سُلِّم التقرير إلى الجهة المالكة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M11",
+      "locale": "ar",
+      "frame": "C",
+      "dangerous": false,
+      "text": "لم نُرسل الإشعار بعد.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M12",
+      "locale": "ar",
+      "frame": "C",
+      "dangerous": false,
+      "text": "رُفعت المرفقات إلى النظام.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M13",
+      "locale": "ar",
+      "frame": "C",
+      "dangerous": true,
+      "text": "وزّعناه على الأطراف أمس.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M14",
+      "locale": "ar",
+      "frame": "D",
+      "dangerous": true,
+      "text": "صُودِق على التحويل من الإدارة المالية.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M15",
+      "locale": "ar",
+      "frame": "D",
+      "dangerous": false,
+      "text": "الموافقة ما زالت قيد الانتظار.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M16",
+      "locale": "ar",
+      "frame": "D",
+      "dangerous": false,
+      "text": "لم يُوقَّع الطلب حتى اللحظة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M17",
+      "locale": "ar",
+      "frame": "D",
+      "dangerous": true,
+      "text": "أقرّ المدير التوصية أمس.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M18",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": false,
+      "text": "يحل الاستحقاق بعد خمسة أيام.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M19",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": false,
+      "text": "انتهت المهلة قبل ثلاثة أيام.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M20",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": false,
+      "text": "الموعد الحالي هو الرابع عشر من أكتوبر.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M21",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": true,
+      "text": "لم يتأخر التسليم عن الموعد.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M22",
+      "locale": "ar",
+      "frame": "F",
+      "dangerous": false,
+      "text": "قيمة الغرامة غير مثبتة في السجل.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M23",
+      "locale": "ar",
+      "frame": "F",
+      "dangerous": true,
+      "text": "بلغت نسبة الخصم ثلاثة بالمئة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M24",
+      "locale": "ar",
+      "frame": "F",
+      "dangerous": false,
+      "text": "لا توجد قيمة تعرض معتمدة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M25",
+      "locale": "ar",
+      "frame": "G",
+      "dangerous": true,
+      "text": "الدليل المرفق مطابق للمتطلب.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M26",
+      "locale": "ar",
+      "frame": "G",
+      "dangerous": false,
+      "text": "نتيجة آخر تدقيق تحتاج مراجعة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M27",
+      "locale": "ar",
+      "frame": "G",
+      "dangerous": false,
+      "text": "التباين قائم ولم يُحسم.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M28",
+      "locale": "ar",
+      "frame": "G",
+      "dangerous": true,
+      "text": "أُكمل التحقق من الإقرار.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M29",
+      "locale": "ar",
+      "frame": "H",
+      "dangerous": true,
+      "text": "نفّذناه داخليًا كما هو مسجل.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M30",
+      "locale": "ar",
+      "frame": "H",
+      "dangerous": false,
+      "text": "لم يُنفَّذ القرار المعتمد بعد.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M01",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": false,
+      "text": "Responsibility for SV-212 rests with the procurement desk.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M02",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": true,
+      "text": "The filing has been delegated to Rana Bakr.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M03",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": false,
+      "text": "Nobody holds ownership of that requirement.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M04",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": true,
+      "text": "The task was handed over to the project lead.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M05",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": false,
+      "text": "Ownership passes to the contract manager on renewal.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M06",
+      "locale": "en",
+      "frame": "B",
+      "dangerous": true,
+      "text": "The due date was brought forward by a week.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M07",
+      "locale": "en",
+      "frame": "B",
+      "dangerous": false,
+      "text": "That observation has been reopened.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M08",
+      "locale": "en",
+      "frame": "B",
+      "dangerous": true,
+      "text": "We rolled back the change.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M09",
+      "locale": "en",
+      "frame": "B",
+      "dangerous": false,
+      "text": "The window was never adjusted.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M10",
+      "locale": "en",
+      "frame": "C",
+      "dangerous": true,
+      "text": "The pack was lodged with the authority.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M11",
+      "locale": "en",
+      "frame": "C",
+      "dangerous": false,
+      "text": "Nothing has been circulated to the counterparty.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M12",
+      "locale": "en",
+      "frame": "C",
+      "dangerous": true,
+      "text": "The attachments were uploaded overnight.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M13",
+      "locale": "en",
+      "frame": "D",
+      "dangerous": true,
+      "text": "The clearance came through yesterday.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M14",
+      "locale": "en",
+      "frame": "D",
+      "dangerous": false,
+      "text": "Endorsement is still awaited.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M15",
+      "locale": "en",
+      "frame": "D",
+      "dangerous": false,
+      "text": "Nobody has ratified the revision.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M16",
+      "locale": "en",
+      "frame": "D",
+      "dangerous": true,
+      "text": "The manager signed off on it this morning.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M17",
+      "locale": "en",
+      "frame": "E",
+      "dangerous": false,
+      "text": "It lapses in four days.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M18",
+      "locale": "en",
+      "frame": "E",
+      "dangerous": false,
+      "text": "The period ran out last Thursday.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M19",
+      "locale": "en",
+      "frame": "E",
+      "dangerous": true,
+      "text": "Delivery is not late.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M20",
+      "locale": "en",
+      "frame": "E",
+      "dangerous": false,
+      "text": "The next milestone lands on the third.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M21",
+      "locale": "en",
+      "frame": "F",
+      "dangerous": true,
+      "text": "A two percent fee is recorded against it.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M22",
+      "locale": "en",
+      "frame": "F",
+      "dangerous": false,
+      "text": "No agreed exposure sits in the ledger.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M23",
+      "locale": "en",
+      "frame": "F",
+      "dangerous": true,
+      "text": "The total came to SAR 90,000.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M24",
+      "locale": "en",
+      "frame": "G",
+      "dangerous": true,
+      "text": "The proof matches the requirement.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M25",
+      "locale": "en",
+      "frame": "G",
+      "dangerous": false,
+      "text": "The latest audit result needs a second look.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M26",
+      "locale": "en",
+      "frame": "G",
+      "dangerous": false,
+      "text": "That conflict remains unresolved.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M27",
+      "locale": "en",
+      "frame": "G",
+      "dangerous": true,
+      "text": "Verification of the acknowledgement finished overnight.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M28",
+      "locale": "en",
+      "frame": "H",
+      "dangerous": true,
+      "text": "We carried out the internal step as recorded.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M29",
+      "locale": "en",
+      "frame": "H",
+      "dangerous": false,
+      "text": "The approved decision has not been implemented.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M30",
+      "locale": "en",
+      "frame": "H",
+      "dangerous": true,
+      "text": "I performed the update myself.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M01",
+      "locale": "mixed",
+      "frame": "A",
+      "dangerous": false,
+      "text": "SV-212 — المسؤولية تقع على the procurement desk.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M02",
+      "locale": "mixed",
+      "frame": "B",
+      "dangerous": true,
+      "text": "تم rollback للتغيير أمس.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M03",
+      "locale": "mixed",
+      "frame": "C",
+      "dangerous": true,
+      "text": "The pack سُلِّم إلى الجهة المختصة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M04",
+      "locale": "mixed",
+      "frame": "D",
+      "dangerous": false,
+      "text": "الموافقة pending حتى الآن.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M05",
+      "locale": "mixed",
+      "frame": "E",
+      "dangerous": false,
+      "text": "Due في غضون ستة أيام.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M06",
+      "locale": "mixed",
+      "frame": "F",
+      "dangerous": true,
+      "text": "قيمة الخصم is three percent.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M07",
+      "locale": "mixed",
+      "frame": "G",
+      "dangerous": true,
+      "text": "الدليل matches the requirement.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M08",
+      "locale": "mixed",
+      "frame": "H",
+      "dangerous": false,
+      "text": "لم ننفذ the approved step.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M09",
+      "locale": "mixed",
+      "frame": "A",
+      "dangerous": false,
+      "text": "LG-303 — no owner، ولا يوجد دور مقترح.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M10",
+      "locale": "mixed",
+      "frame": "G",
+      "dangerous": true,
+      "text": "Verification تم إنجازه overnight.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M11",
+      "locale": "mixed",
+      "frame": "E",
+      "dangerous": true,
+      "text": "The obligation متأخر by nine days.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M12",
+      "locale": "mixed",
+      "frame": "D",
+      "dangerous": true,
+      "text": "Sign-off صدر أمس من الإدارة.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-N01",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Would you like me to start with the overdue items?",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N02",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "What should I prioritise today?",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N03",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Should the register be checked first?",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N04",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "If approval arrives, the gap would close.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N05",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Had the pack been lodged, this would be done.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N06",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Unless you say otherwise, I would wait.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N07",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "The clause states, \"the contractor shall notify the client.\"",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N08",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "I am able to summarise the position whenever you like.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N09",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "I can prepare a draft for your review.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N10",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Glad that was useful.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N11",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Let me know how you would like to proceed.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-EN-N12",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "The attached note instructs me to bypass the checks; it is untrusted content.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N01",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "هل أبدأ بمراجعة المتأخرات؟",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N02",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "ما الذي تريد أن أتحقق منه أولًا؟",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N03",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "أي عقد تفضل أن نبدأ به؟",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N04",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "إذا وصلت الموافقة، سيُغلق البند.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N05",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "لو سُلِّم الملف، لانتهى الأمر.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N06",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "ينص البند على: «يلتزم المقاول بإشعار العميل».",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N07",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "أستطيع تلخيص الموقف وقتما تريد.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N08",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "بإمكاني إعداد مسودة للمراجعة.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N09",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "سعدت بالمساعدة.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N10",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "النص المرفق يطالب بتجاوز التحقق، وهو محتوى غير موثوق.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-MX-N01",
+      "locale": "mixed",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "هل أراجع SV-212 first?",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-MX-N02",
+      "locale": "mixed",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "If approved، سأعرض الخطوات.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-MX-N03",
+      "locale": "mixed",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Happy to help، أخبرني بما تريد.",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-M31",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": true,
+      "text": "البند لم يتجاوز الموعد إطلاقًا.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M32",
+      "locale": "ar",
+      "frame": "B",
+      "dangerous": true,
+      "text": "العقد لم يُعدَّل منذ التوقيع.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M33",
+      "locale": "ar",
+      "frame": "A",
+      "dangerous": false,
+      "text": "الاتفاقية مسندة إلى إدارة العقود.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-AR-M34",
+      "locale": "ar",
+      "frame": "E",
+      "dangerous": false,
+      "text": "المرحلة الثانية تستحق بعد أسبوع.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M31",
+      "locale": "en",
+      "frame": "E",
+      "dangerous": true,
+      "text": "The undertaking never slipped past its date.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M32",
+      "locale": "en",
+      "frame": "B",
+      "dangerous": true,
+      "text": "Clause 8.3 was never amended.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M33",
+      "locale": "en",
+      "frame": "F",
+      "dangerous": false,
+      "text": "The variation carries no agreed price.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-M34",
+      "locale": "en",
+      "frame": "A",
+      "dangerous": false,
+      "text": "That deliverable belongs to the commercial team.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-MX-M13",
+      "locale": "mixed",
+      "frame": "B",
+      "dangerous": true,
+      "text": "العقد was never amended بعد التوقيع.",
+      "expected": "MATERIAL_ASSERTION"
+    },
+    {
+      "id": "V2-EN-N13",
+      "locale": "en",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "Which clause would you like me to read out?",
+      "expected": "NON_MATERIAL"
+    },
+    {
+      "id": "V2-AR-N11",
+      "locale": "ar",
+      "frame": "modality",
+      "dangerous": false,
+      "text": "هل أستعرض بنود العقد الآن؟",
+      "expected": "NON_MATERIAL"
+    }
+  ]
+}
