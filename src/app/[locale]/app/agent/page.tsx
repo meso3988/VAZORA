@@ -14,6 +14,7 @@ import {
   startOfficerConversation,
 } from "@/app/[locale]/app/agent/actions";
 import { CommandCenter } from "@/components/app/officer/command-center";
+import { LiveAdvisor } from "@/components/app/officer/live-advisor";
 import { ReviewBeacon } from "@/components/app/officer/review-beacon";
 import { OfficerThread } from "@/components/app/officer/thread";
 import { TodayBriefPanel } from "@/components/app/officer/today-brief";
@@ -206,6 +207,58 @@ export default async function AgentPage(props: PageProps<"/[locale]/app/agent">)
           {t("providerMissingNotice")}
         </p>
       )}
+
+      {/* ===== Phase 4B: Global Live AI Contract Advisor (Voice + Avatar) ===== */}
+      <Panel
+        title={t("liveAdvisor.title")}
+        hint={t("liveAdvisor.hint")}
+        tone="emerald"
+      >
+        <LiveAdvisor
+          locale={locale}
+          conversationId={activeId}
+          initialCue={brief.counts.critical > 0 ? "critical" : !brief.assessment.complete ? "uncertainty" : "neutral"}
+          labels={{
+            badge: t("liveAdvisor.badge"),
+            name: t("liveAdvisor.name"),
+            role: t("liveAdvisor.role"),
+            costBadge: t("liveAdvisor.costBadge"),
+            voiceLabel: t("liveAdvisor.voiceLabel"),
+            voices: {
+              "en-US": t("liveAdvisor.voices.en-US"),
+              "en-GB": t("liveAdvisor.voices.en-GB"),
+              "ar-SA": t("liveAdvisor.voices.ar-SA"),
+            },
+            cues: {
+              neutral: t("liveAdvisor.cues.neutral"),
+              uncertainty: t("liveAdvisor.cues.uncertainty"),
+              approval_request: t("liveAdvisor.cues.approval_request"),
+              critical: t("liveAdvisor.cues.critical"),
+            },
+            states: {
+              idle: t("liveAdvisor.states.idle"),
+              listening: t("liveAdvisor.states.listening"),
+              thinking: t("liveAdvisor.states.thinking"),
+              speaking: t("liveAdvisor.states.speaking"),
+            },
+            micStart: t("liveAdvisor.micStart"),
+            micStop: t("liveAdvisor.micStop"),
+            bargeIn: t("liveAdvisor.bargeIn"),
+            mute: t("liveAdvisor.mute"),
+            unmute: t("liveAdvisor.unmute"),
+            placeholder: t("liveAdvisor.placeholder"),
+            ask: t("liveAdvisor.ask"),
+            quickSummary: t("liveAdvisor.quickSummary"),
+            quickOverdue: t("liveAdvisor.quickOverdue"),
+            quickGaps: t("liveAdvisor.quickGaps"),
+            toolsUsed: t("liveAdvisor.toolsUsed"),
+            citationsLabel: t("liveAdvisor.citationsLabel"),
+            greetingEnUs: t("liveAdvisor.greetingEnUs"),
+            greetingEnGb: t("liveAdvisor.greetingEnGb"),
+            greetingAr: t("liveAdvisor.greetingAr"),
+          }}
+        />
+      </Panel>
 
       {/* ===== Today Brief — deterministic counts, optional narrative ===== */}
       <Panel title={t("brief.title")} tone="amber">

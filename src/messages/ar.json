@@ -2069,7 +2069,48 @@
       "contractActions": "إجراءات مدير العقود على هذا العقد",
       "noContractActions": "لا توجد إجراءات مسجّلة لهذا العقد بعد.",
       "askOpen": "افتح محادثة للعقد",
-      "askDemo": "معاينة للمحادثة — جلسات العرض للقراءة فقط. مساحة العمل الحقيقية تفتح محادثة بعقد محدد."
+      "askDemo": "معاينة للمحادثة — جلسات العرض للقراءة فقط. مساحة العمل الحقيقية تفتح محادثة بعقد محدد.",
+      "liveAdvisor": {
+        "title": "مستشارة العقود المباشرة بالصوت والصورة",
+        "hint": "محادثة صوتية ومرئية مباشرة مرتبطة بعقل مدير العقود وأدواته الحقيقية (العربية، الإنجليزية الأمريكية، الإنجليزية البريطانية).",
+        "badge": "Phase 4B · المستشارة المباشرة",
+        "name": "نور المنصور",
+        "role": "مستشارة العقود التنفيذية · العربية والإنجليزية (US/UK)",
+        "costBadge": "وضع الأدوات الحقيقية · $0.00",
+        "voiceLabel": "اللغة واللهجة الصوتية",
+        "voices": {
+          "en-US": "English (US)",
+          "en-GB": "English (UK)",
+          "ar-SA": "العربية"
+        },
+        "cues": {
+          "neutral": "موثّق · جاهز",
+          "uncertainty": "غير مسجّل / تقييم غير مكتمل",
+          "approval_request": "يتطلب موافقة بشرية",
+          "critical": "تنبيه استحقاق حرج"
+        },
+        "states": {
+          "idle": "في الانتظار",
+          "listening": "تستمع الآن…",
+          "thinking": "تتحقق من السجلات…",
+          "speaking": "تتحدث الآن"
+        },
+        "micStart": "تحدّث",
+        "micStop": "إيقاف الميكروفون",
+        "bargeIn": "مقاطعة الصوت",
+        "mute": "كتم الصوت",
+        "unmute": "تفعيل الصوت",
+        "placeholder": "اسأل مستشارة العقود بالصوت أو النص…",
+        "ask": "اسأل المستشارة",
+        "quickSummary": "ملخص المحفظة",
+        "quickOverdue": "الالتزامات المتأخرة",
+        "quickGaps": "فجوات الأدلة المفتوحة",
+        "toolsUsed": "أدوات مدير العقود المنفّذة",
+        "citationsLabel": "المصادر الموثّقة",
+        "greetingEnUs": "Hello, I am Noor, your VAZORA Contract Advisor (American English). Ask me about your contracts, overdue cycles, or evidence gaps — every answer is verified directly against your organization's records.",
+        "greetingEnGb": "Good day, I am Noor, your VAZORA Contract Advisor (British English). Ask me about your contracts, overdue cycles, or evidence gaps — every statement is grounded in your organisation's verified records.",
+        "greetingAr": "أهلًا بك، أنا نور، مستشارة العقود الذكية في فازورا. اسأليني بالصوت أو الكتابة عن العقود أو الاستحقاقات المتأخرة أو فجوات الأدلة — كل إجابة مرتبطة مباشرةً بسجلات منشأتك الموثقة."
+      }
     },
     "indicator": {
       "activeObligations": "الالتزامات المفعّلة",
