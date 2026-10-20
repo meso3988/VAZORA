@@ -2074,9 +2074,9 @@
         "title": "مستشارة العقود المباشرة بالصوت والصورة",
         "hint": "محادثة صوتية ومرئية مباشرة مرتبطة بعقل مدير العقود وأدواته الحقيقية (العربية، الإنجليزية الأمريكية، الإنجليزية البريطانية).",
         "badge": "Phase 4B · المستشارة المباشرة",
-        "name": "نور المنصور",
+        "name": "مستشارة العقود في فازورا",
         "role": "مستشارة العقود التنفيذية · العربية والإنجليزية (US/UK)",
-        "costBadge": "وضع الأدوات الحقيقية · $0.00",
+        "costBadge": "نموذج أولي · أدوات حقيقية · $0.00",
         "voiceLabel": "اللغة واللهجة الصوتية",
         "voices": {
           "en-US": "English (US)",
@@ -2093,7 +2093,7 @@
           "idle": "في الانتظار",
           "listening": "تستمع الآن…",
           "thinking": "تتحقق من السجلات…",
-          "speaking": "تتحدث الآن"
+          "speaking": "تتحدث (معاينة صوت المتصفح)"
         },
         "micStart": "تحدّث",
         "micStop": "إيقاف الميكروفون",
@@ -2107,9 +2107,9 @@
         "quickGaps": "فجوات الأدلة المفتوحة",
         "toolsUsed": "أدوات مدير العقود المنفّذة",
         "citationsLabel": "المصادر الموثّقة",
-        "greetingEnUs": "Hello, I am Noor, your VAZORA Contract Advisor (American English). Ask me about your contracts, overdue cycles, or evidence gaps — every answer is verified directly against your organization's records.",
-        "greetingEnGb": "Good day, I am Noor, your VAZORA Contract Advisor (British English). Ask me about your contracts, overdue cycles, or evidence gaps — every statement is grounded in your organisation's verified records.",
-        "greetingAr": "أهلًا بك، أنا نور، مستشارة العقود الذكية في فازورا. اسأليني بالصوت أو الكتابة عن العقود أو الاستحقاقات المتأخرة أو فجوات الأدلة — كل إجابة مرتبطة مباشرةً بسجلات منشأتك الموثقة."
+        "greetingEnUs": "Welcome. I am your VAZORA Contract Advisor (American English). Ask me about your contracts, overdue cycles, or evidence gaps — every answer is verified directly against your organization's records.",
+        "greetingEnGb": "Good day. I am your VAZORA Contract Advisor (British English). Ask me about your contracts, overdue cycles, or evidence gaps — every statement is grounded in your organisation's verified records.",
+        "greetingAr": "أهلًا بك. أنا مستشارة العقود الذكية في فازورا. اسأليني بالصوت أو الكتابة عن العقود أو الاستحقاقات المتأخرة أو فجوات الأدلة — كل إجابة مرتبطة مباشرةً بسجلات منشأتك الموثقة."
       }
     },
     "indicator": {

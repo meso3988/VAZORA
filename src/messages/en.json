@@ -2074,9 +2074,9 @@
         "title": "Live AI Contract Advisor",
         "hint": "Global voice & avatar advisor connected directly to the VAZORA Contract Officer tools and grounded records (EN-US, EN-GB, AR).",
         "badge": "Phase 4B · Live Contract Advisor",
-        "name": "Noor Al-Mansoor",
-        "role": "Senior AI Contract Advisor · EN (US/UK) & AR",
-        "costBadge": "Rehearsal · Real Officer Tools · $0.00",
+        "name": "VAZORA Contract Advisor",
+        "role": "Global Executive AI Contract Advisor · EN (US/UK) & AR",
+        "costBadge": "Prototype · Real Officer Tools · $0.00",
         "voiceLabel": "Voice & Accent",
         "voices": {
           "en-US": "English (US)",
@@ -2093,7 +2093,7 @@
           "idle": "Standby",
           "listening": "Listening…",
           "thinking": "Checking records…",
-          "speaking": "Speaking"
+          "speaking": "Speaking (browser TTS preview)"
         },
         "micStart": "Speak",
         "micStop": "Stop mic",
@@ -2107,9 +2107,9 @@
         "quickGaps": "Open evidence gaps",
         "toolsUsed": "Verified Officer tools run",
         "citationsLabel": "Validated sources",
-        "greetingEnUs": "Hello, I am Noor, your VAZORA Contract Advisor (American English). Ask me about your contracts, overdue cycles, or evidence gaps — every answer is verified directly against your organization's records.",
-        "greetingEnGb": "Good day, I am Noor, your VAZORA Contract Advisor (British English). Ask me about your contracts, overdue cycles, or evidence gaps — every statement is grounded in your organisation's verified records.",
-        "greetingAr": "أهلًا بك، أنا نور، مستشارة العقود الذكية في فازورا. اسأليني بالصوت أو الكتابة عن العقود أو الاستحقاقات المتأخرة أو فجوات الأدلة — كل إجابة مرتبطة مباشرةً بسجلات منشأتك الموثقة."
+        "greetingEnUs": "Welcome. I am your VAZORA Contract Advisor (American English). Ask me about your contracts, overdue cycles, or evidence gaps — every answer is verified directly against your organization's records.",
+        "greetingEnGb": "Good day. I am your VAZORA Contract Advisor (British English). Ask me about your contracts, overdue cycles, or evidence gaps — every statement is grounded in your organisation's verified records.",
+        "greetingAr": "أهلًا بك. أنا مستشارة العقود الذكية في فازورا. اسأليني بالصوت أو الكتابة عن العقود أو الاستحقاقات المتأخرة أو فجوات الأدلة — كل إجابة مرتبطة مباشرةً بسجلات منشأتك الموثقة."
       }
     },
     "indicator": {

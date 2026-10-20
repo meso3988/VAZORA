@@ -37,21 +37,21 @@ type Labels = {
   greetingAr: string;
 };
 
-const MOUTH_SHAPES: Record<VisemeKind, { rx: number; ry: number; open: boolean; teeth?: boolean }> = {
-  sil: { rx: 9, ry: 1.4, open: false },
-  MBP: { rx: 8.5, ry: 1.1, open: false },
-  FV: { rx: 9.5, ry: 2.6, open: true, teeth: true },
-  EE: { rx: 11, ry: 3.4, open: true, teeth: true },
-  AA: { rx: 10, ry: 6.2, open: true, teeth: true },
-  OH: { rx: 7.2, ry: 5.8, open: true },
-  OO: { rx: 5.4, ry: 4.5, open: true },
+const CUE_TONE: Record<OfficerSpeechCue, { ring: string; badge: string; tilt: string }> = {
+  neutral: { ring: "border-emerald-600/40", badge: "bg-verified/10 text-verified border-verified/30", tilt: "rotate-0" },
+  uncertainty: { ring: "border-amber-500/50", badge: "bg-partial/10 text-partial border-partial/30", tilt: "-rotate-1" },
+  approval_request: { ring: "border-sky-500/50", badge: "bg-fg/8 text-fg border-line", tilt: "rotate-1" },
+  critical: { ring: "border-rose-500/60", badge: "bg-missing/10 text-missing border-missing/30", tilt: "rotate-0" },
 };
 
-const CUE_TONE: Record<OfficerSpeechCue, { ring: string; badge: string; browLift: number; headTilt: number }> = {
-  neutral: { ring: "border-emerald-600/40", badge: "bg-verified/10 text-verified border-verified/30", browLift: 0, headTilt: 0 },
-  uncertainty: { ring: "border-amber-500/50", badge: "bg-partial/10 text-partial border-partial/30", browLift: -1.8, headTilt: -1.5 },
-  approval_request: { ring: "border-sky-500/50", badge: "bg-fg/8 text-fg border-line", browLift: -1, headTilt: 1.2 },
-  critical: { ring: "border-rose-500/60", badge: "bg-missing/10 text-missing border-missing/30", browLift: 1.6, headTilt: 0 },
+const VISEME_BAR_HEIGHTS: Record<VisemeKind, [number, number, number, number, number]> = {
+  sil: [3, 4, 3, 4, 3],
+  MBP: [5, 7, 6, 7, 5],
+  FV: [7, 11, 9, 11, 7],
+  EE: [9, 14, 12, 14, 9],
+  AA: [12, 18, 22, 18, 12],
+  OH: [10, 16, 20, 16, 10],
+  OO: [8, 13, 16, 13, 8],
 };
 
 function pickPreferredFemaleVoice(
@@ -93,7 +93,6 @@ export function LiveAdvisor({
   const [cue, setCue] = useState<OfficerSpeechCue>(initialCue);
   const [status, setStatus] = useState<"idle" | "listening" | "thinking" | "speaking">("idle");
   const [viseme, setViseme] = useState<VisemeKind>("sil");
-  const [blink, setBlink] = useState(false);
   const [muted, setMuted] = useState(false);
   const [question, setQuestion] = useState("");
   const [replyText, setReplyText] = useState<string>(
@@ -101,23 +100,13 @@ export function LiveAdvisor({
   );
   const [citations, setCitations] = useState<OfficerCitation[]>([]);
   const [tools, setTools] = useState<OfficerToolInvocation[]>([]);
+  const [turnaroundMs, setTurnaroundMs] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const visemeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const recognitionRef = useRef<any>(null);
   /* eslint-enable @typescript-eslint/no-explicit-any */
-
-  // Natural blinking cycle (paused when prefers-reduced-motion is enabled).
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => {
-      setBlink(true);
-      setTimeout(() => setBlink(false), 140);
-    }, 3800);
-    return () => clearInterval(id);
-  }, []);
 
   const stopSpeech = () => {
     if (visemeTimerRef.current) {
@@ -133,8 +122,14 @@ export function LiveAdvisor({
 
   useEffect(() => () => stopSpeech(), []);
 
-  const animateVisemes = (seq: VisemeKind[], spokenText: string, vLocale: AdvisorVoiceLocale) => {
+  const animateCadenceAndSpeak = (
+    seq: VisemeKind[],
+    spokenText: string,
+    vLocale: AdvisorVoiceLocale,
+    serverDurationMs: number | null,
+  ) => {
     stopSpeech();
+    if (serverDurationMs !== null) setTurnaroundMs(Math.max(1, Math.round(serverDurationMs)));
     if (!seq.length) return;
     setStatus("speaking");
     let idx = 0;
@@ -154,7 +149,7 @@ export function LiveAdvisor({
         const utter = new SpeechSynthesisUtterance(spokenText);
         utter.lang = vLocale;
         utter.rate = vLocale === "ar-SA" ? 0.98 : 1.0;
-        utter.pitch = 1.04;
+        utter.pitch = 1.02;
         const chosen = pickPreferredFemaleVoice(window.speechSynthesis.getVoices(), vLocale);
         if (chosen) utter.voice = chosen;
         utter.onend = () => {
@@ -171,7 +166,7 @@ export function LiveAdvisor({
         };
         window.speechSynthesis.speak(utter);
       } catch {
-        // Viseme timeline continues as visual fallback if browser TTS is unavailable.
+        // Browser speech synthesis is optional in headless environments.
       }
     }
   };
@@ -205,10 +200,11 @@ export function LiveAdvisor({
       setCue((data.speechCue as OfficerSpeechCue) ?? "neutral");
       setCitations(Array.isArray(data.citations) ? data.citations : []);
       setTools(Array.isArray(data.answer?.toolInvocations) ? data.answer.toolInvocations : []);
-      animateVisemes(
+      animateCadenceAndSpeak(
         Array.isArray(data.visemes) && data.visemes.length ? data.visemes : ["AA", "EE", "OH", "sil"],
         data.spokenText ?? data.answer?.text ?? "",
         targetLocale,
+        typeof data.answer?.durationMs === "number" ? data.answer.durationMs : null,
       );
     } catch {
       setErrorMsg("Unable to reach the Contract Advisor endpoint.");
@@ -268,8 +264,8 @@ export function LiveAdvisor({
     }
   };
 
-  const mouth = MOUTH_SHAPES[viseme] ?? MOUTH_SHAPES.sil;
   const tone = CUE_TONE[cue] ?? CUE_TONE.neutral;
+  const bars = VISEME_BAR_HEIGHTS[viseme] ?? VISEME_BAR_HEIGHTS.sil;
   const isArVoice = voiceLocale === "ar-SA";
 
   const quickPrompts = isArVoice
@@ -291,149 +287,47 @@ export function LiveAdvisor({
       data-advisor-cue={cue}
       data-advisor-voice-locale={voiceLocale}
       data-advisor-viseme={viseme}
-      className="grid grid-cols-1 gap-5 p-5 lg:grid-cols-[240px_minmax(0,1fr)]"
+      className="grid grid-cols-1 gap-5 p-5 lg:grid-cols-[250px_minmax(0,1fr)]"
     >
-      {/* ===== Left: Animated Female Executive Contract Advisor Avatar ===== */}
+      {/* ===== Left: Approved Reference Portrait of the VAZORA Contract Advisor ===== */}
       <div className="flex flex-col items-center gap-3 rounded-md border border-line bg-bg/70 p-4">
         <div
           className={cn(
-            "relative flex h-44 w-44 items-center justify-center rounded-full border-2 bg-elevated shadow-inner transition-all duration-300",
+            "relative h-52 w-44 overflow-hidden rounded-xl border-2 bg-elevated shadow-sm transition-all duration-300",
             tone.ring,
-            status === "speaking" && "ring-4 ring-emerald-500/15",
-            status === "listening" && "ring-4 ring-sky-500/20",
+            tone.tilt,
+            status === "speaking" && "ring-4 ring-emerald-500/20",
+            status === "listening" && "ring-4 ring-sky-500/25",
           )}
         >
-          <svg
-            viewBox="0 0 200 210"
-            className="h-40 w-40 overflow-visible"
-            role="img"
-            aria-label={`${labels.name} — ${labels.role}`}
-          >
-            <defs>
-              <linearGradient id="vazora-bg-halo" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#14342B" stopOpacity="0.14" />
-                <stop offset="100%" stopColor="#8B6F3D" stopOpacity="0.10" />
-              </linearGradient>
-              <linearGradient id="vazora-skin" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F2D7C4" />
-                <stop offset="100%" stopColor="#E4BE9E" />
-              </linearGradient>
-              <linearGradient id="vazora-hair" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#1E1B1A" />
-                <stop offset="100%" stopColor="#352B26" />
-              </linearGradient>
-              <linearGradient id="vazora-blazer" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1B2826" />
-                <stop offset="100%" stopColor="#0F1716" />
-              </linearGradient>
-            </defs>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/advisor/vazora-advisor-portrait.jpg"
+            alt={`${labels.name} — ${labels.role}`}
+            className={cn(
+              "h-full w-full object-cover object-top transition-transform duration-300",
+              status === "speaking" && "scale-[1.015]",
+            )}
+          />
 
-            {/* Subtle mineral studio backdrop */}
-            <circle cx="100" cy="104" r="88" fill="url(#vazora-bg-halo)" />
-
-            {/* Back hair */}
-            <path
-              d="M52 78 C46 118, 50 156, 60 174 L140 174 C150 156, 154 118, 148 78 C144 42, 126 28, 100 28 C74 28, 56 42, 52 78 Z"
-              fill="url(#vazora-hair)"
-            />
-
-            {/* Neck & silk blouse + tailored executive blazer */}
-            <rect x="86" y="132" width="28" height="26" rx="8" fill="#DFB697" />
-            <path d="M40 198 C44 158, 68 148, 100 148 C132 148, 156 158, 160 198 Z" fill="url(#vazora-blazer)" />
-            {/* Silk ivory V-neck blouse */}
-            <polygon points="84,148 116,148 100,184" fill="#F6F2EA" />
-            {/* Tailored blazer lapels */}
-            <polygon points="72,150 86,148 100,184 82,196" fill="#243532" />
-            <polygon points="128,150 114,148 100,184 118,196" fill="#243532" />
-            {/* Gold & emerald VAZORA lapel pin */}
-            <circle cx="122" cy="172" r="3.4" fill="#C6A15B" />
-            <circle cx="122" cy="172" r="1.6" fill="#1F7A5A" />
-
-            {/* Animated head group (responds to OfficerSpeechCue + speaking cadence) */}
-            <g
-              transform={`translate(0, ${status === "speaking" ? -1.2 : 0}) rotate(${tone.headTilt}, 100, 96)`}
-            >
-              {/* Ears & pearl studs */}
-              <ellipse cx="59" cy="96" rx="5" ry="9" fill="#E4BE9E" />
-              <ellipse cx="141" cy="96" rx="5" ry="9" fill="#E4BE9E" />
-              <circle cx="59" cy="104" r="2.1" fill="#F7F3EB" stroke="#C6A15B" strokeWidth="0.7" />
-              <circle cx="141" cy="104" r="2.1" fill="#F7F3EB" stroke="#C6A15B" strokeWidth="0.7" />
-
-              {/* Face contour */}
-              <path
-                d="M62 76 C62 49, 78 38, 100 38 C122 38, 138 49, 138 76 C138 108, 122 136, 100 138 C78 136, 62 108, 62 76 Z"
-                fill="url(#vazora-skin)"
-              />
-
-              {/* Professional side-parted hair */}
-              <path
-                d="M59 84 C58 54, 75 34, 104 34 C126 34, 141 50, 141 80 C134 62, 118 54, 94 56 C76 58, 65 68, 59 84 Z"
-                fill="url(#vazora-hair)"
-              />
-
-              {/* Eyebrows (shift slightly with cue) */}
-              <path
-                d={`M72 ${76 + tone.browLift} Q82 ${72 + tone.browLift} 91 ${75 + tone.browLift}`}
-                stroke="#2B221E"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d={`M109 ${75 + tone.browLift} Q118 ${72 + tone.browLift} 128 ${76 + tone.browLift}`}
-                stroke="#2B221E"
-                strokeWidth="2.3"
-                strokeLinecap="round"
-                fill="none"
-              />
-
-              {/* Eyes (blink cycle) */}
-              {blink ? (
-                <>
-                  <path d="M74 86 Q82 88 90 86" stroke="#2B221E" strokeWidth="2" strokeLinecap="round" fill="none" />
-                  <path d="M110 86 Q118 88 126 86" stroke="#2B221E" strokeWidth="2" strokeLinecap="round" fill="none" />
-                </>
-              ) : (
-                <>
-                  <ellipse cx="82" cy="86" rx="7.2" ry="4.4" fill="#FFFFFF" />
-                  <circle cx="82" cy="86" r="3.2" fill="#3B2B23" />
-                  <circle cx="83.2" cy="84.8" r="1" fill="#FFFFFF" />
-                  <path d="M74 84 Q82 80 90 84" stroke="#2B221E" strokeWidth="1.6" fill="none" />
-
-                  <ellipse cx="118" cy="86" rx="7.2" ry="4.4" fill="#FFFFFF" />
-                  <circle cx="118" cy="86" r="3.2" fill="#3B2B23" />
-                  <circle cx="119.2" cy="84.8" r="1" fill="#FFFFFF" />
-                  <path d="M110 84 Q118 80 126 84" stroke="#2B221E" strokeWidth="1.6" fill="none" />
-                </>
-              )}
-
-              {/* Subtle nose bridge */}
-              <path d="M100 84 L98 102 Q100 104 103 102" stroke="#C99E80" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-
-              {/* Multi-viseme lip-synced mouth */}
-              <g data-advisor-mouth={viseme} transform="translate(100, 117)">
-                {mouth.open ? (
-                  <>
-                    <ellipse cx="0" cy="0" rx={mouth.rx} ry={mouth.ry} fill="#6E242B" stroke="#B65D61" strokeWidth="1.5" />
-                    {mouth.teeth && (
-                      <rect x={-mouth.rx * 0.65} y={-mouth.ry * 0.75} width={mouth.rx * 1.3} height={Math.min(2.4, mouth.ry * 0.55)} rx="0.8" fill="#FAF6F0" />
-                    )}
-                  </>
-                ) : (
-                  <path
-                    d={`M-${mouth.rx} 0 Q0 ${mouth.ry * 1.4} ${mouth.rx} 0`}
-                    stroke="#B05559"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                )}
-              </g>
-            </g>
-          </svg>
+          {/* Honest speaking-cadence wave overlay at the bottom of the portrait */}
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/75 via-black/40 to-transparent px-3 py-2 text-white">
+            <span className="text-[10px] font-medium opacity-90">
+              {isArVoice ? "إيقاع النص (نموذج أولي)" : "Text cadence (prototype)"}
+            </span>
+            <div className="flex h-5 items-end gap-0.5" aria-hidden>
+              {bars.map((h, i) => (
+                <span
+                  key={i}
+                  style={{ height: `${h}px` }}
+                  className="w-1 rounded-full bg-emerald-400 transition-all duration-100"
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center gap-1 text-center">
+        <div className="flex flex-col items-center gap-0.5 text-center">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">{labels.badge}</span>
           <p className="text-sm font-semibold text-fg">{labels.name}</p>
           <p className="text-[11px] text-muted">{labels.role}</p>
@@ -446,12 +340,19 @@ export function LiveAdvisor({
           <span className="rounded-full border border-line bg-elevated px-2.5 py-0.5 text-[10px] text-muted">
             {labels.states[status]}
           </span>
+          {turnaroundMs !== null && (
+            <span
+              data-advisor-latency-ms={turnaroundMs}
+              className="rounded-full border border-line bg-bg px-2 py-0.5 font-mono text-[10px] text-muted"
+            >
+              {turnaroundMs}ms
+            </span>
+          )}
         </div>
       </div>
 
       {/* ===== Right: Voice/Accent Selector, Grounded Spoken Output, and Controls ===== */}
       <div className="flex flex-col justify-between gap-4">
-        {/* Top bar: EN-US / EN-GB / AR-SA selector + cost badge + audio controls */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3">
           <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={labels.voiceLabel}>
             <span className="me-1 text-[11px] font-medium text-muted">{labels.voiceLabel}:</span>
